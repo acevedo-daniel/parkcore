@@ -1,63 +1,63 @@
 # Architecture
 
-ParkCore API is organized around a small layered backend structure:
+## Summary
 
-```text
-routes -> controller -> service -> repository
+ParkCore is a single Node.js HTTP service for parking-facility operations. It exposes an Express API, persists data in PostgreSQL through Prisma, and publishes its contract as generated OpenAPI.
+
+```mermaid
+flowchart LR
+    O[Parking owner] --> API[ParkCore API]
+    API --> DB[(PostgreSQL)]
+    API --> DOCS[OpenAPI and Scalar]
 ```
 
-## Domain Boundary
+## Components
 
-The application is an operational backend for parking-facility owners. Authentication identifies the facility owner who performs operational actions; there is no customer account, staff role, payment record, or reservation flow in the current model.
-
-```text
-User (owner) 1 --- * Parking 1 --- * Vehicle
-                              |             |
-                              *             *
-                           Review       Booking
-```
-
-`Booking` is the historical record of an on-site vehicle stay. A `Vehicle` is scoped to the parking facility that registered it, and is not related to `User`. The detailed current domain map and unresolved semantics are maintained in [PROJECT.md](PROJECT.md).
-
-## Runtime
-
-- `server.ts` starts the HTTP server and handles graceful shutdown.
-- `app.ts` builds the Express app, middleware pipeline, routes, docs, and error handler.
-- `src/config/env.ts` validates environment variables on startup.
-- `src/config/prisma.ts` creates the Prisma client.
+| Component               | Responsibility                                                | Technology             |
+| ----------------------- | ------------------------------------------------------------- | ---------------------- |
+| HTTP application        | Middleware, route mounting, API reference, and error handling | Express 5              |
+| Feature modules         | Transport handling, domain rules, and persistence access      | TypeScript             |
+| Validation and contract | Request parsing and OpenAPI schema registration               | Zod and zod-to-openapi |
+| Persistence             | Relational data and forward migrations                        | PostgreSQL and Prisma  |
+| Authentication          | Password hashing and bearer-token verification                | Argon2 and jose        |
 
 ## Request Flow
 
-1. Request logger attaches or propagates `x-request-id`.
-2. `helmet` and CORS run before body parsing.
-3. JSON and URL-encoded bodies are limited to `10kb`.
-4. Route middleware validates params, query, and body with Zod.
-5. Controllers handle HTTP concerns only.
-6. Services enforce authorization and business rules.
-7. Repositories isolate Prisma persistence.
-8. Errors are normalized by the global error handler.
-
-## Feature Shape
-
-Each feature follows:
-
 ```text
-feature.routes.ts
-feature.controller.ts
-feature.service.ts
-feature.repository.ts
-feature.schema.ts
-feature.docs.ts
+HTTP request
+  -> middleware (logging, security, CORS, body parsing, authentication)
+  -> route
+  -> controller parses untrusted params/query/body with Zod
+  -> service enforces authorization and business rules
+  -> repository performs Prisma operations
+  -> global error handler returns the JSON error contract
 ```
 
-## Key Decisions
+Controllers must not make Express request transport appear globally typed. Zod parsing produces the feature input; the Parking feature is the reference implementation of this boundary pattern. `ZodError` instances are converted to the standard 400 error response by the global error handler.
 
-- Express 5 async errors are forwarded to the global error handler.
-- Auth-required controllers call `requireUser(req)` before reading `req.user`.
-- Zod schemas validate inputs and generate OpenAPI contracts.
-- Booking check-in keeps capacity and active-vehicle checks inside a serializable transaction.
-- Logs use Pino with redaction for passwords, tokens, and authorization headers.
+## Data
 
-## Persistence Lifecycle
+- **Source of truth:** PostgreSQL through the Prisma schema and forward migrations.
+- **Current implementation:** `User`, `Parking`, `Vehicle`, `Booking`, and `Review` models.
+- **1.0 target:** `ParkingSession` replaces `Booking`; reviews are removed; parking/session money uses integer cents and explicit currency. The approved data migration policy is in [PROJECT.md](PROJECT.md).
+- **Important rule:** check-in capacity and duplicate active-vehicle checks run in one serializable transaction.
 
-Prisma is the source of truth. Deleting a `User` cascades to owned parkings; deleting a `Parking` cascades to its vehicles, bookings, and reviews; deleting a `Vehicle` cascades to its bookings. The HTTP API currently exposes no delete operations, so these cascades are relevant to direct database administration and future deletion features.
+## Security Boundaries
+
+- **Authentication:** JWT bearer tokens identify the owner/operator.
+- **Authorization:** services verify that the authenticated user owns the parking, vehicle, or session being operated.
+- **Sensitive data:** passwords are Argon2 hashes and are excluded from public responses; logs redact passwords, tokens, and authorization headers.
+- **Transport protection:** Helmet, CORS allowlisting in production, request-size limits, and rate limiting protect the API boundary.
+
+## External Dependencies
+
+| Dependency               | Purpose                        | Failure impact                                  |
+| ------------------------ | ------------------------------ | ----------------------------------------------- |
+| PostgreSQL               | Application persistence        | The API cannot read or modify operational data. |
+| JWT secret configuration | Token signing and verification | Authentication cannot operate safely.           |
+
+## Known Transitional Limitations
+
+- The running API still exposes legacy booking and review behavior until the direct ParkCore 1.0 migration is implemented.
+- Not every feature has adopted explicit controller-side Zod parsing yet; Parking is the pilot pattern.
+- The required Phase 2 migration must resolve money snapshots, currency, normalized plates, status data, and review removal according to the project migration policy.
