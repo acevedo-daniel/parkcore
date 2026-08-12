@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+import { ZodError } from 'zod';
 import { AppError } from '../errors/app-error.js';
 import { logger } from '../lib/logger.js';
 
@@ -20,19 +21,23 @@ function isEntityTooLargeError(err: ErrorWithStatus): boolean {
   return err.type === 'entity.too.large' || err.status === 413;
 }
 
+function formatZodError(error: ZodError): string {
+  return error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join(', ');
+}
+
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
 function toErrorWithStatus(err: unknown): ErrorWithStatus {
   if (err instanceof Error) {
-    return err as ErrorWithStatus;
+    return err;
   }
 
   if (isObject(err)) {
-    const normalized = new Error(
+    const normalized: ErrorWithStatus = new Error(
       typeof err.message === 'string' ? err.message : 'Unexpected error object',
-    ) as ErrorWithStatus;
+    );
 
     if (typeof err.status === 'number') {
       normalized.status = err.status;
@@ -71,6 +76,13 @@ export const errorHandler = (err: unknown, req: Request, res: Response, next: Ne
     return res.status(400).json({
       error: true,
       message: 'Invalid JSON payload',
+    });
+  }
+
+  if (normalizedError instanceof ZodError) {
+    return res.status(400).json({
+      error: true,
+      message: formatZodError(normalizedError),
     });
   }
 

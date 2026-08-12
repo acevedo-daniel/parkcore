@@ -1,44 +1,18 @@
 import { Router } from 'express';
-import type { RequestHandler } from 'express';
 import { requireAuth } from '../../middlewares/auth.middleware.js';
-import { validateRequest } from '../../middlewares/validation.middleware.js';
 import { parkingBookingsRouter } from '../booking/booking.routes.js';
 import * as parkingController from './parking.controller.js';
-import {
-  createParkingSchema,
-  parkingParamsSchema,
-  parkingQuerySchema,
-  updateParkingSchema,
-} from './parking.schema.js';
 
 const parkingRouter = Router();
 
 parkingRouter.use('/:parkingId/bookings', parkingBookingsRouter);
 
-parkingRouter.get(
-  '/',
-  validateRequest({ query: parkingQuerySchema }),
-  parkingController.findAll as unknown as RequestHandler,
-);
+parkingRouter.get('/', parkingController.findAll);
 parkingRouter.get('/me', requireAuth, parkingController.findOwned);
-parkingRouter.get(
-  '/:id',
-  validateRequest({ params: parkingParamsSchema }),
-  parkingController.findById,
-);
+parkingRouter.get('/:id', parkingController.findById);
 
-parkingRouter.patch(
-  '/:id',
-  requireAuth,
-  validateRequest({ params: parkingParamsSchema, body: updateParkingSchema }),
-  parkingController.update,
-);
+parkingRouter.patch('/:id', requireAuth, parkingController.update);
 
-parkingRouter.post(
-  '/',
-  requireAuth,
-  validateRequest({ body: createParkingSchema }),
-  parkingController.create,
-);
+parkingRouter.post('/', requireAuth, parkingController.create);
 
 export { parkingRouter };

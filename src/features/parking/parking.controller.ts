@@ -1,44 +1,42 @@
-import * as parkingService from './parking.service.js';
 import type { Request, Response } from 'express';
-import { ParkingParams, ParkingQuery, CreateParking, UpdateParking } from './parking.schema.js';
-import { requireUser } from '../../utils/require-user.js';
+import * as parkingService from './parking.service.js';
+import {
+  createParkingSchema,
+  parkingParamsSchema,
+  parkingQuerySchema,
+  updateParkingSchema,
+} from './parking.schema.js';
+import { getAuthenticatedUserId } from '../../utils/require-user.js';
 
-export const create = async (
-  req: Request<unknown, unknown, CreateParking>,
-  res: Response,
-): Promise<void> => {
-  requireUser(req);
-  const parking = await parkingService.create(req.user.id, req.body);
+export const create = async (req: Request, res: Response): Promise<void> => {
+  const userId = getAuthenticatedUserId(req);
+  const input = createParkingSchema.parse(req.body);
+  const parking = await parkingService.create(userId, input);
   res.status(201).json(parking);
 };
 
-export const findAll = async (
-  req: Request<unknown, unknown, unknown, ParkingQuery>,
-  res: Response,
-): Promise<void> => {
-  const result = await parkingService.findAll(req.query);
+export const findAll = async (req: Request, res: Response): Promise<void> => {
+  const query = parkingQuerySchema.parse(req.query);
+  const result = await parkingService.findAll(query);
   res.json(result);
 };
 
-export const findById = async (req: Request<ParkingParams>, res: Response): Promise<void> => {
-  const parking = await parkingService.findById(req.params.id);
+export const findById = async (req: Request, res: Response): Promise<void> => {
+  const { id } = parkingParamsSchema.parse(req.params);
+  const parking = await parkingService.findById(id);
   res.json(parking);
 };
 
-export const findOwned = async (
-  req: Request<unknown, unknown, unknown, unknown>,
-  res: Response,
-): Promise<void> => {
-  requireUser(req);
-  const parkings = await parkingService.findOwned(req.user.id);
+export const findOwned = async (req: Request, res: Response): Promise<void> => {
+  const userId = getAuthenticatedUserId(req);
+  const parkings = await parkingService.findOwned(userId);
   res.json(parkings);
 };
 
-export const update = async (
-  req: Request<ParkingParams, unknown, UpdateParking>,
-  res: Response,
-): Promise<void> => {
-  requireUser(req);
-  const parking = await parkingService.update(req.user.id, req.params.id, req.body);
+export const update = async (req: Request, res: Response): Promise<void> => {
+  const userId = getAuthenticatedUserId(req);
+  const { id } = parkingParamsSchema.parse(req.params);
+  const input = updateParkingSchema.parse(req.body);
+  const parking = await parkingService.update(userId, id, input);
   res.json(parking);
 };

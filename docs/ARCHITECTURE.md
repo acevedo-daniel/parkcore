@@ -6,6 +6,19 @@ ParkCore API is organized around a small layered backend structure:
 routes -> controller -> service -> repository
 ```
 
+## Domain Boundary
+
+The application is an operational backend for parking-facility owners. Authentication identifies the facility owner who performs operational actions; there is no customer account, staff role, payment record, or reservation flow in the current model.
+
+```text
+User (owner) 1 --- * Parking 1 --- * Vehicle
+                              |             |
+                              *             *
+                           Review       Booking
+```
+
+`Booking` is the historical record of an on-site vehicle stay. A `Vehicle` is scoped to the parking facility that registered it, and is not related to `User`. The detailed current domain map and unresolved semantics are maintained in [PROJECT.md](PROJECT.md).
+
 ## Runtime
 
 - `server.ts` starts the HTTP server and handles graceful shutdown.
@@ -44,3 +57,7 @@ feature.docs.ts
 - Zod schemas validate inputs and generate OpenAPI contracts.
 - Booking check-in keeps capacity and active-vehicle checks inside a serializable transaction.
 - Logs use Pino with redaction for passwords, tokens, and authorization headers.
+
+## Persistence Lifecycle
+
+Prisma is the source of truth. Deleting a `User` cascades to owned parkings; deleting a `Parking` cascades to its vehicles, bookings, and reviews; deleting a `Vehicle` cascades to its bookings. The HTTP API currently exposes no delete operations, so these cascades are relevant to direct database administration and future deletion features.

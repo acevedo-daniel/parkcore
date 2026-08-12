@@ -17,6 +17,8 @@ Expected domain failures use `AppError` subclasses and return `4xx` responses. U
 - Password hashing: Argon2
 - Auth middleware sets `req.user.id`
 
+Authentication authorizes parking owners. All authenticated users currently have the same capabilities: they may create parkings and may manage vehicles and bookings only for parkings they own. Public endpoints expose parking discovery and reviews; reviews do not identify an authenticated user.
+
 ## Validation
 
 All external input is validated through:
@@ -65,3 +67,10 @@ Configuration:
 - UI: `/docs`
 - JSON: `/openapi.json`
 - Production docs require `ENABLE_API_DOCS=true`
+- The generated OpenAPI document is the endpoint-level API contract. This document deliberately does not duplicate every operation.
+
+## Domain Terminology
+
+In the running API, a `Booking` is created by the `check-in` operation and represents a vehicle stay, rather than a customer reservation made in advance. An active stay has status `CONFIRMED`; checkout or cancellation finalizes it. `Vehicle` records are scoped to a parking facility and may include the visiting customer's contact details.
+
+These names are retained in the API for compatibility. Their desired product meaning is recorded as an open decision in [PROJECT.md](PROJECT.md).
