@@ -42,7 +42,7 @@ export const update = async (
 };
 
 export const findAll = async (query: ParkingQuery): Promise<PaginationResult<Parking>> => {
-  const { page, limit, search, minPrice, maxPrice, ownerId } = query;
+  const { page, limit, search, minHourlyRateCents, maxHourlyRateCents, ownerId } = query;
   const skip = (page - 1) * limit;
 
   const where: Prisma.ParkingWhereInput = { isActive: true };
@@ -54,10 +54,10 @@ export const findAll = async (query: ParkingQuery): Promise<PaginationResult<Par
     ];
   }
 
-  if (minPrice !== undefined || maxPrice !== undefined) {
-    where.pricePerHour = {
-      ...(minPrice !== undefined ? { gte: minPrice } : {}),
-      ...(maxPrice !== undefined ? { lte: maxPrice } : {}),
+  if (minHourlyRateCents !== undefined || maxHourlyRateCents !== undefined) {
+    where.hourlyRateCents = {
+      ...(minHourlyRateCents !== undefined ? { gte: minHourlyRateCents } : {}),
+      ...(maxHourlyRateCents !== undefined ? { lte: maxHourlyRateCents } : {}),
     };
   }
 

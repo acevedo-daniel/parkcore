@@ -18,8 +18,9 @@ import { create, findAll, findById, findOwned, findPublicById, update } from './
 const createDto: CreateParking = {
   title: 'Main Parking',
   address: '123 Test St',
-  pricePerHour: 2000,
-  totalSpaces: 20,
+  hourlyRateCents: 200000,
+  currency: 'USD',
+  capacity: 20,
   lat: 10,
   lng: 10,
 };
@@ -121,8 +122,8 @@ describe('parking.service', () => {
         page: 2,
         limit: 2,
         search: 'Main',
-        minPrice: 1000,
-        maxPrice: 3000,
+        minHourlyRateCents: 1000,
+        maxHourlyRateCents: 3000,
         ownerId: 'owner-1',
       };
 
@@ -135,7 +136,7 @@ describe('parking.service', () => {
           { title: { contains: 'Main', mode: 'insensitive' } },
           { address: { contains: 'Main', mode: 'insensitive' } },
         ],
-        pricePerHour: {
+        hourlyRateCents: {
           gte: 1000,
           lte: 3000,
         },

@@ -32,15 +32,22 @@ export const createParkingSchema = z
       example: 'https://example.com/parking.jpg',
     }),
 
-    pricePerHour: z
-      .number({ error: 'Required' })
-      .positive({ error: 'Must be positive' })
-      .openapi({ description: 'Hourly rate in local currency', example: 15.5 }),
-
-    totalSpaces: z
+    hourlyRateCents: z
       .int({ error: 'Must be integer' })
       .positive({ error: 'Must be positive' })
-      .openapi({ description: 'Total capacity', example: 100 }),
+      .openapi({ description: 'Hourly rate in integer cents', example: 1550 }),
+
+    currency: z
+      .string({ error: 'Required' })
+      .trim()
+      .toUpperCase()
+      .regex(/^[A-Z]{3}$/, { error: 'Must be a three-letter ISO 4217 currency code' })
+      .openapi({ description: 'ISO 4217 currency code', example: 'USD' }),
+
+    capacity: z
+      .int({ error: 'Must be integer' })
+      .positive({ error: 'Must be positive' })
+      .openapi({ description: 'Maximum simultaneous active vehicle stays', example: 100 }),
 
     lat: z
       .number({ error: 'Required' })
@@ -94,24 +101,28 @@ export const parkingQuerySchema = z
       .min(1, { error: 'Search must not be empty' })
       .optional()
       .openapi({ description: 'Search term for title or address' }),
-    minPrice: z.coerce
+    minHourlyRateCents: z.coerce
       .number()
+      .int()
       .positive()
       .optional()
-      .openapi({ description: 'Minimum price filter' }),
-    maxPrice: z.coerce
+      .openapi({ description: 'Minimum hourly rate in cents' }),
+    maxHourlyRateCents: z.coerce
       .number()
+      .int()
       .positive()
       .optional()
-      .openapi({ description: 'Maximum price filter' }),
+      .openapi({ description: 'Maximum hourly rate in cents' }),
     ownerId: z.uuid().optional().openapi({ description: 'Filter by owner ID' }),
   })
   .refine(
-    ({ minPrice, maxPrice }) =>
-      minPrice === undefined || maxPrice === undefined || minPrice <= maxPrice,
+    ({ minHourlyRateCents, maxHourlyRateCents }) =>
+      minHourlyRateCents === undefined ||
+      maxHourlyRateCents === undefined ||
+      minHourlyRateCents <= maxHourlyRateCents,
     {
-      message: 'minPrice must be less than or equal to maxPrice',
-      path: ['minPrice'],
+      message: 'minHourlyRateCents must be less than or equal to maxHourlyRateCents',
+      path: ['minHourlyRateCents'],
     },
   )
   .openapi('ParkingQuery');
@@ -123,8 +134,9 @@ export const parkingResponseSchema = z
     description: z.string().nullable().openapi({ description: 'Description' }),
     image: z.string().nullable().openapi({ description: 'Image URL' }),
     address: z.string().openapi({ description: 'Address' }),
-    pricePerHour: z.number().openapi({ description: 'Price per hour' }),
-    totalSpaces: z.number().openapi({ description: 'Total spaces' }),
+    hourlyRateCents: z.int().openapi({ description: 'Hourly rate in integer cents' }),
+    currency: z.string().openapi({ description: 'ISO 4217 currency code' }),
+    capacity: z.int().openapi({ description: 'Maximum simultaneous active vehicle stays' }),
     lat: z.number().openapi({ description: 'Latitude' }),
     lng: z.number().openapi({ description: 'Longitude' }),
     isActive: z.boolean().openapi({ description: 'Is active' }),

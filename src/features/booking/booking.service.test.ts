@@ -41,7 +41,7 @@ const buildBookingWithRelations = (
       parking: {
         id: string;
         title: string;
-        pricePerHour: number;
+        hourlyRateCents: number;
         ownerId: string;
       };
     }
@@ -60,7 +60,7 @@ const buildBookingWithRelations = (
     parking: {
       id: booking.parkingId,
       title: 'Main Parking',
-      pricePerHour: 2000,
+      hourlyRateCents: 200000,
       ownerId: 'owner-1',
       ...(overrides?.parking ?? {}),
     },
@@ -84,7 +84,7 @@ describe('booking.service', () => {
         buildParking({
           ownerId: 'owner-2',
           isActive: true,
-          totalSpaces: 20,
+          capacity: 20,
         }),
       );
 
@@ -100,7 +100,7 @@ describe('booking.service', () => {
         buildParking({
           ownerId: 'owner-1',
           isActive: false,
-          totalSpaces: 20,
+          capacity: 20,
         }),
       );
 
@@ -118,7 +118,7 @@ describe('booking.service', () => {
         buildParking({
           ownerId: 'owner-1',
           isActive: true,
-          totalSpaces: 20,
+          capacity: 20,
         }),
       );
       vi.mocked(vehicleService.findByPlate).mockRejectedValue(
@@ -151,7 +151,7 @@ describe('booking.service', () => {
         buildParking({
           ownerId: 'owner-1',
           isActive: true,
-          totalSpaces: 20,
+          capacity: 20,
         }),
       );
       vi.mocked(vehicleService.findByPlate).mockResolvedValue(buildVehicle());
@@ -165,7 +165,7 @@ describe('booking.service', () => {
         buildParking({
           ownerId: 'owner-1',
           isActive: true,
-          totalSpaces: 20,
+          capacity: 20,
         }),
       );
       vi.mocked(vehicleService.findByPlate).mockResolvedValue(buildVehicle());
@@ -186,7 +186,7 @@ describe('booking.service', () => {
         buildParking({
           ownerId: 'owner-1',
           isActive: true,
-          totalSpaces: 20,
+          capacity: 20,
         }),
       );
       vi.mocked(vehicleService.findByPlate).mockResolvedValue(buildVehicle());
@@ -207,7 +207,7 @@ describe('booking.service', () => {
       const activeBooking = buildBookingWithRelations({
         id: bookingId,
         startTime: new Date('2026-02-21T10:05:00.000Z'),
-        parking: { id: 'parking-1', title: 'Main', ownerId: 'owner-1', pricePerHour: 3000 },
+        parking: { id: 'parking-1', title: 'Main', ownerId: 'owner-1', hourlyRateCents: 300000 },
       });
 
       const completedBooking = buildBookingWithRelations({
@@ -248,7 +248,7 @@ describe('booking.service', () => {
       const activeBooking = buildBookingWithRelations({
         id: bookingId,
         startTime: new Date('2026-02-21T10:00:00.000Z'),
-        parking: { id: 'parking-1', title: 'Main', ownerId: 'owner-1', pricePerHour: 1500 },
+        parking: { id: 'parking-1', title: 'Main', ownerId: 'owner-1', hourlyRateCents: 150000 },
       });
 
       vi.mocked(bookingRepository.findById).mockResolvedValue(activeBooking);
@@ -264,7 +264,7 @@ describe('booking.service', () => {
 
     it('throws ConflictError when booking is not active', async () => {
       const booking = buildBookingWithRelations({
-        parking: { id: 'parking-1', title: 'Main', ownerId: 'owner-1', pricePerHour: 1000 },
+        parking: { id: 'parking-1', title: 'Main', ownerId: 'owner-1', hourlyRateCents: 100000 },
       });
 
       vi.mocked(bookingRepository.findById).mockResolvedValue(booking);
@@ -349,7 +349,7 @@ describe('booking.service', () => {
     it('throws ForbiddenError when owner does not match', async () => {
       vi.mocked(bookingRepository.findById).mockResolvedValue(
         buildBookingWithRelations({
-          parking: { id: 'parking-1', title: 'Main', ownerId: 'owner-2', pricePerHour: 1000 },
+          parking: { id: 'parking-1', title: 'Main', ownerId: 'owner-2', hourlyRateCents: 100000 },
         }),
       );
 
@@ -359,7 +359,7 @@ describe('booking.service', () => {
     it('returns booking without relation fields', async () => {
       const booking = buildBookingWithRelations({
         id: 'booking-30',
-        parking: { id: 'parking-1', title: 'Main', ownerId: 'owner-1', pricePerHour: 1000 },
+        parking: { id: 'parking-1', title: 'Main', ownerId: 'owner-1', hourlyRateCents: 100000 },
       });
 
       vi.mocked(bookingRepository.findById).mockResolvedValue(booking);
@@ -392,7 +392,7 @@ describe('booking.service', () => {
     it('throws ForbiddenError when owner does not match', async () => {
       vi.mocked(bookingRepository.findById).mockResolvedValue(
         buildBookingWithRelations({
-          parking: { id: 'parking-1', title: 'Main', ownerId: 'owner-2', pricePerHour: 1000 },
+          parking: { id: 'parking-1', title: 'Main', ownerId: 'owner-2', hourlyRateCents: 100000 },
         }),
       );
 

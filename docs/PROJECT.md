@@ -92,14 +92,14 @@ totalAmountCents = chargedHours * hourlyRateCents
 | Float to cents       | Convert with `round(value * 100)`.                                                                                                                                                                                       |
 | `PENDING` data       | Reset development/demo data. For preserved data, export and remove it; never reinterpret it.                                                                                                                             |
 | Historical snapshots | Derive a completed-session rate from historical total and duration when possible. For preserved active/cancelled sessions, fall back to the current parking rate. Prefer a clean reset for nonvaluable development data. |
-| Currency             | Identify currency before preserving monetary records. Fresh/demo data uses the selected seed currency.                                                                                                                   |
+| Currency             | Identify currency before preserving monetary records. Fresh/demo data uses USD, selected from the seeded New York parking.                                                                                               |
 
 ## Phase 2 Plan
 
 1. Record currency for every preserved monetary dataset and prepare a backup/export plus staging-validation plan.
 2. Remove reviews through a forward migration and remove their API, seed, OpenAPI, rate limiting, and tests. **Completed in Phase 2.1.**
 3. Implement owner parking activation/deactivation and public inactive filtering. **Completed in Phase 2.2.**
-4. Migrate parking prices and capacity to cents, currency, and capacity fields.
+4. Migrate parking prices and capacity to cents, currency, and capacity fields. **Completed in Phase 2.3 for disposable/demo data.** The forward migration intentionally stops when Parking data exists; preserving data requires a reviewed, currency-specific migration that applies `round(pricePerHour * 100)`.
 5. Replace `Booking` and `BookingStatus` with `ParkingSession` and `ParkingSessionStatus` (`ACTIVE`, `COMPLETED`, `CANCELLED`).
 6. Persist rate/currency snapshots at check-in and retain the documented billing formula.
 7. Apply plate normalization, retain only needed vehicle operations, regenerate Prisma, and run the full verification suite.

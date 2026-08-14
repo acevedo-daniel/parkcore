@@ -9,7 +9,7 @@ import { prisma } from '../../config/prisma.js';
 
 export type BookingWithRelations = Booking & {
   vehicle: Vehicle;
-  parking: Pick<Parking, 'id' | 'title' | 'pricePerHour' | 'ownerId'>;
+  parking: Pick<Parking, 'id' | 'title' | 'hourlyRateCents' | 'ownerId'>;
 };
 
 export type CheckInBlockedReason = 'parking-full' | 'vehicle-active';
@@ -20,7 +20,7 @@ export const findById = async (id: string): Promise<BookingWithRelations | null>
     include: {
       vehicle: true,
       parking: {
-        select: { id: true, title: true, pricePerHour: true, ownerId: true },
+        select: { id: true, title: true, hourlyRateCents: true, ownerId: true },
       },
     },
   });
@@ -63,7 +63,7 @@ export const findByParking = async (
 export const createConfirmedIfAvailable = async (
   parkingId: string,
   vehicleId: string,
-  totalSpaces: number,
+  capacity: number,
 ): Promise<Booking | CheckInBlockedReason> => {
   return await prisma.$transaction(
     async (tx) => {
@@ -74,7 +74,7 @@ export const createConfirmedIfAvailable = async (
         },
       });
 
-      if (activeCount >= totalSpaces) {
+      if (activeCount >= capacity) {
         return 'parking-full';
       }
 

@@ -45,8 +45,9 @@ model Parking {
   description  String?
   image        String?
   address      String
-  pricePerHour Float
-  totalSpaces  Int
+  hourlyRateCents Int
+  currency         String @db.VarChar(3)
+  capacity         Int
   lat          Float
   lng          Float
   isActive     Boolean   @default(true)

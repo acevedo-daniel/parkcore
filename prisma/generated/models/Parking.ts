@@ -27,15 +27,15 @@ export type AggregateParking = {
 }
 
 export type ParkingAvgAggregateOutputType = {
-  pricePerHour: number | null
-  totalSpaces: number | null
+  hourlyRateCents: number | null
+  capacity: number | null
   lat: number | null
   lng: number | null
 }
 
 export type ParkingSumAggregateOutputType = {
-  pricePerHour: number | null
-  totalSpaces: number | null
+  hourlyRateCents: number | null
+  capacity: number | null
   lat: number | null
   lng: number | null
 }
@@ -46,8 +46,9 @@ export type ParkingMinAggregateOutputType = {
   description: string | null
   image: string | null
   address: string | null
-  pricePerHour: number | null
-  totalSpaces: number | null
+  hourlyRateCents: number | null
+  currency: string | null
+  capacity: number | null
   lat: number | null
   lng: number | null
   isActive: boolean | null
@@ -62,8 +63,9 @@ export type ParkingMaxAggregateOutputType = {
   description: string | null
   image: string | null
   address: string | null
-  pricePerHour: number | null
-  totalSpaces: number | null
+  hourlyRateCents: number | null
+  currency: string | null
+  capacity: number | null
   lat: number | null
   lng: number | null
   isActive: boolean | null
@@ -78,8 +80,9 @@ export type ParkingCountAggregateOutputType = {
   description: number
   image: number
   address: number
-  pricePerHour: number
-  totalSpaces: number
+  hourlyRateCents: number
+  currency: number
+  capacity: number
   lat: number
   lng: number
   isActive: number
@@ -91,15 +94,15 @@ export type ParkingCountAggregateOutputType = {
 
 
 export type ParkingAvgAggregateInputType = {
-  pricePerHour?: true
-  totalSpaces?: true
+  hourlyRateCents?: true
+  capacity?: true
   lat?: true
   lng?: true
 }
 
 export type ParkingSumAggregateInputType = {
-  pricePerHour?: true
-  totalSpaces?: true
+  hourlyRateCents?: true
+  capacity?: true
   lat?: true
   lng?: true
 }
@@ -110,8 +113,9 @@ export type ParkingMinAggregateInputType = {
   description?: true
   image?: true
   address?: true
-  pricePerHour?: true
-  totalSpaces?: true
+  hourlyRateCents?: true
+  currency?: true
+  capacity?: true
   lat?: true
   lng?: true
   isActive?: true
@@ -126,8 +130,9 @@ export type ParkingMaxAggregateInputType = {
   description?: true
   image?: true
   address?: true
-  pricePerHour?: true
-  totalSpaces?: true
+  hourlyRateCents?: true
+  currency?: true
+  capacity?: true
   lat?: true
   lng?: true
   isActive?: true
@@ -142,8 +147,9 @@ export type ParkingCountAggregateInputType = {
   description?: true
   image?: true
   address?: true
-  pricePerHour?: true
-  totalSpaces?: true
+  hourlyRateCents?: true
+  currency?: true
+  capacity?: true
   lat?: true
   lng?: true
   isActive?: true
@@ -245,8 +251,9 @@ export type ParkingGroupByOutputType = {
   description: string | null
   image: string | null
   address: string
-  pricePerHour: number
-  totalSpaces: number
+  hourlyRateCents: number
+  currency: string
+  capacity: number
   lat: number
   lng: number
   isActive: boolean
@@ -284,8 +291,9 @@ export type ParkingWhereInput = {
   description?: Prisma.StringNullableFilter<"Parking"> | string | null
   image?: Prisma.StringNullableFilter<"Parking"> | string | null
   address?: Prisma.StringFilter<"Parking"> | string
-  pricePerHour?: Prisma.FloatFilter<"Parking"> | number
-  totalSpaces?: Prisma.IntFilter<"Parking"> | number
+  hourlyRateCents?: Prisma.IntFilter<"Parking"> | number
+  currency?: Prisma.StringFilter<"Parking"> | string
+  capacity?: Prisma.IntFilter<"Parking"> | number
   lat?: Prisma.FloatFilter<"Parking"> | number
   lng?: Prisma.FloatFilter<"Parking"> | number
   isActive?: Prisma.BoolFilter<"Parking"> | boolean
@@ -303,8 +311,9 @@ export type ParkingOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   image?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrder
-  pricePerHour?: Prisma.SortOrder
-  totalSpaces?: Prisma.SortOrder
+  hourlyRateCents?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
+  capacity?: Prisma.SortOrder
   lat?: Prisma.SortOrder
   lng?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -325,8 +334,9 @@ export type ParkingWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringNullableFilter<"Parking"> | string | null
   image?: Prisma.StringNullableFilter<"Parking"> | string | null
   address?: Prisma.StringFilter<"Parking"> | string
-  pricePerHour?: Prisma.FloatFilter<"Parking"> | number
-  totalSpaces?: Prisma.IntFilter<"Parking"> | number
+  hourlyRateCents?: Prisma.IntFilter<"Parking"> | number
+  currency?: Prisma.StringFilter<"Parking"> | string
+  capacity?: Prisma.IntFilter<"Parking"> | number
   lat?: Prisma.FloatFilter<"Parking"> | number
   lng?: Prisma.FloatFilter<"Parking"> | number
   isActive?: Prisma.BoolFilter<"Parking"> | boolean
@@ -344,8 +354,9 @@ export type ParkingOrderByWithAggregationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   image?: Prisma.SortOrderInput | Prisma.SortOrder
   address?: Prisma.SortOrder
-  pricePerHour?: Prisma.SortOrder
-  totalSpaces?: Prisma.SortOrder
+  hourlyRateCents?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
+  capacity?: Prisma.SortOrder
   lat?: Prisma.SortOrder
   lng?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -368,8 +379,9 @@ export type ParkingScalarWhereWithAggregatesInput = {
   description?: Prisma.StringNullableWithAggregatesFilter<"Parking"> | string | null
   image?: Prisma.StringNullableWithAggregatesFilter<"Parking"> | string | null
   address?: Prisma.StringWithAggregatesFilter<"Parking"> | string
-  pricePerHour?: Prisma.FloatWithAggregatesFilter<"Parking"> | number
-  totalSpaces?: Prisma.IntWithAggregatesFilter<"Parking"> | number
+  hourlyRateCents?: Prisma.IntWithAggregatesFilter<"Parking"> | number
+  currency?: Prisma.StringWithAggregatesFilter<"Parking"> | string
+  capacity?: Prisma.IntWithAggregatesFilter<"Parking"> | number
   lat?: Prisma.FloatWithAggregatesFilter<"Parking"> | number
   lng?: Prisma.FloatWithAggregatesFilter<"Parking"> | number
   isActive?: Prisma.BoolWithAggregatesFilter<"Parking"> | boolean
@@ -384,8 +396,9 @@ export type ParkingCreateInput = {
   description?: string | null
   image?: string | null
   address: string
-  pricePerHour: number
-  totalSpaces: number
+  hourlyRateCents: number
+  currency: string
+  capacity: number
   lat: number
   lng: number
   isActive?: boolean
@@ -402,8 +415,9 @@ export type ParkingUncheckedCreateInput = {
   description?: string | null
   image?: string | null
   address: string
-  pricePerHour: number
-  totalSpaces: number
+  hourlyRateCents: number
+  currency: string
+  capacity: number
   lat: number
   lng: number
   isActive?: boolean
@@ -420,8 +434,9 @@ export type ParkingUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.StringFieldUpdateOperationsInput | string
-  pricePerHour?: Prisma.FloatFieldUpdateOperationsInput | number
-  totalSpaces?: Prisma.IntFieldUpdateOperationsInput | number
+  hourlyRateCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  capacity?: Prisma.IntFieldUpdateOperationsInput | number
   lat?: Prisma.FloatFieldUpdateOperationsInput | number
   lng?: Prisma.FloatFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -438,8 +453,9 @@ export type ParkingUncheckedUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.StringFieldUpdateOperationsInput | string
-  pricePerHour?: Prisma.FloatFieldUpdateOperationsInput | number
-  totalSpaces?: Prisma.IntFieldUpdateOperationsInput | number
+  hourlyRateCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  capacity?: Prisma.IntFieldUpdateOperationsInput | number
   lat?: Prisma.FloatFieldUpdateOperationsInput | number
   lng?: Prisma.FloatFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -456,8 +472,9 @@ export type ParkingCreateManyInput = {
   description?: string | null
   image?: string | null
   address: string
-  pricePerHour: number
-  totalSpaces: number
+  hourlyRateCents: number
+  currency: string
+  capacity: number
   lat: number
   lng: number
   isActive?: boolean
@@ -472,8 +489,9 @@ export type ParkingUpdateManyMutationInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.StringFieldUpdateOperationsInput | string
-  pricePerHour?: Prisma.FloatFieldUpdateOperationsInput | number
-  totalSpaces?: Prisma.IntFieldUpdateOperationsInput | number
+  hourlyRateCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  capacity?: Prisma.IntFieldUpdateOperationsInput | number
   lat?: Prisma.FloatFieldUpdateOperationsInput | number
   lng?: Prisma.FloatFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -487,8 +505,9 @@ export type ParkingUncheckedUpdateManyInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.StringFieldUpdateOperationsInput | string
-  pricePerHour?: Prisma.FloatFieldUpdateOperationsInput | number
-  totalSpaces?: Prisma.IntFieldUpdateOperationsInput | number
+  hourlyRateCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  capacity?: Prisma.IntFieldUpdateOperationsInput | number
   lat?: Prisma.FloatFieldUpdateOperationsInput | number
   lng?: Prisma.FloatFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -518,8 +537,9 @@ export type ParkingCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   image?: Prisma.SortOrder
   address?: Prisma.SortOrder
-  pricePerHour?: Prisma.SortOrder
-  totalSpaces?: Prisma.SortOrder
+  hourlyRateCents?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
+  capacity?: Prisma.SortOrder
   lat?: Prisma.SortOrder
   lng?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -529,8 +549,8 @@ export type ParkingCountOrderByAggregateInput = {
 }
 
 export type ParkingAvgOrderByAggregateInput = {
-  pricePerHour?: Prisma.SortOrder
-  totalSpaces?: Prisma.SortOrder
+  hourlyRateCents?: Prisma.SortOrder
+  capacity?: Prisma.SortOrder
   lat?: Prisma.SortOrder
   lng?: Prisma.SortOrder
 }
@@ -541,8 +561,9 @@ export type ParkingMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   image?: Prisma.SortOrder
   address?: Prisma.SortOrder
-  pricePerHour?: Prisma.SortOrder
-  totalSpaces?: Prisma.SortOrder
+  hourlyRateCents?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
+  capacity?: Prisma.SortOrder
   lat?: Prisma.SortOrder
   lng?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -557,8 +578,9 @@ export type ParkingMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   image?: Prisma.SortOrder
   address?: Prisma.SortOrder
-  pricePerHour?: Prisma.SortOrder
-  totalSpaces?: Prisma.SortOrder
+  hourlyRateCents?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
+  capacity?: Prisma.SortOrder
   lat?: Prisma.SortOrder
   lng?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -568,8 +590,8 @@ export type ParkingMinOrderByAggregateInput = {
 }
 
 export type ParkingSumOrderByAggregateInput = {
-  pricePerHour?: Prisma.SortOrder
-  totalSpaces?: Prisma.SortOrder
+  hourlyRateCents?: Prisma.SortOrder
+  capacity?: Prisma.SortOrder
   lat?: Prisma.SortOrder
   lng?: Prisma.SortOrder
 }
@@ -630,7 +652,7 @@ export type ParkingUpdateOneRequiredWithoutVehiclesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ParkingUpdateToOneWithWhereWithoutVehiclesInput, Prisma.ParkingUpdateWithoutVehiclesInput>, Prisma.ParkingUncheckedUpdateWithoutVehiclesInput>
 }
 
-export type FloatFieldUpdateOperationsInput = {
+export type IntFieldUpdateOperationsInput = {
   set?: number
   increment?: number
   decrement?: number
@@ -638,7 +660,7 @@ export type FloatFieldUpdateOperationsInput = {
   divide?: number
 }
 
-export type IntFieldUpdateOperationsInput = {
+export type FloatFieldUpdateOperationsInput = {
   set?: number
   increment?: number
   decrement?: number
@@ -670,8 +692,9 @@ export type ParkingCreateWithoutOwnerInput = {
   description?: string | null
   image?: string | null
   address: string
-  pricePerHour: number
-  totalSpaces: number
+  hourlyRateCents: number
+  currency: string
+  capacity: number
   lat: number
   lng: number
   isActive?: boolean
@@ -687,8 +710,9 @@ export type ParkingUncheckedCreateWithoutOwnerInput = {
   description?: string | null
   image?: string | null
   address: string
-  pricePerHour: number
-  totalSpaces: number
+  hourlyRateCents: number
+  currency: string
+  capacity: number
   lat: number
   lng: number
   isActive?: boolean
@@ -733,8 +757,9 @@ export type ParkingScalarWhereInput = {
   description?: Prisma.StringNullableFilter<"Parking"> | string | null
   image?: Prisma.StringNullableFilter<"Parking"> | string | null
   address?: Prisma.StringFilter<"Parking"> | string
-  pricePerHour?: Prisma.FloatFilter<"Parking"> | number
-  totalSpaces?: Prisma.IntFilter<"Parking"> | number
+  hourlyRateCents?: Prisma.IntFilter<"Parking"> | number
+  currency?: Prisma.StringFilter<"Parking"> | string
+  capacity?: Prisma.IntFilter<"Parking"> | number
   lat?: Prisma.FloatFilter<"Parking"> | number
   lng?: Prisma.FloatFilter<"Parking"> | number
   isActive?: Prisma.BoolFilter<"Parking"> | boolean
@@ -749,8 +774,9 @@ export type ParkingCreateWithoutVehiclesInput = {
   description?: string | null
   image?: string | null
   address: string
-  pricePerHour: number
-  totalSpaces: number
+  hourlyRateCents: number
+  currency: string
+  capacity: number
   lat: number
   lng: number
   isActive?: boolean
@@ -766,8 +792,9 @@ export type ParkingUncheckedCreateWithoutVehiclesInput = {
   description?: string | null
   image?: string | null
   address: string
-  pricePerHour: number
-  totalSpaces: number
+  hourlyRateCents: number
+  currency: string
+  capacity: number
   lat: number
   lng: number
   isActive?: boolean
@@ -799,8 +826,9 @@ export type ParkingUpdateWithoutVehiclesInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.StringFieldUpdateOperationsInput | string
-  pricePerHour?: Prisma.FloatFieldUpdateOperationsInput | number
-  totalSpaces?: Prisma.IntFieldUpdateOperationsInput | number
+  hourlyRateCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  capacity?: Prisma.IntFieldUpdateOperationsInput | number
   lat?: Prisma.FloatFieldUpdateOperationsInput | number
   lng?: Prisma.FloatFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -816,8 +844,9 @@ export type ParkingUncheckedUpdateWithoutVehiclesInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.StringFieldUpdateOperationsInput | string
-  pricePerHour?: Prisma.FloatFieldUpdateOperationsInput | number
-  totalSpaces?: Prisma.IntFieldUpdateOperationsInput | number
+  hourlyRateCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  capacity?: Prisma.IntFieldUpdateOperationsInput | number
   lat?: Prisma.FloatFieldUpdateOperationsInput | number
   lng?: Prisma.FloatFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -833,8 +862,9 @@ export type ParkingCreateWithoutBookingsInput = {
   description?: string | null
   image?: string | null
   address: string
-  pricePerHour: number
-  totalSpaces: number
+  hourlyRateCents: number
+  currency: string
+  capacity: number
   lat: number
   lng: number
   isActive?: boolean
@@ -850,8 +880,9 @@ export type ParkingUncheckedCreateWithoutBookingsInput = {
   description?: string | null
   image?: string | null
   address: string
-  pricePerHour: number
-  totalSpaces: number
+  hourlyRateCents: number
+  currency: string
+  capacity: number
   lat: number
   lng: number
   isActive?: boolean
@@ -883,8 +914,9 @@ export type ParkingUpdateWithoutBookingsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.StringFieldUpdateOperationsInput | string
-  pricePerHour?: Prisma.FloatFieldUpdateOperationsInput | number
-  totalSpaces?: Prisma.IntFieldUpdateOperationsInput | number
+  hourlyRateCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  capacity?: Prisma.IntFieldUpdateOperationsInput | number
   lat?: Prisma.FloatFieldUpdateOperationsInput | number
   lng?: Prisma.FloatFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -900,8 +932,9 @@ export type ParkingUncheckedUpdateWithoutBookingsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.StringFieldUpdateOperationsInput | string
-  pricePerHour?: Prisma.FloatFieldUpdateOperationsInput | number
-  totalSpaces?: Prisma.IntFieldUpdateOperationsInput | number
+  hourlyRateCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  capacity?: Prisma.IntFieldUpdateOperationsInput | number
   lat?: Prisma.FloatFieldUpdateOperationsInput | number
   lng?: Prisma.FloatFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -917,8 +950,9 @@ export type ParkingCreateManyOwnerInput = {
   description?: string | null
   image?: string | null
   address: string
-  pricePerHour: number
-  totalSpaces: number
+  hourlyRateCents: number
+  currency: string
+  capacity: number
   lat: number
   lng: number
   isActive?: boolean
@@ -932,8 +966,9 @@ export type ParkingUpdateWithoutOwnerInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.StringFieldUpdateOperationsInput | string
-  pricePerHour?: Prisma.FloatFieldUpdateOperationsInput | number
-  totalSpaces?: Prisma.IntFieldUpdateOperationsInput | number
+  hourlyRateCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  capacity?: Prisma.IntFieldUpdateOperationsInput | number
   lat?: Prisma.FloatFieldUpdateOperationsInput | number
   lng?: Prisma.FloatFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -949,8 +984,9 @@ export type ParkingUncheckedUpdateWithoutOwnerInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.StringFieldUpdateOperationsInput | string
-  pricePerHour?: Prisma.FloatFieldUpdateOperationsInput | number
-  totalSpaces?: Prisma.IntFieldUpdateOperationsInput | number
+  hourlyRateCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  capacity?: Prisma.IntFieldUpdateOperationsInput | number
   lat?: Prisma.FloatFieldUpdateOperationsInput | number
   lng?: Prisma.FloatFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -966,8 +1002,9 @@ export type ParkingUncheckedUpdateManyWithoutOwnerInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   address?: Prisma.StringFieldUpdateOperationsInput | string
-  pricePerHour?: Prisma.FloatFieldUpdateOperationsInput | number
-  totalSpaces?: Prisma.IntFieldUpdateOperationsInput | number
+  hourlyRateCents?: Prisma.IntFieldUpdateOperationsInput | number
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  capacity?: Prisma.IntFieldUpdateOperationsInput | number
   lat?: Prisma.FloatFieldUpdateOperationsInput | number
   lng?: Prisma.FloatFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1021,8 +1058,9 @@ export type ParkingSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   description?: boolean
   image?: boolean
   address?: boolean
-  pricePerHour?: boolean
-  totalSpaces?: boolean
+  hourlyRateCents?: boolean
+  currency?: boolean
+  capacity?: boolean
   lat?: boolean
   lng?: boolean
   isActive?: boolean
@@ -1041,8 +1079,9 @@ export type ParkingSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   description?: boolean
   image?: boolean
   address?: boolean
-  pricePerHour?: boolean
-  totalSpaces?: boolean
+  hourlyRateCents?: boolean
+  currency?: boolean
+  capacity?: boolean
   lat?: boolean
   lng?: boolean
   isActive?: boolean
@@ -1058,8 +1097,9 @@ export type ParkingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   description?: boolean
   image?: boolean
   address?: boolean
-  pricePerHour?: boolean
-  totalSpaces?: boolean
+  hourlyRateCents?: boolean
+  currency?: boolean
+  capacity?: boolean
   lat?: boolean
   lng?: boolean
   isActive?: boolean
@@ -1075,8 +1115,9 @@ export type ParkingSelectScalar = {
   description?: boolean
   image?: boolean
   address?: boolean
-  pricePerHour?: boolean
-  totalSpaces?: boolean
+  hourlyRateCents?: boolean
+  currency?: boolean
+  capacity?: boolean
   lat?: boolean
   lng?: boolean
   isActive?: boolean
@@ -1085,7 +1126,7 @@ export type ParkingSelectScalar = {
   ownerId?: boolean
 }
 
-export type ParkingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "image" | "address" | "pricePerHour" | "totalSpaces" | "lat" | "lng" | "isActive" | "createdAt" | "updatedAt" | "ownerId", ExtArgs["result"]["parking"]>
+export type ParkingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "image" | "address" | "hourlyRateCents" | "currency" | "capacity" | "lat" | "lng" | "isActive" | "createdAt" | "updatedAt" | "ownerId", ExtArgs["result"]["parking"]>
 export type ParkingInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bookings?: boolean | Prisma.Parking$bookingsArgs<ExtArgs>
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1112,8 +1153,9 @@ export type $ParkingPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     description: string | null
     image: string | null
     address: string
-    pricePerHour: number
-    totalSpaces: number
+    hourlyRateCents: number
+    currency: string
+    capacity: number
     lat: number
     lng: number
     isActive: boolean
@@ -1551,8 +1593,9 @@ export interface ParkingFieldRefs {
   readonly description: Prisma.FieldRef<"Parking", 'String'>
   readonly image: Prisma.FieldRef<"Parking", 'String'>
   readonly address: Prisma.FieldRef<"Parking", 'String'>
-  readonly pricePerHour: Prisma.FieldRef<"Parking", 'Float'>
-  readonly totalSpaces: Prisma.FieldRef<"Parking", 'Int'>
+  readonly hourlyRateCents: Prisma.FieldRef<"Parking", 'Int'>
+  readonly currency: Prisma.FieldRef<"Parking", 'String'>
+  readonly capacity: Prisma.FieldRef<"Parking", 'Int'>
   readonly lat: Prisma.FieldRef<"Parking", 'Float'>
   readonly lng: Prisma.FieldRef<"Parking", 'Float'>
   readonly isActive: Prisma.FieldRef<"Parking", 'Boolean'>

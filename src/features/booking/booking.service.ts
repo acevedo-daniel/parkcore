@@ -43,7 +43,7 @@ export const checkIn = async (
     const booking = await bookingRepository.createConfirmedIfAvailable(
       parkingId,
       vehicle.id,
-      parking.totalSpaces,
+      parking.capacity,
     );
 
     if (booking === 'parking-full') {
@@ -72,7 +72,7 @@ export const checkOut = async (ownerId: string, bookingId: string): Promise<Book
   const endTime = new Date();
   const diffHours = (endTime.getTime() - booking.startTime.getTime()) / (1000 * 60 * 60);
   const hoursToCharge = Math.max(1, Math.ceil(diffHours));
-  const totalPrice = hoursToCharge * booking.parking.pricePerHour;
+  const totalPrice = (hoursToCharge * booking.parking.hourlyRateCents) / 100;
 
   const completedBooking = await bookingRepository.completeIfConfirmed(
     bookingId,

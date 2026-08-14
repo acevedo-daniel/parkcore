@@ -28,8 +28,9 @@ const parking = { id: parkingId, title: 'Central Parking' };
 const createParkingBody = {
   title: 'Central Parking',
   address: '123 Main Street',
-  pricePerHour: 15.5,
-  totalSpaces: 20,
+  hourlyRateCents: 1550,
+  currency: 'USD',
+  capacity: 20,
   lat: -34.6037,
   lng: -58.3816,
 };
@@ -58,13 +59,13 @@ describe('parking routes', () => {
   it('parses a valid query before calling the service', async () => {
     parkingService.findAll.mockResolvedValue({ data: [], meta: {} });
 
-    const response = await request(app).get('/parkings?page=2&limit=5&minPrice=10');
+    const response = await request(app).get('/parkings?page=2&limit=5&minHourlyRateCents=1000');
 
     expect(response.status).toBe(200);
     expect(parkingService.findAll).toHaveBeenCalledWith({
       page: 2,
       limit: 5,
-      minPrice: 10,
+      minHourlyRateCents: 1000,
     });
   });
 
@@ -126,6 +127,18 @@ describe('parking routes', () => {
     expect(parkingService.create).toHaveBeenCalledWith('owner-1', createParkingBody);
   });
 
+  it('normalizes a valid currency code before calling the service', async () => {
+    parkingService.create.mockResolvedValue(parking);
+
+    const response = await request(app)
+      .post('/parkings')
+      .set(await authorizationHeader())
+      .send({ ...createParkingBody, currency: 'usd' });
+
+    expect(response.status).toBe(201);
+    expect(parkingService.create).toHaveBeenCalledWith('owner-1', createParkingBody);
+  });
+
   it('returns the global error contract for an invalid body', async () => {
     const response = await request(app)
       .post('/parkings')
@@ -134,6 +147,25 @@ describe('parking routes', () => {
 
     expect(response.status).toBe(400);
     expectErrorContract(response.body);
+    expect(parkingService.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects non-positive rates and capacities before calling the service', async () => {
+    const invalidRate = await request(app)
+      .post('/parkings')
+      .set(await authorizationHeader())
+      .send({ ...createParkingBody, hourlyRateCents: 0 });
+
+    expect(invalidRate.status).toBe(400);
+    expectErrorContract(invalidRate.body);
+
+    const invalidCapacity = await request(app)
+      .post('/parkings')
+      .set(await authorizationHeader())
+      .send({ ...createParkingBody, capacity: 0 });
+
+    expect(invalidCapacity.status).toBe(400);
+    expectErrorContract(invalidCapacity.body);
     expect(parkingService.create).not.toHaveBeenCalled();
   });
 
