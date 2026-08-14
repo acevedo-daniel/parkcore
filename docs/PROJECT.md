@@ -17,7 +17,7 @@ Parking operations need a small, reliable record of which vehicles are currently
 
 ## Goals
 
-- Provide owner-scoped parking and vehicle operations.
+- Provide owner-scoped parking operations and parking-scoped vehicle recognition during check-in.
 - Keep capacity, active stays, and final pricing consistent under concurrent check-ins.
 - Maintain a typed, documented HTTP contract.
 
@@ -25,7 +25,7 @@ Parking operations need a small, reliable record of which vehicles are currently
 
 - User authentication for parking owners/operators.
 - Parking lifecycle through active/inactive state.
-- Vehicles known within a parking facility.
+- Vehicles known within a parking facility and created or reused only during check-in.
 - Active, completed, and cancelled parking sessions.
 - Capacity based on concurrent active sessions.
 - Hourly pricing in integer cents with explicit currency and per-session rate snapshots.
@@ -59,7 +59,7 @@ Parking operations need a small, reliable record of which vehicles are currently
 
 ### Vehicle and Session Lifecycle
 
-`Vehicle` is a visiting vehicle known by one parking, not by a user. Its canonical identity is `(parkingId, normalizedPlate)`, where normalization trims, uppercases, and removes non-alphanumeric characters.
+`Vehicle` is a visiting vehicle known by one parking, not by a user. Its canonical identity is `(parkingId, normalizedPlate)`, where normalization trims, uppercases, and removes non-alphanumeric characters. Vehicles have no standalone HTTP endpoints; check-in creates or reuses them.
 
 `ParkingSession` models an actual stay:
 
@@ -101,4 +101,5 @@ totalAmountCents = chargedHours * hourlyRateCents
 4. Migrate parking prices and capacity to cents, currency, and capacity fields. **Completed in Phase 2.3 for disposable/demo data.** The forward migration intentionally stops when Parking data exists; preserving data requires a reviewed, currency-specific migration that applies `round(pricePerHour * 100)`.
 5. Adopt `ParkingSession` and `ParkingSessionStatus` (`ACTIVE`, `COMPLETED`, `CANCELLED`). **Completed in Phase 2.4.**
 6. Persist rate/currency snapshots and final amounts in cents at check-in/checkout, retaining the documented billing formula. **Completed in Phase 2.5.**
-7. Apply plate normalization, retain only needed vehicle operations, use explicit controller-side Zod parsing across active HTTP features, regenerate Prisma, and run the full verification suite. **Completed in Phase 2.7.**
+7. Harden check-in and terminal transitions with serializable check-in, unique active-session identity, and conditional `ACTIVE` updates. **Completed in Phase 2.6.**
+8. Apply plate normalization, retain only needed vehicle operations, use explicit controller-side Zod parsing across active HTTP features, regenerate Prisma, and run the full verification suite. **Completed in Phase 2.7.**

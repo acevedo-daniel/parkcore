@@ -21,42 +21,42 @@ model User {
 }
 
 model Vehicle {
-  id            String      @id @default(uuid())
-  plate         String
-  brand         String?
-  model         String?
-  type          VehicleType @default(CAR)
-  customerName  String?
-  customerPhone String?
-  notes         String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  parkingId     String
+  id              String           @id @default(uuid())
+  plate           String
+  brand           String?
+  model           String?
+  type            VehicleType      @default(CAR)
+  customerName    String?
+  customerPhone   String?
+  notes           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  parkingId       String
   parkingSessions ParkingSession[]
-  parking       Parking     @relation(fields: [parkingId], references: [id], onDelete: Cascade)
+  parking         Parking          @relation(fields: [parkingId], references: [id], onDelete: Cascade)
 
   @@unique([plate, parkingId])
   @@index([plate])
 }
 
 model Parking {
-  id           String    @id @default(uuid())
-  title        String
-  description  String?
-  image        String?
-  address      String
+  id              String           @id @default(uuid())
+  title           String
+  description     String?
+  image           String?
+  address         String
   hourlyRateCents Int
-  currency         String @db.VarChar(3)
-  capacity         Int
-  lat          Float
-  lng          Float
-  isActive     Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  ownerId      String
+  currency        String           @db.VarChar(3)
+  capacity        Int
+  lat             Float
+  lng             Float
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  ownerId         String
   parkingSessions ParkingSession[]
-  owner        User      @relation("ParkingOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  vehicles     Vehicle[]
+  owner           User             @relation("ParkingOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  vehicles        Vehicle[]
 
   @@index([ownerId])
 }

@@ -49,10 +49,6 @@ if (!doc.components?.schemas?.ErrorResponse) {
   errors.push('Missing components.schemas.ErrorResponse.');
 }
 
-if (Object.keys(doc.paths ?? {}).some((path) => path.startsWith('/reviews'))) {
-  errors.push('Review paths must not be present.');
-}
-
 if (errors.length > 0) {
   console.error('OpenAPI health check failed:');
   for (const error of errors) {

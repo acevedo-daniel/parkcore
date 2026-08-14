@@ -5,7 +5,7 @@ An operational API for parking-facility owners. ParkCore records vehicle stays, 
 ## Features
 
 - Owner authentication and profile management with JWT and Argon2.
-- Parking-facility management, vehicle registration, and transactional vehicle check-in/check-out.
+- Parking-facility management and transactional vehicle check-in/check-out with parking-scoped vehicle recognition.
 - Zod request validation, generated OpenAPI 3.1 documentation, and a stable JSON error contract.
 
 ## Stack
@@ -21,7 +21,7 @@ An operational API for parking-facility owners. ParkCore records vehicle stays, 
 
 - Node.js 22
 - pnpm 10
-- Docker Desktop, for local PostgreSQL and pgAdmin
+- Docker Desktop, for local PostgreSQL
 
 ### Install and Run
 

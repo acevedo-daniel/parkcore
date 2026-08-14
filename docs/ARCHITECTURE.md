@@ -39,6 +39,7 @@ Controllers must not make Express request transport appear globally typed. Every
 
 - **Source of truth:** PostgreSQL through the Prisma schema and forward migrations.
 - **Current implementation:** `User`, `Parking`, `Vehicle`, and `ParkingSession` models.
+- **Prisma client:** generated during install and build, then ignored by Git.
 - **1.0 domain:** parking/session money uses integer cents and explicit currency. The approved data migration policy is in [PROJECT.md](PROJECT.md).
 - **Important rule:** check-in capacity and duplicate active-vehicle checks run in one serializable transaction.
 - **Session transitions:** checkout and cancel use a conditional `ACTIVE` update; a partial unique index prevents more than one active session for a parking/vehicle pair.
@@ -46,7 +47,7 @@ Controllers must not make Express request transport appear globally typed. Every
 ## Security Boundaries
 
 - **Authentication:** JWT bearer tokens identify the owner/operator.
-- **Authorization:** services verify that the authenticated user owns the parking, vehicle, or session being operated.
+- **Authorization:** services verify that the authenticated user owns the parking or session being operated. Vehicle access occurs only through owner-authorized session check-in.
 - **Sensitive data:** passwords are Argon2 hashes and are excluded from public responses; logs redact passwords, tokens, and authorization headers.
 - **Transport protection:** Helmet, CORS allowlisting in production, request-size limits, and rate limiting protect the API boundary.
 
@@ -57,7 +58,7 @@ Controllers must not make Express request transport appear globally typed. Every
 | PostgreSQL               | Application persistence        | The API cannot read or modify operational data. |
 | JWT secret configuration | Token signing and verification | Authentication cannot operate safely.           |
 
-## Known Transitional Limitations
+## Operational Constraints
 
 - The running API exposes `/sessions`; compatibility routes and aliases are not supported.
-- Parking sessions persist rate and currency snapshots plus final amounts in cents. Vehicle identity uses the normalized `(parkingId, plate)` pair.
+- Parking sessions persist rate and currency snapshots plus final amounts in cents. Vehicle identity uses the normalized `(parkingId, plate)` pair, and vehicles have no standalone HTTP API.

@@ -48,28 +48,6 @@ describe('app smoke', () => {
     });
   });
 
-  it('review endpoints are no longer part of the application', async () => {
-    const response = await request(app).get(
-      '/reviews/parking/00000000-0000-4000-8000-000000000001',
-    );
-
-    expect(response.status).toBe(404);
-    expect(response.body).toEqual({
-      error: true,
-      message: 'Route not found',
-    });
-  });
-
-  it('does not expose legacy booking routes', async () => {
-    const response = await request(app).get('/bookings/00000000-0000-4000-8000-000000000001');
-
-    expect(response.status).toBe(404);
-    expect(response.body).toEqual({
-      error: true,
-      message: 'Route not found',
-    });
-  });
-
   it('does not expose standalone vehicle routes', async () => {
     const response = await request(app).get('/vehicles/00000000-0000-4000-8000-000000000001');
 

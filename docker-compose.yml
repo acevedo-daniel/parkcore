@@ -1,9 +1,9 @@
-name: parkcore-api
+name: copark
 
 services:
-  parkcore-db:
+  copark:
     image: postgres:18.1
-    container_name: parkcore-db
+    container_name: copark
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -12,38 +12,14 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - parkcore-db-data:/var/lib/postgresql
+      - copark-data:/var/lib/postgresql
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 5s
-    networks:
-      - parkcore-network
-
-  pgadmin:
-    image: dpage/pgadmin4:9.8
-    container_name: parkcore-pgadmin
-    restart: unless-stopped
-    depends_on:
-      parkcore-db:
-        condition: service_healthy
-    environment:
-      PGADMIN_DEFAULT_EMAIL: demo@example.com
-      PGADMIN_DEFAULT_PASSWORD: secret
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
-    ports:
-      - '5050:80'
-    networks:
-      - parkcore-network
-
-networks:
-  parkcore-network:
-    driver: bridge
-
 volumes:
-  parkcore-db-data:
-    name: parkcore-db-data
+  copark-data:
+    name: copark-data
     driver: local

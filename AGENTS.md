@@ -38,8 +38,9 @@ ParkCore is a personal TypeScript API for owner-operated parking facilities. Its
 
 - A user owns and operates parking facilities; no additional roles exist in 1.0.
 - A vehicle belongs to a parking, not a user.
-- The future `ParkingSession` lifecycle is `ACTIVE -> COMPLETED | CANCELLED`; it is not a reservation workflow.
-- Capacity is the maximum concurrent active sessions. Keep check-in capacity and active-vehicle checks transactional.
+- `ParkingSession` lifecycle is `ACTIVE -> COMPLETED | CANCELLED`; it is not a reservation workflow.
+- Capacity is the maximum concurrent active sessions. Keep check-in capacity and active-vehicle checks in a serializable transaction; the database prevents duplicate active parking/vehicle pairs.
+- Checkout and cancellation must atomically transition only an `ACTIVE` session.
 - Before changing domain persistence, follow the approved migration policy in `docs/PROJECT.md`.
 
 ## Verification
