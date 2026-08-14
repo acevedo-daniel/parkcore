@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('./parking.repository.js', () => ({
   create: vi.fn(),
   findById: vi.fn(),
+  findActiveById: vi.fn(),
   findByOwner: vi.fn(),
   update: vi.fn(),
   findAll: vi.fn(),
@@ -12,7 +13,7 @@ import { buildParking } from '../../../tests/helpers/builders.js';
 import { ForbiddenError, NotFoundError } from '../../errors/index.js';
 import type { CreateParking, ParkingQuery, UpdateParking } from './parking.schema.js';
 import * as parkingRepository from './parking.repository.js';
-import { create, findAll, findById, findOwned, update } from './parking.service.js';
+import { create, findAll, findById, findOwned, findPublicById, update } from './parking.service.js';
 
 const createDto: CreateParking = {
   title: 'Main Parking',
@@ -45,6 +46,22 @@ describe('parking.service', () => {
     vi.mocked(parkingRepository.findById).mockResolvedValue(null);
 
     await expect(findById('missing-parking')).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it('findPublicById returns only an active parking', async () => {
+    const parking = buildParking({ isActive: true });
+    vi.mocked(parkingRepository.findActiveById).mockResolvedValue(parking);
+
+    const result = await findPublicById(parking.id);
+
+    expect(parkingRepository.findActiveById).toHaveBeenCalledWith(parking.id);
+    expect(result).toEqual(parking);
+  });
+
+  it('findPublicById hides an inactive parking as not found', async () => {
+    vi.mocked(parkingRepository.findActiveById).mockResolvedValue(null);
+
+    await expect(findPublicById('inactive-parking')).rejects.toBeInstanceOf(NotFoundError);
   });
 
   it('findOwned returns owner parkings', async () => {
@@ -84,6 +101,17 @@ describe('parking.service', () => {
       expect(parkingRepository.update).toHaveBeenCalledWith('parking-1', dto);
       expect(result).toEqual(updatedParking);
     });
+
+    it('allows the owner to deactivate a parking', async () => {
+      const inactiveParking = buildParking({ isActive: false });
+      vi.mocked(parkingRepository.findById).mockResolvedValue(buildParking({ ownerId: 'owner-1' }));
+      vi.mocked(parkingRepository.update).mockResolvedValue(inactiveParking);
+
+      const result = await update('owner-1', 'parking-1', { isActive: false });
+
+      expect(parkingRepository.update).toHaveBeenCalledWith('parking-1', { isActive: false });
+      expect(result).toEqual(inactiveParking);
+    });
   });
 
   describe('findAll', () => {
@@ -112,6 +140,7 @@ describe('parking.service', () => {
           lte: 3000,
         },
         ownerId: 'owner-1',
+        isActive: true,
       });
       expect(result.meta).toEqual({
         page: 2,
@@ -134,7 +163,7 @@ describe('parking.service', () => {
 
       const result = await findAll(query);
 
-      expect(parkingRepository.findAll).toHaveBeenCalledWith(0, 10, {});
+      expect(parkingRepository.findAll).toHaveBeenCalledWith(0, 10, { isActive: true });
       expect(result.meta).toEqual({
         page: 1,
         limit: 10,

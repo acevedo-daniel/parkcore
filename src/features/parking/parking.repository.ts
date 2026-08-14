@@ -13,6 +13,12 @@ export const findById = async (id: string): Promise<Parking | null> => {
   });
 };
 
+export const findActiveById = async (id: string): Promise<Parking | null> => {
+  return await prisma.parking.findFirst({
+    where: { id, isActive: true },
+  });
+};
+
 export const findByOwner = async (ownerId: string): Promise<Parking[]> => {
   return await prisma.parking.findMany({
     where: { ownerId },

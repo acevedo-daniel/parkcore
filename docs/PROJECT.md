@@ -98,7 +98,7 @@ totalAmountCents = chargedHours * hourlyRateCents
 
 1. Record currency for every preserved monetary dataset and prepare a backup/export plus staging-validation plan.
 2. Remove reviews through a forward migration and remove their API, seed, OpenAPI, rate limiting, and tests. **Completed in Phase 2.1.**
-3. Implement owner parking activation/deactivation and public inactive filtering.
+3. Implement owner parking activation/deactivation and public inactive filtering. **Completed in Phase 2.2.**
 4. Migrate parking prices and capacity to cents, currency, and capacity fields.
 5. Replace `Booking` and `BookingStatus` with `ParkingSession` and `ParkingSessionStatus` (`ACTIVE`, `COMPLETED`, `CANCELLED`).
 6. Persist rate/currency snapshots at check-in and retain the documented billing formula.

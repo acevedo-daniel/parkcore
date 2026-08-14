@@ -18,6 +18,12 @@ export const findById = async (id: string): Promise<Parking> => {
   return parking;
 };
 
+export const findPublicById = async (id: string): Promise<Parking> => {
+  const parking = await parkingRepository.findActiveById(id);
+  if (!parking) throw new NotFoundError('Parking not found');
+  return parking;
+};
+
 export const findOwned = async (ownerId: string): Promise<Parking[]> => {
   return parkingRepository.findByOwner(ownerId);
 };
@@ -39,7 +45,7 @@ export const findAll = async (query: ParkingQuery): Promise<PaginationResult<Par
   const { page, limit, search, minPrice, maxPrice, ownerId } = query;
   const skip = (page - 1) * limit;
 
-  const where: Prisma.ParkingWhereInput = {};
+  const where: Prisma.ParkingWhereInput = { isActive: true };
 
   if (search) {
     where.OR = [

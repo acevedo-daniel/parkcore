@@ -6,7 +6,7 @@ import { z } from 'zod';
 const parkingService = vi.hoisted(() => ({
   create: vi.fn(),
   findAll: vi.fn(),
-  findById: vi.fn(),
+  findPublicById: vi.fn(),
   findOwned: vi.fn(),
   update: vi.fn(),
 }));
@@ -77,12 +77,12 @@ describe('parking routes', () => {
   });
 
   it('parses valid route params before calling the service', async () => {
-    parkingService.findById.mockResolvedValue(parking);
+    parkingService.findPublicById.mockResolvedValue(parking);
 
     const response = await request(app).get(`/parkings/${parkingId}`);
 
     expect(response.status).toBe(200);
-    expect(parkingService.findById).toHaveBeenCalledWith(parkingId);
+    expect(parkingService.findPublicById).toHaveBeenCalledWith(parkingId);
   });
 
   it('returns the global error contract for invalid route params', async () => {
@@ -90,7 +90,7 @@ describe('parking routes', () => {
 
     expect(response.status).toBe(400);
     expectErrorContract(response.body);
-    expect(parkingService.findById).not.toHaveBeenCalled();
+    expect(parkingService.findPublicById).not.toHaveBeenCalled();
   });
 
   it('requires authentication before owner routes', async () => {
@@ -99,6 +99,19 @@ describe('parking routes', () => {
     expect(response.status).toBe(401);
     expect(response.body).toEqual({ error: true, message: 'Missing token' });
     expect(parkingService.findOwned).not.toHaveBeenCalled();
+  });
+
+  it('returns both active and inactive parkings to the authenticated owner', async () => {
+    const inactiveParking = { ...parking, id: 'parking-2', isActive: false };
+    parkingService.findOwned.mockResolvedValue([{ ...parking, isActive: true }, inactiveParking]);
+
+    const response = await request(app)
+      .get('/parkings/me')
+      .set(await authorizationHeader());
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([{ ...parking, isActive: true }, inactiveParking]);
+    expect(parkingService.findOwned).toHaveBeenCalledWith('owner-1');
   });
 
   it('parses a valid body and reads authentication context once', async () => {
@@ -122,5 +135,17 @@ describe('parking routes', () => {
     expect(response.status).toBe(400);
     expectErrorContract(response.body);
     expect(parkingService.create).not.toHaveBeenCalled();
+  });
+
+  it('allows an authenticated owner to deactivate a parking through update', async () => {
+    parkingService.update.mockResolvedValue({ ...parking, isActive: false });
+
+    const response = await request(app)
+      .patch(`/parkings/${parkingId}`)
+      .set(await authorizationHeader())
+      .send({ isActive: false });
+
+    expect(response.status).toBe(200);
+    expect(parkingService.update).toHaveBeenCalledWith('owner-1', parkingId, { isActive: false });
   });
 });

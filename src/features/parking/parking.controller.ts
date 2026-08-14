@@ -23,7 +23,7 @@ export const findAll = async (req: Request, res: Response): Promise<void> => {
 
 export const findById = async (req: Request, res: Response): Promise<void> => {
   const { id } = parkingParamsSchema.parse(req.params);
-  const parking = await parkingService.findById(id);
+  const parking = await parkingService.findPublicById(id);
   res.json(parking);
 };
 

@@ -57,7 +57,13 @@ export const createParkingSchema = z
   .openapi('CreateParkingRequest');
 
 export const updateParkingSchema = z
-  .strictObject(createParkingSchema.partial().shape)
+  .strictObject({
+    ...createParkingSchema.partial().shape,
+    isActive: z
+      .boolean()
+      .optional()
+      .openapi({ description: 'Whether the parking accepts check-ins' }),
+  })
   .refine((data) => Object.keys(data).length > 0, {
     message: 'At least one field must be provided',
   })
