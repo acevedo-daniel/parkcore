@@ -1,4 +1,3 @@
-import type { NextFunction } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../features/auth/auth.jwt.js', () => ({
@@ -20,7 +19,7 @@ describe('requireAuth middleware', () => {
     const res = createMockResponse();
     const next = vi.fn<(error?: unknown) => void>();
 
-    await requireAuth(req, res, next as unknown as NextFunction);
+    await requireAuth(req, res, next);
 
     expect(authJwt.verifyAccessToken).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledTimes(1);
@@ -37,7 +36,7 @@ describe('requireAuth middleware', () => {
     const res = createMockResponse();
     const next = vi.fn<(error?: unknown) => void>();
 
-    await requireAuth(req, res, next as unknown as NextFunction);
+    await requireAuth(req, res, next);
 
     expect(authJwt.verifyAccessToken).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledTimes(1);
@@ -56,7 +55,7 @@ describe('requireAuth middleware', () => {
 
     vi.mocked(authJwt.verifyAccessToken).mockRejectedValue(new Error('bad token'));
 
-    await requireAuth(req, res, next as unknown as NextFunction);
+    await requireAuth(req, res, next);
 
     expect(authJwt.verifyAccessToken).toHaveBeenCalledWith('invalid-token');
     expect(next).toHaveBeenCalledTimes(1);
@@ -75,7 +74,7 @@ describe('requireAuth middleware', () => {
 
     vi.mocked(authJwt.verifyAccessToken).mockResolvedValue({ sub: 'user-123' });
 
-    await requireAuth(req, res, next as unknown as NextFunction);
+    await requireAuth(req, res, next);
 
     expect(authJwt.verifyAccessToken).toHaveBeenCalledWith('valid-token');
     expect(req.user).toEqual({ id: 'user-123' });

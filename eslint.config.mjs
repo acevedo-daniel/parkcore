@@ -13,9 +13,7 @@ export default defineConfig(
   {
     languageOptions: {
       parserOptions: {
-        projectService: {
-          allowDefaultProject: ['*.config.mjs', '*.config.ts'],
-        },
+        projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -28,6 +26,10 @@ export default defineConfig(
         },
       ],
     },
+  },
+  {
+    files: ['*.config.{js,mjs,cjs,ts,mts,cts}'],
+    extends: [tseslint.configs.disableTypeChecked],
   },
   eslintConfigPrettier,
 );

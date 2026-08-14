@@ -1,4 +1,3 @@
-import type { NextFunction, Response } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mockWarn, mockError } = vi.hoisted(() => ({
@@ -17,14 +16,6 @@ import { AppError } from '../errors/app-error.js';
 import { createMockRequest, createMockResponse } from '../../tests/helpers/mocks.js';
 import { errorHandler } from './error-handler.middleware.js';
 
-type MockFn = ReturnType<typeof vi.fn>;
-type MockResponse = Omit<Response, 'status' | 'json' | 'send'> & {
-  headersSent: boolean;
-  status: MockFn;
-  json: MockFn;
-  send: MockFn;
-};
-
 describe('errorHandler middleware', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -32,15 +23,15 @@ describe('errorHandler middleware', () => {
 
   it('returns operational AppError status and message', () => {
     const req = createMockRequest({ path: '/auth/register' });
-    const res = createMockResponse() as MockResponse;
+    const res = createMockResponse();
     res.headersSent = false;
     const next = vi.fn<(error?: unknown) => void>();
 
     errorHandler(
       new AppError('Email already in use', 409),
       req,
-      res as unknown as Response,
-      next as unknown as NextFunction,
+      res,
+      next,
     );
 
     expect(res.status).toHaveBeenCalledWith(409);
@@ -61,15 +52,15 @@ describe('errorHandler middleware', () => {
 
   it('returns 500 and safe message for unexpected errors', () => {
     const req = createMockRequest({ path: '/auth/login' });
-    const res = createMockResponse() as MockResponse;
+    const res = createMockResponse();
     res.headersSent = false;
     const next = vi.fn<(error?: unknown) => void>();
 
     errorHandler(
       new Error('boom'),
       req,
-      res as unknown as Response,
-      next as unknown as NextFunction,
+      res,
+      next,
     );
 
     expect(res.status).toHaveBeenCalledWith(500);
@@ -88,7 +79,7 @@ describe('errorHandler middleware', () => {
 
   it('returns 400 for invalid JSON payload', () => {
     const req = createMockRequest({ path: '/parkings' });
-    const res = createMockResponse() as MockResponse;
+    const res = createMockResponse();
     res.headersSent = false;
     const next = vi.fn<(error?: unknown) => void>();
 
@@ -97,7 +88,7 @@ describe('errorHandler middleware', () => {
       type: 'entity.parse.failed',
     });
 
-    errorHandler(jsonError, req, res as unknown as Response, next as unknown as NextFunction);
+    errorHandler(jsonError, req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({
@@ -110,15 +101,15 @@ describe('errorHandler middleware', () => {
 
   it('returns 413 for payload too large', () => {
     const req = createMockRequest({ path: '/bookings' });
-    const res = createMockResponse() as MockResponse;
+    const res = createMockResponse();
     res.headersSent = false;
     const next = vi.fn<(error?: unknown) => void>();
 
     errorHandler(
       { type: 'entity.too.large' },
       req,
-      res as unknown as Response,
-      next as unknown as NextFunction,
+      res,
+      next,
     );
 
     expect(res.status).toHaveBeenCalledWith(413);
@@ -132,12 +123,12 @@ describe('errorHandler middleware', () => {
 
   it('delegates to next when headers are already sent', () => {
     const req = createMockRequest({ path: '/users/me' });
-    const res = createMockResponse() as MockResponse;
+    const res = createMockResponse();
     res.headersSent = true;
     const next = vi.fn<(error?: unknown) => void>();
     const error = new Error('already sent');
 
-    errorHandler(error, req, res as unknown as Response, next as unknown as NextFunction);
+    errorHandler(error, req, res, next);
 
     expect(next).toHaveBeenCalledWith(error);
     expect(res.status).not.toHaveBeenCalled();
