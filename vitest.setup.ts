@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import './src/lib/openapi-registry.js';
 
 const defaultEnv: Record<string, string> = {
@@ -15,3 +16,6 @@ const defaultEnv: Record<string, string> = {
 for (const [key, value] of Object.entries(defaultEnv)) {
   process.env[key] ??= value;
 }
+
+process.env.LOG_LEVEL = 'error';
+process.env.LOG_PRETTY = 'false';

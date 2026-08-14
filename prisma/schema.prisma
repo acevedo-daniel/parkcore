@@ -26,9 +26,6 @@ model Vehicle {
   brand           String?
   model           String?
   type            VehicleType      @default(CAR)
-  customerName    String?
-  customerPhone   String?
-  notes           String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   parkingId       String
@@ -46,7 +43,7 @@ model Parking {
   image           String?
   address         String
   hourlyRateCents Int
-  currency        String           @db.VarChar(3)
+  currency        Currency
   capacity        Int
   lat             Float
   lng             Float
@@ -66,8 +63,11 @@ model ParkingSession {
   startTime        DateTime
   endTime          DateTime?
   hourlyRateCents  Int
-  currency         String               @db.VarChar(3)
+  currency         Currency
   totalAmountCents Int?
+  customerName     String?
+  customerPhone    String?
+  notes            String?
   status           ParkingSessionStatus @default(ACTIVE)
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
@@ -90,4 +90,8 @@ enum ParkingSessionStatus {
   ACTIVE
   COMPLETED
   CANCELLED
+}
+
+enum Currency {
+  USD
 }

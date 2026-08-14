@@ -9,7 +9,7 @@ vi.mock('./parking-session.repository.js', () => ({
   cancelIfActive: vi.fn(),
 }));
 vi.mock('../parking/parking.service.js', () => ({ findById: vi.fn() }));
-vi.mock('../vehicle/vehicle.service.js', () => ({ findOrCreateByPlate: vi.fn() }));
+vi.mock('../vehicle/vehicle.service.js', () => ({ findOrCreateForAuthorizedParking: vi.fn() }));
 
 import { Prisma, type ParkingSessionStatus } from '../../../prisma/generated/client.js';
 import {
@@ -23,6 +23,7 @@ import * as vehicleService from '../vehicle/vehicle.service.js';
 import * as parkingSessionRepository from './parking-session.repository.js';
 import type { ParkingSessionWithRelations } from './parking-session.repository.js';
 import type { CheckIn, ParkingSessionQuery } from './parking-session.schema.js';
+import { toParkingSessionResponse } from './parking-session.schema.js';
 import {
   cancelSession,
   checkIn,
@@ -32,7 +33,13 @@ import {
   getSessionsByParking,
 } from './parking-session.service.js';
 
-const checkInDto: CheckIn = { plate: 'ABC123', type: 'CAR' };
+const checkInDto: CheckIn = {
+  plate: 'ABC123',
+  type: 'CAR',
+  customerName: 'Jane Doe',
+  customerPhone: '+1234567890',
+  notes: 'Scratch on left door',
+};
 
 function buildSessionWithRelations(
   overrides?: Partial<
@@ -67,23 +74,37 @@ describe('parking session service', () => {
   describe('checkIn', () => {
     it('creates an ACTIVE session when the vehicle is not known yet', async () => {
       const vehicle = buildVehicle({ id: 'vehicle-2' });
-      const session = buildParkingSession({ id: 'session-2', vehicleId: vehicle.id });
+      const session = buildSessionWithRelations({
+        id: 'session-2',
+        vehicleId: vehicle.id,
+        customerName: checkInDto.customerName,
+        customerPhone: checkInDto.customerPhone,
+        notes: checkInDto.notes,
+      });
       vi.mocked(parkingService.findById).mockResolvedValue(buildParking());
-      vi.mocked(vehicleService.findOrCreateByPlate).mockResolvedValue(vehicle);
+      vi.mocked(vehicleService.findOrCreateForAuthorizedParking).mockResolvedValue(vehicle);
       vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockResolvedValue(session);
 
-      await expect(checkIn('owner-1', 'parking-1', checkInDto)).resolves.toEqual(session);
-      expect(vehicleService.findOrCreateByPlate).toHaveBeenCalledWith(
-        'owner-1',
-        'parking-1',
-        checkInDto,
-      );
+      await expect(checkIn('owner-1', 'parking-1', checkInDto)).resolves.toMatchObject({
+        id: session.id,
+        vehicle: { id: vehicle.id },
+        customerName: 'Jane Doe',
+      });
+      expect(vehicleService.findOrCreateForAuthorizedParking).toHaveBeenCalledWith('parking-1', {
+        plate: 'ABC123',
+        type: 'CAR',
+      });
       expect(parkingSessionRepository.createActiveIfAvailable).toHaveBeenCalledWith(
         'parking-1',
         vehicle.id,
         20,
         200000,
         'USD',
+        {
+          customerName: 'Jane Doe',
+          customerPhone: '+1234567890',
+          notes: 'Scratch on left door',
+        },
       );
     });
 
@@ -94,7 +115,7 @@ describe('parking session service', () => {
       );
 
       vi.mocked(parkingService.findById).mockResolvedValue(buildParking());
-      vi.mocked(vehicleService.findOrCreateByPlate).mockResolvedValue(buildVehicle());
+      vi.mocked(vehicleService.findOrCreateForAuthorizedParking).mockResolvedValue(buildVehicle());
       vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockResolvedValue('parking-full');
       await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toThrow('Parking is full');
 
@@ -121,7 +142,7 @@ describe('parking session service', () => {
         },
       ) as Prisma.PrismaClientKnownRequestError;
       vi.mocked(parkingService.findById).mockResolvedValue(buildParking());
-      vi.mocked(vehicleService.findOrCreateByPlate).mockResolvedValue(buildVehicle());
+      vi.mocked(vehicleService.findOrCreateForAuthorizedParking).mockResolvedValue(buildVehicle());
       vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockRejectedValue(conflict);
       await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toThrow(
         'Check-in conflict',
@@ -245,9 +266,11 @@ describe('parking session service', () => {
 
   it('lists only ACTIVE sessions for an owner parking and paginates allowed statuses', async () => {
     vi.mocked(parkingService.findById).mockResolvedValue(buildParking());
-    const sessions = [buildParkingSession(), buildParkingSession({ id: 'session-2' })];
+    const sessions = [buildSessionWithRelations(), buildSessionWithRelations({ id: 'session-2' })];
     vi.mocked(parkingSessionRepository.findActiveByParking).mockResolvedValue(sessions);
-    await expect(getActiveSessionsByParking('owner-1', 'parking-1')).resolves.toEqual(sessions);
+    await expect(getActiveSessionsByParking('owner-1', 'parking-1')).resolves.toEqual(
+      sessions.map(toParkingSessionResponse),
+    );
 
     const query: ParkingSessionQuery = { page: 2, limit: 2, status: 'COMPLETED' };
     vi.mocked(parkingSessionRepository.findByParking).mockResolvedValue({

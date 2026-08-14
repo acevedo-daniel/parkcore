@@ -1,21 +1,8 @@
-import { Vehicle } from '../../../prisma/generated/client.js';
-import { Prisma } from '../../../prisma/generated/client.js';
-import { ConflictError, ForbiddenError, NotFoundError } from '../../errors/index.js';
-import * as parkingRepository from '../parking/parking.repository.js';
+import { type Vehicle, Prisma } from '../../../prisma/generated/client.js';
+import { ConflictError } from '../../errors/index.js';
 import * as vehicleRepository from './vehicle.repository.js';
 import { normalizePlate } from './plate-normalization.js';
-import type { CreateVehicle } from './vehicle.schema.js';
-
-const ensureParkingOwnership = async (ownerId: string, parkingId: string): Promise<void> => {
-  const parking = await parkingRepository.findById(parkingId);
-  if (!parking) {
-    throw new NotFoundError('Parking not found');
-  }
-
-  if (parking.ownerId !== ownerId) {
-    throw new ForbiddenError('Access denied');
-  }
-};
+import type { VehicleIdentityInput } from './vehicle.schema.js';
 
 const isUniquePlateByParkingError = (error: unknown): boolean => {
   if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
@@ -26,26 +13,40 @@ const isUniquePlateByParkingError = (error: unknown): boolean => {
   return Array.isArray(target) && target.includes('plate') && target.includes('parkingId');
 };
 
-export const findOrCreateByPlate = async (
-  ownerId: string,
-  parkingId: string,
-  dto: CreateVehicle,
+const suppliedStableMetadata = (dto: VehicleIdentityInput): Prisma.VehicleUpdateInput => ({
+  ...(dto.type !== undefined ? { type: dto.type } : {}),
+  ...(dto.brand !== undefined ? { brand: dto.brand } : {}),
+  ...(dto.model !== undefined ? { model: dto.model } : {}),
+});
+
+const updateExistingVehicle = async (
+  vehicle: Vehicle,
+  dto: VehicleIdentityInput,
 ): Promise<Vehicle> => {
-  await ensureParkingOwnership(ownerId, parkingId);
+  const data = suppliedStableMetadata(dto);
+  return Object.keys(data).length === 0
+    ? vehicle
+    : await vehicleRepository.updateStableMetadata(vehicle.id, data);
+};
+
+export const findOrCreateForAuthorizedParking = async (
+  parkingId: string,
+  dto: VehicleIdentityInput,
+): Promise<Vehicle> => {
   const plate = normalizePlate(dto.plate);
   const existingVehicle = await vehicleRepository.findByPlate(plate, parkingId);
-  if (existingVehicle) return existingVehicle;
+  if (existingVehicle) return await updateExistingVehicle(existingVehicle, dto);
 
   try {
     return await vehicleRepository.create({
       ...dto,
       plate,
-      parking: { connect: { id: parkingId } },
+      parkingId,
     });
   } catch (error) {
     if (isUniquePlateByParkingError(error)) {
       const concurrentVehicle = await vehicleRepository.findByPlate(plate, parkingId);
-      if (concurrentVehicle) return concurrentVehicle;
+      if (concurrentVehicle) return await updateExistingVehicle(concurrentVehicle, dto);
       throw new ConflictError('Vehicle plate already exists in this parking');
     }
     throw error;

@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import type { Parking } from '../../../prisma/generated/client.js';
+import { supportedCurrencies } from '../../utils/currency.js';
 import { paginationMetaSchema } from '../../utils/pagination.schema.js';
 
 export const createParkingSchema = z
@@ -38,11 +40,8 @@ export const createParkingSchema = z
       .openapi({ description: 'Hourly rate in integer cents', example: 1550 }),
 
     currency: z
-      .string({ error: 'Required' })
-      .trim()
-      .toUpperCase()
-      .regex(/^[A-Z]{3}$/, { error: 'Must be a three-letter ISO 4217 currency code' })
-      .openapi({ description: 'ISO 4217 currency code', example: 'USD' }),
+      .enum(supportedCurrencies, { error: 'Unsupported currency' })
+      .openapi({ description: 'Supported currency code', example: 'USD' }),
 
     capacity: z
       .int({ error: 'Must be integer' })
@@ -135,14 +134,14 @@ export const parkingResponseSchema = z
     image: z.string().nullable().openapi({ description: 'Image URL' }),
     address: z.string().openapi({ description: 'Address' }),
     hourlyRateCents: z.int().openapi({ description: 'Hourly rate in integer cents' }),
-    currency: z.string().openapi({ description: 'ISO 4217 currency code' }),
+    currency: z.enum(supportedCurrencies).openapi({ description: 'Supported currency code' }),
     capacity: z.int().openapi({ description: 'Maximum simultaneous active vehicle stays' }),
     lat: z.number().openapi({ description: 'Latitude' }),
     lng: z.number().openapi({ description: 'Longitude' }),
     isActive: z.boolean().openapi({ description: 'Is active' }),
     ownerId: z.uuid().openapi({ description: 'Owner UUID' }),
-    createdAt: z.date().openapi({ description: 'Creation date' }),
-    updatedAt: z.date().openapi({ description: 'Update date' }),
+    createdAt: z.iso.datetime().openapi({ description: 'Creation time', format: 'date-time' }),
+    updatedAt: z.iso.datetime().openapi({ description: 'Last update time', format: 'date-time' }),
   })
   .openapi('ParkingResponse');
 
@@ -155,7 +154,23 @@ export const parkingListResponseSchema = z
 
 export type CreateParking = z.infer<typeof createParkingSchema>;
 export type UpdateParking = z.infer<typeof updateParkingSchema>;
-export type ParkingParams = z.infer<typeof parkingParamsSchema>;
 export type ParkingQuery = z.infer<typeof parkingQuerySchema>;
 export type ParkingResponse = z.infer<typeof parkingResponseSchema>;
 export type ParkingListResponse = z.infer<typeof parkingListResponseSchema>;
+
+export const toParkingResponse = (parking: Parking): ParkingResponse => ({
+  id: parking.id,
+  title: parking.title,
+  description: parking.description,
+  image: parking.image,
+  address: parking.address,
+  hourlyRateCents: parking.hourlyRateCents,
+  currency: parking.currency,
+  capacity: parking.capacity,
+  lat: parking.lat,
+  lng: parking.lng,
+  isActive: parking.isActive,
+  ownerId: parking.ownerId,
+  createdAt: parking.createdAt.toISOString(),
+  updatedAt: parking.updatedAt.toISOString(),
+});

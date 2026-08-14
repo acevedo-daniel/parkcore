@@ -11,7 +11,12 @@ vi.mock('./parking.repository.js', () => ({
 
 import { buildParking } from '../../../tests/helpers/builders.js';
 import { ForbiddenError, NotFoundError } from '../../errors/index.js';
-import type { CreateParking, ParkingQuery, UpdateParking } from './parking.schema.js';
+import {
+  toParkingResponse,
+  type CreateParking,
+  type ParkingQuery,
+  type UpdateParking,
+} from './parking.schema.js';
 import * as parkingRepository from './parking.repository.js';
 import { create, findAll, findById, findOwned, findPublicById, update } from './parking.service.js';
 
@@ -40,7 +45,7 @@ describe('parking.service', () => {
       ...createDto,
       owner: { connect: { id: 'owner-1' } },
     });
-    expect(result).toEqual(created);
+    expect(result).toEqual(toParkingResponse(created));
   });
 
   it('findById throws NotFoundError when parking does not exist', async () => {
@@ -56,7 +61,7 @@ describe('parking.service', () => {
     const result = await findPublicById(parking.id);
 
     expect(parkingRepository.findActiveById).toHaveBeenCalledWith(parking.id);
-    expect(result).toEqual(parking);
+    expect(result).toEqual(toParkingResponse(parking));
   });
 
   it('findPublicById hides an inactive parking as not found', async () => {
@@ -72,7 +77,7 @@ describe('parking.service', () => {
     const result = await findOwned('owner-1');
 
     expect(parkingRepository.findByOwner).toHaveBeenCalledWith('owner-1');
-    expect(result).toEqual(owned);
+    expect(result).toEqual(owned.map(toParkingResponse));
   });
 
   describe('update', () => {
@@ -100,7 +105,7 @@ describe('parking.service', () => {
       const result = await update('owner-1', 'parking-1', dto);
 
       expect(parkingRepository.update).toHaveBeenCalledWith('parking-1', dto);
-      expect(result).toEqual(updatedParking);
+      expect(result).toEqual(toParkingResponse(updatedParking));
     });
 
     it('allows the owner to deactivate a parking', async () => {
@@ -111,7 +116,7 @@ describe('parking.service', () => {
       const result = await update('owner-1', 'parking-1', { isActive: false });
 
       expect(parkingRepository.update).toHaveBeenCalledWith('parking-1', { isActive: false });
-      expect(result).toEqual(inactiveParking);
+      expect(result).toEqual(toParkingResponse(inactiveParking));
     });
   });
 
@@ -151,7 +156,7 @@ describe('parking.service', () => {
         hasNextPage: true,
         hasPreviousPage: true,
       });
-      expect(result.data).toEqual(data);
+      expect(result.data).toEqual(data.map(toParkingResponse));
     });
 
     it('returns paginated result with empty filters', async () => {

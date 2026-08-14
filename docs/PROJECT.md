@@ -1,67 +1,53 @@
 # Project
 
-## Summary
+## Product
 
-ParkCore is a personal backend for owners who operate parking facilities. It records vehicles entering and leaving a facility, tracks concurrent capacity, and provides an API contract for an owner-facing application.
+ParkCore is a personal backend for a parking operations management application for parking owners, with a read-only public catalog of active parking facilities.
 
-## Problem
+It records vehicles entering and leaving an owner-operated parking facility, enforces concurrent capacity, and preserves the price charged for each stay.
 
-Parking operations need a small, reliable record of which vehicles are currently inside a facility and what each stay costs, without treating the product as a customer marketplace or advance-reservation system.
+## Actors
 
-## Users and Stakeholders
+| Actor          | Capabilities                                                                    |
+| -------------- | ------------------------------------------------------------------------------- |
+| Public visitor | Lists, searches, filters, and views active parking facilities.                  |
+| Owner/operator | Registers, manages a profile and owned parkings, and operates parking sessions. |
 
-| Role              | Need or responsibility                                                                  |
-| ----------------- | --------------------------------------------------------------------------------------- |
-| Owner/operator    | Manages their own facilities and records vehicle stays.                                 |
-| Visiting customer | Exists only as optional contact information on a vehicle; has no account or API access. |
-
-## Goals
-
-- Provide owner-scoped parking operations and parking-scoped vehicle recognition during check-in.
-- Keep capacity, active stays, and final pricing consistent under concurrent check-ins.
-- Maintain a typed, documented HTTP contract.
+Visiting drivers may be recorded as contact data for a stay, but have no account or API access.
 
 ## Scope
 
-- User authentication for parking owners/operators.
-- Parking lifecycle through active/inactive state.
-- Vehicles known within a parking facility and created or reused only during check-in.
+- Public catalog of active parkings with search and rate filters.
+- Owner authentication and profile management.
+- Owner-controlled parking lifecycle through `isActive`.
+- Parking-scoped vehicle recognition during check-in.
 - Active, completed, and cancelled parking sessions.
 - Capacity based on concurrent active sessions.
-- Hourly pricing in integer cents with explicit currency and per-session rate snapshots.
+- Integer-cent pricing with a rate and currency snapshot per session.
 
 ## Out of Scope
 
-- Marketplace discovery or customer reservations.
-- Registered customers, employees, or additional roles.
-- Payments, physical space/slot management, and public hard deletion.
-- Reviews, moderation, or customer eligibility workflows.
+- Reservations, marketplace transactions, or public session creation.
+- Payments, registered customers, employees, additional roles, or RBAC.
+- Public feedback, moderation, and customer eligibility workflows.
+- Physical spaces, floors, sectors, or slots.
+- Public hard deletion of parkings.
 
-## Success Criteria
+## Domain
 
-- Only the owner can operate their parking facilities.
-- An inactive parking cannot accept a new check-in and is not publicly listed.
-- A vehicle has at most one active session, and active sessions cannot exceed parking capacity.
-- Completed sessions use the hourly rate and currency captured at check-in.
+### Ownership and Parking
 
-## Relevant Constraints
+`User` is the sole owner/operator identity. Every `Parking` belongs to exactly one user.
 
-- ParkCore 1.0 is a direct breaking API migration: no compatibility aliases or routes.
-- Prisma migrations must be forward-only; never edit an applied migration or generated Prisma output.
+`Parking.isActive` controls lifecycle. Active parkings appear in the public catalog and accept check-ins. Inactive parkings are visible to their owner but hidden publicly and reject new check-ins. Owners can reactivate or deactivate a parking.
 
-## Approved Domain Decisions
+### Vehicle and ParkingSession
 
-### Ownership and Parking Lifecycle
+`Vehicle` is stable vehicle identity inside one parking. It owns the normalized plate, type, brand, and model. Its identity is `(parkingId, normalizedPlate)`, where normalization trims, uppercases, and removes non-alphanumeric characters.
 
-`User` is the sole owner/operator identity in 1.0; there are no added roles. Every `Parking` belongs to exactly one user.
+Check-in creates or reuses that identity. Returning vehicles update stable metadata only when the new check-in explicitly supplies it; omitted values never erase existing metadata.
 
-`isActive` defines parking lifecycle. Active parkings accept check-ins and appear in public lists. Inactive parkings reject check-ins and are hidden from public lists, but remain visible to their owner. Owners can reactivate or deactivate a parking; there is no public hard delete in 1.0.
-
-### Vehicle and Session Lifecycle
-
-`Vehicle` is a visiting vehicle known by one parking, not by a user. Its canonical identity is `(parkingId, normalizedPlate)`, where normalization trims, uppercases, and removes non-alphanumeric characters. Vehicles have no standalone HTTP endpoints; check-in creates or reuses them.
-
-`ParkingSession` models an actual stay:
+`ParkingSession` is one actual visit. It owns visit-specific customer name, customer phone, operational notes, timestamps, status, and pricing snapshot.
 
 ```text
 check-in: ACTIVE
@@ -69,13 +55,13 @@ ACTIVE --check-out--> COMPLETED
 ACTIVE --cancel----> CANCELLED
 ```
 
-`COMPLETED` and `CANCELLED` are terminal; `PENDING` does not exist. Capacity is the maximum number of simultaneous active sessions. ParkCore does not model individual spaces, floors, sectors, or slots.
+`COMPLETED` and `CANCELLED` are terminal. There are no pending or confirmed states.
 
-### Pricing
+### Capacity and Pricing
 
-Money uses integer cents and explicit currency. A parking session snapshots the hourly rate and currency at check-in; a later parking rate change cannot affect it. `totalAmountCents` is finalized on checkout and remains unset for active or cancelled sessions.
+Capacity is the maximum number of simultaneous `ACTIVE` sessions; ParkCore does not model physical slots.
 
-The billing formula to preserve is:
+Money uses integer cents. ParkCore 1.0 supports `USD` explicitly. Each session snapshots the parking hourly rate and currency at check-in. Checkout never reads a later parking rate.
 
 ```text
 elapsedHours = (checkoutTime - startTime) / 3,600,000
@@ -83,23 +69,17 @@ chargedHours = max(1, ceil(elapsedHours))
 totalAmountCents = chargedHours * hourlyRateCents
 ```
 
-## Approved Migration Policy
+## Business Rules
 
-| Concern              | Policy                                                                                                                                                                                                                   |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| API compatibility    | Direct breaking ParkCore 1.0 migration; no compatibility aliases.                                                                                                                                                        |
-| Float to cents       | Convert with `round(value * 100)`.                                                                                                                                                                                       |
-| `PENDING` data       | Reset development/demo data. For preserved data, export and remove it; never reinterpret it.                                                                                                                             |
-| Historical snapshots | Derive a completed-session rate from historical total and duration when possible. For preserved active/cancelled sessions, fall back to the current parking rate. Prefer a clean reset for nonvaluable development data. |
-| Currency             | Identify currency before preserving monetary records. Fresh/demo data uses USD, selected from the seeded New York parking.                                                                                               |
+- Public parking reads return only active parkings.
+- Only the owner can operate a parking or one of its sessions.
+- Check-in, capacity validation, and duplicate active-session validation run in a serializable transaction.
+- A partial unique database index prevents more than one active session for the same parking and vehicle.
+- Checkout and cancel perform an atomic conditional transition from `ACTIVE`.
+- Vehicle data has no standalone HTTP CRUD API; it is managed through check-in.
 
-## Phase 2 Plan
+## Relevant Limitations
 
-1. Record currency for every preserved monetary dataset and prepare a backup/export plus staging-validation plan.
-2. Remove reviews through a forward migration and remove their API, seed, OpenAPI, rate limiting, and tests. **Completed in Phase 2.1.**
-3. Implement owner parking activation/deactivation and public inactive filtering. **Completed in Phase 2.2.**
-4. Migrate parking prices and capacity to cents, currency, and capacity fields. **Completed in Phase 2.3 for disposable/demo data.** The forward migration intentionally stops when Parking data exists; preserving data requires a reviewed, currency-specific migration that applies `round(pricePerHour * 100)`.
-5. Adopt `ParkingSession` and `ParkingSessionStatus` (`ACTIVE`, `COMPLETED`, `CANCELLED`). **Completed in Phase 2.4.**
-6. Persist rate/currency snapshots and final amounts in cents at check-in/checkout, retaining the documented billing formula. **Completed in Phase 2.5.**
-7. Harden check-in and terminal transitions with serializable check-in, unique active-session identity, and conditional `ACTIVE` updates. **Completed in Phase 2.6.**
-8. Apply plate normalization, retain only needed vehicle operations, use explicit controller-side Zod parsing across active HTTP features, regenerate Prisma, and run the full verification suite. **Completed in Phase 2.7.**
+- ParkCore 1.0 is a direct-breaking API: it offers `/sessions`, not compatibility aliases.
+- Historical Prisma migrations retain former terminology because applied migrations are immutable. Active code, schema, and HTTP contracts do not use it.
+- The supported-currency enum intentionally contains only USD. Supporting another currency requires an explicit domain and migration decision.

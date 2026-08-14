@@ -1,9 +1,9 @@
-name: copark
+name: parkcore
 
 services:
-  copark:
+  parkcore-db:
     image: postgres:18.1
-    container_name: copark
+    container_name: parkcore-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -12,7 +12,7 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - copark-data:/var/lib/postgresql
+      - parkcore-data:/var/lib/postgresql
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
       interval: 10s
@@ -20,6 +20,6 @@ services:
       retries: 5
       start_period: 5s
 volumes:
-  copark-data:
-    name: copark-data
+  parkcore-data:
+    name: parkcore-data
     driver: local

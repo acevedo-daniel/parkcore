@@ -127,16 +127,15 @@ describe('parking routes', () => {
     expect(parkingService.create).toHaveBeenCalledWith('owner-1', createParkingBody);
   });
 
-  it('normalizes a valid currency code before calling the service', async () => {
-    parkingService.create.mockResolvedValue(parking);
-
+  it('rejects unsupported currency codes before calling the service', async () => {
     const response = await request(app)
       .post('/parkings')
       .set(await authorizationHeader())
       .send({ ...createParkingBody, currency: 'usd' });
 
-    expect(response.status).toBe(201);
-    expect(parkingService.create).toHaveBeenCalledWith('owner-1', createParkingBody);
+    expect(response.status).toBe(400);
+    expectErrorContract(response.body);
+    expect(parkingService.create).not.toHaveBeenCalled();
   });
 
   it('returns the global error contract for an invalid body', async () => {

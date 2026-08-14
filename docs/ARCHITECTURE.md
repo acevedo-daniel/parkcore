@@ -2,63 +2,66 @@
 
 ## Summary
 
-ParkCore is a single Node.js HTTP service for parking-facility operations. It exposes an Express API, persists data in PostgreSQL through Prisma, and publishes its contract as generated OpenAPI.
+ParkCore is a single Node.js HTTP service for owner-operated parking facilities. It exposes an Express API, persists data in PostgreSQL through Prisma, and publishes its endpoint contract as generated OpenAPI.
 
 ```mermaid
 flowchart LR
-    O[Parking owner] --> API[ParkCore API]
+    P[Public visitor] --> API[ParkCore API]
+    O[Parking owner] --> API
     API --> DB[(PostgreSQL)]
     API --> DOCS[OpenAPI and Scalar]
 ```
 
 ## Components
 
-| Component               | Responsibility                                                | Technology             |
-| ----------------------- | ------------------------------------------------------------- | ---------------------- |
-| HTTP application        | Middleware, route mounting, API reference, and error handling | Express 5              |
-| Feature modules         | Transport handling, domain rules, and persistence access      | TypeScript             |
-| Validation and contract | Request parsing and OpenAPI schema registration               | Zod and zod-to-openapi |
-| Persistence             | Relational data and forward migrations                        | PostgreSQL and Prisma  |
-| Authentication          | Password hashing and bearer-token verification                | Argon2 and jose        |
+| Component               | Responsibility                                                   | Technology             |
+| ----------------------- | ---------------------------------------------------------------- | ---------------------- |
+| HTTP application        | Middleware, route mounting, OpenAPI reference, and global errors | Express 5              |
+| Feature modules         | HTTP transport, business rules, and persistence access           | TypeScript             |
+| Validation and contract | Zod parsing and OpenAPI registration                             | Zod and zod-to-openapi |
+| Persistence             | Relational data and forward migrations                           | PostgreSQL and Prisma  |
+| Authentication          | Password hashing and bearer-token verification                   | Argon2 and jose        |
 
-## Request Flow
+## Request and Response Flow
 
 ```text
 HTTP request
-  -> middleware (logging, security, CORS, body parsing, authentication)
+  -> middleware
   -> route
-  -> controller parses untrusted params/query/body with Zod
+  -> controller parses params/query/body with Zod
   -> service enforces authorization and business rules
   -> repository performs Prisma operations
-  -> global error handler returns the JSON error contract
+  -> explicit response mapper produces JSON contract
+  -> global error handler returns the standard error contract
 ```
 
-Controllers must not make Express request transport appear globally typed. Every active HTTP feature parses the relevant params, query, or body with Zod before calling its service. `ZodError` instances are converted to the standard 400 error response by the global error handler.
+Express requests are untrusted transport. Controllers use ordinary `Request` and parse inputs with colocated Zod schemas. Services do not expose Prisma models as HTTP responses: `toUserResponse`, `toParkingResponse`, and `toParkingSessionResponse` produce explicit contracts.
+
+All wire timestamps are ISO-8601 `date-time` strings. OpenAPI describes the JSON contract, not JavaScript `Date` objects.
 
 ## Data
 
 - **Source of truth:** PostgreSQL through the Prisma schema and forward migrations.
-- **Current implementation:** `User`, `Parking`, `Vehicle`, and `ParkingSession` models.
-- **Prisma client:** generated during install and build, then ignored by Git.
-- **1.0 domain:** parking/session money uses integer cents and explicit currency. The approved data migration policy is in [PROJECT.md](PROJECT.md).
-- **Important rule:** check-in capacity and duplicate active-vehicle checks run in one serializable transaction.
-- **Session transitions:** checkout and cancel use a conditional `ACTIVE` update; a partial unique index prevents more than one active session for a parking/vehicle pair.
+- **Generated client:** generated during install and build; ignored by Git.
+- **Models:** `User`, `Parking`, `Vehicle`, and `ParkingSession`.
+- **Vehicle:** parking-scoped stable identity and metadata only.
+- **ParkingSession:** visit data, vehicle summary in responses, status, and immutable pricing snapshot.
+- **Money:** integer cents and the explicitly supported `USD` currency.
+- **Concurrency:** check-in runs serializably; a partial unique index prevents duplicate active parking/vehicle sessions. Checkout and cancellation use conditional `ACTIVE` updates.
 
 ## Security Boundaries
 
 - **Authentication:** JWT bearer tokens identify the owner/operator.
-- **Authorization:** services verify that the authenticated user owns the parking or session being operated. Vehicle access occurs only through owner-authorized session check-in.
-- **Sensitive data:** passwords are Argon2 hashes and are excluded from public responses; logs redact passwords, tokens, and authorization headers.
-- **Transport protection:** Helmet, CORS allowlisting in production, request-size limits, and rate limiting protect the API boundary.
+- **Authorization:** services verify ownership of a parking or parking session. Vehicle access happens only through owner-authorized check-in.
+- **Sensitive data:** passwords are Argon2 hashes and are excluded from responses; logs redact passwords, tokens, and authorization headers.
+- **Transport protection:** Helmet, production CORS allowlisting, request-size limits, and rate limiting protect the API boundary.
 
-## External Dependencies
+## Local Development
 
-| Dependency               | Purpose                        | Failure impact                                  |
-| ------------------------ | ------------------------------ | ----------------------------------------------- |
-| PostgreSQL               | Application persistence        | The API cannot read or modify operational data. |
-| JWT secret configuration | Token signing and verification | Authentication cannot operate safely.           |
+Docker Compose starts a single PostgreSQL container named `parkcore-db`, backed by the `parkcore-data` volume. The API runs from the host; it is not a Compose service.
 
-## Operational Constraints
+## Constraints
 
-- The running API exposes `/sessions`; compatibility routes and aliases are not supported.
-- Parking sessions persist rate and currency snapshots plus final amounts in cents. Vehicle identity uses the normalized `(parkingId, plate)` pair, and vehicles have no standalone HTTP API.
+- The API has no legacy route aliases or standalone Vehicle routes.
+- OpenAPI is the endpoint-level source of truth and its health check guards the complete active route surface.
+- Historical migrations are retained and never edited after application.

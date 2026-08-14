@@ -13,7 +13,7 @@ const normalizedPlateSchema = z
       .max(10, { error: 'Max 10 alphanumeric characters' }),
   );
 
-export const createVehicleSchema = z
+export const vehicleIdentitySchema = z
   .strictObject({
     plate: normalizedPlateSchema.openapi({
       description: 'Vehicle license plate; normalized to uppercase alphanumeric characters',
@@ -22,7 +22,7 @@ export const createVehicleSchema = z
 
     type: z
       .enum(vehicleTypes, { error: 'Invalid type' })
-      .default('CAR')
+      .optional()
       .openapi({ description: 'Vehicle type', example: 'CAR' }),
 
     brand: z
@@ -38,28 +38,7 @@ export const createVehicleSchema = z
       .trim()
       .optional()
       .openapi({ description: 'Vehicle model', example: 'Corolla' }),
-
-    customerName: z
-      .string()
-      .max(100, { error: 'Max 100 chars' })
-      .trim()
-      .optional()
-      .openapi({ description: 'Owner name', example: 'Jane Doe' }),
-
-    customerPhone: z
-      .string()
-      .max(20, { error: 'Max 20 chars' })
-      .trim()
-      .optional()
-      .openapi({ description: 'Owner phone', example: '+1234567890' }),
-
-    notes: z
-      .string()
-      .max(500, { error: 'Max 500 chars' })
-      .trim()
-      .optional()
-      .openapi({ description: 'Additional notes', example: 'Scratch on left door' }),
   })
-  .openapi('CreateVehicleRequest');
+  .openapi('VehicleIdentityInput');
 
-export type CreateVehicle = z.infer<typeof createVehicleSchema>;
+export type VehicleIdentityInput = z.infer<typeof vehicleIdentitySchema>;

@@ -12,7 +12,7 @@ const { mockPrisma, mockTransaction } = vi.hoisted(() => {
 
 vi.mock('../../config/prisma.js', () => ({ prisma: mockPrisma }));
 
-import { buildParkingSession } from '../../../tests/helpers/builders.js';
+import { buildParkingSession, buildVehicle } from '../../../tests/helpers/builders.js';
 import {
   cancelIfActive,
   completeIfActive,
@@ -29,22 +29,38 @@ const transactionClient = {
   },
 };
 
+const buildSessionWithVehicle = () => {
+  const session = buildParkingSession();
+  return {
+    ...session,
+    vehicle: buildVehicle({ id: session.vehicleId, parkingId: session.parkingId }),
+  };
+};
+
+const visitData = {
+  customerName: 'Jane Doe',
+  customerPhone: '+1234567890',
+  notes: 'Scratch on left door',
+};
+
 describe('parking session repository', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockTransaction.mockImplementation(async (callback: (tx: typeof transactionClient) => unknown) => {
-      return await callback(transactionClient);
-    });
+    mockTransaction.mockImplementation(
+      async (callback: (tx: typeof transactionClient) => unknown) => {
+        return await callback(transactionClient);
+      },
+    );
   });
 
   it('keeps capacity and active-vehicle checks in one serializable transaction', async () => {
-    const session = buildParkingSession();
+    const session = buildSessionWithVehicle();
     transactionClient.parkingSession.count.mockResolvedValue(0);
     transactionClient.parkingSession.findFirst.mockResolvedValue(null);
     transactionClient.parkingSession.create.mockResolvedValue(session);
 
     await expect(
-      createActiveIfAvailable('parking-1', 'vehicle-1', 20, 1500, 'USD'),
+      createActiveIfAvailable('parking-1', 'vehicle-1', 20, 1500, 'USD', visitData),
     ).resolves.toEqual(session);
 
     expect(mockTransaction).toHaveBeenCalledWith(expect.any(Function), {
@@ -61,30 +77,31 @@ describe('parking session repository', () => {
   it('does not create a session when capacity or an active vehicle blocks check-in', async () => {
     transactionClient.parkingSession.count.mockResolvedValue(20);
     await expect(
-      createActiveIfAvailable('parking-1', 'vehicle-1', 20, 1500, 'USD'),
+      createActiveIfAvailable('parking-1', 'vehicle-1', 20, 1500, 'USD', visitData),
     ).resolves.toBe('parking-full');
 
     transactionClient.parkingSession.count.mockResolvedValue(0);
     transactionClient.parkingSession.findFirst.mockResolvedValue(buildParkingSession());
     await expect(
-      createActiveIfAvailable('parking-1', 'vehicle-1', 20, 1500, 'USD'),
+      createActiveIfAvailable('parking-1', 'vehicle-1', 20, 1500, 'USD', visitData),
     ).resolves.toBe('vehicle-active');
     expect(transactionClient.parkingSession.create).not.toHaveBeenCalled();
   });
 
   it('completes with one conditional ACTIVE transition', async () => {
     const endTime = new Date('2026-02-21T10:00:00.000Z');
-    const completedSession = buildParkingSession({
-      endTime,
-      totalAmountCents: 1500,
-      status: 'COMPLETED',
-    });
+    const completedSession = {
+      ...buildParkingSession({
+        endTime,
+        totalAmountCents: 1500,
+        status: 'COMPLETED',
+      }),
+      vehicle: buildVehicle(),
+    };
     transactionClient.parkingSession.updateMany.mockResolvedValue({ count: 1 });
     transactionClient.parkingSession.findUniqueOrThrow.mockResolvedValue(completedSession);
 
-    await expect(
-      completeIfActive('session-1', endTime, 1500),
-    ).resolves.toEqual(completedSession);
+    await expect(completeIfActive('session-1', endTime, 1500)).resolves.toEqual(completedSession);
     expect(transactionClient.parkingSession.updateMany).toHaveBeenCalledWith({
       where: { id: 'session-1', status: 'ACTIVE' },
       data: {
@@ -104,7 +121,10 @@ describe('parking session repository', () => {
   });
 
   it('cancels with one conditional ACTIVE transition', async () => {
-    const cancelledSession = buildParkingSession({ status: 'CANCELLED' });
+    const cancelledSession = {
+      ...buildParkingSession({ status: 'CANCELLED' }),
+      vehicle: buildVehicle(),
+    };
     transactionClient.parkingSession.updateMany.mockResolvedValue({ count: 1 });
     transactionClient.parkingSession.findUniqueOrThrow.mockResolvedValue(cancelledSession);
 

@@ -10,7 +10,7 @@ import type { User } from '../../../prisma/generated/client.js';
 import { NotFoundError } from '../../errors/index.js';
 import type { UpdateProfile } from './user.schema.js';
 import * as userRepository from './user.repository.js';
-import { getByEmail, getById, updateProfile } from './user.service.js';
+import { getById, updateProfile } from './user.service.js';
 
 const buildUser = (overrides?: Partial<User>): User => {
   const now = new Date('2026-02-21T12:00:00.000Z');
@@ -49,8 +49,8 @@ describe('user.service', () => {
         lastName: user.lastName,
         phone: user.phone,
         photoUrl: user.photoUrl,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
       });
       expect(result).not.toHaveProperty('passwordHash');
     });
@@ -58,36 +58,6 @@ describe('user.service', () => {
     it('throws NotFoundError when user does not exist', async () => {
       vi.mocked(userRepository.findById).mockResolvedValue(null);
       const promise = getById('missing-user');
-
-      await expect(promise).rejects.toBeInstanceOf(NotFoundError);
-      await expect(promise).rejects.toThrow('User not found');
-    });
-  });
-
-  describe('getByEmail', () => {
-    it('returns user response without passwordHash', async () => {
-      const user = buildUser();
-      vi.mocked(userRepository.findByEmail).mockResolvedValue(user);
-
-      const result = await getByEmail(user.email);
-
-      expect(userRepository.findByEmail).toHaveBeenCalledWith(user.email);
-      expect(result).toEqual({
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        lastName: user.lastName,
-        phone: user.phone,
-        photoUrl: user.photoUrl,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      });
-      expect(result).not.toHaveProperty('passwordHash');
-    });
-
-    it('throws NotFoundError when email does not exist', async () => {
-      vi.mocked(userRepository.findByEmail).mockResolvedValue(null);
-      const promise = getByEmail('missing@parkcore.test');
 
       await expect(promise).rejects.toBeInstanceOf(NotFoundError);
       await expect(promise).rejects.toThrow('User not found');
@@ -116,8 +86,8 @@ describe('user.service', () => {
         lastName: updatedUser.lastName,
         phone: updatedUser.phone,
         photoUrl: updatedUser.photoUrl,
-        createdAt: updatedUser.createdAt,
-        updatedAt: updatedUser.updatedAt,
+        createdAt: updatedUser.createdAt.toISOString(),
+        updatedAt: updatedUser.updatedAt.toISOString(),
       });
       expect(result).not.toHaveProperty('passwordHash');
     });

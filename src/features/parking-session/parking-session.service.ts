@@ -1,23 +1,38 @@
-import { ParkingSession, Prisma } from '../../../prisma/generated/client.js';
+import { Prisma } from '../../../prisma/generated/client.js';
 import { ConflictError, ForbiddenError, NotFoundError } from '../../errors/index.js';
 import { type PaginationResult, createPaginatedResult } from '../../utils/pagination.js';
 import * as parkingService from '../parking/parking.service.js';
 import * as vehicleService from '../vehicle/vehicle.service.js';
 import * as parkingSessionRepository from './parking-session.repository.js';
-import type { CheckIn, ParkingSessionQuery } from './parking-session.schema.js';
+import type {
+  CheckIn,
+  ParkingSessionQuery,
+  ParkingSessionResponse,
+  VisitData,
+} from './parking-session.schema.js';
 import { toParkingSessionResponse } from './parking-session.schema.js';
 
 export const checkIn = async (
   ownerId: string,
   parkingId: string,
   dto: CheckIn,
-): Promise<ParkingSession> => {
+): Promise<ParkingSessionResponse> => {
   const parking = await parkingService.findById(parkingId);
   if (parking.ownerId !== ownerId)
     throw new ForbiddenError("You don't have access to this parking");
   if (!parking.isActive) throw new ConflictError('Parking is inactive');
 
-  const vehicle = await vehicleService.findOrCreateByPlate(ownerId, parkingId, dto);
+  const vehicle = await vehicleService.findOrCreateForAuthorizedParking(parkingId, {
+    plate: dto.plate,
+    ...(dto.type !== undefined ? { type: dto.type } : {}),
+    ...(dto.brand !== undefined ? { brand: dto.brand } : {}),
+    ...(dto.model !== undefined ? { model: dto.model } : {}),
+  });
+  const visitData: VisitData = {
+    customerName: dto.customerName,
+    customerPhone: dto.customerPhone,
+    notes: dto.notes,
+  };
 
   try {
     const session = await parkingSessionRepository.createActiveIfAvailable(
@@ -26,10 +41,11 @@ export const checkIn = async (
       parking.capacity,
       parking.hourlyRateCents,
       parking.currency,
+      visitData,
     );
     if (session === 'parking-full') throw new ConflictError('Parking is full');
     if (session === 'vehicle-active') throw new ConflictError('Vehicle is already in the parking');
-    return session;
+    return toParkingSessionResponse(session);
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       throw new ConflictError('Vehicle is already in the parking');
@@ -41,7 +57,10 @@ export const checkIn = async (
   }
 };
 
-export const checkOut = async (ownerId: string, sessionId: string): Promise<ParkingSession> => {
+export const checkOut = async (
+  ownerId: string,
+  sessionId: string,
+): Promise<ParkingSessionResponse> => {
   const session = await parkingSessionRepository.findById(sessionId);
   if (!session) throw new NotFoundError('Parking session not found');
   if (session.parking.ownerId !== ownerId) {
@@ -64,18 +83,19 @@ export const checkOut = async (ownerId: string, sessionId: string): Promise<Park
 export const getActiveSessionsByParking = async (
   ownerId: string,
   parkingId: string,
-): Promise<ParkingSession[]> => {
+): Promise<ParkingSessionResponse[]> => {
   const parking = await parkingService.findById(parkingId);
   if (parking.ownerId !== ownerId)
     throw new ForbiddenError("You don't have access to this parking");
-  return await parkingSessionRepository.findActiveByParking(parkingId);
+  const sessions = await parkingSessionRepository.findActiveByParking(parkingId);
+  return sessions.map(toParkingSessionResponse);
 };
 
 export const getSessionsByParking = async (
   ownerId: string,
   parkingId: string,
   query: ParkingSessionQuery,
-): Promise<PaginationResult<ParkingSession>> => {
+): Promise<PaginationResult<ParkingSessionResponse>> => {
   const parking = await parkingService.findById(parkingId);
   if (parking.ownerId !== ownerId)
     throw new ForbiddenError("You don't have access to this parking");
@@ -86,13 +106,18 @@ export const getSessionsByParking = async (
     take: limit,
     status,
   });
-  return createPaginatedResult(result.data, result.total, page, limit);
+  return createPaginatedResult(
+    result.data.map(toParkingSessionResponse),
+    result.total,
+    page,
+    limit,
+  );
 };
 
 export const getSessionById = async (
   ownerId: string,
   sessionId: string,
-): Promise<ParkingSession> => {
+): Promise<ParkingSessionResponse> => {
   const session = await parkingSessionRepository.findById(sessionId);
   if (!session) throw new NotFoundError('Parking session not found');
   if (session.parking.ownerId !== ownerId) {
@@ -104,7 +129,7 @@ export const getSessionById = async (
 export const cancelSession = async (
   ownerId: string,
   sessionId: string,
-): Promise<ParkingSession> => {
+): Promise<ParkingSessionResponse> => {
   const session = await parkingSessionRepository.findById(sessionId);
   if (!session) throw new NotFoundError('Parking session not found');
   if (session.parking.ownerId !== ownerId) {

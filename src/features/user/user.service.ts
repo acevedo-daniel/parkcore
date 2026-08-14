@@ -10,14 +10,6 @@ export const getById = async (id: string): Promise<UserResponse> => {
   return toUserResponse(user);
 };
 
-export const getByEmail = async (email: string): Promise<UserResponse> => {
-  const user = await userRepository.findByEmail(email);
-  if (!user) {
-    throw new NotFoundError('User not found');
-  }
-  return toUserResponse(user);
-};
-
 export const updateProfile = async (id: string, data: UpdateProfile): Promise<UserResponse> => {
   const user = await userRepository.update(id, data);
   return toUserResponse(user);

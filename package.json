@@ -2,6 +2,9 @@
   "name": "parkcore-api",
   "version": "1.0.0",
   "description": "Parking management backend API",
+  "engines": {
+    "node": "24.x"
+  },
   "type": "module",
   "main": "dist/server.js",
   "scripts": {
@@ -65,7 +68,7 @@
     "@eslint/js": "^10.0.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-    "@types/node": "^26.2.0",
+    "@types/node": "^24.13.3",
     "@types/pg": "^8.21.0",
     "@types/supertest": "^7.2.1",
     "@vitest/coverage-v8": "^4.1.10",
@@ -83,16 +86,5 @@
     "vite": "^8.2.1",
     "vitest": "^4.1.10"
   },
-  "packageManager": "pnpm@10.33.0",
-  "pnpm": {
-    "overrides": {
-      "lodash": "^4.17.23",
-      "qs@>=6.7.0 <=6.14.1": ">=6.14.2",
-      "minimatch@<10.2.1": ">=10.2.1",
-      "vite@>=7.0.0 <=7.3.1": ">=7.3.2",
-      "vite@>=7.1.0 <=7.3.1": ">=7.3.2",
-      "@hono/node-server@<1.19.13": ">=1.19.13"
-    },
-    "ignoredBuiltDependencies": []
-  }
+  "packageManager": "pnpm@10.33.0"
 }

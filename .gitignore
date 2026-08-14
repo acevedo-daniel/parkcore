@@ -29,6 +29,7 @@ prisma/generated/
 
 # Legacy agent context
 .agent/
+AGENTS.md
 
 # Local docs (do not publish)
 docs/local/

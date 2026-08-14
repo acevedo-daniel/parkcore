@@ -55,7 +55,16 @@ describe('auth.service', () => {
 
     const result = await register(dto);
 
-    const { passwordHash: _passwordHash, ...expectedUser } = createdUser;
+    const expectedUser = {
+      id: createdUser.id,
+      email: createdUser.email,
+      name: createdUser.name,
+      lastName: createdUser.lastName,
+      phone: createdUser.phone,
+      photoUrl: createdUser.photoUrl,
+      createdAt: createdUser.createdAt.toISOString(),
+      updatedAt: createdUser.updatedAt.toISOString(),
+    };
 
     expect(userRepository.findByEmail).toHaveBeenCalledWith(dto.email);
     expect(authPassword.hashPassword).toHaveBeenCalledWith(dto.password);
@@ -114,7 +123,16 @@ describe('auth.service', () => {
     vi.mocked(authJwt.signAccessToken).mockResolvedValue('token-456');
 
     const result = await login(dto);
-    const { passwordHash: _passwordHash, ...expectedUser } = existingUser;
+    const expectedUser = {
+      id: existingUser.id,
+      email: existingUser.email,
+      name: existingUser.name,
+      lastName: existingUser.lastName,
+      phone: existingUser.phone,
+      photoUrl: existingUser.photoUrl,
+      createdAt: existingUser.createdAt.toISOString(),
+      updatedAt: existingUser.updatedAt.toISOString(),
+    };
 
     expect(userRepository.findByEmail).toHaveBeenCalledWith(dto.email);
     expect(authPassword.verifyPassword).toHaveBeenCalledWith(

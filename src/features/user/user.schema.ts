@@ -45,15 +45,21 @@ export const userResponseSchema = z
     lastName: z.string().nullable().openapi({ description: 'Last name' }),
     phone: z.string().nullable().openapi({ description: 'Phone number' }),
     photoUrl: z.string().nullable().openapi({ description: 'Profile photo URL' }),
-    createdAt: z.date().openapi({ description: 'Creation date' }),
-    updatedAt: z.date().openapi({ description: 'Update date' }),
+    createdAt: z.iso.datetime().openapi({ description: 'Creation time', format: 'date-time' }),
+    updatedAt: z.iso.datetime().openapi({ description: 'Last update time', format: 'date-time' }),
   })
   .openapi('UserResponse');
 
 export type UpdateProfile = z.infer<typeof updateProfileSchema>;
 export type UserResponse = z.infer<typeof userResponseSchema>;
 
-export const toUserResponse = (user: User): UserResponse => {
-  const { passwordHash: _passwordHash, ...userWithoutPassword } = user;
-  return userWithoutPassword;
-};
+export const toUserResponse = (user: User): UserResponse => ({
+  id: user.id,
+  email: user.email,
+  name: user.name,
+  lastName: user.lastName,
+  phone: user.phone,
+  photoUrl: user.photoUrl,
+  createdAt: user.createdAt.toISOString(),
+  updatedAt: user.updatedAt.toISOString(),
+});
