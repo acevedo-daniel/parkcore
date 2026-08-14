@@ -10,10 +10,9 @@ import { errorHandler } from './src/middlewares/error-handler.middleware.js';
 import { requestLogger } from './src/middlewares/logger.middleware.js';
 
 import { authRouter } from './src/features/auth/auth.routes.js';
-import { bookingRouter } from './src/features/booking/booking.routes.js';
+import { parkingSessionRouter } from './src/features/parking-session/parking-session.routes.js';
 import { parkingRouter } from './src/features/parking/parking.routes.js';
 import { userRouter } from './src/features/user/user.routes.js';
-import { vehicleRouter } from './src/features/vehicle/vehicle.routes.js';
 
 const app = express();
 
@@ -69,9 +68,8 @@ app.get('/', (_req, res) => {
 });
 
 app.use('/users', userRouter);
-app.use('/vehicles', vehicleRouter);
 app.use('/parkings', parkingRouter);
-app.use('/bookings', bookingRouter);
+app.use('/sessions', parkingSessionRouter);
 app.use('/auth', authRouter);
 
 app.use((_req, _res, next) => {

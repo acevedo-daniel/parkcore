@@ -31,7 +31,7 @@ ParkCore is a personal TypeScript API for owner-operated parking facilities. Its
 - Treat Express `Request` as untrusted transport. Parse params, query, and body with colocated Zod schemas in the controller, then pass inferred input to services.
 - Controllers own HTTP, parsing, authentication context, and response status. Services own authorization and business rules; repositories own Prisma access.
 - Use `getAuthenticatedUserId(req)` when a controller needs the authenticated user.
-- Do not edit `prisma/generated/` manually.
+- Do not edit `prisma/generated/` manually or commit it; `pnpm install` and `pnpm build` run `prisma generate`.
 - Preserve unrelated user changes. Do not commit, push, deploy, or run destructive database commands unless explicitly requested.
 
 ## Domain Boundaries

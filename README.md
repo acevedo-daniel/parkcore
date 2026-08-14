@@ -26,14 +26,16 @@ An operational API for parking-facility owners. ParkCore records vehicle stays, 
 ### Install and Run
 
 ```powershell
-pnpm install
 Copy-Item .env.example .env
+pnpm install
 pnpm docker:up
 pnpm db:setup
 pnpm dev
 ```
 
 On macOS or Linux, use `cp .env.example .env` instead of `Copy-Item`.
+
+`pnpm install` and `pnpm build` run `prisma generate`; `DATABASE_URL` must therefore be available through `.env` or the environment before either command. Generated Prisma output is not committed.
 
 The local API runs at `http://localhost:3000`; its OpenAPI reference is at `http://localhost:3000/docs`. `.env.example` is the canonical list of environment variables.
 
@@ -52,4 +54,4 @@ pnpm release:readiness
 - [Architecture](docs/ARCHITECTURE.md) - runtime boundaries, data model, and security constraints.
 - [OpenAPI reference](http://localhost:3000/docs) - local endpoint contract after the API is running.
 
-The current code still uses the legacy `Booking` name. The approved ParkCore 1.0 target is documented in `docs/PROJECT.md`; its direct breaking migration is intentionally pending implementation.
+ParkCore 1.0 models a vehicle stay as a `ParkingSession`. The API uses the direct-breaking `/sessions` contract; compatibility routes and aliases are not supported.

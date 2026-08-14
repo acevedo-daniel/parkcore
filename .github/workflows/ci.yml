@@ -17,6 +17,8 @@ jobs:
   quality-and-readiness:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      DATABASE_URL: postgresql://parkcore:parkcore@localhost:5432/parkcore-db
     services:
       parkcore-db:
         image: postgres:18.1
@@ -49,8 +51,6 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Database bootstrap check
-        env:
-          DATABASE_URL: postgresql://parkcore:parkcore@localhost:5432/parkcore-db
         run: pnpm db:setup
 
       - name: Pipeline checks

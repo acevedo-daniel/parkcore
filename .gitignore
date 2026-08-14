@@ -25,6 +25,7 @@ Thumbs.db
 # Build
 dist/
 coverage/
+prisma/generated/
 
 # Legacy agent context
 .agent/

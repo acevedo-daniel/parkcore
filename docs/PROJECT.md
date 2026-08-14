@@ -46,8 +46,7 @@ Parking operations need a small, reliable record of which vehicles are currently
 
 ## Relevant Constraints
 
-- ParkCore 1.0 is a direct breaking API migration: no legacy `Booking` aliases or compatibility routes.
-- The current code retains the legacy `Booking` name until the Phase 2 migration is applied.
+- ParkCore 1.0 is a direct breaking API migration: no compatibility aliases or routes.
 - Prisma migrations must be forward-only; never edit an applied migration or generated Prisma output.
 
 ## Approved Domain Decisions
@@ -62,7 +61,7 @@ Parking operations need a small, reliable record of which vehicles are currently
 
 `Vehicle` is a visiting vehicle known by one parking, not by a user. Its canonical identity is `(parkingId, normalizedPlate)`, where normalization trims, uppercases, and removes non-alphanumeric characters.
 
-`ParkingSession` is the definitive replacement for the legacy `Booking` name. It models an actual stay:
+`ParkingSession` models an actual stay:
 
 ```text
 check-in: ACTIVE
@@ -74,7 +73,7 @@ ACTIVE --cancel----> CANCELLED
 
 ### Pricing
 
-Money uses integer cents and explicit currency. A parking session snapshots the hourly rate and currency at check-in; a later parking rate change cannot affect it.
+Money uses integer cents and explicit currency. A parking session snapshots the hourly rate and currency at check-in; a later parking rate change cannot affect it. `totalAmountCents` is finalized on checkout and remains unset for active or cancelled sessions.
 
 The billing formula to preserve is:
 
@@ -88,7 +87,7 @@ totalAmountCents = chargedHours * hourlyRateCents
 
 | Concern              | Policy                                                                                                                                                                                                                   |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| API compatibility    | Direct breaking ParkCore 1.0 migration; no legacy booking aliases.                                                                                                                                                       |
+| API compatibility    | Direct breaking ParkCore 1.0 migration; no compatibility aliases.                                                                                                                                                        |
 | Float to cents       | Convert with `round(value * 100)`.                                                                                                                                                                                       |
 | `PENDING` data       | Reset development/demo data. For preserved data, export and remove it; never reinterpret it.                                                                                                                             |
 | Historical snapshots | Derive a completed-session rate from historical total and duration when possible. For preserved active/cancelled sessions, fall back to the current parking rate. Prefer a clean reset for nonvaluable development data. |
@@ -100,6 +99,6 @@ totalAmountCents = chargedHours * hourlyRateCents
 2. Remove reviews through a forward migration and remove their API, seed, OpenAPI, rate limiting, and tests. **Completed in Phase 2.1.**
 3. Implement owner parking activation/deactivation and public inactive filtering. **Completed in Phase 2.2.**
 4. Migrate parking prices and capacity to cents, currency, and capacity fields. **Completed in Phase 2.3 for disposable/demo data.** The forward migration intentionally stops when Parking data exists; preserving data requires a reviewed, currency-specific migration that applies `round(pricePerHour * 100)`.
-5. Replace `Booking` and `BookingStatus` with `ParkingSession` and `ParkingSessionStatus` (`ACTIVE`, `COMPLETED`, `CANCELLED`).
-6. Persist rate/currency snapshots at check-in and retain the documented billing formula.
-7. Apply plate normalization, retain only needed vehicle operations, regenerate Prisma, and run the full verification suite.
+5. Adopt `ParkingSession` and `ParkingSessionStatus` (`ACTIVE`, `COMPLETED`, `CANCELLED`). **Completed in Phase 2.4.**
+6. Persist rate/currency snapshots and final amounts in cents at check-in/checkout, retaining the documented billing formula. **Completed in Phase 2.5.**
+7. Apply plate normalization, retain only needed vehicle operations, use explicit controller-side Zod parsing across active HTTP features, regenerate Prisma, and run the full verification suite. **Completed in Phase 2.7.**

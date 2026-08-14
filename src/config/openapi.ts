@@ -41,8 +41,7 @@ export function generateOpenApiDocument() {
     tags: [
       { name: 'Auth', description: 'Authentication endpoints' },
       { name: 'Parkings', description: 'Parking lot management' },
-      { name: 'Bookings', description: 'Check-in/Check-out flow' },
-      { name: 'Vehicles', description: 'Vehicle registry' },
+      { name: 'Parking Sessions', description: 'Vehicle stay lifecycle' },
       { name: 'User', description: 'User profile management' },
       { name: 'System', description: 'Operational endpoints' },
     ],

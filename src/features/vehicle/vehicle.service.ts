@@ -3,6 +3,7 @@ import { Prisma } from '../../../prisma/generated/client.js';
 import { ConflictError, ForbiddenError, NotFoundError } from '../../errors/index.js';
 import * as parkingRepository from '../parking/parking.repository.js';
 import * as vehicleRepository from './vehicle.repository.js';
+import { normalizePlate } from './plate-normalization.js';
 import type { CreateVehicle } from './vehicle.schema.js';
 
 const ensureParkingOwnership = async (ownerId: string, parkingId: string): Promise<void> => {
@@ -25,37 +26,28 @@ const isUniquePlateByParkingError = (error: unknown): boolean => {
   return Array.isArray(target) && target.includes('plate') && target.includes('parkingId');
 };
 
-export const create = async (
+export const findOrCreateByPlate = async (
   ownerId: string,
   parkingId: string,
   dto: CreateVehicle,
 ): Promise<Vehicle> => {
   await ensureParkingOwnership(ownerId, parkingId);
+  const plate = normalizePlate(dto.plate);
+  const existingVehicle = await vehicleRepository.findByPlate(plate, parkingId);
+  if (existingVehicle) return existingVehicle;
 
   try {
     return await vehicleRepository.create({
       ...dto,
+      plate,
       parking: { connect: { id: parkingId } },
     });
   } catch (error) {
     if (isUniquePlateByParkingError(error)) {
+      const concurrentVehicle = await vehicleRepository.findByPlate(plate, parkingId);
+      if (concurrentVehicle) return concurrentVehicle;
       throw new ConflictError('Vehicle plate already exists in this parking');
     }
     throw error;
   }
-};
-
-export const findByPlate = async (
-  ownerId: string,
-  plate: string,
-  parkingId: string,
-): Promise<Vehicle> => {
-  await ensureParkingOwnership(ownerId, parkingId);
-
-  const vehicle = await vehicleRepository.findByPlate(plate, parkingId);
-  if (!vehicle) {
-    throw new NotFoundError('Vehicle not found');
-  }
-
-  return vehicle;
 };

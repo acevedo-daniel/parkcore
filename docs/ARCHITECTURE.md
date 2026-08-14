@@ -33,14 +33,15 @@ HTTP request
   -> global error handler returns the JSON error contract
 ```
 
-Controllers must not make Express request transport appear globally typed. Zod parsing produces the feature input; the Parking feature is the reference implementation of this boundary pattern. `ZodError` instances are converted to the standard 400 error response by the global error handler.
+Controllers must not make Express request transport appear globally typed. Every active HTTP feature parses the relevant params, query, or body with Zod before calling its service. `ZodError` instances are converted to the standard 400 error response by the global error handler.
 
 ## Data
 
 - **Source of truth:** PostgreSQL through the Prisma schema and forward migrations.
-- **Current implementation:** `User`, `Parking`, `Vehicle`, and `Booking` models.
-- **1.0 target:** `ParkingSession` replaces `Booking`; parking/session money uses integer cents and explicit currency. The approved data migration policy is in [PROJECT.md](PROJECT.md).
+- **Current implementation:** `User`, `Parking`, `Vehicle`, and `ParkingSession` models.
+- **1.0 domain:** parking/session money uses integer cents and explicit currency. The approved data migration policy is in [PROJECT.md](PROJECT.md).
 - **Important rule:** check-in capacity and duplicate active-vehicle checks run in one serializable transaction.
+- **Session transitions:** checkout and cancel use a conditional `ACTIVE` update; a partial unique index prevents more than one active session for a parking/vehicle pair.
 
 ## Security Boundaries
 
@@ -58,6 +59,5 @@ Controllers must not make Express request transport appear globally typed. Zod p
 
 ## Known Transitional Limitations
 
-- The running API still exposes the legacy booking name until the direct ParkCore 1.0 migration is implemented.
-- Not every feature has adopted explicit controller-side Zod parsing yet; Parking is the pilot pattern.
-- The required Phase 2 migration must resolve money snapshots, currency, normalized plates, and status data according to the project migration policy.
+- The running API exposes `/sessions`; compatibility routes and aliases are not supported.
+- Parking sessions persist rate and currency snapshots plus final amounts in cents. Vehicle identity uses the normalized `(parkingId, plate)` pair.

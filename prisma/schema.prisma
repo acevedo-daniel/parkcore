@@ -32,7 +32,7 @@ model Vehicle {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   parkingId     String
-  bookings      Booking[]
+  parkingSessions ParkingSession[]
   parking       Parking     @relation(fields: [parkingId], references: [id], onDelete: Cascade)
 
   @@unique([plate, parkingId])
@@ -54,25 +54,27 @@ model Parking {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   ownerId      String
-  bookings     Booking[]
+  parkingSessions ParkingSession[]
   owner        User      @relation("ParkingOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   vehicles     Vehicle[]
 
   @@index([ownerId])
 }
 
-model Booking {
-  id         String        @id @default(uuid())
-  startTime  DateTime
-  endTime    DateTime?
-  totalPrice Float?
-  status     BookingStatus @default(CONFIRMED)
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-  parkingId  String
-  vehicleId  String
-  parking    Parking       @relation(fields: [parkingId], references: [id], onDelete: Cascade)
-  vehicle    Vehicle       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+model ParkingSession {
+  id               String               @id @default(uuid())
+  startTime        DateTime
+  endTime          DateTime?
+  hourlyRateCents  Int
+  currency         String               @db.VarChar(3)
+  totalAmountCents Int?
+  status           ParkingSessionStatus @default(ACTIVE)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  parkingId        String
+  vehicleId        String
+  parking          Parking              @relation(fields: [parkingId], references: [id], onDelete: Cascade)
+  vehicle          Vehicle              @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
 
   @@index([parkingId, status])
   @@index([vehicleId, status])
@@ -84,9 +86,8 @@ enum VehicleType {
   LARGE
 }
 
-enum BookingStatus {
-  PENDING
-  CONFIRMED
-  CANCELLED
+enum ParkingSessionStatus {
+  ACTIVE
   COMPLETED
+  CANCELLED
 }

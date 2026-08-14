@@ -1,22 +1,17 @@
 import type { Request, Response } from 'express';
-import type { UpdateProfile } from './user.schema.js';
 import * as userService from './user.service.js';
-import { requireUser } from '../../utils/require-user.js';
+import { getAuthenticatedUserId } from '../../utils/require-user.js';
+import { updateProfileSchema } from './user.schema.js';
 
-export const findCurrent = async (
-  req: Request<unknown, unknown, unknown, unknown>,
-  res: Response,
-): Promise<void> => {
-  requireUser(req);
-  const user = await userService.getById(req.user.id);
+export const findCurrent = async (req: Request, res: Response): Promise<void> => {
+  const userId = getAuthenticatedUserId(req);
+  const user = await userService.getById(userId);
   res.json(user);
 };
 
-export const updateCurrent = async (
-  req: Request<unknown, unknown, UpdateProfile>,
-  res: Response,
-): Promise<void> => {
-  requireUser(req);
-  const user = await userService.updateProfile(req.user.id, req.body);
+export const updateCurrent = async (req: Request, res: Response): Promise<void> => {
+  const userId = getAuthenticatedUserId(req);
+  const input = updateProfileSchema.parse(req.body);
+  const user = await userService.updateProfile(userId, input);
   res.json(user);
 };

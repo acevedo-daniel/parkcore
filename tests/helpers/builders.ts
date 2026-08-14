@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { Booking, Parking, Vehicle } from '../../prisma/generated/client.js';
+import type { Parking, ParkingSession, Vehicle } from '../../prisma/generated/client.js';
 
 type Mergeable = Record<string, unknown>;
 
@@ -80,15 +80,17 @@ export const buildVehicle = (overrides?: Partial<Vehicle>): Vehicle => {
   };
 };
 
-export const buildBooking = (overrides?: Partial<Booking>): Booking => {
+export const buildParkingSession = (overrides?: Partial<ParkingSession>): ParkingSession => {
   const now = new Date('2026-02-21T10:00:00.000Z');
 
   return {
-    id: 'booking-1',
+    id: 'session-1',
     startTime: new Date('2026-02-21T09:00:00.000Z'),
     endTime: null,
-    totalPrice: null,
-    status: 'CONFIRMED',
+    hourlyRateCents: 1500,
+    currency: 'USD',
+    totalAmountCents: null,
+    status: 'ACTIVE',
     createdAt: now,
     updatedAt: now,
     parkingId: 'parking-1',

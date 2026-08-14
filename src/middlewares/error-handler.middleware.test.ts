@@ -27,12 +27,7 @@ describe('errorHandler middleware', () => {
     res.headersSent = false;
     const next = vi.fn<(error?: unknown) => void>();
 
-    errorHandler(
-      new AppError('Email already in use', 409),
-      req,
-      res,
-      next,
-    );
+    errorHandler(new AppError('Email already in use', 409), req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(409);
     expect(res.json).toHaveBeenCalledWith({
@@ -56,12 +51,7 @@ describe('errorHandler middleware', () => {
     res.headersSent = false;
     const next = vi.fn<(error?: unknown) => void>();
 
-    errorHandler(
-      new Error('boom'),
-      req,
-      res,
-      next,
-    );
+    errorHandler(new Error('boom'), req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
@@ -100,17 +90,12 @@ describe('errorHandler middleware', () => {
   });
 
   it('returns 413 for payload too large', () => {
-    const req = createMockRequest({ path: '/bookings' });
+    const req = createMockRequest({ path: '/sessions' });
     const res = createMockResponse();
     res.headersSent = false;
     const next = vi.fn<(error?: unknown) => void>();
 
-    errorHandler(
-      { type: 'entity.too.large' },
-      req,
-      res,
-      next,
-    );
+    errorHandler({ type: 'entity.too.large' }, req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(413);
     expect(res.json).toHaveBeenCalledWith({
