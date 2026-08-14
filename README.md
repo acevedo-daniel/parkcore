@@ -52,4 +52,4 @@ pnpm release:readiness
 - [Architecture](docs/ARCHITECTURE.md) - runtime boundaries, data model, and security constraints.
 - [OpenAPI reference](http://localhost:3000/docs) - local endpoint contract after the API is running.
 
-The current code still uses legacy `Booking` and review concepts in places. The approved ParkCore 1.0 target is documented in `docs/PROJECT.md`; its direct breaking migration is intentionally pending implementation.
+The current code still uses the legacy `Booking` name. The approved ParkCore 1.0 target is documented in `docs/PROJECT.md`; its direct breaking migration is intentionally pending implementation.

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { Booking, Parking, Review, Vehicle } from '../../prisma/generated/client.js';
+import type { Booking, Parking, Vehicle } from '../../prisma/generated/client.js';
 
 type Mergeable = Record<string, unknown>;
 
@@ -92,21 +92,6 @@ export const buildBooking = (overrides?: Partial<Booking>): Booking => {
     updatedAt: now,
     parkingId: 'parking-1',
     vehicleId: 'vehicle-1',
-    ...(overrides ?? {}),
-  };
-};
-
-export const buildReview = (overrides?: Partial<Review>): Review => {
-  const now = new Date('2026-02-21T12:00:00.000Z');
-
-  return {
-    id: 'review-1',
-    rating: 5,
-    comment: 'Great parking',
-    authorName: 'Daniel',
-    parkingId: 'parking-1',
-    createdAt: now,
-    updatedAt: now,
     ...(overrides ?? {}),
   };
 };

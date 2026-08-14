@@ -12,7 +12,6 @@ import { requestLogger } from './src/middlewares/logger.middleware.js';
 import { authRouter } from './src/features/auth/auth.routes.js';
 import { bookingRouter } from './src/features/booking/booking.routes.js';
 import { parkingRouter } from './src/features/parking/parking.routes.js';
-import { reviewRouter } from './src/features/review/review.routes.js';
 import { userRouter } from './src/features/user/user.routes.js';
 import { vehicleRouter } from './src/features/vehicle/vehicle.routes.js';
 
@@ -73,7 +72,6 @@ app.use('/users', userRouter);
 app.use('/vehicles', vehicleRouter);
 app.use('/parkings', parkingRouter);
 app.use('/bookings', bookingRouter);
-app.use('/reviews', reviewRouter);
 app.use('/auth', authRouter);
 
 app.use((_req, _res, next) => {

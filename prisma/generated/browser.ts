@@ -37,8 +37,3 @@ export type Parking = Prisma.ParkingModel
  * 
  */
 export type Booking = Prisma.BookingModel
-/**
- * Model Review
- * 
- */
-export type Review = Prisma.ReviewModel

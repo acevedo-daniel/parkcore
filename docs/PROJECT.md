@@ -47,7 +47,7 @@ Parking operations need a small, reliable record of which vehicles are currently
 ## Relevant Constraints
 
 - ParkCore 1.0 is a direct breaking API migration: no legacy `Booking` aliases or compatibility routes.
-- The current code retains legacy `Booking` and review behavior until the Phase 2 migration is applied.
+- The current code retains the legacy `Booking` name until the Phase 2 migration is applied.
 - Prisma migrations must be forward-only; never edit an applied migration or generated Prisma output.
 
 ## Approved Domain Decisions
@@ -97,7 +97,7 @@ totalAmountCents = chargedHours * hourlyRateCents
 ## Phase 2 Plan
 
 1. Record currency for every preserved monetary dataset and prepare a backup/export plus staging-validation plan.
-2. Remove reviews through one forward migration and remove their API, seed, OpenAPI, rate limiting, and tests.
+2. Remove reviews through a forward migration and remove their API, seed, OpenAPI, rate limiting, and tests. **Completed in Phase 2.1.**
 3. Implement owner parking activation/deactivation and public inactive filtering.
 4. Migrate parking prices and capacity to cents, currency, and capacity fields.
 5. Replace `Booking` and `BookingStatus` with `ParkingSession` and `ParkingSessionStatus` (`ACTIVE`, `COMPLETED`, `CANCELLED`).

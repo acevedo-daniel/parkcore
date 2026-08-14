@@ -43,7 +43,6 @@ export function generateOpenApiDocument() {
       { name: 'Parkings', description: 'Parking lot management' },
       { name: 'Bookings', description: 'Check-in/Check-out flow' },
       { name: 'Vehicles', description: 'Vehicle registry' },
-      { name: 'Reviews', description: 'Rating and feedback' },
       { name: 'User', description: 'User profile management' },
       { name: 'System', description: 'Operational endpoints' },
     ],

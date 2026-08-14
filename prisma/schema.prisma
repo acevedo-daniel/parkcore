@@ -55,7 +55,6 @@ model Parking {
   ownerId      String
   bookings     Booking[]
   owner        User      @relation("ParkingOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  reviews      Review[]
   vehicles     Vehicle[]
 
   @@index([ownerId])
@@ -76,19 +75,6 @@ model Booking {
 
   @@index([parkingId, status])
   @@index([vehicleId, status])
-}
-
-model Review {
-  id         String   @id @default(uuid())
-  rating     Int
-  comment    String?
-  authorName String   @default("Anonymous")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  parkingId  String
-  parking    Parking  @relation(fields: [parkingId], references: [id], onDelete: Cascade)
-
-  @@index([parkingId])
 }
 
 enum VehicleType {

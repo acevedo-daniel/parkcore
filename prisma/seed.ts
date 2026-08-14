@@ -54,29 +54,6 @@ async function main(): Promise<void> {
     },
   });
 
-  const reviewCount = await prisma.review.count({
-    where: { parkingId: parking.id },
-  });
-
-  if (reviewCount === 0) {
-    await prisma.review.createMany({
-      data: [
-        {
-          rating: 5,
-          comment: 'Clean and safe parking spot.',
-          authorName: 'Alex',
-          parkingId: parking.id,
-        },
-        {
-          rating: 4,
-          comment: 'Good location and fair price.',
-          authorName: 'Sam',
-          parkingId: parking.id,
-        },
-      ],
-    });
-  }
-
   console.log(`Seed completed. Owner: ${owner.email}. Parking: ${parking.title}`);
 }
 

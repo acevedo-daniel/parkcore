@@ -26,13 +26,7 @@ interface OpenApiDoc {
   };
 }
 
-const requiredPaths = [
-  '/healthz',
-  '/auth/register',
-  '/auth/login',
-  '/reviews/parking/{parkingId}',
-  '/reviews/parking/{parkingId}/stats',
-];
+const requiredPaths = ['/healthz', '/auth/register', '/auth/login'];
 
 const doc = generateOpenApiDocument() as OpenApiDoc;
 const errors: string[] = [];
@@ -55,31 +49,8 @@ if (!doc.components?.schemas?.ErrorResponse) {
   errors.push('Missing components.schemas.ErrorResponse.');
 }
 
-const reviewsPath = doc.paths?.['/reviews/parking/{parkingId}']?.get;
-if (!reviewsPath?.responses?.['404']) {
-  errors.push('Missing 404 response in GET /reviews/parking/{parkingId}.');
-}
-
-const createReviewPath = doc.paths?.['/reviews/parking/{parkingId}']?.post;
-if (!createReviewPath?.responses?.['201']) {
-  errors.push('Missing 201 response in POST /reviews/parking/{parkingId}.');
-}
-
-if (!createReviewPath?.responses?.['404']) {
-  errors.push('Missing 404 response in POST /reviews/parking/{parkingId}.');
-}
-
-if (createReviewPath?.requestBody?.required !== true) {
-  errors.push('POST /reviews/parking/{parkingId} request body must be required.');
-}
-
-if (!createReviewPath?.responses?.['429']) {
-  errors.push('Missing 429 response in POST /reviews/parking/{parkingId}.');
-}
-
-const statsPath = doc.paths?.['/reviews/parking/{parkingId}/stats']?.get;
-if (!statsPath?.responses?.['404']) {
-  errors.push('Missing 404 response in GET /reviews/parking/{parkingId}/stats.');
+if (Object.keys(doc.paths ?? {}).some((path) => path.startsWith('/reviews'))) {
+  errors.push('Review paths must not be present.');
 }
 
 if (errors.length > 0) {

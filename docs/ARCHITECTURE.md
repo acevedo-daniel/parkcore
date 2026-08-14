@@ -38,8 +38,8 @@ Controllers must not make Express request transport appear globally typed. Zod p
 ## Data
 
 - **Source of truth:** PostgreSQL through the Prisma schema and forward migrations.
-- **Current implementation:** `User`, `Parking`, `Vehicle`, `Booking`, and `Review` models.
-- **1.0 target:** `ParkingSession` replaces `Booking`; reviews are removed; parking/session money uses integer cents and explicit currency. The approved data migration policy is in [PROJECT.md](PROJECT.md).
+- **Current implementation:** `User`, `Parking`, `Vehicle`, and `Booking` models.
+- **1.0 target:** `ParkingSession` replaces `Booking`; parking/session money uses integer cents and explicit currency. The approved data migration policy is in [PROJECT.md](PROJECT.md).
 - **Important rule:** check-in capacity and duplicate active-vehicle checks run in one serializable transaction.
 
 ## Security Boundaries
@@ -58,6 +58,6 @@ Controllers must not make Express request transport appear globally typed. Zod p
 
 ## Known Transitional Limitations
 
-- The running API still exposes legacy booking and review behavior until the direct ParkCore 1.0 migration is implemented.
+- The running API still exposes the legacy booking name until the direct ParkCore 1.0 migration is implemented.
 - Not every feature has adopted explicit controller-side Zod parsing yet; Parking is the pilot pattern.
-- The required Phase 2 migration must resolve money snapshots, currency, normalized plates, status data, and review removal according to the project migration policy.
+- The required Phase 2 migration must resolve money snapshots, currency, normalized plates, and status data according to the project migration policy.
