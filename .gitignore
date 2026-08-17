@@ -23,6 +23,8 @@ Thumbs.db
 # Build
 **/dist/
 **/coverage/
+**/test-results/
+**/playwright-report/
 apps/api/prisma/generated/
 
 # Legacy agent context

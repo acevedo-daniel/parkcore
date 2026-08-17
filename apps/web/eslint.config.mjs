@@ -30,6 +30,16 @@ export default defineConfig(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
+  {
+    files: ['e2e/**/*.ts'],
+    languageOptions: {
+      globals: globals.node,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
   query.configs['flat/recommended'],
   {
     files: ['*.config.{js,mjs,cjs,ts,mts,cts}'],

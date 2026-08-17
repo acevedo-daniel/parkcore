@@ -10,7 +10,9 @@ import { Field, Input } from '../../components/ui/field.js';
 import { getPublicParkings, type PublicParkingQuery } from '../../lib/api/public-api.js';
 
 function rateToCents(value: string) {
-  const parsed = Number(value);
+  const normalized = value.trim();
+  if (!normalized) return undefined;
+  const parsed = Number(normalized);
   return Number.isFinite(parsed) && parsed >= 0 ? Math.round(parsed * 100) : undefined;
 }
 

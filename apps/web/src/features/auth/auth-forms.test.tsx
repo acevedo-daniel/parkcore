@@ -72,4 +72,18 @@ describe('authentication forms', () => {
       (await screen.findByText('An account with this email already exists.')).textContent,
     ).toContain('An account with this email already exists.');
   });
+
+  it('shows an explicit invalid-credentials message during login', async () => {
+    const user = userEvent.setup();
+    const login = vi.fn().mockRejectedValue(new ApiError('Invalid credentials', 401));
+    renderWithAuth(<LoginForm onSuccess={vi.fn()} />, { login });
+
+    await user.type(screen.getByLabelText('Email'), 'owner@example.com');
+    await user.type(screen.getByLabelText('Password'), 'wrong-password');
+    await user.click(screen.getByRole('button', { name: 'Sign in' }));
+
+    expect((await screen.findByText('Email or password is incorrect.')).textContent).toContain(
+      'Email or password is incorrect.',
+    );
+  });
 });
