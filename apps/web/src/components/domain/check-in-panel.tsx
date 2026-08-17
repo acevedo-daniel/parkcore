@@ -7,13 +7,28 @@ import { z } from 'zod';
 import { Button } from '../ui/button.js';
 import { Field, Input, Select, Textarea } from '../ui/field.js';
 
+const normalizePlate = (plate: string) =>
+  plate
+    .trim()
+    .toUpperCase()
+    .replaceAll(/[^A-Z0-9]/g, '');
+
 const checkInFormSchema = z.object({
-  brand: z.string(),
-  customerName: z.string(),
-  customerPhone: z.string(),
-  model: z.string(),
-  notes: z.string(),
-  plate: z.string().trim().min(1, 'Enter a vehicle plate.'),
+  brand: z.string().trim().max(50, 'Use no more than 50 characters.'),
+  customerName: z.string().trim().max(100, 'Use no more than 100 characters.'),
+  customerPhone: z.string().trim().max(20, 'Use no more than 20 characters.'),
+  model: z.string().trim().max(50, 'Use no more than 50 characters.'),
+  notes: z.string().trim().max(500, 'Use no more than 500 characters.'),
+  plate: z
+    .string()
+    .transform(normalizePlate)
+    .pipe(
+      z
+        .string()
+        .min(1, 'Enter a vehicle plate.')
+        .min(4, 'Use 4 to 10 alphanumeric characters.')
+        .max(10, 'Use 4 to 10 alphanumeric characters.'),
+    ),
   type: z.enum(['CAR', 'MOTORCYCLE', 'LARGE']),
 });
 
@@ -54,7 +69,7 @@ export function CheckInPanel({
       customerPhone: optional(values.customerPhone),
       model: optional(values.model),
       notes: optional(values.notes),
-      plate: values.plate.toUpperCase().replaceAll(/[^A-Z0-9]/g, ''),
+      plate: values.plate,
       type: values.type,
     });
   };

@@ -1,6 +1,6 @@
 # ParkCore
 
-ParkCore is a personal parking-operations application for parking owners. It is a pnpm monorepo containing the ParkCore 1.0 API, a deliberately minimal React frontend foundation, and a typed client generated from the API's OpenAPI contract.
+ParkCore is a personal parking-operations application for parking owners. It is a pnpm monorepo containing the ParkCore 1.0 API, a public parking-discovery web app, an owner operations app, and a typed client generated from the API's OpenAPI contract.
 
 There are no marketplace transactions, reservations, payments, customer accounts, staff, roles, reviews, or physical-slot features in 1.0.
 
@@ -9,7 +9,7 @@ There are no marketplace transactions, reservations, payments, customer accounts
 | Workspace             | Responsibility                                                                  |
 | --------------------- | ------------------------------------------------------------------------------- |
 | `apps/api`            | Express 5 API, Prisma schema/migrations, OpenAPI artifact, and backend tests.   |
-| `apps/web`            | Vite, React, React Router Data Mode, TanStack Query, and Tailwind 4 foundation. |
+| `apps/web`            | Vite React public discovery and owner operations UI.                            |
 | `packages/api-client` | Generated OpenAPI types and typed `openapi-fetch` bridge for browser consumers. |
 
 ## Requirements
@@ -48,13 +48,14 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm test:coverage
+pnpm --filter @parkcore/web test:e2e
 pnpm contract:generate
 pnpm contract:check
 pnpm build
 pnpm release:readiness
 ```
 
-`pnpm contract:generate` writes `apps/api/openapi.json` and regenerates `packages/api-client/src/generated/schema.ts`. Generated contract types are committed and must not be edited manually; `pnpm contract:check` detects drift.
+`pnpm contract:generate` writes `apps/api/openapi.json` and regenerates `packages/api-client/src/generated/schema.ts`. Generated contract types are committed and must not be edited manually; `pnpm contract:check` detects drift. Browser JWT persistence is owned by `apps/web`; browser API calls use `@parkcore/api-client`.
 
 ## Documentation
 

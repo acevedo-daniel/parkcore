@@ -80,4 +80,17 @@ describe('parking operations', () => {
       'Active',
     );
   });
+
+  it('does not expose any check-in path for an inactive parking', async () => {
+    api.getOwnedParkings.mockResolvedValue([parkingFixture({ isActive: false })]);
+    api.getActiveSessions.mockResolvedValue([]);
+    renderOverview();
+
+    const checkIn = await screen.findByRole('button', { name: /^Check in$/ });
+    expect((checkIn as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.queryByRole('button', { name: 'Check in vehicle' })).toBeNull();
+    expect(
+      screen.getByText('Reactivate this parking before accepting new check-ins.'),
+    ).toBeTruthy();
+  });
 });

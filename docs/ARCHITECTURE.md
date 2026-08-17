@@ -2,7 +2,7 @@
 
 ## Summary
 
-ParkCore is a pnpm workspace monorepo. It keeps the API independently deployable, gives the frontend a small modern foundation, and makes the published OpenAPI document the sole contract bridge between them.
+ParkCore is a pnpm workspace monorepo. It keeps the API independently deployable, provides public discovery and owner-operation web surfaces, and makes the published OpenAPI document the sole contract bridge between them.
 
 ```mermaid
 flowchart LR
@@ -47,12 +47,14 @@ OpenAPI registrations in apps/api
 
 Both generated contract artifacts are versioned. `pnpm contract:check` regenerates them and fails on a diff, so contract changes are reviewed together with the API implementation.
 
-## Frontend foundation
+## Frontend
 
-`apps/web` uses Vite, React, React Compiler, React Router Data Mode, TanStack Query, and Tailwind 4. It intentionally has only an application provider, router, neutral route, and global style baseline. Product features, design system components, authentication storage, and screens are deferred until there is a real frontend requirement.
+`apps/web` uses Vite, React, React Compiler, React Router Data Mode, TanStack Query, and Tailwind 4. It contains the public catalog/detail experience, owner authentication, parking management, and parking-session operations. Route modules load lazily; TanStack Query owns server state; URL search parameters own catalog/history pagination and filters; and local React state owns transient UI.
+
+Browser JWT persistence belongs to `apps/web`. API access uses only `@parkcore/api-client`; the web app never imports API internals, Prisma types, or backend schemas.
 
 ## Local development and CI
 
 Root Docker Compose runs a local `parkcore-db` PostgreSQL container only. API and web processes run with root pnpm orchestration and retain independent workspace scripts.
 
-CI has separate API, web, and contract jobs. The API job provisions PostgreSQL and runs API-specific quality/readiness checks; web checks do not boot a database; the contract job detects generated-type drift.
+CI has separate API, web, web-E2E, and contract jobs. The API job provisions PostgreSQL and runs API-specific quality/readiness checks; web checks do not boot a database; the E2E job installs Playwright Chromium and runs the mocked owner workflow; the contract job detects generated-type drift.

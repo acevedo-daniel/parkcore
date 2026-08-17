@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -13,7 +14,10 @@ vi.mock('../../lib/api/public-api.js', () => ({ getPublicParkings: api.getPublic
 
 type ParkingList = components['schemas']['ParkingListResponse'];
 
-function listFixture(data: ParkingList['data']): ParkingList {
+function listFixture(
+  data: ParkingList['data'],
+  meta: Partial<ParkingList['meta']> = {},
+): ParkingList {
   return {
     data,
     meta: {
@@ -23,17 +27,18 @@ function listFixture(data: ParkingList['data']): ParkingList {
       page: 1,
       total: data.length,
       totalPages: 1,
+      ...meta,
     },
   };
 }
 
-function renderCatalog() {
+function renderCatalog(initialEntry = '/parkings') {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={['/parkings']}>
+      <MemoryRouter initialEntries={[initialEntry]}>
         <ParkingCatalogRoute />
       </MemoryRouter>
     </QueryClientProvider>,
@@ -63,6 +68,7 @@ describe('public parking catalog', () => {
     );
     expect(api.getPublicParkings).toHaveBeenCalledWith({
       limit: 30,
+      page: 1,
       maxHourlyRateCents: undefined,
       minHourlyRateCents: undefined,
       search: undefined,
@@ -80,5 +86,48 @@ describe('public parking catalog', () => {
     await waitFor(() => {
       expect(screen.getByRole('alert').textContent).toContain('We could not load active parkings.');
     });
+  });
+
+  it('keeps filters in the URL while moving through public parking pages', async () => {
+    const user = userEvent.setup();
+    api.getPublicParkings
+      .mockResolvedValueOnce(listFixture([parkingFixture()], { hasNextPage: true, totalPages: 2 }))
+      .mockResolvedValueOnce(
+        listFixture([parkingFixture({ id: 'parking-2', title: 'North Garage' })], {
+          hasPreviousPage: true,
+          page: 2,
+          totalPages: 2,
+        }),
+      );
+    renderCatalog('/parkings?search=central&minRate=10&maxRate=20');
+
+    await screen.findByRole('link', { name: 'Open Central Parking' });
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+
+    expect(await screen.findByRole('link', { name: 'Open North Garage' })).toBeTruthy();
+    expect(api.getPublicParkings).toHaveBeenLastCalledWith({
+      limit: 30,
+      maxHourlyRateCents: 2000,
+      minHourlyRateCents: 1000,
+      page: 2,
+      search: 'central',
+    });
+  });
+
+  it('keeps invalid rate combinations at the boundary instead of calling the API', async () => {
+    const user = userEvent.setup();
+    api.getPublicParkings.mockResolvedValue(listFixture([]));
+    renderCatalog();
+    await screen.findByText('No active parkings');
+    const callsBeforeSubmit = api.getPublicParkings.mock.calls.length;
+
+    await user.type(screen.getByLabelText('Min. rate (USD)'), '20');
+    await user.type(screen.getByLabelText('Max. rate (USD)'), '10');
+    await user.click(screen.getByRole('button', { name: 'Apply filters' }));
+
+    expect((await screen.findByRole('alert')).textContent).toContain(
+      'Minimum rate cannot exceed maximum rate.',
+    );
+    expect(api.getPublicParkings).toHaveBeenCalledTimes(callsBeforeSubmit);
   });
 });

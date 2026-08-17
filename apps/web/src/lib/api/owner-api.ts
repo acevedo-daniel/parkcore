@@ -9,6 +9,9 @@ export type CreateParkingRequest = components['schemas']['CreateParkingRequest']
 export type UpdateParkingRequest = components['schemas']['UpdateParkingRequest'];
 export type UpdateProfileRequest =
   paths['/users/me']['patch']['requestBody']['content']['application/json'];
+export type ParkingSessionQuery = NonNullable<
+  paths['/parkings/{parkingId}/sessions']['get']['parameters']['query']
+>;
 function ownerError(error: unknown, response: Response, fallback: string): never {
   throw new ApiError(getApiErrorMessage(error, fallback), response.status);
 }
@@ -55,9 +58,9 @@ export async function checkIn(parkingId: string, input: components['schemas']['C
   return ownerError(error, response, 'Unable to start this session.');
 }
 
-export async function getParkingSessions(parkingId: string, status?: ParkingSession['status']) {
+export async function getParkingSessions(parkingId: string, query: ParkingSessionQuery = {}) {
   const { data, error, response } = await authenticatedApi.GET('/parkings/{parkingId}/sessions', {
-    params: { path: { parkingId }, query: { limit: 50, ...(status ? { status } : {}) } },
+    params: { path: { parkingId }, query: { limit: 20, page: 1, ...query } },
   });
   if (data) return data;
   return ownerError(error, response, 'Unable to load parking sessions.');

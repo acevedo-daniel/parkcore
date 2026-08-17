@@ -53,6 +53,9 @@ export function OwnerParkingOverviewRoute() {
       </ErrorState>
     );
   const activeSessions = activeSessionsQuery.data;
+  const openCheckIn = () => {
+    if (parking.isActive) setCheckInOpen(true);
+  };
 
   return (
     <section className="owner-page stack-owner" aria-labelledby="parking-overview-title">
@@ -73,16 +76,11 @@ export function OwnerParkingOverviewRoute() {
         </div>
       </header>
       <div className="owner-operation-actions">
-        <Button
-          disabled={!parking.isActive}
-          onClick={() => {
-            setCheckInOpen(true);
-          }}
-        >
+        <Button disabled={!parking.isActive} onClick={openCheckIn}>
           <Plus aria-hidden="true" size={17} /> Check in
         </Button>
         {!parking.isActive ? (
-          <p className="field-help">Inactive parkings cannot accept new check-ins.</p>
+          <p className="field-help">Reactivate this parking before accepting new check-ins.</p>
         ) : null}
       </div>
       <div className="owner-parking-overview-grid">
@@ -127,13 +125,7 @@ export function OwnerParkingOverviewRoute() {
         ) : activeSessions?.length === 0 ? (
           <EmptyState
             action={
-              <Button
-                onClick={() => {
-                  setCheckInOpen(true);
-                }}
-              >
-                Check in vehicle
-              </Button>
+              parking.isActive ? <Button onClick={openCheckIn}>Check in vehicle</Button> : undefined
             }
             title="No active sessions"
           >
@@ -149,14 +141,20 @@ export function OwnerParkingOverviewRoute() {
       </section>
       <Sheet
         description="Record a vehicle entering this facility."
-        onOpenChange={setCheckInOpen}
-        open={checkInOpen}
+        onOpenChange={(open) => {
+          setCheckInOpen(open && parking.isActive);
+        }}
+        open={parking.isActive && checkInOpen}
         title="Check in vehicle"
       >
         <CheckInPanel
           error={checkInError}
           isSubmitting={checkInMutation.isPending}
           onSubmit={async (input) => {
+            if (!parking.isActive) {
+              setCheckInError('Reactivate this parking before accepting new check-ins.');
+              return;
+            }
             setCheckInError(undefined);
             try {
               const session = await checkInMutation.mutateAsync(input);

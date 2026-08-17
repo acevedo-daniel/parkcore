@@ -82,6 +82,32 @@ jobs:
       - name: Frontend checks
         run: pnpm --filter @parkcore/web lint && pnpm --filter @parkcore/web typecheck && pnpm --filter @parkcore/web test && pnpm --filter @parkcore/web build
 
+  web-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @parkcore/web exec playwright install --with-deps chromium
+
+      - name: Run browser workflow
+        run: pnpm --filter @parkcore/web test:e2e
+
   contract:
     runs-on: ubuntu-latest
     timeout-minutes: 10

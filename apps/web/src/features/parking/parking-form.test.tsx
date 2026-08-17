@@ -38,4 +38,16 @@ describe('ParkingForm', () => {
       });
     });
   });
+
+  it('requires explicit coordinates when creating a parking', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(<ParkingForm onSubmit={onSubmit} />);
+
+    expect(screen.getByLabelText<HTMLInputElement>('Latitude').value).toBe('');
+    expect(screen.getByLabelText<HTMLInputElement>('Longitude').value).toBe('');
+    await user.click(screen.getByRole('button', { name: 'Create parking' }));
+
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
 });

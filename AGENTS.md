@@ -2,12 +2,12 @@
 
 ## Workspace
 
-ParkCore is a personal pnpm monorepo for owner-operated parking facilities. `apps/api` is the authoritative backend; `apps/web` is the frontend foundation; `packages/api-client` is the only supported browser-to-API contract bridge.
+ParkCore is a personal pnpm monorepo for owner-operated parking facilities. `apps/api` is the authoritative backend; `apps/web` is the implemented public and owner frontend; `packages/api-client` is the only supported browser-to-API contract bridge.
 
 ## Layout
 
 - `apps/api/` — Express, Prisma, OpenAPI, and backend tests.
-- `apps/web/` — Vite React application shell.
+- `apps/web/` — Vite React public discovery and owner operations application.
 - `packages/api-client/` — generated OpenAPI types and typed `openapi-fetch` client.
 - `docs/` — concise product and architecture sources of truth.
 - `docker-compose.yml` — local PostgreSQL only.
@@ -28,6 +28,7 @@ Use the relevant workspace check while changing it. Before handoff for cross-wor
 pnpm lint
 pnpm typecheck
 pnpm test
+pnpm --filter @parkcore/web test:e2e
 pnpm contract:check
 pnpm build
 ```

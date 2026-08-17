@@ -23,6 +23,20 @@ describe('CheckInPanel', () => {
       expect(onSubmit).toHaveBeenCalledWith({ plate: 'AB123CD', type: 'MOTORCYCLE' });
     });
   });
+
+  it('rejects a plate that remains invalid after normalization', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(<CheckInPanel onSubmit={onSubmit} />);
+
+    await user.type(screen.getByLabelText('Plate'), 'a-1');
+    await user.click(screen.getByRole('button', { name: 'Start session' }));
+
+    expect((await screen.findByRole('alert')).textContent).toContain(
+      'Use 4 to 10 alphanumeric characters.',
+    );
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
 });
 
 describe('OccupancyMeter', () => {

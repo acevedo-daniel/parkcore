@@ -24,7 +24,7 @@
     "docker:logs": "docker compose logs -f",
     "docker:ps": "docker compose ps",
     "db:setup": "pnpm --filter @parkcore/api db:setup",
-    "release:readiness": "pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm contract:check && pnpm build"
+    "release:readiness": "pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm contract:check && pnpm build && pnpm --filter @parkcore/web test:e2e"
   },
   "devDependencies": {
     "prettier": "3.9.6"

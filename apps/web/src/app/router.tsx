@@ -3,8 +3,8 @@ import { createBrowserRouter, Outlet } from 'react-router';
 import { OwnerLayout } from '../components/layout/owner-layout.js';
 import { PublicLayout } from '../components/layout/public-layout.js';
 import { RequireAuthentication } from '../routes/auth/auth-guard.js';
+import { OwnerNotFoundRoute } from '../routes/owner/owner-not-found-route.js';
 import { OwnerRouteErrorBoundary, PublicRouteErrorBoundary } from '../routes/route-boundaries.js';
-import { RoutePending } from '../routes/route-pending.js';
 
 export const router = createBrowserRouter([
   {
@@ -124,7 +124,7 @@ export const router = createBrowserRouter([
                     .OwnerProfileRoute,
                 }),
               },
-              { path: '*', element: <RoutePending title="Route unavailable" /> },
+              { path: '*', element: <OwnerNotFoundRoute /> },
             ],
           },
         ],

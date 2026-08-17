@@ -20,7 +20,7 @@ const parkingFormSchema = z.object({
 
 type ParkingFormValues = z.infer<typeof parkingFormSchema>;
 
-function defaults(parking?: Parking): ParkingFormValues {
+function defaults(parking?: Parking) {
   return {
     address: parking?.address ?? '',
     capacity: parking?.capacity ?? 1,
@@ -28,8 +28,8 @@ function defaults(parking?: Parking): ParkingFormValues {
     hourlyRate: parking ? parking.hourlyRateCents / 100 : 1,
     image: parking?.image ?? '',
     isActive: parking?.isActive ?? true,
-    lat: parking?.lat ?? 0,
-    lng: parking?.lng ?? 0,
+    lat: parking?.lat,
+    lng: parking?.lng,
     title: parking?.title ?? '',
   };
 }
@@ -109,6 +109,7 @@ export function ParkingForm({
           <Field error={form.formState.errors.lat?.message} htmlFor="parking-lat" label="Latitude">
             <Input
               id="parking-lat"
+              required
               step="any"
               type="number"
               {...form.register('lat', { valueAsNumber: true })}
@@ -117,6 +118,7 @@ export function ParkingForm({
           <Field error={form.formState.errors.lng?.message} htmlFor="parking-lng" label="Longitude">
             <Input
               id="parking-lng"
+              required
               step="any"
               type="number"
               {...form.register('lng', { valueAsNumber: true })}

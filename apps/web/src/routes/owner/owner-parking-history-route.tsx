@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 
 import { SessionHistoryRow } from '../../components/domain/session.js';
 import { Button } from '../../components/ui/button.js';
@@ -16,13 +15,24 @@ type SessionFilter = 'ALL' | ParkingSession['status'];
 
 export function OwnerParkingHistoryRoute() {
   const { parkingId } = useParams();
-  const [filter, setFilter] = useState<SessionFilter>('ALL');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawPage = Number(searchParams.get('page'));
+  const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+  const rawStatus = searchParams.get('status');
+  const filter: SessionFilter =
+    rawStatus === 'ACTIVE' || rawStatus === 'COMPLETED' || rawStatus === 'CANCELLED'
+      ? rawStatus
+      : 'ALL';
   const parkingsQuery = useQuery({ queryKey: ['owned-parkings'], queryFn: getOwnedParkings });
   const parking = parkingsQuery.data?.find((item) => item.id === parkingId);
   const sessionsQuery = useQuery({
     enabled: Boolean(parkingId),
-    queryKey: ['parking-sessions', parkingId, filter],
-    queryFn: () => getParkingSessions(parkingId ?? '', filter === 'ALL' ? undefined : filter),
+    queryKey: ['parking-sessions', parkingId, filter, page],
+    queryFn: () =>
+      getParkingSessions(parkingId ?? '', {
+        page,
+        ...(filter === 'ALL' ? {} : { status: filter }),
+      }),
     placeholderData: (previousData) => previousData,
   });
 
@@ -49,6 +59,16 @@ export function OwnerParkingHistoryRoute() {
     );
   }
   const sessions = sessionsQuery.data?.data ?? [];
+  const pagination = sessionsQuery.data?.meta;
+
+  const updateSearch = (next: { page?: number; status?: SessionFilter }) => {
+    const params = new URLSearchParams(searchParams);
+    if (next.status === undefined || next.status === 'ALL') params.delete('status');
+    else params.set('status', next.status);
+    if (next.page === undefined || next.page <= 1) params.delete('page');
+    else params.set('page', String(next.page));
+    setSearchParams(params);
+  };
 
   return (
     <section className="owner-page stack-owner" aria-labelledby="history-title">
@@ -69,7 +89,7 @@ export function OwnerParkingHistoryRoute() {
             id="session-status"
             value={filter}
             onChange={(event) => {
-              setFilter(event.target.value as SessionFilter);
+              updateSearch({ page: 1, status: event.target.value as SessionFilter });
             }}
           >
             <option value="ALL">All sessions</option>
@@ -106,6 +126,33 @@ export function OwnerParkingHistoryRoute() {
           ))}
         </div>
       )}
+      {pagination ? (
+        <nav aria-label="Session history pagination" className="pagination-controls">
+          <Button
+            disabled={!pagination.hasPreviousPage}
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              updateSearch({ page: pagination.page - 1, status: filter });
+            }}
+          >
+            Previous
+          </Button>
+          <span className="type-operational" aria-live="polite">
+            Page {pagination.page} of {pagination.totalPages}
+          </span>
+          <Button
+            disabled={!pagination.hasNextPage}
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              updateSearch({ page: pagination.page + 1, status: filter });
+            }}
+          >
+            Next
+          </Button>
+        </nav>
+      ) : null}
     </section>
   );
 }
