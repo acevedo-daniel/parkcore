@@ -93,7 +93,9 @@ export function ParkingListItem({ activeSessions, identifier, parking, to }: Par
         {available === undefined ? (
           <span className="type-small">Capacity {parking.capacity}</span>
         ) : (
-          <span className="type-operational">{available} free</span>
+          <span className="type-operational">
+            {activeSessions} / {parking.capacity} occupied
+          </span>
         )}
         <ArrowUpRight aria-hidden="true" size={18} />
       </div>

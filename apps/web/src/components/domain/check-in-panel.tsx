@@ -75,6 +75,9 @@ export function CheckInPanel({
           {...register('plate')}
         />
       </Field>
+      <p className="field-help">
+        Plates are normalized. Known vehicles are reused within this parking.
+      </p>
       <div className="form-divider">
         <span className="type-label">Vehicle</span>
       </div>
