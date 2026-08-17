@@ -52,6 +52,8 @@ export function OwnerOverviewRoute() {
             activeSessionCount={activeSessionCount}
             identifier={index + 1}
             key={parking.id}
+            occupancyError={parkings[index]?.occupancyError}
+            occupancyLoading={parkings[index]?.occupancyLoading}
             parking={parking}
           />
         ))}

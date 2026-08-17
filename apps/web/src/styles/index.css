@@ -819,6 +819,7 @@ textarea.control {
 
 .owner-main {
   width: min(100%, var(--owner-content-max));
+  margin: 0 auto;
   padding: var(--space-8);
 }
 
@@ -876,7 +877,15 @@ textarea.control {
     display: none;
   }
   .public-mobile-nav {
-    display: block;
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+  }
+  .public-menu-trigger {
+    display: inline-grid;
+    visibility: visible;
+    border-color: var(--public-border-strong);
+    color: var(--public-foreground);
   }
   .public-main {
     width: min(calc(100% - (var(--mobile-gutter) * 2)), var(--public-content-max));
@@ -1239,6 +1248,12 @@ textarea.control {
 .owner-list-link {
   width: fit-content;
 }
+.query-status {
+  color: var(--foreground-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.05em;
+}
 .owner-list-skeleton,
 .owner-form-skeleton,
 .owner-overview-skeleton {
@@ -1339,10 +1354,9 @@ textarea.control {
 }
 .session-history-row {
   display: grid;
-  grid-template-columns: minmax(110px, 1fr) minmax(110px, 1fr) minmax(72px, 0.65fr) minmax(
-      106px,
-      0.8fr
-    ) minmax(92px, 0.7fr) auto;
+  grid-template-columns:
+    minmax(110px, 1fr) minmax(110px, 1fr) minmax(72px, 0.65fr) minmax(106px, 0.8fr)
+    minmax(92px, 0.7fr) auto;
   align-items: center;
   gap: var(--space-4);
   border-bottom: 1px solid var(--owner-border);
@@ -1426,6 +1440,23 @@ textarea.control {
   .catalog-filters .field:first-child {
     grid-column: 1 / -1;
   }
+  .owner-main {
+    padding: var(--space-6);
+  }
+  .owner-parking-panel-data {
+    grid-template-columns: auto minmax(150px, 1fr) auto;
+  }
+  .owner-parking-panel-data .rate-display {
+    grid-column: 2 / -1;
+  }
+  .session-history-row {
+    grid-template-columns:
+      minmax(96px, 1fr) minmax(104px, 1fr) minmax(68px, 0.55fr) minmax(100px, 0.7fr)
+      auto;
+  }
+  .session-history-row > :nth-child(5) {
+    display: none;
+  }
 }
 
 @media (max-width: 767px) {
@@ -1482,6 +1513,12 @@ textarea.control {
   .owner-operation-actions {
     align-items: stretch;
     flex-direction: column;
+    position: sticky;
+    bottom: 72px;
+    z-index: 12;
+    margin: 0 calc(var(--mobile-gutter) * -1);
+    background: var(--owner-surface-raised);
+    padding: var(--space-3) var(--mobile-gutter);
   }
   .owner-header-actions {
     align-items: center;
@@ -1511,6 +1548,13 @@ textarea.control {
   }
   .session-history-row > svg {
     display: none;
+  }
+  .session-history-row > :nth-child(5) {
+    display: inline;
+  }
+  .sheet-content {
+    width: 100vw;
+    padding: var(--space-4);
   }
   .session-detail-header,
   .session-detail-actions {

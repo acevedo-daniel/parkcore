@@ -23,13 +23,23 @@ export function OwnerParkingHistoryRoute() {
     enabled: Boolean(parkingId),
     queryKey: ['parking-sessions', parkingId, filter],
     queryFn: () => getParkingSessions(parkingId ?? '', filter === 'ALL' ? undefined : filter),
+    placeholderData: (previousData) => previousData,
   });
 
   if (parkingsQuery.isLoading || sessionsQuery.isLoading) {
     return <Skeleton className="owner-list-skeleton" />;
   }
   if (parkingsQuery.isError || sessionsQuery.isError || !parkingId) {
-    return <ErrorState>We could not load this parking history.</ErrorState>;
+    return (
+      <ErrorState
+        onRetry={() => {
+          void parkingsQuery.refetch();
+          void sessionsQuery.refetch();
+        }}
+      >
+        We could not load this parking history.
+      </ErrorState>
+    );
   }
   if (!parking) {
     return (
@@ -78,6 +88,11 @@ export function OwnerParkingHistoryRoute() {
           Refresh
         </Button>
       </div>
+      {sessionsQuery.isFetching ? (
+        <p className="query-status" role="status">
+          Refreshing history…
+        </p>
+      ) : null}
       {sessions.length === 0 ? (
         <EmptyState title="No sessions found">Try a different status filter.</EmptyState>
       ) : (

@@ -22,7 +22,15 @@ export function OwnerEditParkingRoute() {
 
   if (parkingsQuery.isLoading) return <Skeleton className="owner-form-skeleton" />;
   if (parkingsQuery.isError || !parkingId)
-    return <ErrorState>We could not load this parking.</ErrorState>;
+    return (
+      <ErrorState
+        onRetry={() => {
+          void parkingsQuery.refetch();
+        }}
+      >
+        We could not load this parking.
+      </ErrorState>
+    );
   const parking = parkingsQuery.data?.find((item) => item.id === parkingId);
   if (!parking)
     return (

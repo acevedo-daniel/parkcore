@@ -17,6 +17,8 @@ export function useOwnedParkingOperations() {
   const parkings = (parkingsQuery.data ?? []).map((parking, index) => ({
     activeSessionCount: activeSessionQueries[index]?.data?.length,
     activeSessions: activeSessionQueries[index]?.data,
+    occupancyError: activeSessionQueries[index]?.isError ?? false,
+    occupancyLoading: activeSessionQueries[index]?.isLoading ?? true,
     parking,
   }));
 

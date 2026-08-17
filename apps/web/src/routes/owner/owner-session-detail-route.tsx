@@ -38,7 +38,16 @@ export function OwnerSessionDetailRoute() {
     return <Skeleton className="owner-overview-skeleton" />;
   }
   if (sessionQuery.isError || !sessionId) {
-    return <ErrorState>We could not load this session.</ErrorState>;
+    return (
+      <ErrorState
+        onRetry={() => {
+          void sessionQuery.refetch();
+          void parkingsQuery.refetch();
+        }}
+      >
+        We could not load this session.
+      </ErrorState>
+    );
   }
   const session = sessionQuery.data;
   if (!session) return null;

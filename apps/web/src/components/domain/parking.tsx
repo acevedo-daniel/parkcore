@@ -75,11 +75,18 @@ export function OccupancyMeter({ active, capacity }: { active: number; capacity:
 interface ParkingListItemProps {
   activeSessions?: number;
   identifier?: number;
+  occupancyUnavailable?: boolean;
   parking: Parking;
   to: string;
 }
 
-export function ParkingListItem({ activeSessions, identifier, parking, to }: ParkingListItemProps) {
+export function ParkingListItem({
+  activeSessions,
+  identifier,
+  occupancyUnavailable = false,
+  parking,
+  to,
+}: ParkingListItemProps) {
   const available =
     activeSessions === undefined ? undefined : Math.max(0, parking.capacity - activeSessions);
   return (
@@ -90,7 +97,9 @@ export function ParkingListItem({ activeSessions, identifier, parking, to }: Par
       <div className="parking-list-metrics">
         <ParkingStatus isActive={parking.isActive} />
         <RateDisplay currency={parking.currency} hourlyRateCents={parking.hourlyRateCents} />
-        {available === undefined ? (
+        {occupancyUnavailable ? (
+          <span className="type-small">Occupancy unavailable</span>
+        ) : available === undefined ? (
           <span className="type-small">Capacity {parking.capacity}</span>
         ) : (
           <span className="type-operational">

@@ -30,6 +30,7 @@ export function ParkingCatalogRoute() {
   const parkingQuery = useQuery({
     queryKey: ['public-parkings', query],
     queryFn: () => getPublicParkings(query),
+    placeholderData: (previousData) => previousData,
   });
 
   const applyFilters = (event: SyntheticEvent<HTMLFormElement>) => {
@@ -91,6 +92,11 @@ export function ParkingCatalogRoute() {
         <Button type="submit">Apply filters</Button>
       </form>
       {parkingQuery.isLoading ? <CatalogSkeleton /> : null}
+      {parkingQuery.isFetching && !parkingQuery.isLoading ? (
+        <p className="query-status" role="status">
+          Refreshing parkings…
+        </p>
+      ) : null}
       {parkingQuery.isError ? (
         <ErrorState
           onRetry={() => {

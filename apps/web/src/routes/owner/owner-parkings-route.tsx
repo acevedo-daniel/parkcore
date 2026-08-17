@@ -30,6 +30,11 @@ export function OwnerParkingsRoute() {
           Create parking
         </Link>
       </header>
+      {parkingsQuery.isFetching ? (
+        <p className="query-status" role="status">
+          Refreshing parkings…
+        </p>
+      ) : null}
       {parkings.length === 0 ? (
         <EmptyState
           action={
@@ -43,11 +48,12 @@ export function OwnerParkingsRoute() {
         </EmptyState>
       ) : (
         <div className="owner-parking-list">
-          {parkings.map(({ activeSessionCount, parking }, index) => (
+          {parkings.map(({ activeSessionCount, occupancyError, parking }, index) => (
             <ParkingListItem
               activeSessions={activeSessionCount}
               identifier={index + 1}
               key={parking.id}
+              occupancyUnavailable={occupancyError}
               parking={parking}
               to={`/app/parkings/${parking.id}`}
             />

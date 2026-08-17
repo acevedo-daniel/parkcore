@@ -37,7 +37,15 @@ export function OwnerParkingOverviewRoute() {
 
   if (parkingsQuery.isLoading) return <Skeleton className="owner-overview-skeleton" />;
   if (parkingsQuery.isError || !parkingId)
-    return <ErrorState>We could not load this parking.</ErrorState>;
+    return (
+      <ErrorState
+        onRetry={() => {
+          void parkingsQuery.refetch();
+        }}
+      >
+        We could not load this parking.
+      </ErrorState>
+    );
   if (!parking)
     return (
       <ErrorState title="Parking unavailable">
@@ -101,6 +109,11 @@ export function OwnerParkingOverviewRoute() {
             <History aria-hidden="true" size={16} /> History
           </Link>
         </header>
+        {activeSessionsQuery.isFetching && !activeSessionsQuery.isLoading ? (
+          <p className="query-status" role="status">
+            Refreshing active sessions…
+          </p>
+        ) : null}
         {activeSessionsQuery.isLoading ? (
           <Skeleton className="owner-list-skeleton" />
         ) : activeSessionsQuery.isError ? (
@@ -112,7 +125,18 @@ export function OwnerParkingOverviewRoute() {
             We could not load active sessions.
           </ErrorState>
         ) : activeSessions?.length === 0 ? (
-          <EmptyState title="No active sessions">
+          <EmptyState
+            action={
+              <Button
+                onClick={() => {
+                  setCheckInOpen(true);
+                }}
+              >
+                Check in vehicle
+              </Button>
+            }
+            title="No active sessions"
+          >
             Check in a vehicle to begin operations.
           </EmptyState>
         ) : (
