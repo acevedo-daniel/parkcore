@@ -35,7 +35,7 @@ describe('env config', () => {
     const module = await import('./env.js');
 
     expect(module.env.NODE_ENV).toBe('production');
-    expect(module.env.CORS_ORIGINS).toContain('parkcore.app');
+    expect(module.env.CORS_ORIGINS).toEqual(['https://parkcore.app', 'https://admin.parkcore.app']);
     expect(module.env.JWT_EXPIRES_IN).toBe('1h');
     expect(module.env.LOG_PRETTY).toBe(false);
   });
@@ -57,6 +57,24 @@ describe('env config', () => {
       NODE_ENV: 'production',
     });
     delete process.env.CORS_ORIGINS;
+
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const exitSpy = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((code?: number | string | null): never => {
+        throw new Error(`process.exit:${String(code ?? '')}`);
+      });
+
+    await expect(import('./env.js')).rejects.toThrow('process.exit:1');
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(errorSpy).toHaveBeenCalledWith('Invalid environment variables:');
+  });
+
+  it('fails fast when CORS_ORIGINS is malformed', async () => {
+    setRequiredEnv({
+      NODE_ENV: 'production',
+      CORS_ORIGINS: 'https://web.example.test/path',
+    });
 
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const exitSpy = vi

@@ -3,9 +3,10 @@ import express from 'express';
 import helmet from 'helmet';
 
 import { mountApiDocs } from './src/config/api-docs.js';
+import { createCorsOriginValidator } from './src/config/cors.js';
 import { env } from './src/config/env.js';
 import { generateOpenApiDocument } from './src/config/openapi.js';
-import { ForbiddenError, NotFoundError } from './src/errors/index.js';
+import { NotFoundError } from './src/errors/index.js';
 import { errorHandler } from './src/middlewares/error-handler.middleware.js';
 import { requestLogger } from './src/middlewares/logger.middleware.js';
 
@@ -20,31 +21,8 @@ app.set('trust proxy', 1);
 app.use(requestLogger);
 app.use(helmet());
 
-const corsOrigins = new Set(
-  env.CORS_ORIGINS?.split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean) ?? [],
-);
-
 const corsOptions: CorsOptions = {
-  origin: (origin, callback) => {
-    if (!origin) {
-      callback(null, true);
-      return;
-    }
-
-    if (env.NODE_ENV !== 'production') {
-      callback(null, true);
-      return;
-    }
-
-    if (corsOrigins.has(origin)) {
-      callback(null, true);
-      return;
-    }
-
-    callback(new ForbiddenError('CORS origin not allowed'));
-  },
+  origin: createCorsOriginValidator(env.NODE_ENV, env.CORS_ORIGINS),
 };
 
 app.use(cors(corsOptions));

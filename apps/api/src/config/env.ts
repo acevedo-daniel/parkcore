@@ -1,5 +1,17 @@
 import { z } from 'zod';
 
+const parseCorsOrigins = (value: string | undefined): string[] =>
+  value?.split(',').map((origin) => origin.trim()) ?? [];
+
+const isHttpOrigin = (value: string): boolean => {
+  try {
+    const url = new URL(value);
+    return (url.protocol === 'http:' || url.protocol === 'https:') && url.origin === value;
+  } catch {
+    return false;
+  }
+};
+
 const envBooleanSchema = z
   .preprocess(
     (value) => (typeof value === 'string' ? value.trim().toLowerCase() : value),
@@ -15,7 +27,6 @@ const envSchema = z
       .enum(['development', 'production', 'test'], { error: 'Invalid NODE_ENV' })
       .default('development'),
     PORT: z.coerce.number({ error: 'Invalid PORT' }).default(3000),
-    API_BASE_URL: z.url({ error: 'Invalid URL' }).optional(),
     ENABLE_API_DOCS: envBooleanSchema.default(false),
     CORS_ORIGINS: z.string().optional(),
     DATABASE_URL: z.string({ error: 'Required' }).min(1, { error: 'Required' }),
@@ -33,24 +44,23 @@ const envSchema = z
       .default(15 * 60 * 1000),
   })
   .superRefine((value, ctx) => {
-    if (value.NODE_ENV !== 'production') {
-      return;
-    }
+    const corsOrigins = parseCorsOrigins(value.CORS_ORIGINS);
 
-    const hasCorsOrigins = Boolean(
-      value.CORS_ORIGINS?.split(',')
-        .map((origin) => origin.trim())
-        .filter(Boolean).length,
-    );
-
-    if (!hasCorsOrigins) {
+    if (value.CORS_ORIGINS !== undefined && corsOrigins.some((origin) => !isHttpOrigin(origin))) {
       ctx.addIssue({
         code: 'custom',
         path: ['CORS_ORIGINS'],
-        message: 'Required in production',
+        message: 'Must be comma-separated HTTP(S) origins without paths or trailing slashes',
       });
     }
-  });
+    if (value.NODE_ENV === 'production' && corsOrigins.length === 0) {
+      ctx.addIssue({ code: 'custom', path: ['CORS_ORIGINS'], message: 'Required in production' });
+    }
+  })
+  .transform((value) => ({
+    ...value,
+    CORS_ORIGINS: parseCorsOrigins(value.CORS_ORIGINS),
+  }));
 
 const parsed = envSchema.safeParse(process.env);
 

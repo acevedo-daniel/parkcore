@@ -59,6 +59,7 @@ pnpm release:readiness
 
 ## Documentation
 
+- [Development](docs/DEVELOPMENT.md) — local setup and API/web environment configuration.
 - [Project](docs/PROJECT.md) — product scope and permanent domain rules.
 - [Architecture](docs/ARCHITECTURE.md) — workspace boundaries and technical structure.
 - [API reference](http://localhost:3000/docs) — endpoint contract while the API is running.
