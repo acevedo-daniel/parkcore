@@ -2,66 +2,57 @@
 
 ## Summary
 
-ParkCore is a single Node.js HTTP service for owner-operated parking facilities. It exposes an Express API, persists data in PostgreSQL through Prisma, and publishes its endpoint contract as generated OpenAPI.
+ParkCore is a pnpm workspace monorepo. It keeps the API independently deployable, gives the frontend a small modern foundation, and makes the published OpenAPI document the sole contract bridge between them.
 
 ```mermaid
 flowchart LR
-    P[Public visitor] --> API[ParkCore API]
-    O[Parking owner] --> API
-    API --> DB[(PostgreSQL)]
-    API --> DOCS[OpenAPI and Scalar]
+    W[apps/web] --> C[packages/api-client]
+    C --> O[apps/api/openapi.json]
+    O --> A[apps/api]
+    A --> D[(PostgreSQL)]
 ```
 
-## Components
+## Workspace boundaries
 
-| Component               | Responsibility                                                   | Technology             |
-| ----------------------- | ---------------------------------------------------------------- | ---------------------- |
-| HTTP application        | Middleware, route mounting, OpenAPI reference, and global errors | Express 5              |
-| Feature modules         | HTTP transport, business rules, and persistence access           | TypeScript             |
-| Validation and contract | Zod parsing and OpenAPI registration                             | Zod and zod-to-openapi |
-| Persistence             | Relational data and forward migrations                           | PostgreSQL and Prisma  |
-| Authentication          | Password hashing and bearer-token verification                   | Argon2 and jose        |
+| Workspace             | Owns                                                                         | Must not own                               |
+| --------------------- | ---------------------------------------------------------------------------- | ------------------------------------------ |
+| `apps/api`            | HTTP API, domain rules, Prisma persistence, OpenAPI registrations, API tests | Browser UI or frontend state               |
+| `apps/web`            | Browser routing, providers, user interface, server-state consumption         | API internals, Prisma, duplicate HTTP DTOs |
+| `packages/api-client` | Generated contract types and typed fetch-client construction                 | Domain rules, token storage, React UI      |
 
-## Request and Response Flow
+The web app consumes the API only through `@parkcore/api-client`. The client injects bearer authentication through a caller-provided callback; it does not choose or persist browser token storage.
+
+## API internals
+
+The API keeps its dependency flow:
 
 ```text
-HTTP request
-  -> middleware
-  -> route
-  -> controller parses params/query/body with Zod
-  -> service enforces authorization and business rules
-  -> repository performs Prisma operations
-  -> explicit response mapper produces JSON contract
-  -> global error handler returns the standard error contract
+route -> controller -> service -> repository -> Prisma
 ```
 
-Express requests are untrusted transport. Controllers use ordinary `Request` and parse inputs with colocated Zod schemas. Services do not expose Prisma models as HTTP responses: `toUserResponse`, `toParkingResponse`, and `toParkingSessionResponse` produce explicit contracts.
+Express requests are untrusted transport. Controllers parse params, query, and body with colocated Zod schemas; services enforce authorization and business rules; repositories perform Prisma operations. Explicit response mappers produce the JSON/OpenAPI contract, including ISO-8601 timestamps.
 
-All wire timestamps are ISO-8601 `date-time` strings. OpenAPI describes the JSON contract, not JavaScript `Date` objects.
+PostgreSQL is the persistence source of truth. Prisma schema changes use forward migrations only. Prisma generated output is ignored by Git and generated explicitly during API build or database setup.
 
-## Data
+## Contract flow
 
-- **Source of truth:** PostgreSQL through the Prisma schema and forward migrations.
-- **Generated client:** generated during install and build; ignored by Git.
-- **Models:** `User`, `Parking`, `Vehicle`, and `ParkingSession`.
-- **Vehicle:** parking-scoped stable identity and metadata only.
-- **ParkingSession:** visit data, vehicle summary in responses, status, and immutable pricing snapshot.
-- **Money:** integer cents and the explicitly supported `USD` currency.
-- **Concurrency:** check-in runs serializably; a partial unique index prevents duplicate active parking/vehicle sessions. Checkout and cancellation use conditional `ACTIVE` updates.
+```text
+OpenAPI registrations in apps/api
+  -> pnpm --filter @parkcore/api generate:openapi
+  -> apps/api/openapi.json
+  -> pnpm --filter @parkcore/api-client generate
+  -> packages/api-client/src/generated/schema.ts
+  -> typed openapi-fetch consumer
+```
 
-## Security Boundaries
+Both generated contract artifacts are versioned. `pnpm contract:check` regenerates them and fails on a diff, so contract changes are reviewed together with the API implementation.
 
-- **Authentication:** JWT bearer tokens identify the owner/operator.
-- **Authorization:** services verify ownership of a parking or parking session. Vehicle access happens only through owner-authorized check-in.
-- **Sensitive data:** passwords are Argon2 hashes and are excluded from responses; logs redact passwords, tokens, and authorization headers.
-- **Transport protection:** Helmet, production CORS allowlisting, request-size limits, and rate limiting protect the API boundary.
+## Frontend foundation
 
-## Local Development
+`apps/web` uses Vite, React, React Compiler, React Router Data Mode, TanStack Query, and Tailwind 4. It intentionally has only an application provider, router, neutral route, and global style baseline. Product features, design system components, authentication storage, and screens are deferred until there is a real frontend requirement.
 
-Docker Compose starts a single PostgreSQL container named `parkcore-db`, backed by the `parkcore-data` volume. The API runs from the host; it is not a Compose service.
+## Local development and CI
 
-## Constraints
+Root Docker Compose runs a local `parkcore-db` PostgreSQL container only. API and web processes run with root pnpm orchestration and retain independent workspace scripts.
 
-- The API has no legacy route aliases or standalone Vehicle routes.
-- OpenAPI is the endpoint-level source of truth and its health check guards the complete active route surface.
-- Historical migrations are retained and never edited after application.
+CI has separate API, web, and contract jobs. The API job provisions PostgreSQL and runs API-specific quality/readiness checks; web checks do not boot a database; the contract job detects generated-type drift.

@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality-and-readiness:
+  api:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -51,10 +51,56 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Database bootstrap check
-        run: pnpm db:setup
+        run: pnpm --filter @parkcore/api db:setup
 
-      - name: Pipeline checks
-        run: pnpm quality:ci
+      - name: API quality checks
+        run: pnpm --filter @parkcore/api quality:ci
 
-      - name: Build and release readiness checks
-        run: pnpm release:readiness
+      - name: API build and release readiness checks
+        run: pnpm --filter @parkcore/api release:readiness
+
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Frontend checks
+        run: pnpm --filter @parkcore/web lint && pnpm --filter @parkcore/web typecheck && pnpm --filter @parkcore/web test && pnpm --filter @parkcore/web build
+
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify generated API contract
+        run: pnpm contract:check

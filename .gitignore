@@ -2,10 +2,8 @@
 node_modules/
 
 # Environment
-.env
-
-# Allow env
-!.env.example
+**/.env
+!**/.env.example
 
 # Logs
 npm-debug.log*
@@ -23,14 +21,12 @@ yarn-error.log*
 Thumbs.db
 
 # Build
-dist/
-coverage/
-prisma/generated/
+**/dist/
+**/coverage/
+apps/api/prisma/generated/
 
 # Legacy agent context
 .agent/
-AGENTS.md
-
 # Local docs (do not publish)
 docs/local/
 docs/references/

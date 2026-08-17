@@ -1,16 +1,15 @@
 # Build outputs
-dist/
-build/
-coverage/
+**/dist/
+**/build/
+**/coverage/
 
 # Dependencies
 node_modules/
 
 # Generated
-prisma/generated/
+apps/api/prisma/generated/
 *.d.ts
 
 # Misc
-.env
-.env.*
-pnpm-lock.yaml
+**/.env
+**/.env.*

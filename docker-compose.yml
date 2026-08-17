@@ -6,15 +6,15 @@ services:
     container_name: parkcore-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: parkcore
+      POSTGRES_PASSWORD: parkcore
+      POSTGRES_DB: parkcore-db
     ports:
       - '5432:5432'
     volumes:
       - parkcore-data:/var/lib/postgresql
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      test: ['CMD-SHELL', 'pg_isready -U parkcore -d parkcore-db']
       interval: 10s
       timeout: 5s
       retries: 5

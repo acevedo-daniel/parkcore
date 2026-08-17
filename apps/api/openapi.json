@@ -1,0 +1,1927 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ParkCore API",
+    "version": "1.0.0",
+    "description": "Backend API for parking facility management. API-first solution with strict typing and validation.",
+    "contact": {
+      "name": "Daniel Acevedo",
+      "url": "https://github.com/acevedo-daniel"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development"
+    },
+    {
+      "url": "https://parkcore-api.onrender.com",
+      "description": "Production"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authentication endpoints"
+    },
+    {
+      "name": "Parkings",
+      "description": "Parking lot management"
+    },
+    {
+      "name": "Parking Sessions",
+      "description": "Vehicle stay lifecycle"
+    },
+    {
+      "name": "User",
+      "description": "User profile management"
+    },
+    {
+      "name": "System",
+      "description": "Operational endpoints"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token obtained from /auth/login"
+      }
+    },
+    "schemas": {
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserResponse"
+          },
+          "accessToken": {
+            "type": "string",
+            "description": "JWT access token",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        },
+        "required": [
+          "user",
+          "accessToken"
+        ],
+        "additionalProperties": false
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "User UUID"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User email address"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "First name"
+          },
+          "lastName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Last name"
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Phone number"
+          },
+          "photoUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Profile photo URL"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update time"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "lastName",
+          "phone",
+          "photoUrl",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User email address",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 100,
+            "description": "Password",
+            "example": "Str0ngP@ssw0rd!"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "description": "User display name",
+            "example": "John Doe"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "additionalProperties": false
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User email address",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 100,
+            "description": "Password",
+            "example": "Str0ngP@ssw0rd!"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "additionalProperties": false
+      },
+      "ParkingSessionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parking session UUID"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Check-in time"
+          },
+          "endTime": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Check-out time"
+          },
+          "hourlyRateCents": {
+            "type": "integer",
+            "description": "Hourly rate snapshot in integer cents"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD"
+            ],
+            "description": "Supported currency snapshot",
+            "example": "USD"
+          },
+          "totalAmountCents": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Final amount in integer cents; present after checkout"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "COMPLETED",
+              "CANCELLED"
+            ],
+            "description": "Parking session status"
+          },
+          "parkingId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parking UUID"
+          },
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Vehicle UUID"
+          },
+          "customerName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Visitor name for this stay"
+          },
+          "customerPhone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Visitor phone for this stay"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Operational notes for this stay"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update time"
+          },
+          "vehicle": {
+            "$ref": "#/components/schemas/VehicleSummary"
+          }
+        },
+        "required": [
+          "id",
+          "startTime",
+          "endTime",
+          "hourlyRateCents",
+          "currency",
+          "totalAmountCents",
+          "status",
+          "parkingId",
+          "vehicleId",
+          "customerName",
+          "customerPhone",
+          "notes",
+          "createdAt",
+          "updatedAt",
+          "vehicle"
+        ],
+        "additionalProperties": false
+      },
+      "VehicleSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Vehicle UUID"
+          },
+          "plate": {
+            "type": "string",
+            "description": "Normalized parking-scoped plate"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "CAR",
+              "MOTORCYCLE",
+              "LARGE"
+            ],
+            "description": "Vehicle type"
+          },
+          "brand": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Vehicle brand"
+          },
+          "model": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Vehicle model"
+          }
+        },
+        "required": [
+          "id",
+          "plate",
+          "type",
+          "brand",
+          "model"
+        ],
+        "additionalProperties": false
+      },
+      "CheckInRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/VehicleIdentityInput"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "customerName": {
+                "type": "string",
+                "maxLength": 100,
+                "description": "Visitor name for this stay",
+                "example": "Jane Doe"
+              },
+              "customerPhone": {
+                "type": "string",
+                "maxLength": 20,
+                "description": "Visitor phone for this stay",
+                "example": "+1234567890"
+              },
+              "notes": {
+                "type": "string",
+                "maxLength": 500,
+                "description": "Operational notes for this stay",
+                "example": "Scratch on left door"
+              }
+            },
+            "additionalProperties": false
+          }
+        ]
+      },
+      "VehicleIdentityInput": {
+        "type": "object",
+        "properties": {
+          "plate": {
+            "type": "string",
+            "description": "Vehicle license plate; normalized to uppercase alphanumeric characters",
+            "example": "AB123CD"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "CAR",
+              "MOTORCYCLE",
+              "LARGE"
+            ],
+            "description": "Vehicle type",
+            "example": "CAR"
+          },
+          "brand": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "Vehicle brand",
+            "example": "Toyota"
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 50,
+            "description": "Vehicle model",
+            "example": "Corolla"
+          }
+        },
+        "required": [
+          "plate"
+        ],
+        "additionalProperties": false
+      },
+      "ParkingSessionListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParkingSessionResponse"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "description": "Current page number",
+                "example": 1
+              },
+              "limit": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "description": "Items per page",
+                "example": 10
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Total items",
+                "example": 50
+              },
+              "totalPages": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Total pages",
+                "example": 5
+              },
+              "hasNextPage": {
+                "type": "boolean",
+                "description": "Has next page",
+                "example": true
+              },
+              "hasPreviousPage": {
+                "type": "boolean",
+                "description": "Has previous page",
+                "example": false
+              }
+            },
+            "required": [
+              "page",
+              "limit",
+              "total",
+              "totalPages",
+              "hasNextPage",
+              "hasPreviousPage"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false
+      },
+      "ParkingResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parking UUID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Parking title"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Description"
+          },
+          "image": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Image URL"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address"
+          },
+          "hourlyRateCents": {
+            "type": "integer",
+            "description": "Hourly rate in integer cents"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD"
+            ],
+            "description": "Supported currency code"
+          },
+          "capacity": {
+            "type": "integer",
+            "description": "Maximum simultaneous active vehicle stays"
+          },
+          "lat": {
+            "type": "number",
+            "description": "Latitude"
+          },
+          "lng": {
+            "type": "number",
+            "description": "Longitude"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Is active"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Owner UUID"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Creation time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last update time"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "image",
+          "address",
+          "hourlyRateCents",
+          "currency",
+          "capacity",
+          "lat",
+          "lng",
+          "isActive",
+          "ownerId",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "CreateParkingRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 100,
+            "description": "Business name of the parking facility",
+            "example": "Central Parking"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Optional description of the facility"
+          },
+          "address": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 200,
+            "description": "Full street address",
+            "example": "123 Main Street"
+          },
+          "image": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL of the parking facility image",
+            "example": "https://example.com/parking.jpg"
+          },
+          "hourlyRateCents": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "description": "Hourly rate in integer cents",
+            "example": 1550
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD"
+            ],
+            "description": "Supported currency code",
+            "example": "USD"
+          },
+          "capacity": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "description": "Maximum simultaneous active vehicle stays",
+            "example": 100
+          },
+          "lat": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "description": "Geographic latitude",
+            "example": -34.6037
+          },
+          "lng": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "description": "Geographic longitude",
+            "example": -58.3816
+          }
+        },
+        "required": [
+          "title",
+          "address",
+          "hourlyRateCents",
+          "currency",
+          "capacity",
+          "lat",
+          "lng"
+        ],
+        "additionalProperties": false
+      },
+      "ParkingListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParkingResponse"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "description": "Current page number",
+                "example": 1
+              },
+              "limit": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "description": "Items per page",
+                "example": 10
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Total items",
+                "example": 50
+              },
+              "totalPages": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Total pages",
+                "example": 5
+              },
+              "hasNextPage": {
+                "type": "boolean",
+                "description": "Has next page",
+                "example": true
+              },
+              "hasPreviousPage": {
+                "type": "boolean",
+                "description": "Has previous page",
+                "example": false
+              }
+            },
+            "required": [
+              "page",
+              "limit",
+              "total",
+              "totalPages",
+              "hasNextPage",
+              "hasPreviousPage"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateParkingRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 100,
+            "description": "Business name of the parking facility",
+            "example": "Central Parking"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Optional description of the facility"
+          },
+          "address": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 200,
+            "description": "Full street address",
+            "example": "123 Main Street"
+          },
+          "image": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL of the parking facility image",
+            "example": "https://example.com/parking.jpg"
+          },
+          "hourlyRateCents": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "description": "Hourly rate in integer cents",
+            "example": 1550
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD"
+            ],
+            "description": "Supported currency code",
+            "example": "USD"
+          },
+          "capacity": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "description": "Maximum simultaneous active vehicle stays",
+            "example": 100
+          },
+          "lat": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "description": "Geographic latitude",
+            "example": -34.6037
+          },
+          "lng": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "description": "Geographic longitude",
+            "example": -58.3816
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the parking accepts check-ins"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/healthz": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Health Check",
+        "description": "Basic service health endpoint.",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Register",
+        "description": "User registration.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error (e.g. invalid email or password)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email taken",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login",
+        "description": "User authentication.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parkings/{parkingId}/sessions/check-in": {
+      "post": {
+        "tags": [
+          "Parking Sessions"
+        ],
+        "summary": "Check in a vehicle",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Parking UUID"
+            },
+            "required": true,
+            "description": "Parking UUID",
+            "name": "parkingId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckInRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Parking session created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParkingSessionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - not the owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parking not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict (vehicle already inside, parking full, or parking inactive)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/{sessionId}/check-out": {
+      "post": {
+        "tags": [
+          "Parking Sessions"
+        ],
+        "summary": "Check out a vehicle",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Parking session UUID"
+            },
+            "required": true,
+            "description": "Parking session UUID",
+            "name": "sessionId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parking session completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParkingSessionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - not the owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parking session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "This parking session is not active",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parkings/{parkingId}/sessions/active": {
+      "get": {
+        "tags": [
+          "Parking Sessions"
+        ],
+        "summary": "List active parking sessions",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Parking UUID"
+            },
+            "required": true,
+            "description": "Parking UUID",
+            "name": "parkingId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Active parking sessions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ParkingSessionResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - not the owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parking not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parkings/{parkingId}/sessions": {
+      "get": {
+        "tags": [
+          "Parking Sessions"
+        ],
+        "summary": "List parking sessions",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Parking UUID"
+            },
+            "required": true,
+            "description": "Parking UUID",
+            "name": "parkingId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "default": 1,
+              "description": "Page number",
+              "example": 1
+            },
+            "required": false,
+            "description": "Page number",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 100,
+              "default": 10,
+              "description": "Items per page",
+              "example": 10
+            },
+            "required": false,
+            "description": "Items per page",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "COMPLETED",
+                "CANCELLED"
+              ],
+              "description": "Filter by session status",
+              "example": "ACTIVE"
+            },
+            "required": false,
+            "description": "Filter by session status",
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parking sessions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParkingSessionListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - not the owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parking not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/{sessionId}": {
+      "get": {
+        "tags": [
+          "Parking Sessions"
+        ],
+        "summary": "Get a parking session",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Parking session UUID"
+            },
+            "required": true,
+            "description": "Parking session UUID",
+            "name": "sessionId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parking session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParkingSessionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - not the owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parking session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/{sessionId}/cancel": {
+      "patch": {
+        "tags": [
+          "Parking Sessions"
+        ],
+        "summary": "Cancel an active parking session",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Parking session UUID"
+            },
+            "required": true,
+            "description": "Parking session UUID",
+            "name": "sessionId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parking session cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParkingSessionResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - not the owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parking session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "This parking session is not active",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parkings": {
+      "post": {
+        "tags": [
+          "Parkings"
+        ],
+        "summary": "Create Parking",
+        "description": "Create a new parking facility.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateParkingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Parking facility created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParkingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Parkings"
+        ],
+        "summary": "List Parkings",
+        "description": "Retrieve parking facilities.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "default": 1,
+              "description": "Page number",
+              "example": 1
+            },
+            "required": false,
+            "description": "Page number",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 100,
+              "default": 10,
+              "description": "Items per page",
+              "example": 10
+            },
+            "required": false,
+            "description": "Items per page",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Search term for title or address"
+            },
+            "required": false,
+            "description": "Search term for title or address",
+            "name": "search",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "Minimum hourly rate in cents"
+            },
+            "required": false,
+            "description": "Minimum hourly rate in cents",
+            "name": "minHourlyRateCents",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "description": "Maximum hourly rate in cents"
+            },
+            "required": false,
+            "description": "Maximum hourly rate in cents",
+            "name": "maxHourlyRateCents",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Filter by owner ID"
+            },
+            "required": false,
+            "description": "Filter by owner ID",
+            "name": "ownerId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of parking facilities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParkingListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parkings/me": {
+      "get": {
+        "tags": [
+          "Parkings"
+        ],
+        "summary": "List Owned Parkings",
+        "description": "Retrieve parking facilities owned by the current user.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of owned parking facilities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ParkingResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parkings/{id}": {
+      "get": {
+        "tags": [
+          "Parkings"
+        ],
+        "summary": "Get Parking",
+        "description": "Parking facility details.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Unique parking ID (UUID)"
+            },
+            "required": true,
+            "description": "Unique parking ID (UUID)",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parking facility details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParkingResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parking not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Parkings"
+        ],
+        "summary": "Update Parking",
+        "description": "Update a parking facility.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Unique parking ID (UUID)"
+            },
+            "required": true,
+            "description": "Unique parking ID (UUID)",
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateParkingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Parking updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParkingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - not the owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parking not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get Profile",
+        "description": "Get current user profile information.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Update Profile",
+        "description": "Update user profile information.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 50,
+                    "description": "User first name",
+                    "example": "John"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 50,
+                    "description": "User last name",
+                    "example": "Doe"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 15,
+                    "pattern": "^[0-9]+$",
+                    "description": "User phone number",
+                    "example": "1234567890"
+                  },
+                  "photoUrl": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Profile photo URL",
+                    "example": "https://example.com/me.jpg"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}

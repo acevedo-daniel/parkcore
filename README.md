@@ -1,59 +1,63 @@
-# ParkCore API
+# ParkCore
 
-ParkCore is a parking operations management API for parking owners. It provides a read-only public catalog of active parking facilities and an authenticated owner workspace for operating them.
+ParkCore is a personal parking-operations application for parking owners. It is a pnpm monorepo containing the ParkCore 1.0 API, a deliberately minimal React frontend foundation, and a typed client generated from the API's OpenAPI contract.
 
-## Product Surfaces
+There are no marketplace transactions, reservations, payments, customer accounts, staff, roles, reviews, or physical-slot features in 1.0.
 
-- **Public catalog:** list, search, filter, and view active parking facilities.
-- **Owner operations:** register and log in, manage a profile, create and update owned parkings, activate or deactivate them, and manage vehicle stays.
+## Workspaces
 
-There are no public reservations, marketplace transactions, payments, customer accounts, employees, or reviews.
+| Workspace             | Responsibility                                                                  |
+| --------------------- | ------------------------------------------------------------------------------- |
+| `apps/api`            | Express 5 API, Prisma schema/migrations, OpenAPI artifact, and backend tests.   |
+| `apps/web`            | Vite, React, React Router Data Mode, TanStack Query, and Tailwind 4 foundation. |
+| `packages/api-client` | Generated OpenAPI types and typed `openapi-fetch` bridge for browser consumers. |
 
-## Stack
-
-- **Runtime:** Node.js 24 and TypeScript
-- **HTTP API:** Express 5, Zod, and Scalar/OpenAPI 3.1
-- **Data:** PostgreSQL and Prisma
-- **Quality:** Vitest, Supertest, ESLint, and Prettier
-
-## Quick Start
-
-### Requirements
+## Requirements
 
 - Node.js 24
 - pnpm 10
 - Docker Desktop for local PostgreSQL
 
-### Install and Run
+## Local development
 
 ```powershell
-Copy-Item .env.example .env
+Copy-Item apps/api/.env.example apps/api/.env
+Copy-Item apps/web/.env.example apps/web/.env
 pnpm install
 pnpm docker:up
 pnpm db:setup
 pnpm dev
 ```
 
-On macOS or Linux, use `cp .env.example .env`.
+On macOS or Linux, use `cp` instead of `Copy-Item`.
 
-`pnpm docker:up` starts only the local PostgreSQL container `parkcore-db`. `pnpm install` and `pnpm build` run `prisma generate`, so `DATABASE_URL` must be available before either command. Generated Prisma output is ignored by Git.
+`pnpm install` does not require API environment variables or generate Prisma code. API database setup and builds generate Prisma explicitly. Docker Compose starts only the local `parkcore-db` PostgreSQL container; both applications run from the host.
 
-The local API runs at `http://localhost:3000`; its OpenAPI reference is at `http://localhost:3000/docs`. `.env.example` is the canonical list of environment variables.
+- API: `http://localhost:3000`
+- API reference: `http://localhost:3000/docs`
+- Web: Vite's default local URL (normally `http://localhost:5173`)
 
-## Common Commands
+## Common commands
 
 ```bash
+pnpm dev
+pnpm dev:api
+pnpm dev:web
+pnpm db:setup
+pnpm lint
+pnpm typecheck
 pnpm test
 pnpm test:coverage
-pnpm typecheck
-pnpm openapi:check
+pnpm contract:generate
+pnpm contract:check
+pnpm build
 pnpm release:readiness
 ```
+
+`pnpm contract:generate` writes `apps/api/openapi.json` and regenerates `packages/api-client/src/generated/schema.ts`. Generated contract types are committed and must not be edited manually; `pnpm contract:check` detects drift.
 
 ## Documentation
 
 - [Project](docs/PROJECT.md) — product scope and permanent domain rules.
-- [Architecture](docs/ARCHITECTURE.md) — runtime boundaries and technical structure.
-- [OpenAPI reference](http://localhost:3000/docs) — endpoint contract after the API is running.
-
-ParkCore 1.0 models each vehicle stay as a `ParkingSession`. The API exposes the direct `/sessions` contract; compatibility routes and aliases are not supported.
+- [Architecture](docs/ARCHITECTURE.md) — workspace boundaries and technical structure.
+- [API reference](http://localhost:3000/docs) — endpoint contract while the API is running.

@@ -1,0 +1,4 @@
+coverage/
+dist/
+openapi.json
+prisma/generated/

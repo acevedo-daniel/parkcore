@@ -2,7 +2,7 @@
 
 ## Product
 
-ParkCore is a personal backend for a parking operations management application for parking owners, with a read-only public catalog of active parking facilities.
+ParkCore is a personal parking operations application for parking owners, with a read-only public catalog of active parking facilities. Its backend is the 1.0 source of truth; the frontend is currently a foundation only and does not expand the product scope.
 
 It records vehicles entering and leaving an owner-operated parking facility, enforces concurrent capacity, and preserves the price charged for each stay.
 
