@@ -31,7 +31,9 @@ function sessionList(data: ParkingSession[]) {
   } satisfies components['schemas']['ParkingSessionListResponse'];
 }
 
-test('registers, creates a parking, checks in, and completes a parking session', async ({ page }) => {
+test('registers, creates a parking, checks in, and completes a parking session', async ({
+  page,
+}) => {
   let parking: Parking | undefined;
   let session: ParkingSession | undefined;
 
@@ -73,10 +75,7 @@ test('registers, creates a parking, checks in, and completes a parking session',
       await respond(session?.status === 'ACTIVE' ? [session] : []);
       return;
     }
-    if (
-      request.method() === 'POST' &&
-      url.pathname === '/parkings/parking-1/sessions/check-in'
-    ) {
+    if (request.method() === 'POST' && url.pathname === '/parkings/parking-1/sessions/check-in') {
       session = {
         createdAt: '2026-08-17T10:00:00.000Z',
         currency: 'USD',
@@ -126,7 +125,10 @@ test('registers, creates a parking, checks in, and completes a parking session',
       await respond(sessionList(session ? [session] : []));
       return;
     }
-    await respond({ error: true, message: `Unexpected request: ${request.method()} ${url.pathname}` }, 500);
+    await respond(
+      { error: true, message: `Unexpected request: ${request.method()} ${url.pathname}` },
+      500,
+    );
   });
 
   await page.goto('/');

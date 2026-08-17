@@ -5,6 +5,7 @@ import { Link, useParams } from 'react-router';
 import { Metric, ParkingIdentity, RateDisplay } from '../../components/domain/parking.js';
 import { ParkingStatus } from '../../components/domain/status.js';
 import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
+import { useDocumentMeta } from '../../lib/document-meta.js';
 import { getPublicParking, PublicApiError } from '../../lib/api/public-api.js';
 
 export function ParkingDetailRoute() {
@@ -13,6 +14,13 @@ export function ParkingDetailRoute() {
     queryKey: ['public-parking', parkingId],
     enabled: Boolean(parkingId),
     queryFn: () => getPublicParking(parkingId ?? ''),
+  });
+  const parking = parkingQuery.data;
+  useDocumentMeta({
+    description: parking
+      ? `${parking.title} is an active ParkCore parking facility at ${parking.address}.`
+      : 'View public ParkCore parking facility details.',
+    title: parking ? `${parking.title} | ParkCore` : 'Parking details | ParkCore',
   });
   if (parkingQuery.isLoading) return <ParkingDetailSkeleton />;
   if (parkingQuery.isError) {
@@ -31,7 +39,6 @@ export function ParkingDetailRoute() {
       </ErrorState>
     );
   }
-  const parking = parkingQuery.data;
   if (!parking) return null;
   const mapUrl = `https://www.openstreetmap.org/?mlat=${String(parking.lat)}&mlon=${String(parking.lng)}#map=17/${String(parking.lat)}/${String(parking.lng)}`;
   return (

@@ -2,7 +2,7 @@
 
 ## Web
 
-This workspace is ParkCore's React frontend foundation. It intentionally contains no product UI yet.
+This workspace is ParkCore's React frontend for public parking discovery and owner-operated parking workflows.
 
 ## Rules
 

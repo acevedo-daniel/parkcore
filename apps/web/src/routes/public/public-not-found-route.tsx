@@ -1,6 +1,12 @@
 import { Link } from 'react-router';
 
+import { useDocumentMeta } from '../../lib/document-meta.js';
+
 export function PublicNotFoundRoute() {
+  useDocumentMeta({
+    description: 'The requested ParkCore public route is unavailable.',
+    title: 'No parking here | ParkCore',
+  });
   return (
     <section className="public-not-found">
       <p className="type-label">404</p>

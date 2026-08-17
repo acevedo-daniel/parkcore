@@ -24,9 +24,7 @@ export function parkingFixture(overrides: Partial<Parking> = {}): Parking {
   };
 }
 
-export function parkingSessionFixture(
-  overrides: Partial<ParkingSession> = {},
-): ParkingSession {
+export function parkingSessionFixture(overrides: Partial<ParkingSession> = {}): ParkingSession {
   return {
     createdAt: '2026-08-17T09:30:00.000Z',
     currency: 'USD',

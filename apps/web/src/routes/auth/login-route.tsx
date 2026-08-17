@@ -3,8 +3,13 @@ import { useNavigate, useLocation } from 'react-router';
 import { AuthFormFrame, LoginFooter, LoginForm } from '../../features/auth/auth-forms.js';
 import { getReturnTo } from './auth-redirect.js';
 import { RedirectAuthenticated } from './auth-guard.js';
+import { useDocumentMeta } from '../../lib/document-meta.js';
 
 export function LoginRoute() {
+  useDocumentMeta({
+    description: 'Sign in to operate your ParkCore parking facilities.',
+    title: 'Sign in | ParkCore',
+  });
   const navigate = useNavigate();
   const location = useLocation();
 

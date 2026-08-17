@@ -57,6 +57,10 @@ describe('public parking catalog', () => {
     renderCatalog();
 
     expect(await screen.findByRole('link', { name: 'Open Central Parking' })).toBeTruthy();
+    expect(document.title).toBe('Parkings | ParkCore');
+    expect(document.head.querySelector('meta[name="description"]')?.getAttribute('content')).toBe(
+      'Browse active ParkCore parking facilities by address and hourly rate.',
+    );
     expect(api.getPublicParkings).toHaveBeenCalledWith({
       limit: 30,
       maxHourlyRateCents: undefined,

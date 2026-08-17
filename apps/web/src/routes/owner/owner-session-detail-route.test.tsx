@@ -80,8 +80,9 @@ describe('parking session completion', () => {
     await user.click(screen.getByRole('button', { name: 'Cancel session' }));
     const dialog = await screen.findByRole('dialog', { name: 'Cancel active session' });
     expect(dialog).toBeTruthy();
-    expect(screen.getByText('The parking will be available for a new check-in after cancellation.'))
-      .toBeTruthy();
+    expect(
+      screen.getByText('The parking will be available for a new check-in after cancellation.'),
+    ).toBeTruthy();
     await user.click(within(dialog).getByRole('button', { name: 'Cancel session' }));
 
     await waitFor(() => {

@@ -54,15 +54,18 @@ describe('parking operations', () => {
     await user.click(screen.getByRole('button', { name: 'Start session' }));
 
     await waitFor(() => {
-      expect(api.checkIn.mock.calls[0]?.slice(0, 2)).toEqual(['parking-1', {
-        brand: undefined,
-        customerName: undefined,
-        customerPhone: undefined,
-        model: undefined,
-        notes: undefined,
-        plate: 'AB123CD',
-        type: 'CAR',
-      }]);
+      expect(api.checkIn.mock.calls[0]?.slice(0, 2)).toEqual([
+        'parking-1',
+        {
+          brand: undefined,
+          customerName: undefined,
+          customerPhone: undefined,
+          model: undefined,
+          notes: undefined,
+          plate: 'AB123CD',
+          type: 'CAR',
+        },
+      ]);
     });
     expect(screen.getByText('AB123CD checked in.')).toBeTruthy();
   });

@@ -7,6 +7,7 @@ import { ParkingListItem } from '../../components/domain/parking.js';
 import { Button } from '../../components/ui/button.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { Field, Input } from '../../components/ui/field.js';
+import { useDocumentMeta } from '../../lib/document-meta.js';
 import { getPublicParkings, type PublicParkingQuery } from '../../lib/api/public-api.js';
 
 function rateToCents(value: string) {
@@ -22,6 +23,10 @@ function getFormText(formData: FormData, name: string) {
 }
 
 export function ParkingCatalogRoute() {
+  useDocumentMeta({
+    description: 'Browse active ParkCore parking facilities by address and hourly rate.',
+    title: 'Parkings | ParkCore',
+  });
   const [searchParams, setSearchParams] = useSearchParams();
   const query: PublicParkingQuery = {
     limit: 30,
