@@ -57,11 +57,11 @@ The API owns domain rules and persistence. The web application consumes it only 
 
 ## Repository structure
 
-| Path                  | Responsibility                                                                  |
-| --------------------- | ------------------------------------------------------------------------------- |
-| `apps/api`            | Express API, Prisma schema/migrations, OpenAPI artifact, and API tests.         |
-| `apps/web`            | Public discovery and owner operations React application.                        |
-| `packages/api-client` | Generated OpenAPI types and typed browser API client.                           |
+| Path                  | Responsibility                                                          |
+| --------------------- | ----------------------------------------------------------------------- |
+| `apps/api`            | Express API, Prisma schema/migrations, OpenAPI artifact, and API tests. |
+| `apps/web`            | Public discovery and owner operations React application.                |
+| `packages/api-client` | Generated OpenAPI types and typed browser API client.                   |
 
 ## Local development
 

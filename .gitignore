@@ -15,6 +15,7 @@ yarn-error.log*
 .vscode/*
 !.vscode/launch.json
 !.vscode/tasks.json
+.idea/
 
 # OS
 .DS_Store
@@ -27,11 +28,4 @@ Thumbs.db
 **/playwright-report/
 apps/api/prisma/generated/
 
-# Legacy agent context
-.agent/
-# Local docs (do not publish)
-docs/local/
-docs/references/
-docs/technical/
-
-temporal.md
+docs\templates

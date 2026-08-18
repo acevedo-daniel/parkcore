@@ -1,6 +1,14 @@
 {
   "name": "@parkcore/api",
   "version": "1.0.0",
+  "description": "Parking operations system Express API and domain services.",
+  "homepage": "https://parkcore-app.vercel.app/",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/acevedo-daniel/parkcore.git",
+    "directory": "apps/api"
+  },
   "private": true,
   "type": "module",
   "main": "dist/server.js",

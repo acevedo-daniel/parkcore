@@ -1,6 +1,14 @@
 {
   "name": "@parkcore/api-client",
   "version": "1.0.0",
+  "description": "Typed API client for ParkCore generated from OpenAPI specifications.",
+  "homepage": "https://parkcore-app.vercel.app/",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/acevedo-daniel/parkcore.git",
+    "directory": "packages/api-client"
+  },
   "private": true,
   "type": "module",
   "exports": {

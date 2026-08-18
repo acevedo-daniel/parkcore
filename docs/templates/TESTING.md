@@ -1,77 +1,77 @@
 <!--
 TEMPLATE CONTRACT
 Target: /docs/TESTING.md
-Activation: testing has multiple layers, special setup/data, critical-path expectations, or non-obvious quality gates.
+Activation: Testing has multiple layers, special setup/data, critical-path expectations, or non-obvious quality gates.
 Mode: create-or-update
-Primary responsibility: what confidence the project expects and how that confidence is verified.
-Primary sources: test suites, test config, scripts, CI, fixtures/factories, container/test database setup.
+Primary responsibility: Testing strategy, test boundaries, data setup, coverage expectations, and release verification.
+Primary sources: Test suites, test runners/configs, scripts, CI definitions, fixtures/factories, container/database setup.
 
-Do not invent coverage targets or test layers the repository does not use.
-Do not duplicate every test case; describe strategy, boundaries, critical behavior, and commands.
-Remove this comment, placeholders, and empty optional sections in the active file.
+Update rules:
+- Do not invent coverage targets or test layers the repository does not use.
+- Describe strategy, boundaries, critical behavior, and verified execution commands.
+- Remove this comment block, placeholders, and inapplicable optional sections in the active file.
 -->
+
 # Testing
 
-> Testing strategy, test boundaries, data setup, and required verification.
+> Test strategy, boundaries, data setup, and release verification.
 
 ## Strategy
 
-{{WHAT_THE_PROJECT_NEEDS_CONFIDENCE_IN_AND_WHY}}
+{{EXPLANATION_OF_WHAT_THE_PROJECT_VERIFIES_WHERE_BOUNDARIES_ARE_ENFORCED_AND_MOCKING_PHILOSOPHY}}
 
 ## Test layers
 
-<!-- Keep only layers actually used or explicitly being established now. -->
+| Layer                                 | Purpose       | Tool / location     |
+| ------------------------------------- | ------------- | ------------------- |
+| {{LAYER_1_EG_API_UNIT_AND_ROUTE}}     | {{PURPOSE_1}} | {{TOOL_AND_PATH_1}} |
+| {{LAYER_2_EG_WEB_COMPONENT_AND_FORM}} | {{PURPOSE_2}} | {{TOOL_AND_PATH_2}} |
+| {{LAYER_3_EG_CONTRACT_DRIFT}}         | {{PURPOSE_3}} | {{TOOL_AND_PATH_3}} |
+| {{LAYER_4_EG_MOCKED_E2E_WORKFLOW}}    | {{PURPOSE_4}} | {{TOOL_AND_PATH_4}} |
+| {{LAYER_5_EG_REAL_STACK_SMOKE}}       | {{PURPOSE_5}} | {{TOOL_AND_PATH_5}} |
 
-| Layer | Purpose | Tool / location |
-|---|---|---|
-| {{UNIT_COMPONENT_INTEGRATION_E2E_CONTRACT}} | {{PURPOSE}} | {{TOOL_OR_PATH}} |
+## Test data and dependencies
 
-## Boundaries
+- **Database isolation:** {{EXPLANATION_OF_HOW_TEST_DATABASES_ARE_PROVISIONED_AND_ISOLATED}}
+- **Mocking boundary:** {{WHAT_IS_MOCKED_VS_WHAT_CALLS_REAL_SERVICES_IN_CI}}
+- **Disposable entities:** {{POLICY_FOR_E2E_SMOKE_TESTS_AGAINST_DEPLOYED_ENVIRONMENTS}}
 
-- {{WHAT_BELONGS_IN_THIS_TEST_LAYER_OR_WHAT_SHOULD_NOT_BE_MOCKED}}
+## Critical behavior under test
+
+- **{{CRITICAL_BEHAVIOR_1}}:** {{CONCISE_EXPLANATION}}
+- **{{CRITICAL_BEHAVIOR_2}}:** {{CONCISE_EXPLANATION}}
+- **{{CRITICAL_BEHAVIOR_3}}:** {{CONCISE_EXPLANATION}}
 
 ## Run tests
 
 ```bash
-{{VERIFIED_TEST_COMMANDS}}
+{{COMMAND_FORMAT_CHECK}}
+{{COMMAND_RUN_UNIT_TESTS}}
+{{COMMAND_RUN_COVERAGE}}
+{{COMMAND_RUN_E2E}}
+{{COMMAND_CHECK_CONTRACTS}}
 ```
 
-## Test data
-
-{{FIXTURES_FACTORIES_SEEDS_TEST_DB_STRATEGY_OR_REMOVE}}
-
-## External dependencies
-
-{{MOCK_SANDBOX_TESTCONTAINER_OR_REAL_SERVICE_POLICY_OR_REMOVE}}
-
-## Critical behavior
-
-<!-- Durable high-risk paths, not a duplicate of the entire suite. -->
-
-- {{CRITICAL_FLOW_OR_RULE}}
-
-## Required verification
-
-<!-- Match actual scripts/CI. Keep only applicable checks. -->
-
-Before considering a relevant change complete:
-
-```bash
-{{TEST_COMMAND}}
-{{LINT_COMMAND_OR_REMOVE}}
-{{TYPECHECK_COMMAND_OR_REMOVE}}
-{{BUILD_COMMAND_OR_REMOVE}}
-```
-
-{{MANUAL_OR_SMOKE_VALIDATION_OR_REMOVE}}
+{{OPTIONAL_REAL_STACK_SMOKE_COMMAND_BLOCK}}
 
 ## Coverage
 
-<!-- Keep only if the project has a real coverage policy. -->
+| Workspace / Module | Lines / Statements   | Branches                |
+| ------------------ | -------------------- | ----------------------- |
+| `{{AREA_1}}`       | {{PERCENT_LINES_1}}% | {{PERCENT_BRANCHES_1}}% |
+| `{{AREA_2}}`       | {{PERCENT_LINES_2}}% | {{PERCENT_BRANCHES_2}}% |
 
-{{REAL_COVERAGE_EXPECTATION_OR_REMOVE}}
+## Required verification
+
+Before handing off code or merging a release:
+
+```bash
+{{FULL_RELEASE_READINESS_COMMAND_OR_CHAIN}}
+```
 
 ## Related documentation
 
+- [README](../README.md)
 - [Development](DEVELOPMENT.md)
 - [Architecture](ARCHITECTURE.md)
+- [Deployment](DEPLOYMENT.md)

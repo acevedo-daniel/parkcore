@@ -1,110 +1,101 @@
 <!--
 TEMPLATE CONTRACT
 Target: /docs/plans/<NNN>-<slug>.md
-Activation: one specific non-trivial change benefits from explicit execution planning.
-Mode: create new plan for a distinct substantial effort; update the same plan while that effort evolves.
-Primary responsibility: bridge approved design/scope to implementation and verification.
-Primary sources: current user request, active PROJECT/ARCHITECTURE/ADRs, relevant code/tests, prior approved decisions.
+Activation: A specific non-trivial implementation effort benefits from scoped execution steps, acceptance criteria, and verification checkpoints.
+Mode: Create new plan for a distinct effort; update as work progresses; record completion notes when finished.
+Primary responsibility: Bridge approved design/scope to step-by-step implementation and verification.
+Primary sources: User request, active PROJECT/ARCHITECTURE docs, relevant code/tests, prior approved decisions.
 
-A plan is not a permanent project specification. Keep task-specific detail here instead of bloating durable docs.
-Do not mark a plan approved unless the user/project process actually approved it.
-Remove this comment and placeholders in the active file.
+Update rules:
+- A plan is a temporary execution artifact, not a permanent specification.
+- Keep task-specific detail here instead of bloating durable docs.
+- Remove this comment block and placeholders in the active file.
 -->
+
 # {{PLAN_TITLE}}
 
 - **Status:** {{proposed | approved | in-progress | completed | superseded}}
-- **Scope:** {{ONE_LINE_SCOPE}}
+- **Scope:** {{ONE_LINE_SCOPE_SUMMARY}}
 
 ## Goal
 
-{{EXACT_OUTCOME}}
+{{EXACT_OUTCOME_TO_BE_ACHIEVED}}
 
 ## Context
 
-{{WHY_THIS_CHANGE_EXISTS_AND_CURRENT_STATE}}
+{{BACKGROUND_WHY_THIS_CHANGE_IS_NEEDED_AND_CURRENT_STATE}}
 
 ## Sources of truth
 
-<!-- Link only what is relevant and exists. -->
-
-- `{{PATH_OR_DOCUMENT}}` — {{WHY_IT_MATTERS}}
+- `{{PATH_OR_DOCUMENT_1}}` — {{WHY_IT_MATTERS}}
+- `{{PATH_OR_DOCUMENT_2}}` — {{WHY_IT_MATTERS}}
 
 ## Decisions to preserve
 
-<!-- Pull only relevant locked decisions/invariants; do not duplicate the whole PROJECT/ARCHITECTURE docs. -->
-
-- {{LOCKED_DECISION_OR_INVARIANT}}
+- **{{LOCKED_DECISION_OR_INVARIANT_1}}**
+- **{{LOCKED_DECISION_OR_INVARIANT_2}}**
 
 ## Scope
 
 ### Included
 
-- {{INCLUDED_WORK}}
+- {{INCLUDED_WORK_ITEM_1}}
+- {{INCLUDED_WORK_ITEM_2}}
 
 ### Excluded
 
-- {{EXPLICITLY_EXCLUDED_WORK}}
+- {{EXPLICITLY_EXCLUDED_ITEM_1}}
+- {{EXPLICITLY_EXCLUDED_ITEM_2}}
 
-## Design / behavior
+## Design and technical contract
 
-<!-- Observable behavior, UX, API/data shape, or technical design needed before implementation. Omit subsections that do not apply. -->
+{{DESIGN_SPECIFICATION_API_CONTRACT_OR_SCHEMA_CHANGES_NEEDED}}
 
-{{APPROVED_DESIGN_OR_BEHAVIOR}}
+## Implementation steps
 
-## Implementation
+### 1. {{STEP_1_TITLE}}
 
-### 1. {{STEP_TITLE}}
+**Outcome:** {{STEP_1_EXPECTED_OUTCOME}}
 
-**Outcome:** {{STEP_OUTCOME}}
+- {{ACTION_1}}
+- {{ACTION_2}}
 
-- {{ACTION}}
-- {{ACTION}}
+**Affected areas:** `{{PATH_OR_MODULE_1}}`
 
-**Expected areas:** `{{PATH_OR_COMPONENT}}`
+### 2. {{STEP_2_TITLE}}
 
-### 2. {{STEP_TITLE}}
+**Outcome:** {{STEP_2_EXPECTED_OUTCOME}}
 
-**Outcome:** {{STEP_OUTCOME}}
+- {{ACTION_1}}
+- {{ACTION_2}}
 
-- {{ACTION}}
-
-## Data / migration impact
-
-{{SCHEMA_DATA_MIGRATION_BACKFILL_COMPATIBILITY_OR_REMOVE}}
-
-## API / contract impact
-
-{{PUBLIC_API_EVENTS_TYPES_CONTRACTS_OR_REMOVE}}
-
-## UI / state impact
-
-{{ROUTES_COMPONENTS_STATES_RESPONSIVE_ACCESSIBILITY_OR_REMOVE}}
+**Affected areas:** `{{PATH_OR_MODULE_2}}`
 
 ## Acceptance criteria
 
-- [ ] {{OBSERVABLE_ACCEPTANCE_CRITERION}}
-- [ ] {{OBSERVABLE_ACCEPTANCE_CRITERION}}
+- [ ] {{OBSERVABLE_ACCEPTANCE_CRITERION_1}}
+- [ ] {{OBSERVABLE_ACCEPTANCE_CRITERION_2}}
+- [ ] {{OBSERVABLE_ACCEPTANCE_CRITERION_3}}
 
-## Verification
+## Verification plan
 
-- [ ] `{{TEST_COMMAND_OR_TARGETED_TEST}}`
-- [ ] `{{LINT_COMMAND_OR_REMOVE}}`
-- [ ] `{{TYPECHECK_COMMAND_OR_REMOVE}}`
-- [ ] `{{BUILD_COMMAND_OR_REMOVE}}`
-- [ ] {{MANUAL_SMOKE_OR_VISUAL_CHECK_OR_REMOVE}}
+- [ ] `{{COMMAND_RUN_RELEVANT_TESTS}}`
+- [ ] `{{COMMAND_LINT}}`
+- [ ] `{{COMMAND_TYPECHECK}}`
+- [ ] `{{COMMAND_BUILD}}`
+- [ ] {{MANUAL_OR_SMOKE_VERIFICATION_CHECK}}
 
 ## Risks and edge cases
 
-- {{RISK_OR_EDGE_CASE}}
+- **{{RISK_1}}:** {{MITIGATION_1}}
+- **{{RISK_2}}:** {{MITIGATION_2}}
 
-## Documentation impact
+## Durable documentation impact
 
-<!-- List only docs whose durable truth is expected to change. Use "None" when appropriate. -->
-
-- {{DOCUMENT_AND_REASON_OR_NONE}}
+- **PROJECT.md:** {{CHANGES_OR_NONE}}
+- **ARCHITECTURE.md:** {{CHANGES_OR_NONE}}
+- **DEVELOPMENT.md:** {{CHANGES_OR_NONE}}
 
 ## Completion notes
 
-<!-- Fill when completed; keep concise and factual. -->
-
-{{FINAL_DEVIATIONS_VERIFICATION_LIMITATIONS_OR_REMOVE}}
+{{FINAL_COMPLETION_NOTES_DEVIATIONS_AND_TEST_RESULTS_FILLED_UPON_COMPLETION}}

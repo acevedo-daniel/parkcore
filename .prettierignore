@@ -5,7 +5,7 @@
 
 # Dependencies
 node_modules/
-docs/templates/
+pnpm-lock.yaml
 
 # Generated
 apps/api/prisma/generated/

@@ -1,110 +1,82 @@
 <!--
 TEMPLATE CONTRACT
 Target: /docs/PROJECT.md
-Activation: product/project-level scope, workflows, constraints, locked decisions, or unresolved durable decisions need a source of truth.
+Activation: Product/project-level scope, actors, core workflows, non-goals, durable domain rules, or locked decisions need a source of truth.
 Mode: create-or-update
-Primary responsibility: what the project is, why it exists, what belongs in it, and which high-level decisions implementation must respect.
-Primary sources: user/project intent, current implementation, existing docs, accepted ADRs.
+Primary responsibility: What the project is, why it exists, what belongs in it, and which domain rules implementation must respect.
+Primary sources: Product requirements, domain model, current implementation, verified tests, accepted ADRs.
 
-Do not duplicate architecture internals, detailed setup, endpoint catalogs, or task-specific implementation plans here.
-Keep durable business rules here only when they define the product globally; feature-local acceptance criteria belong in plans/tests.
-Remove this comment, placeholders, and empty optional sections in the active file.
+Update rules:
+- Do not duplicate architecture internals, detailed setup, endpoint catalogs, or task-specific implementation plans here.
+- Keep durable business rules here only when they define the product globally; feature-local acceptance criteria belong in plans/tests.
+- Remove this comment block, placeholders, and inapplicable optional sections in the active file.
 -->
+
 # Project
 
-> Product scope, core workflows, constraints, and durable project direction.
+## Product
 
-## Overview
-
-{{WHAT_THE_SOFTWARE_IS_AND_WHY_IT_EXISTS}}
+{{WHAT_THE_SOFTWARE_IS_WHO_IT_IS_FOR_AND_CORE_VALUE_PROPOSITION}}
 
 ## Problem
 
-{{PROBLEM_OR_OPPORTUNITY}}
+{{CLEAR_DESCRIPTION_OF_THE_PROBLEM_BEING_SOLVED_AND_OPERATIONAL_PAIN_POINTS}}
 
-## Users
+## Actors
 
-<!-- Keep only actual user/actor groups that affect product behavior. -->
-
-| User / actor | Need |
-|---|---|
-| {{USER_OR_ACTOR}} | {{NEED}} |
-
-## Core workflows
-
-<!-- Describe user/system outcomes, not implementation details. -->
-
-1. {{CORE_WORKFLOW}}
-2. {{CORE_WORKFLOW}}
+| Actor       | Capabilities                        |
+| ----------- | ----------------------------------- |
+| {{ACTOR_1}} | {{CAPABILITIES_AND_ACCESS_LEVEL_1}} |
+| {{ACTOR_2}} | {{CAPABILITIES_AND_ACCESS_LEVEL_2}} |
 
 ## Scope
 
 ### In scope
 
-- {{IN_SCOPE_CAPABILITY_OR_RESPONSIBILITY}}
+- {{IN_SCOPE_CAPABILITY_1}}
+- {{IN_SCOPE_CAPABILITY_2}}
+- {{IN_SCOPE_CAPABILITY_3}}
+- {{IN_SCOPE_CAPABILITY_4}}
 
 ### Out of scope
 
-- {{EXPLICIT_NON_GOAL}}
+- {{EXPLICIT_NON_GOAL_1}}
+- {{EXPLICIT_NON_GOAL_2}}
+- {{EXPLICIT_NON_GOAL_3}}
 
-## Product rules
+## Domain
 
-<!-- Keep only durable cross-feature rules. Omit if ordinary behavior is already clear in code/tests. -->
+### {{CORE_ENTITY_OR_AGGREGATE_1}}
 
-- {{DURABLE_PRODUCT_OR_BUSINESS_RULE}}
+{{DESCRIPTION_OF_CORE_ENTITY_LIFECYCLE_OWNERSHIP_AND_IDENTITY}}
 
-## Success criteria
+### {{CORE_ENTITY_OR_AGGREGATE_2}}
 
-<!-- Observable outcomes, not vanity metrics invented by the agent. -->
+{{DESCRIPTION_OF_STABLE_VS_TRANSIENT_ATTRIBUTES_AND_STATE_MACHINE}}
 
-- {{SUCCESS_CRITERION}}
+```text
+{{STATE_TRANSITION_DIAGRAM_EXAMPLE_ACTIVE_TO_COMPLETED_OR_CANCELLED}}
+```
 
-## Technical direction
+### {{CAPACITY_PRICING_OR_SPECIAL_DOMAIN_MODEL}}
 
-<!-- High-level direction only. Detailed boundaries belong in ARCHITECTURE.md. -->
+{{EXPLANATION_OF_UNITS_INTEGERS_SNAPSHOTS_CALCULATIONS_AND_PRECISION}}
 
-| Area | Direction |
-|---|---|
-| Runtime | {{RUNTIME_OR_REMOVE_ROW}} |
-| Frontend | {{FRONTEND_OR_REMOVE_ROW}} |
-| Backend | {{BACKEND_OR_REMOVE_ROW}} |
-| Data | {{DATABASE_OR_PERSISTENCE_OR_REMOVE_ROW}} |
-| Authentication | {{AUTH_DIRECTION_OR_REMOVE_ROW}} |
-| Deployment | {{DEPLOYMENT_DIRECTION_OR_REMOVE_ROW}} |
+## Business Rules
 
-## Locked decisions
+- {{DURABLE_RULE_1_EG_ACCESS_CONTROL_BOUNDARY}}
+- {{DURABLE_RULE_2_EG_CONCURRENCY_AND_TRANSACTIONAL_SAFETY}}
+- {{DURABLE_RULE_3_EG_SNAPSHOT_IMMUTABILITY}}
+- {{DURABLE_RULE_4_EG_INPUT_NORMALIZATION_OR_VALIDATION}}
 
-<!-- Decisions implementation must respect until explicitly reconsidered. Do not invent entries just to fill the section. -->
+## Relevant Limitations
 
-- **locked:** {{DECISION}}
-
-## Open decisions
-
-<!-- An unresolved decision is not permission for an implementation task to decide it silently. -->
-
-| Decision | Status | Blocking | Notes |
-|---|---|:---:|---|
-| {{DECISION}} | unresolved | {{YES_NO}} | {{NOTES_OR_EMPTY}} |
-
-## Constraints
-
-<!-- Product/technical constraints that materially affect implementation. -->
-
-- {{CONSTRAINT}}
-
-## Current state
-
-{{SHORT_FACTUAL_DESCRIPTION_OF_WHAT_EXISTS_NOW}}
-
-## Current focus
-
-{{CURRENT_PROJECT_LEVEL_FOCUS_OR_REMOVE}}
+- {{DELIBERATE_LIMITATION_OR_BREAKING_API_NOTE}}
+- {{DATA_MIGRATION_OR_HISTORICAL_IMMUTABILITY_RULE}}
+- {{SUPPORTED_ENUM_OR_CURRENCY_RESTRICTION}}
 
 ## Related documentation
-
-<!-- Keep only links to active files that exist. -->
 
 - [Architecture](ARCHITECTURE.md)
 - [Development](DEVELOPMENT.md)
 - [Testing](TESTING.md)
-- [Architecture decisions](adr/)

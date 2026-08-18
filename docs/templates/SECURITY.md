@@ -1,52 +1,49 @@
 <!--
 TEMPLATE CONTRACT
-Target: /SECURITY.md by default, or /docs/SECURITY.md when the repository intentionally keeps internal-only security architecture there.
-Activation: real vulnerability reporting policy, supported-version policy, project-specific security procedure, or durable security guidance exists that should not live only in ARCHITECTURE.md.
+Target: /SECURITY.md or /docs/SECURITY.md
+Activation: Real vulnerability reporting policy, supported version policy, or project-specific security procedures exist.
 Mode: create-or-update
-Primary responsibility: security policy/procedure, not generic secure-coding advice.
-Primary sources: actual reporting channel, maintained version policy, project security process, architecture/auth decisions.
+Primary responsibility: Vulnerability disclosure procedure and project-specific security rules.
+Primary sources: Verified contact channels, maintained versions, architectural security decisions.
 
-Do not invent an email address, SLA, bug bounty, supported versions, compliance claim, or response commitment.
-Remove this comment, placeholders, and empty optional sections in the active file.
+Update rules:
+- Do not invent fictitious email addresses, bug bounties, or compliance certifications.
+- Remove this comment block, placeholders, and inapplicable optional sections in the active file.
 -->
+
 # Security
 
-> Security reporting and project-specific security policy.
+> Vulnerability disclosure policy and project-specific security rules.
 
 ## Supported versions
 
-<!-- Keep only when a real support policy exists. -->
-
-| Version | Supported |
-|---|:---:|
-| {{VERSION}} | {{YES_NO}} |
+| Version                    | Supported |
+| -------------------------- | :-------: |
+| {{CURRENT_VERSION_EG_1_X}} |    Yes    |
+| {{PREVIOUS_VERSIONS}}      |    No     |
 
 ## Reporting a vulnerability
 
-Do not publish sensitive vulnerability details in a public issue.
+Do not disclose security vulnerabilities in public issues or discussions.
 
-Use the project's verified private reporting channel:
+Report vulnerabilities securely using the verified private channel:
 
-{{VERIFIED_PRIVATE_REPORTING_CHANNEL}}
+{{VERIFIED_PRIVATE_SECURITY_CHANNEL_OR_EMAIL}}
 
-Include, when possible:
+Please include:
 
-- a concise description of the vulnerability;
-- affected version/commit or area;
-- minimal reproduction steps;
-- expected impact;
-- technical evidence needed to reproduce without exposing unrelated secrets or third-party data.
+- A clear description of the vulnerability and its potential impact.
+- Affected components, versions, or endpoints.
+- Step-by-step reproduction instructions or a minimal proof of concept.
+- Any known mitigations or remediation suggestions.
 
-## Response process
+## Security architecture highlights
 
-{{REAL_RESPONSE_PROCESS_OR_REMOVE}}
-
-## Project-specific security notes
-
-<!-- Durable policy/procedure only; architecture details can link to ARCHITECTURE.md instead of being duplicated. -->
-
-- {{SECURITY_POLICY_OR_PROCEDURE}}
+- **Transport security:** All production traffic is strictly served over HTTPS with HSTS headers.
+- **Authentication & password hashing:** Passwords are hashed using strong algorithms (e.g. Argon2id / bcrypt). Tokens are signed and verified on every protected request.
+- **Browser protection:** Production headers enforce Content Security Policy (CSP), frame denial, and rate limiting on sensitive routes.
 
 ## Related documentation
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [Deployment](docs/DEPLOYMENT.md)

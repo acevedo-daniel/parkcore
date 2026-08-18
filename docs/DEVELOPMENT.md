@@ -43,7 +43,7 @@ On macOS or Linux, use `cp` instead of `Copy-Item`. Docker Compose starts only t
 | `AUTH_RATE_LIMIT_WINDOW_MS` |        No        | Auth rate-limit window; defaults to `900000`.                                            |
 | `LOG_LEVEL`                 |        No        | Pino log level; defaults to `info`.                                                      |
 | `LOG_PRETTY`                |        No        | Pretty local logs; defaults to `false`.                                                  |
-| `ENABLE_API_DOCS`           |        No        | Adds the API reference in production; local development exposes it by default.            |
+| `ENABLE_API_DOCS`           |        No        | Adds the API reference in production; local development exposes it by default.           |
 
 `apps/web/.env` has one browser-safe variable:
 
@@ -99,13 +99,13 @@ pnpm dev
 | Start local database | `pnpm docker:up`                       | Starts the `parkcore-db` container.                         |
 | Prepare database     | `pnpm db:setup`                        | Generates Prisma, applies migrations, and seeds local data. |
 | Develop              | `pnpm dev`                             | Runs API and web from the host.                             |
-| Format check         | `pnpm format:check`                    | Verifies repository formatting without writing files.        |
-| Lint                 | `pnpm lint`                            | Runs API, API-client, and web lint checks.                   |
-| Typecheck            | `pnpm typecheck`                       | Checks all workspace TypeScript projects.                    |
+| Format check         | `pnpm format:check`                    | Verifies repository formatting without writing files.       |
+| Lint                 | `pnpm lint`                            | Runs API, API-client, and web lint checks.                  |
+| Typecheck            | `pnpm typecheck`                       | Checks all workspace TypeScript projects.                   |
 | Test                 | `pnpm test`                            | Runs API and web unit/integration tests.                    |
 | Browser workflow     | `pnpm --filter @parkcore/web test:e2e` | Uses mocked contract-shaped responses.                      |
 | Verify contract      | `pnpm contract:check`                  | Detects OpenAPI/client drift.                               |
-| Build                | `pnpm build`                           | Requires `VITE_API_URL` for the web production build.      |
+| Build                | `pnpm build`                           | Requires `VITE_API_URL` for the web production build.       |
 | Release checks       | `pnpm release:readiness`               | Lint, types, coverage, contract, build, and E2E.            |
 
 ## Workspace workflow

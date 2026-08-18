@@ -1,5 +1,23 @@
 {
   "name": "parkcore",
+  "version": "1.0.0",
+  "description": "Parking operations system for independent parking owners.",
+  "homepage": "https://parkcore-app.vercel.app/",
+  "keywords": [
+    "typescript",
+    "nodejs",
+    "express",
+    "postgresql",
+    "prisma",
+    "react",
+    "openapi",
+    "docker"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/acevedo-daniel/parkcore.git"
+  },
   "private": true,
   "engines": {
     "node": "24.x"
