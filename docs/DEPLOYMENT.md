@@ -130,6 +130,25 @@ Do not use `pnpm db:setup` in production: it seeds data. Do not use `prisma migr
   ```
 
 - Confirm the deployed web build uses the intended `VITE_API_URL` and can complete the owner workflow.
+- Real-stack smoke test (not part of CI; it uses a disposable account, completes its session, and deactivates its test parking):
+
+  ```powershell
+  $env:REAL_STACK_WEB_URL = 'https://parkcore-app.vercel.app'
+  pnpm --filter @parkcore/web test:e2e:real
+  Remove-Item Env:REAL_STACK_WEB_URL
+  ```
+
+  This test uses the deployed browser application and its configured API, with no route mocking or local server. It requires the Render API to allow the Vercel origin through `CORS_ORIGINS`. The demo account and terminal session remain because ParkCore intentionally has no account or parking hard-delete endpoint.
+
+- Browser QA runs the same smoke sequentially in Chromium, Firefox, and installed Microsoft Edge:
+
+  ```powershell
+  $env:REAL_STACK_WEB_URL = 'https://parkcore-app.vercel.app'
+  pnpm --filter @parkcore/web test:e2e:browser-qa
+  Remove-Item Env:REAL_STACK_WEB_URL
+  ```
+
+  Safari is not covered because this workspace has no Apple environment.
 
 ## Related documentation
 

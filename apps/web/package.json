@@ -12,7 +12,10 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:real": "playwright test --config playwright.real-stack.config.ts --project=chromium",
+    "test:e2e:browser-qa": "playwright test --config playwright.real-stack.config.ts --project=chromium --project=firefox --project=edge",
+    "test:e2e:responsive": "playwright test --config playwright.real-stack.config.ts responsive-production-qa.spec.ts --project=chromium"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
