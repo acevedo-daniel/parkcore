@@ -6,10 +6,11 @@ ParkCore is a pnpm workspace monorepo. It keeps the API independently deployable
 
 ```mermaid
 flowchart LR
-    W[apps/web] --> C[packages/api-client]
-    C --> O[apps/api/openapi.json]
-    O --> A[apps/api]
-    A --> D[(PostgreSQL)]
+    B[Browser] --> W[Vercel: apps/web]
+    W --> C[packages/api-client]
+    C --> A[Render: apps/api]
+    A --> D[(Neon PostgreSQL)]
+    O[apps/api/openapi.json] -. generates .-> C
 ```
 
 ## Workspace boundaries
@@ -52,6 +53,10 @@ Both generated contract artifacts are versioned. `pnpm contract:check` regenerat
 `apps/web` uses Vite, React, React Compiler, React Router Data Mode, TanStack Query, and Tailwind 4. It contains the public catalog/detail experience, owner authentication, parking management, and parking-session operations. Route modules load lazily; TanStack Query owns server state; URL search parameters own catalog/history pagination and filters; and local React state owns transient UI.
 
 Browser JWT persistence belongs to `apps/web`. API access uses only `@parkcore/api-client`; the web app never imports API internals, Prisma types, or backend schemas.
+
+## Hosted topology
+
+The selected ParkCore 1.0 deployment targets are Vercel for the static web application, Render for the Express API, and Neon for managed PostgreSQL. The browser calls the Render API over HTTPS using the Vercel build's public `VITE_API_URL`; the API is the only component that connects to Neon. The root Render Blueprint configures the service boundary; no provider SDKs belong in application code.
 
 ## Local development and CI
 

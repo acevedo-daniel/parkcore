@@ -36,6 +36,7 @@ describe('app smoke', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ status: 'ok' });
+    expect(response.headers['cache-control']).toBe('no-store');
   });
 
   it('unknown route returns standard error contract', async () => {

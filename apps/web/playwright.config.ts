@@ -10,6 +10,10 @@ export default defineConfig({
   },
   webServer: {
     command: 'pnpm build && pnpm exec vite preview --host 127.0.0.1 --port 4173 --strictPort',
+    env: {
+      ...process.env,
+      VITE_API_URL: 'http://localhost:3000',
+    },
     reuseExistingServer: !process.env.CI,
     url: 'http://127.0.0.1:4173',
   },

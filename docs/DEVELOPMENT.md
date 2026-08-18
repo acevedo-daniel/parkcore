@@ -47,9 +47,9 @@ On macOS or Linux, use `cp` instead of `Copy-Item`. Docker Compose starts only t
 
 `apps/web/.env` has one browser-safe variable:
 
-| Variable       | Required locally | Purpose                                                                |
-| -------------- | :--------------: | ---------------------------------------------------------------------- |
-| `VITE_API_URL` |        No        | API base URL. Local development falls back to `http://localhost:3000`. |
+| Variable       | Required locally | Purpose                                                                                              |
+| -------------- | :--------------: | ---------------------------------------------------------------------------------------------------- |
+| `VITE_API_URL` |        No        | API base URL. Local development falls back to `http://localhost:3000`; production builds require it. |
 
 ### API production
 
@@ -70,7 +70,7 @@ In local development, the API explicitly allows browser origins so Vite and loca
 
 ### Web production
 
-Set `VITE_API_URL` to the deployed API's public base URL during the web build. It is public, embedded in the browser bundle, and required in production; the application fails fast if it is absent. Do not place database URLs, JWT secrets, or any other secret in the web environment.
+Set `VITE_API_URL` to the deployed API's public base URL during the web build. It is public, embedded in the browser bundle, and required before a production build can complete. Do not place database URLs, JWT secrets, or any other secret in the web environment.
 
 ## Run locally
 

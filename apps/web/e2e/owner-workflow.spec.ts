@@ -31,6 +31,16 @@ function sessionList(data: ParkingSession[]) {
   } satisfies components['schemas']['ParkingSessionListResponse'];
 }
 
+test('serves the SPA entry for direct public and owner routes', async ({ request }) => {
+  for (const path of ['/parkings/parking-1', '/app/parkings/parking-1']) {
+    const response = await request.get(path);
+
+    expect(response.status()).toBe(200);
+    expect(response.headers()['content-type']).toContain('text/html');
+    await expect(response.text()).resolves.toContain('<div id="root">');
+  }
+});
+
 test('registers, creates a parking, checks in, and completes a parking session', async ({
   page,
 }) => {

@@ -10,6 +10,11 @@ const server = app.listen(env.PORT, () => {
   logger.info({ env: env.NODE_ENV }, 'Runtime environment');
 });
 
+server.once('error', (error) => {
+  logger.fatal({ err: error }, 'Failed to start ParkCore API');
+  process.exit(1);
+});
+
 let isShuttingDown = false;
 
 function closeServer(httpServer: Server): Promise<void> {

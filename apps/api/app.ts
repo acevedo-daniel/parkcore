@@ -35,7 +35,7 @@ if (env.NODE_ENV !== 'production' || env.ENABLE_API_DOCS) {
 }
 
 app.get('/healthz', (_req, res) => {
-  res.status(200).json({ status: 'ok' });
+  res.set('cache-control', 'no-store').status(200).json({ status: 'ok' });
 });
 
 app.get('/', (_req, res) => {
