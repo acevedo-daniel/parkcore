@@ -388,7 +388,7 @@ async function main(): Promise<void> {
   });
 
   console.log(
-    `Seed completed for ${owner.email}: ${demoParkings.length} parkings and ${demoParkings.reduce((count, parking) => count + parking.sessions.length, 0)} sessions.`,
+    `Seed completed for ${owner.email}: ${String(demoParkings.length)} parkings and ${String(demoParkings.reduce((count, parking) => count + parking.sessions.length, 0))} sessions.`,
   );
 }
 

@@ -81,6 +81,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build API client
+        run: pnpm --filter @parkcore/api-client build
+
       - name: Frontend checks
         run: pnpm --filter @parkcore/web lint && pnpm --filter @parkcore/web typecheck && pnpm --filter @parkcore/web test && pnpm --filter @parkcore/web build
 
@@ -103,6 +106,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build API client
+        run: pnpm --filter @parkcore/api-client build
 
       - name: Install Playwright Chromium
         run: pnpm --filter @parkcore/web exec playwright install --with-deps chromium
