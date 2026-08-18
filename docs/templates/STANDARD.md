@@ -39,7 +39,6 @@ Do not create documentation for completeness, ceremony, or future possibilities.
 | Template | Active target | Activation |
 |---|---|---|
 | `README.md` | `/README.md` | Always for a software repository. |
-| `AGENTS.md` | `/AGENTS.md` | Always when coding agents are used in the repository. |
 | `PROJECT.md` | `/docs/PROJECT.md` | Create when product scope, users, workflows, constraints, locked decisions, or open decisions need durable project-level definition. Keep/update if it already exists and has useful content. |
 | `ARCHITECTURE.md` | `/docs/ARCHITECTURE.md` | Create when the system has meaningful component boundaries, dependency rules, persistent data, external systems, runtime topology, or architectural invariants. |
 | `DEVELOPMENT.md` | `/docs/DEVELOPMENT.md` | Create when local setup, environment, workspace commands, database workflow, or development conventions are too detailed for README quick start. |
@@ -81,7 +80,7 @@ During an explicit documentation migration/cleanup:
 
 Inspect only what is necessary, typically:
 
-1. existing `README.md`, `AGENTS.md`, and relevant `docs/` files;
+1. existing `README.md` and relevant `docs/` files;
 2. package/project manifests and lockfiles;
 3. scripts and task runners;
 4. framework/tool configuration;

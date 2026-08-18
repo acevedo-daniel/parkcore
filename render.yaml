@@ -22,10 +22,10 @@ services:
         value: info
 
       - key: LOG_PRETTY
-        value: "false"
+        value: 'false'
 
       - key: ENABLE_API_DOCS
-        value: "false"
+        value: 'false'
 
       - key: DATABASE_URL
         sync: false

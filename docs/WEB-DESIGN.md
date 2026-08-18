@@ -1713,9 +1713,9 @@ Do not add Redux/Zustand unless a concrete requirement appears.
 
 ---
 
-# 49. Representative screens to implement first
+# 49. Representative implementation screens
 
-Before building the full product, validate the visual system with:
+The visual system is expressed most clearly through:
 
 1. **Public Parking Catalog**
 2. **Owner Parking Overview**
@@ -1847,7 +1847,7 @@ Implement:
 
 ## Phase 4.10 — UX states
 
-Complete:
+Implemented:
 
 - loading;
 - empty;
@@ -1859,11 +1859,11 @@ Complete:
 
 ## Phase 4.11 — Responsive/accessibility
 
-Perform a formal pass across all screens.
+A formal responsive and accessibility pass covers all public and owner screens.
 
 ## Phase 4.12 — Testing and polish
 
-Add:
+ParkCore 1.0 includes:
 
 - component/form tests;
 - auth tests;
@@ -1877,7 +1877,7 @@ Add:
 
 # 51. Definition of Done — Frontend Design
 
-Phase 3 is complete when the following remain stable enough to implement without redesigning the product during coding:
+The following design decisions are implemented and remain stable for ParkCore 1.0:
 
 - product surfaces;
 - information architecture;

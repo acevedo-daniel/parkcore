@@ -19,7 +19,7 @@
     "test": "pnpm -r --filter @parkcore/api --filter @parkcore/web test",
     "test:coverage": "pnpm -r --filter @parkcore/api --filter @parkcore/web test:coverage",
     "lint": "pnpm -r --filter @parkcore/api --filter @parkcore/api-client --filter @parkcore/web lint",
-    "format:check": "pnpm -r --filter @parkcore/api --filter @parkcore/api-client --filter @parkcore/web format:check && prettier --check README.md AGENTS.md docs .github docker-compose.yml package.json pnpm-workspace.yaml",
+    "format:check": "pnpm -r --filter @parkcore/api --filter @parkcore/api-client --filter @parkcore/web format:check && prettier --check README.md docs .github docker-compose.yml package.json pnpm-workspace.yaml render.yaml vercel.json",
     "contract:generate": "pnpm --filter @parkcore/api generate:openapi && pnpm --filter @parkcore/api-client generate",
     "contract:check": "pnpm contract:generate && git diff --exit-code -- apps/api/openapi.json packages/api-client/src/generated/schema.ts",
     "openapi:check": "pnpm --filter @parkcore/api openapi:check",
