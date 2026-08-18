@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useNavigate, useNavigation } from 'react-router'
 
 import { useAuth } from '../../features/auth/use-auth.js';
 import { cn } from '../../lib/cn.js';
+import { useDocumentMeta } from '../../lib/document-meta.js';
 
 const ownerLinks = [
   { Icon: LayoutDashboard, label: 'Overview', to: '/app' },
@@ -26,6 +27,11 @@ export function OwnerLayout() {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const navigation = useNavigation();
+  useDocumentMeta({
+    description: 'Operate ParkCore parking facilities with active sessions, capacity and rates.',
+    noIndex: true,
+    title: 'ParkCore | Operations',
+  });
 
   const signOut = () => {
     logout();
@@ -33,6 +39,9 @@ export function OwnerLayout() {
   };
   return (
     <div className="owner-theme owner-shell">
+      <a className="skip-link" href="#owner-main">
+        Skip to main content
+      </a>
       <aside className="owner-sidebar">
         <Link aria-label="ParkCore operations" className="brand-mark" to="/app">
           PARKCORE
@@ -70,7 +79,7 @@ export function OwnerLayout() {
           Loading route
         </div>
       ) : null}
-      <main className="owner-main">
+      <main className="owner-main" id="owner-main" tabIndex={-1}>
         <Outlet />
       </main>
       <nav aria-label="Owner mobile navigation" className="owner-mobile-nav">

@@ -8,6 +8,7 @@ import { useDocumentMeta } from '../../lib/document-meta.js';
 export function RegisterRoute() {
   useDocumentMeta({
     description: 'Create a ParkCore owner account to operate parking facilities.',
+    noIndex: true,
     title: 'Create account | ParkCore',
   });
   const location = useLocation();

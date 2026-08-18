@@ -1,9 +1,11 @@
 import type {
   InputHTMLAttributes,
+  ReactElement,
   ReactNode,
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from 'react';
+import { cloneElement, isValidElement } from 'react';
 
 import { cn } from '../../lib/cn.js';
 
@@ -17,13 +19,27 @@ interface FieldProps {
 
 export function Field({ children, error, help, htmlFor, label }: FieldProps) {
   const describedBy = error ? `${htmlFor}-error` : help ? `${htmlFor}-help` : undefined;
+  const control = isValidElement<{
+    'aria-describedby'?: string;
+    'aria-invalid'?: boolean | 'false' | 'true';
+  }>(children)
+    ? cloneElement(children as ReactElement<{
+        'aria-describedby'?: string;
+        'aria-invalid'?: boolean | 'false' | 'true';
+      }>, {
+        'aria-describedby': [children.props['aria-describedby'], describedBy]
+          .filter(Boolean)
+          .join(' ') || undefined,
+        ...(error ? { 'aria-invalid': true } : {}),
+      })
+    : children;
 
   return (
     <div className="field">
       <label className="field-label" htmlFor={htmlFor}>
         {label}
       </label>
-      {children}
+      {control}
       {error ? (
         <p className="field-error" id={describedBy} role="alert">
           {error}

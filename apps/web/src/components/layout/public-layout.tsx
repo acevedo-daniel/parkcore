@@ -78,6 +78,9 @@ export function PublicLayout() {
   const navigation = useNavigation();
   return (
     <div className="public-shell">
+      <a className="skip-link" href="#public-main">
+        Skip to main content
+      </a>
       <header className="public-header">
         <div className="public-header-inner">
           <Link aria-label="ParkCore home" className="brand-mark" to="/">
@@ -96,7 +99,7 @@ export function PublicLayout() {
           Loading route
         </div>
       ) : null}
-      <main className="public-main">
+      <main className="public-main" id="public-main" tabIndex={-1}>
         <Outlet />
       </main>
     </div>

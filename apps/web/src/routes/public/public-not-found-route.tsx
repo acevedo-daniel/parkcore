@@ -5,6 +5,7 @@ import { useDocumentMeta } from '../../lib/document-meta.js';
 export function PublicNotFoundRoute() {
   useDocumentMeta({
     description: 'The requested ParkCore public route is unavailable.',
+    noIndex: true,
     title: 'No parking here | ParkCore',
   });
   return (

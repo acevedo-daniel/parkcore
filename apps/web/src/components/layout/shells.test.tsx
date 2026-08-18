@@ -46,5 +46,6 @@ describe('application shells', () => {
     expect(navigation.textContent).toContain('Overview');
     expect(navigation.textContent).toContain('Parkings');
     expect(navigation.textContent).not.toContain('Payments');
+    expect(document.title).toBe('ParkCore | Operations');
   });
 });

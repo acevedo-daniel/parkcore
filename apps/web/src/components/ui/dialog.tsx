@@ -1,6 +1,6 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useLayoutEffect, useRef, type ReactNode } from 'react';
 
 import { cn } from '../../lib/cn.js';
 
@@ -12,12 +12,31 @@ interface DialogProps {
   title: string;
 }
 
+function useFocusRestoration(open: boolean) {
+  const focusBeforeOpen = useRef<HTMLElement | null>(null);
+  const wasOpen = useRef(open);
+
+  useLayoutEffect(() => {
+    if (open && !wasOpen.current) {
+      focusBeforeOpen.current =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    }
+    wasOpen.current = open;
+  }, [open]);
+
+  return (event: Event) => {
+    event.preventDefault();
+    focusBeforeOpen.current?.focus();
+  };
+}
+
 export function Dialog({ children, description, onOpenChange, open, title }: DialogProps) {
+  const restoreFocus = useFocusRestoration(open);
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="dialog-overlay" />
-        <DialogPrimitive.Content className="dialog-content">
+        <DialogPrimitive.Content className="dialog-content" onCloseAutoFocus={restoreFocus}>
           <header className="dialog-header">
             <div className="stack-tight">
               <p className="type-label">ParkCore</p>
@@ -42,11 +61,15 @@ export function Dialog({ children, description, onOpenChange, open, title }: Dia
 }
 
 export function Sheet({ children, description, onOpenChange, open, title }: DialogProps) {
+  const restoreFocus = useFocusRestoration(open);
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="dialog-overlay" />
-        <DialogPrimitive.Content className={cn('dialog-content', 'sheet-content')}>
+        <DialogPrimitive.Content
+          className={cn('dialog-content', 'sheet-content')}
+          onCloseAutoFocus={restoreFocus}
+        >
           <header className="dialog-header">
             <div className="stack-tight">
               <p className="type-label">Operation</p>

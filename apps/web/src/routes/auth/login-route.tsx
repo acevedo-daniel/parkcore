@@ -8,6 +8,7 @@ import { useDocumentMeta } from '../../lib/document-meta.js';
 export function LoginRoute() {
   useDocumentMeta({
     description: 'Sign in to operate your ParkCore parking facilities.',
+    noIndex: true,
     title: 'Sign in | ParkCore',
   });
   const navigate = useNavigate();

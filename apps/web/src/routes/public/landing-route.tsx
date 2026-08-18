@@ -1,13 +1,14 @@
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router';
 
-import { useDocumentMeta } from '../../lib/document-meta.js';
+import { PARKCORE_PUBLIC_URL, useDocumentMeta } from '../../lib/document-meta.js';
 
 export function LandingRoute() {
   useDocumentMeta({
     description:
       'Find active parking facilities or operate your own parking with clear sessions, capacity and rates.',
-    title: 'ParkCore | Parking operations',
+    publicUrl: PARKCORE_PUBLIC_URL,
+    title: 'ParkCore | Parking Operations',
   });
   return (
     <div className="landing stack-landing">

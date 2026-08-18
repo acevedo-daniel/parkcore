@@ -13,7 +13,7 @@
   --public-surface-raised: #ffffff;
   --public-foreground: #0a0a0a;
   --public-foreground-secondary: #5f5f5f;
-  --public-foreground-muted: #8a8a8a;
+  --public-foreground-muted: #707070;
   --public-border: #dededb;
   --public-border-strong: #b8b8b3;
 
@@ -24,13 +24,13 @@
   --owner-surface-hover: #181818;
   --owner-foreground: #f2f2f2;
   --owner-foreground-secondary: #a3a3a3;
-  --owner-foreground-muted: #6c6c6c;
+  --owner-foreground-muted: #808080;
   --owner-border: #242424;
   --owner-border-strong: #3a3a3a;
 
   /* Semantic meaning, never brand treatment */
-  --success: #248447;
-  --warning: #a86d09;
+  --success: #1f7a3d;
+  --warning: #8a5906;
   --danger: #b42c2c;
 
   /* Spacing */
@@ -147,6 +147,23 @@ p {
 :focus-visible {
   outline: 2px solid var(--foreground);
   outline-offset: 3px;
+}
+
+.skip-link {
+  position: fixed;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 120;
+  transform: translateY(-200%);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--foreground);
+  padding: var(--space-2) var(--space-3);
+  font-weight: 700;
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
 }
 
 .type-hero {
@@ -1102,8 +1119,7 @@ textarea.control {
 .parking-image,
 .parking-image-placeholder {
   width: 100%;
-  min-height: 300px;
-  max-height: 540px;
+  height: clamp(220px, 56.25vw, 540px);
   object-fit: cover;
   border: 1px solid var(--public-border);
 }
@@ -1510,7 +1526,7 @@ textarea.control {
   }
   .parking-image,
   .parking-image-placeholder {
-    min-height: 220px;
+    height: clamp(220px, 56.25vw, 540px);
   }
   .auth-frame {
     min-height: auto;

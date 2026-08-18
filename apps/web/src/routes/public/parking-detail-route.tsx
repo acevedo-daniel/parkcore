@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 
 import { Metric, ParkingIdentity, RateDisplay } from '../../components/domain/parking.js';
 import { ParkingStatus } from '../../components/domain/status.js';
 import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
-import { useDocumentMeta } from '../../lib/document-meta.js';
+import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
 import { getPublicParking, PublicApiError } from '../../lib/api/public-api.js';
 
 export function ParkingDetailRoute() {
@@ -16,10 +17,13 @@ export function ParkingDetailRoute() {
     queryFn: () => getPublicParking(parkingId ?? ''),
   });
   const parking = parkingQuery.data;
+  const [unavailableImage, setUnavailableImage] = useState<string | null>();
   useDocumentMeta({
     description: parking
       ? `${parking.title} is an active ParkCore parking facility at ${parking.address}.`
       : 'View public ParkCore parking facility details.',
+    noIndex: parkingQuery.isError,
+    publicUrl: parking ? publicUrl(`/parkings/${parking.id}`) : undefined,
     title: parking ? `${parking.title} | ParkCore` : 'Parking details | ParkCore',
   });
   if (parkingQuery.isLoading) return <ParkingDetailSkeleton />;
@@ -54,10 +58,15 @@ export function ParkingDetailRoute() {
         <RateDisplay currency={parking.currency} hourlyRateCents={parking.hourlyRateCents} />
         <Metric label="Capacity" value={parking.capacity} />
       </div>
-      {parking.image ? (
+      {parking.image && unavailableImage !== parking.image ? (
         <img
           alt={`${parking.title} parking facility`}
           className="parking-image"
+          decoding="async"
+          fetchPriority="high"
+          onError={() => {
+            setUnavailableImage(parking.image);
+          }}
           src={parking.image}
         />
       ) : (

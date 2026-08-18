@@ -41,6 +41,32 @@ test('serves the SPA entry for direct public and owner routes', async ({ request
   }
 });
 
+test('keeps public mobile navigation and main content usable with a keyboard', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+
+  await page.locator('body').focus();
+  await page.keyboard.press('Tab');
+  const skipLink = page.getByRole('link', { name: 'Skip to main content' });
+  await expect(skipLink).toBeFocused();
+  await expect(skipLink).toHaveCSS('outline-style', 'solid');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#public-main')).toBeFocused();
+
+  const menuTrigger = page.getByRole('button', { name: 'Open navigation' });
+  await menuTrigger.focus();
+  await page.keyboard.press('Enter');
+  const menu = page.getByRole('dialog', { name: 'PARKCORE' });
+  await expect(menu).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Close navigation' })).toBeFocused();
+
+  await page.keyboard.press('Shift+Tab');
+  await expect(menu.getByRole('link', { name: 'Get started' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(menu).toBeHidden();
+  await expect(menuTrigger).toBeFocused();
+});
+
 test('registers, creates a parking, checks in, and completes a parking session', async ({
   page,
 }) => {
