@@ -7,8 +7,8 @@ ParkCore is a pnpm workspace monorepo. It keeps the API independently deployable
 ```mermaid
 flowchart LR
     B[Browser] --> W[Vercel: apps/web]
-    W --> C[packages/api-client]
-    C --> A[Render: apps/api]
+    W --> A[Render: apps/api]
+    C[packages/api-client] -. browser contract .-> W
     A --> D[(Neon PostgreSQL)]
     O[apps/api/openapi.json] -. generates .-> C
 ```
@@ -62,4 +62,4 @@ The selected ParkCore 1.0 deployment targets are Vercel for the static web appli
 
 Root Docker Compose runs a local `parkcore-db` PostgreSQL container only. API and web processes run with root pnpm orchestration and retain independent workspace scripts.
 
-CI has separate API, web, web-E2E, and contract jobs. The API job provisions PostgreSQL and runs API-specific quality/readiness checks; web checks do not boot a database; the E2E job installs Playwright Chromium and runs the mocked owner workflow; the contract job detects generated-type drift.
+CI has separate formatting, API, web, web-E2E, and contract jobs. The API job provisions PostgreSQL and runs API-specific quality/readiness checks; web checks do not boot a database; the E2E job installs Playwright Chromium and runs the mocked owner workflow; the contract job detects generated-type drift.

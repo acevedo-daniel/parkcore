@@ -7,6 +7,7 @@ interface HttpResult {
 
 const baseUrl = (process.env.SMOKE_BASE_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
 const withAuth = process.env.SMOKE_WITH_AUTH === 'true';
+const withDocs = process.env.SMOKE_CHECK_DOCS === 'true';
 const timeoutMs = Number.parseInt(process.env.SMOKE_TIMEOUT_MS ?? '30000', 10);
 const maxRetries = Number.parseInt(process.env.SMOKE_RETRIES ?? '2', 10);
 
@@ -118,15 +119,19 @@ async function checkAuthFlow(): Promise<void> {
 async function main(): Promise<void> {
   console.log(`Smoke check target: ${baseUrl}`);
   await checkHealth();
-  await checkDocs();
+
+  if (withDocs) {
+    await checkDocs();
+  }
 
   if (withAuth) {
     await checkAuthFlow();
   }
 
-  console.log(
-    `Smoke check passed (${withAuth ? 'health + docs + auth' : 'health + docs'}). Base URL: ${baseUrl}`,
-  );
+  const checks = ['health', withDocs ? 'docs' : null, withAuth ? 'auth' : null]
+    .filter((check): check is string => check !== null)
+    .join(' + ');
+  console.log(`Smoke check passed (${checks}). Base URL: ${baseUrl}`);
 }
 
 void main().catch((error: unknown) => {

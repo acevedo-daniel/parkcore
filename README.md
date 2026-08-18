@@ -2,14 +2,12 @@
 
 > A focused parking-operations system for independent parking owners.
 
-ParkCore makes the daily state of a parking facility explicit: capacity, vehicle check-ins, active stays, and charged totals. It exists as a small operational product for owners who need to run a facility, not a marketplace for reservations or payments.
-
-- **Owners** manage their facilities, activate or deactivate them, monitor occupancy, start sessions, and complete or cancel stays.
-- **Public visitors** can discover active facilities, search by address or rate, and inspect parking details. They cannot reserve or pay.
+ParkCore helps an owner run the daily state of a parking facility: manage its availability, check vehicles in, follow active stays, and complete or cancel them with a preserved hourly rate. It also provides a read-only public catalog of active facilities. It is intentionally not a reservation marketplace or payment platform.
 
 ## Demo
 
-[Live web app](https://parkcore-app.vercel.app/) · [API health](https://parkcore-api.onrender.com/healthz)
+- [Production web app](https://parkcore-app.vercel.app/)
+- [API health](https://parkcore-api.onrender.com/healthz)
 
 ## Screenshots
 
@@ -27,21 +25,29 @@ ParkCore makes the daily state of a parking facility explicit: capacity, vehicle
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | ![ParkCore owner check-in sheet with vehicle and visit information](docs/screenshots/check-in-flow.png) | ![ParkCore checkout dialog with the rate snapshot and final calculation](docs/screenshots/checkout-summary.png) |
 
-## Key features
+## Key capabilities
 
-- Discover active parkings by address and hourly rate.
-- Create and operate owner-controlled parkings, including activation and deactivation.
-- Check in a vehicle using its parking-scoped normalized plate identity.
-- Enforce active-session capacity and complete or cancel sessions safely.
-- Preserve each session's USD hourly-rate snapshot and calculated total.
+- Public discovery of active facilities by address and hourly rate.
+- Owner-managed parking lifecycle, including activation and deactivation.
+- Vehicle check-in, active-session monitoring, checkout, cancellation, and history.
+- Parking-scoped vehicle recognition based on a normalized plate.
+- Integer-cent USD pricing with an immutable session-rate snapshot.
+
+## Engineering highlights
+
+- **Operational rules live at the API boundary.** A parking must be active to accept check-ins, and only its owner can operate it or its sessions.
+- **Concurrent check-ins protect capacity.** Serializable persistence work and an active-session constraint prevent over-capacity and duplicate active vehicles.
+- **Completed totals remain historically correct.** Checkout calculates from the rate and currency captured at check-in, not from a parking's later configuration.
+- **The web client is contract-driven.** `@parkcore/api-client` is generated from the API's OpenAPI artifact, and `pnpm contract:check` detects API/client drift.
+- **Verification exercises real boundaries.** PostgreSQL-backed API tests, component tests, Playwright workflow coverage, and CI quality gates validate the operational flow.
 
 ## Architecture
 
 ```text
-Browser -> Vercel web -> @parkcore/api-client -> Render API -> Neon PostgreSQL
+Browser -> Vercel web (React/Vite + @parkcore/api-client) -> Render API -> Neon PostgreSQL
 ```
 
-The API is the domain and persistence authority. `apps/web` consumes it only through the generated `@parkcore/api-client`; OpenAPI generation and contract checks keep that boundary synchronized. See [Architecture](docs/ARCHITECTURE.md) for the dependency rules.
+The API owns domain rules and persistence. The web application consumes it only through the generated client, preserving a clear browser/API boundary. See [Architecture](docs/ARCHITECTURE.md) for the dependency rules and contract flow.
 
 ## Technology stack
 
@@ -56,9 +62,8 @@ The API is the domain and persistence authority. `apps/web` consumes it only thr
 | `apps/api`            | Express API, Prisma schema/migrations, OpenAPI artifact, and API tests.         |
 | `apps/web`            | Public discovery and owner operations React application.                        |
 | `packages/api-client` | Generated OpenAPI types and typed browser API client.                           |
-| `docs`                | Product, architecture, development, testing, deployment, and design references. |
 
-## Local setup
+## Local development
 
 Prerequisites: Node.js 24, pnpm 10, and Docker Desktop.
 
@@ -73,9 +78,10 @@ pnpm dev
 
 On macOS or Linux, replace `Copy-Item` with `cp`. The API starts at `http://localhost:3000`; the web application normally starts at `http://localhost:5173`.
 
-## Testing
+## Quality
 
 ```bash
+pnpm format:check
 pnpm lint
 pnpm typecheck
 pnpm test
@@ -85,13 +91,13 @@ pnpm contract:check
 pnpm build
 ```
 
-`pnpm build` requires `VITE_API_URL`; the local web `.env` supplies it after setup. See [Testing](docs/TESTING.md) for test layers, real-stack checks, coverage, and required release verification.
+`pnpm build` requires `VITE_API_URL`; the local web `.env` supplies it after setup. CI runs formatting, API quality checks with PostgreSQL, web checks, the mocked browser workflow, and contract verification. See [Testing](docs/TESTING.md) for test boundaries and release verification.
 
 ## Documentation
 
-- [Project](docs/PROJECT.md) — product scope and locked domain rules.
-- [Architecture](docs/ARCHITECTURE.md) — system boundaries and dependency rules.
+- [Project](docs/PROJECT.md) — product scope, users, and durable domain rules.
+- [Architecture](docs/ARCHITECTURE.md) — system boundaries, data flow, and dependency rules.
 - [Development](docs/DEVELOPMENT.md) — local environment and workspace workflow.
-- [Testing](docs/TESTING.md) — test strategy and release checks.
+- [Testing](docs/TESTING.md) — test strategy, database setup, and quality gates.
 - [Deployment](docs/DEPLOYMENT.md) — production configuration, migrations, and validation.
-- [Web design](docs/WEB-DESIGN.md) — implemented frontend direction.
+- [Web design](docs/WEB-DESIGN.md) — implemented frontend design decisions.

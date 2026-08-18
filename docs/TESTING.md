@@ -15,6 +15,7 @@ ParkCore verifies its domain rules at the API boundary, its public and owner beh
 | Contract check                  | Detect drift between API OpenAPI output and the generated browser client.                         | `pnpm contract:check`.                                      |
 | Mocked browser workflow         | Owner login, parking operations, and checkout flow against contract-shaped mocked responses.      | Playwright in `apps/web/e2e/owner-workflow.spec.ts`.        |
 | Real-stack smoke and browser QA | Verify the deployed web, API, and PostgreSQL integration.                                         | Playwright real-stack configuration; run manually.          |
+| Remote API smoke                | Verify deployed API liveness; optional checks are explicit to avoid creating data by default.     | `pnpm --filter @parkcore/api smoke:remote`; see Deployment. |
 
 ## Test data and external dependencies
 
@@ -33,6 +34,7 @@ The default Playwright workflow starts a local production preview and intercepts
 ## Run tests
 
 ```bash
+pnpm format:check
 pnpm test
 pnpm test:coverage
 pnpm --filter @parkcore/web test:e2e
@@ -49,6 +51,8 @@ Remove-Item Env:REAL_STACK_WEB_URL
 
 `test:e2e:browser-qa` runs the same real workflow sequentially in Chromium, Firefox, and installed Microsoft Edge. `test:e2e:responsive` performs the production responsive QA in Chromium.
 
+The remote API smoke checks `/healthz` by default. Documentation and authentication checks are opt-in because production disables public API documentation and authentication smoke creates a disposable user. See [Deployment](DEPLOYMENT.md) for its environment variables and production use.
+
 ## Coverage
 
 Vitest enforces these repository thresholds:
@@ -64,6 +68,7 @@ Before handing off a cross-workspace change, run:
 
 ```bash
 pnpm lint
+pnpm format:check
 pnpm typecheck
 pnpm test
 pnpm --filter @parkcore/web test:e2e

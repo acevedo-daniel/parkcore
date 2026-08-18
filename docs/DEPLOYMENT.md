@@ -63,13 +63,13 @@ The Blueprint marks the connection string, JWT secret, and allowed browser origi
 
 [`vercel.json`](../vercel.json) configures the Vite SPA as a Vercel project from the repository root. Keeping the root directory at the repository root gives the build access to the pnpm workspace and `@parkcore/api-client`.
 
-| Stage            | Vercel command / setting                                        |
-| ---------------- | --------------------------------------------------------------- |
-| Node.js          | `24.x`, inherited from the root `package.json` `engines` field. |
-| Install          | `pnpm install --frozen-lockfile`                                |
-| Build            | `pnpm contract:generate && pnpm --filter @parkcore/web build`   |
-| Output directory | `apps/web/dist`                                                 |
-| SPA routing      | `/(.*)` rewrites to `/index.html`                               |
+| Stage            | Vercel command / setting                                                                                  |
+| ---------------- | --------------------------------------------------------------------------------------------------------- |
+| Node.js          | `24.x`, inherited from the root `package.json` `engines` field.                                           |
+| Install          | `pnpm install --frozen-lockfile`                                                                          |
+| Build            | `pnpm contract:generate && pnpm --filter @parkcore/api-client build && pnpm --filter @parkcore/web build` |
+| Output directory | `apps/web/dist`                                                                                           |
+| SPA routing      | `/(.*)` rewrites to `/index.html`                                                                         |
 
 Set `VITE_API_URL` in Vercel's Production environment to the HTTPS Render API origin (`https://parkcore-api.onrender.com`). This is the only browser API location value and is public by design; do not add API, Neon, or JWT secrets to Vercel. Use the same HTTPS value for previews unless a separate preview API is deliberately provisioned.
 
@@ -124,11 +124,13 @@ Do not use `pnpm db:setup` in production: it seeds data. Do not use `prisma migr
 ## Validation
 
 - API health: `GET /healthz` returns `200` with `{ "status": "ok" }` and `Cache-Control: no-store`. It is a process liveness check and intentionally does not orchestrate database or external dependency checks.
-- Optional remote smoke check, with the public API URL supplied by the release environment:
+- Remote smoke check, with the public API URL supplied by the release environment. By default this checks only `/healthz`, which is the production-safe API surface:
 
   ```bash
   SMOKE_BASE_URL=https://your-api-host pnpm --filter @parkcore/api smoke:remote
   ```
+
+  Set `SMOKE_CHECK_DOCS=true` only where API documentation is intentionally enabled. Production disables public OpenAPI documentation, so this check must remain off there. Set `SMOKE_WITH_AUTH=true` only for a disposable environment or account because it registers a smoke user.
 
 - Confirm the deployed web build uses the intended `VITE_API_URL` and can complete the owner workflow.
 - Real-stack smoke test (not part of CI; it uses a disposable account, completes its session, and deactivates its test parking):
