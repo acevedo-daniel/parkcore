@@ -72,6 +72,16 @@ In local development, the API explicitly allows browser origins so Vite and loca
 
 Set `VITE_API_URL` to the deployed API's public base URL during the web build. It is public, embedded in the browser bundle, and required before a production build can complete. Do not place database URLs, JWT secrets, or any other secret in the web environment.
 
+### Browser access-token storage
+
+The web application stores its short-lived JWT access token in `localStorage` so an owner session can survive a browser refresh. This is an explicit ParkCore 1.0 tradeoff: a successful same-origin XSS attack could read and reuse that token until it expires. The API still verifies the token on every protected request; browser storage is not proof of authorization.
+
+The current mitigations are React's default escaping, no use of unsafe HTML APIs, controlled dependencies, and the production Content Security Policy configured in `vercel.json`. Keep the policy's `connect-src` synchronized with the deployed `VITE_API_URL`. Do not add refresh tokens or cookie authentication as release polish; changing the session model requires a separately reviewed security and product decision.
+
+### Dependency security override
+
+The root `pnpm.overrides` pins `deepmerge-ts` to `8.0.0`. Prisma 7.9.1 currently pins the vulnerable `7.1.5` through `@prisma/config`; this minimal transitive override removes the published advisory while retaining Prisma 7. It must remain until Prisma publishes a release that declares a patched version itself. Verify `pnpm audit --prod` and the Prisma generation/build workflow whenever that override changes or is removed.
+
 ## Run locally
 
 ```bash
@@ -113,8 +123,15 @@ pnpm db:setup
 
 Use `pnpm docker:down` to stop the local database. `pnpm docker:reset` removes its local volume and is destructive; never use it against valuable data. Prisma changes use forward migrations only.
 
+### Demo seed
+
+`pnpm db:setup` creates or refreshes the fictional owner selected by `SEED_OWNER_EMAIL` and four coherent demo parkings: three active facilities with varied occupancy and one inactive facility. It includes active, completed, and cancelled sessions, parking-scoped vehicles, and USD pricing snapshots.
+
+The seed replaces sessions and vehicles only for its named demo parkings, so do not use the demo owner for data you need to retain. Its records are fixed; set an optional ISO-8601 `SEED_REFERENCE_TIME` when you need reproducible session timestamps. Without it, active sessions are placed relative to the time the seed runs.
+
 ## Related documentation
 
 - [README](../README.md)
 - [Project](PROJECT.md)
 - [Architecture](ARCHITECTURE.md)
+- [Testing](TESTING.md)

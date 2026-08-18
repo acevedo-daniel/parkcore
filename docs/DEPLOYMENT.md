@@ -35,16 +35,15 @@ CI verifies API, web, generated contract, coverage, build, and browser workflow.
 
 ## Render API service
 
-[`render.yaml`](../render.yaml) declares the `parkcore-api` Render web service from the monorepo root. It uses Node `24.14.1`, pnpm, and the existing API workspace scripts:
+[`render.yaml`](../render.yaml) declares the `parkcore-api` Render web service from the monorepo root. It uses the root Node `24.x` engine, pnpm, and the existing API workspace scripts:
 
-| Stage                | Render command                                                        |
-| -------------------- | --------------------------------------------------------------------- |
-| Build                | `pnpm install --frozen-lockfile && pnpm --filter @parkcore/api build` |
-| Pre-deploy migration | `pnpm --filter @parkcore/api prisma:migrate:deploy`                   |
-| Start                | `pnpm --filter @parkcore/api start`                                   |
-| Health check         | `GET /healthz`                                                        |
+| Stage               | Render command                                                                                                                                             |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Build and migration | `corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm --filter @parkcore/api build && pnpm --filter @parkcore/api prisma:migrate:deploy` |
+| Start               | `pnpm --filter @parkcore/api start`                                                                                                                        |
+| Health check        | `GET /healthz`                                                                                                                                             |
 
-The `starter` plan is declared because Render's pre-deploy command is the supported place to run production migrations. It runs after a successful build and before the new API process starts. Do not replace it with `db:setup`, `prisma migrate dev`, or `prisma migrate reset`.
+The Blueprint declares Render's free plan and runs the forward migration at the end of the successful build before the new API process starts. Do not replace that command with `db:setup`, `prisma migrate dev`, or `prisma migrate reset`.
 
 Render supplies the service port (`10000`); the API binds through `PORT`. Configure these values in Render when creating the Blueprint:
 
@@ -53,7 +52,7 @@ Render supplies the service port (`10000`); the API binds through `PORT`. Config
 | `DATABASE_URL`                               | Neon production PostgreSQL connection string; secret.               |
 | `JWT_SECRET`                                 | Unique production secret of at least 32 characters.                 |
 | `CORS_ORIGINS`                               | Exact deployed Vercel web origin, without a path or trailing slash. |
-| `NODE_VERSION`                               | `24.14.1`.                                                          |
+| Node version                                 | `24.x`, inherited from the root `package.json` engine.              |
 | `NODE_ENV`                                   | `production`.                                                       |
 | `PORT`                                       | `10000`, supplied for the Render web-service listener.              |
 | `LOG_LEVEL`, `LOG_PRETTY`, `ENABLE_API_DOCS` | Declared non-secret runtime settings in `render.yaml`.              |
@@ -75,6 +74,8 @@ The Blueprint marks the connection string, JWT secret, and allowed browser origi
 Set `VITE_API_URL` in Vercel's Production environment to the HTTPS Render API origin (`https://parkcore-api.onrender.com`). This is the only browser API location value and is public by design; do not add API, Neon, or JWT secrets to Vercel. Use the same HTTPS value for previews unless a separate preview API is deliberately provisioned.
 
 Vercel serves the static site over HTTPS. The rewrite preserves direct navigation and refresh for `/app/...` and public client routes while the browser makes API calls directly to the configured Render origin; Vercel does not proxy API traffic.
+
+`vercel.json` also sends a restrictive Content Security Policy and baseline browser protection headers. The policy permits API connections only to `https://parkcore-api.onrender.com`, allows HTTPS parking images, and blocks framing and browser access to camera, microphone, and geolocation. If the deployed API origin changes, update the CSP `connect-src` value together with Vercel's `VITE_API_URL` and the API's `CORS_ORIGINS`.
 
 When creating the Vercel project manually, import this repository, leave **Root Directory** at the repository root, select Node `24.x` if the dashboard asks, and add `VITE_API_URL` before the first production deployment. Do not set its Root Directory to `apps/web`, because this build intentionally consumes the root pnpm workspace and generated contract package.
 
@@ -154,3 +155,4 @@ Do not use `pnpm db:setup` in production: it seeds data. Do not use `prisma migr
 
 - [Development](DEVELOPMENT.md)
 - [Architecture](ARCHITECTURE.md)
+- [Testing](TESTING.md)
