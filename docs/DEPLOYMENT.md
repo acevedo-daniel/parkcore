@@ -60,6 +60,24 @@ Render supplies the service port (`10000`); the API binds through `PORT`. Config
 
 The Blueprint marks the connection string, JWT secret, and allowed browser origin with `sync: false`, so Render prompts for them instead of storing them in Git. It deploys `main` only after the linked CI checks pass. Syncing the Blueprint or creating the service remains a manual Render dashboard action; this repository change does not deploy it.
 
+## Vercel web project
+
+[`vercel.json`](../vercel.json) configures the Vite SPA as a Vercel project from the repository root. Keeping the root directory at the repository root gives the build access to the pnpm workspace and `@parkcore/api-client`.
+
+| Stage            | Vercel command / setting                                        |
+| ---------------- | --------------------------------------------------------------- |
+| Node.js          | `24.x`, inherited from the root `package.json` `engines` field. |
+| Install          | `pnpm install --frozen-lockfile`                                |
+| Build            | `pnpm contract:generate && pnpm --filter @parkcore/web build`   |
+| Output directory | `apps/web/dist`                                                 |
+| SPA routing      | `/(.*)` rewrites to `/index.html`                               |
+
+Set `VITE_API_URL` in Vercel's Production environment to the HTTPS Render API origin (`https://parkcore-api.onrender.com`). This is the only browser API location value and is public by design; do not add API, Neon, or JWT secrets to Vercel. Use the same HTTPS value for previews unless a separate preview API is deliberately provisioned.
+
+Vercel serves the static site over HTTPS. The rewrite preserves direct navigation and refresh for `/app/...` and public client routes while the browser makes API calls directly to the configured Render origin; Vercel does not proxy API traffic.
+
+When creating the Vercel project manually, import this repository, leave **Root Directory** at the repository root, select Node `24.x` if the dashboard asks, and add `VITE_API_URL` before the first production deployment. Do not set its Root Directory to `apps/web`, because this build intentionally consumes the root pnpm workspace and generated contract package.
+
 ## Configuration and secrets
 
 Set API production configuration and web build configuration in the deployment platform. The required boundary is documented in [Development](DEVELOPMENT.md): `DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`, and `CORS_ORIGINS` belong to the API; only public `VITE_API_URL` belongs to the web build.
