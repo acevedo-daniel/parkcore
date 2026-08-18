@@ -23,15 +23,18 @@ export function Field({ children, error, help, htmlFor, label }: FieldProps) {
     'aria-describedby'?: string;
     'aria-invalid'?: boolean | 'false' | 'true';
   }>(children)
-    ? cloneElement(children as ReactElement<{
-        'aria-describedby'?: string;
-        'aria-invalid'?: boolean | 'false' | 'true';
-      }>, {
-        'aria-describedby': [children.props['aria-describedby'], describedBy]
-          .filter(Boolean)
-          .join(' ') || undefined,
-        ...(error ? { 'aria-invalid': true } : {}),
-      })
+    ? cloneElement(
+        children as ReactElement<{
+          'aria-describedby'?: string;
+          'aria-invalid'?: boolean | 'false' | 'true';
+        }>,
+        {
+          'aria-describedby':
+            [children.props['aria-describedby'], describedBy].filter(Boolean).join(' ') ||
+            undefined,
+          ...(error ? { 'aria-invalid': true } : {}),
+        },
+      )
     : children;
 
   return (

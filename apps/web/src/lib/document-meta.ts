@@ -28,7 +28,12 @@ function removeMetaProperty(key: string) {
   document.head.querySelector(`meta[property="${key}"]`)?.remove();
 }
 
-export function useDocumentMeta({ description, noIndex = false, publicUrl: url, title }: DocumentMeta) {
+export function useDocumentMeta({
+  description,
+  noIndex = false,
+  publicUrl: url,
+  title,
+}: DocumentMeta) {
   useEffect(() => {
     document.title = title;
     setMetaAttribute('name', 'description', description);

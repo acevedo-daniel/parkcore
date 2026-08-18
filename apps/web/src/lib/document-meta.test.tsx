@@ -14,7 +14,9 @@ function metaContent(property: string) {
 
 afterEach(() => {
   document.head
-    .querySelectorAll('link[rel="canonical"], meta[name="description"], meta[name="robots"], meta[property^="og:"]')
+    .querySelectorAll(
+      'link[rel="canonical"], meta[name="description"], meta[name="robots"], meta[property^="og:"]',
+    )
     .forEach((element) => {
       element.remove();
     });

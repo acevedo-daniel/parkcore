@@ -71,12 +71,14 @@ async function expectOverlayWithinViewport(locator: Locator, label: string) {
 
   expect(box.x, `${label} should not leave the left viewport edge.`).toBeGreaterThanOrEqual(-1);
   expect(box.y, `${label} should not leave the top viewport edge.`).toBeGreaterThanOrEqual(-1);
-  expect(box.x + box.width, `${label} should not leave the right viewport edge.`).toBeLessThanOrEqual(
-    viewport.width + 1,
-  );
-  expect(box.y + box.height, `${label} should not leave the bottom viewport edge.`).toBeLessThanOrEqual(
-    viewport.height + 1,
-  );
+  expect(
+    box.x + box.width,
+    `${label} should not leave the right viewport edge.`,
+  ).toBeLessThanOrEqual(viewport.width + 1);
+  expect(
+    box.y + box.height,
+    `${label} should not leave the bottom viewport edge.`,
+  ).toBeLessThanOrEqual(viewport.height + 1);
 }
 
 async function expectMobileNavigationDoesNotCoverContent(page: Page, label: string) {
@@ -116,10 +118,9 @@ async function visit(page: Page, path: string, ready: Locator, label: string) {
   await expectMobileNavigationDoesNotCoverContent(page, label);
 }
 
-test('keeps the deployed public and owner surfaces usable at production viewports', async (
-  { page },
-  testInfo,
-) => {
+test('keeps the deployed public and owner surfaces usable at production viewports', async ({
+  page,
+}, testInfo) => {
   test.setTimeout(300_000);
 
   const timestamp = Date.now();
@@ -178,7 +179,12 @@ test('keeps the deployed public and owner surfaces usable at production viewport
       await page.setViewportSize(viewport);
       const prefix = `${viewport.name}:`;
 
-      await visit(page, '/', page.getByRole('heading', { name: /Parking,\s*under control/i }), `${prefix} landing`);
+      await visit(
+        page,
+        '/',
+        page.getByRole('heading', { name: /Parking,\s*under control/i }),
+        `${prefix} landing`,
+      );
       if (viewport.width < 768) {
         await page.getByRole('button', { name: 'Open navigation' }).click();
         const menu = page.getByRole('dialog');
@@ -186,16 +192,34 @@ test('keeps the deployed public and owner surfaces usable at production viewport
         await page.getByRole('button', { name: 'Close navigation' }).click();
       }
       if (viewport.width === 360) {
-        await page.screenshot({ path: testInfo.outputPath('responsive-public-360.png'), fullPage: true });
+        await page.screenshot({
+          path: testInfo.outputPath('responsive-public-360.png'),
+          fullPage: true,
+        });
       }
-      await visit(page, '/parkings', page.getByRole('heading', { name: 'Parkings' }), `${prefix} catalog`);
-      await visit(page, `/parkings/${parkingId}`, page.getByText(title, { exact: true }), `${prefix} public detail`);
+      await visit(
+        page,
+        '/parkings',
+        page.getByRole('heading', { name: 'Parkings' }),
+        `${prefix} catalog`,
+      );
+      await visit(
+        page,
+        `/parkings/${parkingId}`,
+        page.getByText(title, { exact: true }),
+        `${prefix} public detail`,
+      );
       await page.evaluate(() => {
         localStorage.removeItem('parkcore.access-token');
       });
       await visit(page, '/login', page.getByLabel('Email'), `${prefix} login`);
       await visit(page, '/register', page.getByLabel('Name (optional)'), `${prefix} register`);
-      await visit(page, '/not-a-route', page.getByRole('heading', { name: /No parking/i }), `${prefix} public 404`);
+      await visit(
+        page,
+        '/not-a-route',
+        page.getByRole('heading', { name: /No parking/i }),
+        `${prefix} public 404`,
+      );
 
       await page.goto('/login');
       await page.getByLabel('Email').fill(email);
@@ -211,35 +235,87 @@ test('keeps the deployed public and owner surfaces usable at production viewport
         `${prefix} owner overview`,
       );
       if (viewport.width === 1440) {
-        await page.screenshot({ path: testInfo.outputPath('responsive-owner-1440.png'), fullPage: true });
+        await page.screenshot({
+          path: testInfo.outputPath('responsive-owner-1440.png'),
+          fullPage: true,
+        });
       }
-      await visit(page, '/app/parkings', page.getByRole('heading', { name: 'Parkings' }), `${prefix} owner parking list`);
-      await visit(page, '/app/parkings/new', page.getByRole('heading', { name: 'Create parking' }), `${prefix} create form`);
-      await expectElementWithinViewport(page.getByLabel('Capacity'), `${prefix} create capacity field`);
-      await expectElementWithinViewport(page.getByLabel('Hourly rate (USD)'), `${prefix} create rate field`);
+      await visit(
+        page,
+        '/app/parkings',
+        page.getByRole('heading', { name: 'Parkings' }),
+        `${prefix} owner parking list`,
+      );
+      await visit(
+        page,
+        '/app/parkings/new',
+        page.getByRole('heading', { name: 'Create parking' }),
+        `${prefix} create form`,
+      );
+      await expectElementWithinViewport(
+        page.getByLabel('Capacity'),
+        `${prefix} create capacity field`,
+      );
+      await expectElementWithinViewport(
+        page.getByLabel('Hourly rate (USD)'),
+        `${prefix} create rate field`,
+      );
 
-      await visit(page, `/app/parkings/${parkingId}`, page.getByRole('button', { name: 'Check in', exact: true }), `${prefix} parking overview`);
+      await visit(
+        page,
+        `/app/parkings/${parkingId}`,
+        page.getByRole('button', { name: 'Check in', exact: true }),
+        `${prefix} parking overview`,
+      );
       await page.getByRole('button', { name: 'Check in', exact: true }).click();
       const checkInSheet = page.getByRole('dialog', { name: 'Check in vehicle' });
       await expectOverlayWithinViewport(checkInSheet, `${prefix} check-in sheet`);
       await page.getByRole('button', { name: 'Close Check in vehicle' }).click();
 
-      await visit(page, `/app/parkings/${parkingId}/edit`, page.getByRole('heading', { name: 'Edit parking' }), `${prefix} edit form`);
-      await expectElementWithinViewport(page.getByLabel('Accept new check-ins'), `${prefix} parking status control`);
-      await visit(page, `/app/parkings/${parkingId}/sessions`, page.getByRole('heading', { name: 'Session history' }), `${prefix} history`);
+      await visit(
+        page,
+        `/app/parkings/${parkingId}/edit`,
+        page.getByRole('heading', { name: 'Edit parking' }),
+        `${prefix} edit form`,
+      );
+      await expectElementWithinViewport(
+        page.getByLabel('Accept new check-ins'),
+        `${prefix} parking status control`,
+      );
+      await visit(
+        page,
+        `/app/parkings/${parkingId}/sessions`,
+        page.getByRole('heading', { name: 'Session history' }),
+        `${prefix} history`,
+      );
       await expectElementWithinViewport(
         page.getByRole('navigation', { name: 'Session history pagination' }),
         `${prefix} history pagination`,
       );
-      await visit(page, `/app/sessions/${sessionId}`, page.getByRole('button', { name: 'Check out' }), `${prefix} session detail`);
+      await visit(
+        page,
+        `/app/sessions/${sessionId}`,
+        page.getByRole('button', { name: 'Check out' }),
+        `${prefix} session detail`,
+      );
       await page.getByRole('button', { name: 'Check out' }).click();
       const checkoutDialog = page.getByRole('dialog', { name: 'Complete checkout' });
       await expectOverlayWithinViewport(checkoutDialog, `${prefix} checkout dialog`);
       await page.getByRole('button', { name: 'Close Complete checkout' }).click();
 
-      await visit(page, '/app/profile', page.getByRole('heading', { name: 'Profile' }), `${prefix} profile`);
+      await visit(
+        page,
+        '/app/profile',
+        page.getByRole('heading', { name: 'Profile' }),
+        `${prefix} profile`,
+      );
       await expectElementWithinViewport(page.getByLabel('Email'), `${prefix} profile email field`);
-      await visit(page, '/app/missing', page.getByRole('heading', { name: 'Route unavailable' }), `${prefix} owner 404`);
+      await visit(
+        page,
+        '/app/missing',
+        page.getByRole('heading', { name: 'Route unavailable' }),
+        `${prefix} owner 404`,
+      );
     }
   } finally {
     if (apiBaseUrl && token && sessionId) {

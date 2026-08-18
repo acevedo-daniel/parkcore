@@ -5,6 +5,7 @@
 
 # Dependencies
 node_modules/
+docs/templates/
 
 # Generated
 apps/api/prisma/generated/
