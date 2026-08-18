@@ -2,30 +2,36 @@ services:
   - type: web
     name: parkcore-api
     runtime: node
-    plan: starter
+    plan: free
     branch: main
     rootDir: .
-    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @parkcore/api build
-    preDeployCommand: pnpm --filter @parkcore/api prisma:migrate:deploy
+
+    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm --filter @parkcore/api build && pnpm --filter @parkcore/api prisma:migrate:deploy
+
     startCommand: pnpm --filter @parkcore/api start
+
     healthCheckPath: /healthz
+
     autoDeployTrigger: checksPass
+
     envVars:
-      - key: NODE_VERSION
-        value: 24.14.1
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000
+
       - key: LOG_LEVEL
         value: info
+
       - key: LOG_PRETTY
-        value: 'false'
+        value: "false"
+
       - key: ENABLE_API_DOCS
-        value: 'false'
+        value: "false"
+
       - key: DATABASE_URL
         sync: false
+
       - key: JWT_SECRET
         sync: false
+
       - key: CORS_ORIGINS
         sync: false
