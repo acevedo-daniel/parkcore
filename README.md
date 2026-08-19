@@ -13,33 +13,33 @@ ParkCore helps an owner run the daily state of a parking facility: manage its av
 
 ### Public discovery
 
-![ParkCore public landing page with the parking operations overview](docs/screenshots/public-home.png)
-
-![ParkCore public parking catalog filtered to fictional demo facilities](docs/screenshots/public-catalog.png)
+| Landing page                                                      | Public catalog                                                                                  |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| ![ParkCore public landing page](docs/screenshots/public-home.png) | ![ParkCore public parking catalog with search and filters](docs/screenshots/public-catalog.png) |
 
 ### Owner operations
 
 ![ParkCore owner parking overview with live occupancy and active sessions](docs/screenshots/owner-parking-overview.png)
 
-| Check-in flow                                                                                           | Checkout summary                                                                                                |
+| Vehicle check-in                                                                                        | Checkout summary                                                                                                |
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | ![ParkCore owner check-in sheet with vehicle and visit information](docs/screenshots/check-in-flow.png) | ![ParkCore checkout dialog with the rate snapshot and final calculation](docs/screenshots/checkout-summary.png) |
 
 ## Key capabilities
 
-- Public discovery of active facilities by address and hourly rate.
-- Owner-managed parking lifecycle, including activation and deactivation.
-- Vehicle check-in, active-session monitoring, checkout, cancellation, and history.
-- Parking-scoped vehicle recognition based on a normalized plate.
-- Integer-cent USD pricing with an immutable session-rate snapshot.
+- **Public discovery:** Search and filter active parking facilities by address and hourly rate.
+- **Parking lifecycle:** Owners manage facilities and control whether they are active, publicly visible, and eligible for new check-ins.
+- **Session operations:** Check vehicles in, monitor active sessions, complete or cancel stays, and review session history.
+- **Vehicle recognition:** Normalize license plates and reuse parking-scoped vehicle identity across repeat visits.
+- **Pricing snapshots:** Store the hourly rate and currency at check-in so completed totals remain historically correct.
 
 ## Engineering highlights
 
-- **Operational rules live at the API boundary.** A parking must be active to accept check-ins, and only its owner can operate it or its sessions.
-- **Concurrent check-ins protect capacity.** Serializable persistence work and an active-session constraint prevent over-capacity and duplicate active vehicles.
-- **Completed totals remain historically correct.** Checkout calculates from the rate and currency captured at check-in, not from a parking's later configuration.
-- **The web client is contract-driven.** `@parkcore/api-client` is generated from the API's OpenAPI artifact, and `pnpm contract:check` detects API/client drift.
-- **Verification exercises real boundaries.** PostgreSQL-backed API tests, component tests, Playwright workflow coverage, and CI quality gates validate the operational flow.
+- **Domain rules stay at the API boundary.** A parking must be active to accept check-ins, and only its owner can operate the parking or its sessions.
+- **Capacity is protected under concurrent check-ins.** Serializable persistence work and a database constraint prevent over-capacity and duplicate active vehicles for the same parking.
+- **Historical pricing stays stable.** Checkout uses the rate and currency captured when the session started rather than the parking's current configuration.
+- **The web client is contract-driven.** `@parkcore/api-client` is generated from the API's OpenAPI artifact, while `pnpm contract:check` detects API/client drift.
+- **Verification covers different system boundaries.** PostgreSQL-backed API tests exercise domain and persistence behavior, web tests cover components and routes, Playwright covers the owner workflow, and separate real-stack checks can verify the deployed system.
 
 ## Architecture
 
@@ -47,21 +47,25 @@ ParkCore helps an owner run the daily state of a parking facility: manage its av
 Browser -> Vercel web (React/Vite + @parkcore/api-client) -> Render API -> Neon PostgreSQL
 ```
 
-The API owns domain rules and persistence. The web application consumes it only through the generated client, preserving a clear browser/API boundary. See [Architecture](docs/ARCHITECTURE.md) for the dependency rules and contract flow.
+- **API (`apps/api`):** Owns authentication, domain rules, authorization, and Prisma persistence.
+- **Web (`apps/web`):** Owns public discovery and owner operations, with React Router for navigation and TanStack Query for server state.
+- **API client (`packages/api-client`):** Provides the generated TypeScript contract used by the browser application.
+
+The web application does not import API internals or Prisma types; it communicates with the API through the generated client. See [Architecture](docs/ARCHITECTURE.md) for dependency rules, data flow, and contract generation.
 
 ## Technology stack
 
-- **Web:** React, Vite, React Router, TanStack Query, React Hook Form, and Zod.
+- **Web:** React, Vite, React Router, TanStack Query, React Hook Form, Tailwind CSS, and Zod.
 - **API:** Node.js, Express 5, Prisma, PostgreSQL, Zod, and OpenAPI.
 - **Tooling:** pnpm workspaces, Vitest, Playwright, ESLint, Prettier, and Docker Compose.
 
 ## Repository structure
 
-| Path                  | Responsibility                                                          |
-| --------------------- | ----------------------------------------------------------------------- |
-| `apps/api`            | Express API, Prisma schema/migrations, OpenAPI artifact, and API tests. |
-| `apps/web`            | Public discovery and owner operations React application.                |
-| `packages/api-client` | Generated OpenAPI types and typed browser API client.                   |
+| Path                  | Responsibility                                                              |
+| --------------------- | --------------------------------------------------------------------------- |
+| `apps/api`            | Express API, Prisma schema and migrations, OpenAPI artifact, and API tests. |
+| `apps/web`            | Public discovery and owner operations React application.                    |
+| `packages/api-client` | Generated OpenAPI types and typed browser API client.                       |
 
 ## Local development
 
@@ -91,7 +95,7 @@ pnpm contract:check
 pnpm build
 ```
 
-`pnpm build` requires `VITE_API_URL`; the local web `.env` supplies it after setup. CI runs formatting, API quality checks with PostgreSQL, web checks, the mocked browser workflow, and contract verification. See [Testing](docs/TESTING.md) for test boundaries and release verification.
+`pnpm build` requires `VITE_API_URL`; the local web `.env` supplies it after setup. CI runs formatting, API checks with PostgreSQL, web checks, the browser workflow, and contract verification. See [Testing](docs/TESTING.md) for test boundaries, coverage thresholds, and release verification.
 
 ## Documentation
 
@@ -100,4 +104,3 @@ pnpm build
 - [Development](docs/DEVELOPMENT.md) — local environment and workspace workflow.
 - [Testing](docs/TESTING.md) — test strategy, database setup, and quality gates.
 - [Deployment](docs/DEPLOYMENT.md) — production configuration, migrations, and validation.
-- [Web design](docs/WEB-DESIGN.md) — implemented frontend design decisions.

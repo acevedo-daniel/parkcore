@@ -1,73 +1,123 @@
-# Project
+# ParkCore — Project
+
+> Product scope, actors, domain model, and durable business rules for ParkCore 1.0.
 
 ## Product
 
-ParkCore is a focused parking-operations system for independent parking owners. Owners use it to operate a facility; public visitors use a read-only catalog of active facilities.
+ParkCore is a parking-operations system for independent parking owners. Owners use it to manage facilities and the vehicle sessions taking place inside them; public visitors can browse active facilities through a read-only catalog.
 
-It records vehicles entering and leaving an owner-operated facility, enforces concurrent capacity, and preserves the price charged for each stay.
+The product focuses on the operational state of a parking facility: whether it is open for intake, how much capacity remains, which vehicles are currently inside, and how an individual stay is completed or cancelled.
 
 ## Problem
 
-Parking operations need a clear current state: which facilities are active, which vehicles are inside, whether capacity remains, and what a completed stay should cost. ParkCore keeps those operational facts together without expanding into reservations, payments, or a multi-sided marketplace.
+Running a parking facility requires a reliable current state. The operator needs to know which facilities are active, which vehicles are inside, whether capacity remains, and what rate applies to each stay.
+
+ParkCore keeps those facts together in one workflow without expanding into reservations, payment processing, customer accounts, or marketplace behavior.
 
 ## Actors
 
-| Actor          | Capabilities                                                                    |
-| -------------- | ------------------------------------------------------------------------------- |
-| Public visitor | Lists, searches, filters, and views active parking facilities.                  |
-| Owner/operator | Registers, manages a profile and owned parkings, and operates parking sessions. |
+| Actor          | Capabilities                                                                 |
+| -------------- | ---------------------------------------------------------------------------- |
+| Public visitor | Browse, search, filter, and view active parking facilities.                  |
+| Owner/operator | Register, manage a profile and owned parkings, and operate parking sessions. |
 
-Visiting drivers may be recorded as contact data for a stay, but have no account or API access.
+Driver information can be recorded as visit data during check-in, but drivers do not have ParkCore accounts or direct API access.
 
 ## Scope
 
-- Public catalog of active parkings with search and rate filters.
-- Public parking detail, URL-backed catalog pagination, and public 404.
-- Owner authentication and profile management.
-- Owner-controlled parking lifecycle through `isActive`.
-- Owner parking management, active-session operations, checkout/cancel, and paginated history.
-- Parking-scoped vehicle recognition during check-in.
-- Active, completed, and cancelled parking sessions.
-- Capacity based on concurrent active sessions.
-- Integer-cent pricing with a rate and currency snapshot per session.
+### Public experience
 
-## Out of Scope
+- List active parking facilities.
+- Search and filter the catalog by address and hourly rate.
+- View public parking details.
+- Navigate paginated catalog results.
+- Receive a public not-found state for unavailable facilities.
 
-- Reservations, marketplace transactions, or public session creation.
-- Payments, registered customers, employees, additional roles, or RBAC.
-- Public feedback, moderation, and customer eligibility workflows.
-- Physical spaces, floors, sectors, or slots.
-- Public hard deletion of parkings.
+### Owner experience
 
-## Domain
+- Register and authenticate as an owner.
+- Manage the owner profile.
+- Create and edit owned parking facilities.
+- Activate or deactivate a parking.
+- View occupancy and active sessions.
+- Check vehicles in.
+- Complete or cancel active sessions.
+- Review paginated session history.
 
-### Ownership and Parking
+### Operational model
 
-`User` is the sole owner/operator identity. Every `Parking` belongs to exactly one user.
+- Reuse a parking-scoped vehicle identity across visits.
+- Track `ACTIVE`, `COMPLETED`, and `CANCELLED` sessions.
+- Calculate capacity from concurrent active sessions.
+- Preserve the hourly rate and currency that applied when a session started.
 
-`Parking.isActive` controls lifecycle. Active parkings appear in the public catalog and accept check-ins. Inactive parkings are visible to their owner but hidden publicly and reject new check-ins. Owners can reactivate or deactivate a parking.
+## Out of scope
 
-### Vehicle and ParkingSession
+ParkCore 1.0 intentionally does not include:
 
-`Vehicle` is stable vehicle identity inside one parking. It owns the normalized plate, type, brand, and model. Its identity is `(parkingId, normalizedPlate)`, where normalization trims, uppercases, and removes non-alphanumeric characters.
+- reservations or advance booking;
+- payments or payment-provider integrations;
+- a multi-sided marketplace;
+- registered driver/customer accounts;
+- employees, additional operator roles, or RBAC;
+- reviews, public feedback, or moderation;
+- physical slots, floors, sectors, or numbered spaces;
+- public hard deletion of parkings.
 
-Check-in creates or reuses that identity. Returning vehicles update stable metadata only when the new check-in explicitly supplies it; omitted values never erase existing metadata.
+## Domain model
 
-`ParkingSession` is one actual visit. It owns visit-specific customer name, customer phone, operational notes, timestamps, status, and pricing snapshot.
+### User and Parking
+
+`User` is the owner/operator identity. Every `Parking` belongs to exactly one user.
+
+`Parking.isActive` controls operational availability:
+
+- active parkings appear in the public catalog and may accept new check-ins;
+- inactive parkings remain visible to their owner but are hidden from public discovery and reject new check-ins.
+
+A parking also owns its configured capacity, hourly rate, currency, location, and the vehicles and sessions associated with that facility.
+
+### Vehicle
+
+`Vehicle` represents stable vehicle identity within one parking.
+
+Its identity is parking-scoped: the same normalized plate may exist independently in different parking facilities. Plate normalization trims the input, uppercases it, and removes non-alphanumeric characters before identity lookup.
+
+Stable vehicle metadata includes type, brand, and model. A returning vehicle can reuse that identity on a later check-in.
+
+### ParkingSession
+
+`ParkingSession` represents one actual stay.
+
+A session owns visit-specific data such as:
+
+- start and end time;
+- customer name and phone when provided;
+- operational notes;
+- status;
+- hourly-rate and currency snapshot;
+- final amount when completed.
+
+The lifecycle is deliberately small:
 
 ```text
-check-in: ACTIVE
-ACTIVE --check-out--> COMPLETED
+check-in -> ACTIVE
+
+ACTIVE --checkout--> COMPLETED
 ACTIVE --cancel----> CANCELLED
 ```
 
-`COMPLETED` and `CANCELLED` are terminal. There are no pending or confirmed states.
+`COMPLETED` and `CANCELLED` are terminal states.
 
-### Capacity and Pricing
+## Capacity and pricing
 
-Capacity is the maximum number of simultaneous `ACTIVE` sessions; ParkCore does not model physical slots.
+Capacity is the maximum number of simultaneous `ACTIVE` sessions in a parking. ParkCore does not model individual physical spaces.
 
-Money uses integer cents. ParkCore 1.0 supports `USD` explicitly. Each session snapshots the parking hourly rate and currency at check-in. Checkout never reads a later parking rate.
+Money is stored in integer cents. ParkCore 1.0 supports `USD`.
+
+At check-in, the session snapshots the parking's hourly rate and currency. Checkout therefore uses the terms that applied when the stay began, even if the parking configuration changes later.
+
+Billing uses started hours with a one-hour minimum:
 
 ```text
 elapsedHours = (checkoutTime - startTime) / 3,600,000
@@ -75,17 +125,30 @@ chargedHours = max(1, ceil(elapsedHours))
 totalAmountCents = chargedHours * hourlyRateCents
 ```
 
-## Business Rules
+## Business rules
 
-- Public parking reads return only active parkings.
-- Only the owner can operate a parking or one of its sessions.
-- Check-in, capacity validation, and duplicate active-session validation run in a serializable transaction.
-- A partial unique database index prevents more than one active session for the same parking and vehicle.
-- Checkout and cancel perform an atomic conditional transition from `ACTIVE`.
-- Vehicle data has no standalone HTTP CRUD API; it is managed through check-in.
+- Only active parkings are exposed through public parking reads.
+- Only the owner may modify a parking or operate its sessions.
+- An inactive parking cannot accept a new check-in.
+- A parking cannot exceed its configured number of concurrent active sessions.
+- The same parking/vehicle pair cannot have more than one active session.
+- Check-in performs capacity and duplicate-active-session validation in a serializable transaction.
+- A database-level partial unique index reinforces the one-active-session invariant for a parking/vehicle pair.
+- Checkout and cancellation transition only an `ACTIVE` session.
+- Checkout calculates from the session's stored pricing snapshot.
+- Vehicle identity is managed through the check-in workflow; there is no standalone vehicle CRUD surface.
 
-## Relevant Limitations
+## Product limitations
 
-- ParkCore 1.0 is a direct-breaking API: it offers `/sessions`, not compatibility aliases.
-- Historical Prisma migrations retain former terminology because applied migrations are immutable. Active code, schema, and HTTP contracts do not use it.
-- The supported-currency enum intentionally contains only USD. Supporting another currency requires an explicit domain and migration decision.
+- `USD` is the only supported currency in ParkCore 1.0.
+- Capacity represents concurrent vehicles, not mapped physical spaces.
+- The public experience is discovery-only: it cannot create or alter parking sessions.
+- Driver/contact data belongs to an individual stay and does not create a customer account.
+
+## Related documentation
+
+- [README](../README.md)
+- [Architecture](ARCHITECTURE.md)
+- [Development](DEVELOPMENT.md)
+- [Testing](TESTING.md)
+- [Deployment](DEPLOYMENT.md)

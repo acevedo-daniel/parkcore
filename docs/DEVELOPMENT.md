@@ -1,16 +1,18 @@
-# Development
+# ParkCore — Development
 
-> Local setup and the environment boundary for ParkCore 1.0.
+> Local setup, environment configuration, workspace commands, and database workflow for ParkCore 1.0.
 
 ## Requirements
 
-| Tool           | Required version | Source               |
-| -------------- | ---------------- | -------------------- |
-| Node.js        | 24.x             | Root `package.json`  |
-| pnpm           | 10.33.0          | Root `package.json`  |
-| Docker Desktop | Local PostgreSQL | `docker-compose.yml` |
+| Tool           | Version / requirement                       | Source               |
+| -------------- | ------------------------------------------- | -------------------- |
+| Node.js        | 24.x                                        | root `package.json`  |
+| pnpm           | 10.33.0                                     | root `package.json`  |
+| Docker Desktop | Required for the local PostgreSQL container | `docker-compose.yml` |
 
 ## Initial setup
+
+From the repository root:
 
 ```powershell
 Copy-Item apps/api/.env.example apps/api/.env
@@ -21,66 +23,43 @@ pnpm db:setup
 pnpm dev
 ```
 
-On macOS or Linux, use `cp` instead of `Copy-Item`. Docker Compose starts only the local PostgreSQL service; API and web processes run from the host.
+On macOS or Linux, use `cp` instead of `Copy-Item`.
 
-## Environment boundary
+Docker Compose starts PostgreSQL only. The API and web development processes run on the host through pnpm.
 
-`.env` files are ignored. Copy the examples, keep real credentials outside version control, and never place a secret in a `VITE_*` variable.
+## Local environment
 
-### Local development
+Real `.env` files are ignored by Git. Copy the examples and keep non-development credentials outside version control.
 
-`apps/api/.env` is the API runtime configuration. The example contains the complete local variable set:
+### API
 
-| Variable                    | Required locally | Purpose                                                                                  |
-| --------------------------- | :--------------: | ---------------------------------------------------------------------------------------- |
-| `NODE_ENV`                  |        No        | Runtime mode; defaults to `development`.                                                 |
-| `PORT`                      |        No        | API port; defaults to `3000`.                                                            |
-| `DATABASE_URL`              |       Yes        | Local PostgreSQL connection.                                                             |
-| `JWT_SECRET`                |       Yes        | Access-token signing secret; at least 32 characters.                                     |
-| `CORS_ORIGINS`              |        No        | Comma-separated exact HTTP(S) browser origins; no paths, trailing slashes, or wildcards. |
-| `JWT_EXPIRES_IN`            |        No        | Access-token lifetime; defaults to `24h`.                                                |
-| `AUTH_RATE_LIMIT_MAX`       |        No        | Maximum auth requests per window; defaults to `15`.                                      |
-| `AUTH_RATE_LIMIT_WINDOW_MS` |        No        | Auth rate-limit window; defaults to `900000`.                                            |
-| `LOG_LEVEL`                 |        No        | Pino log level; defaults to `info`.                                                      |
-| `LOG_PRETTY`                |        No        | Pretty local logs; defaults to `false`.                                                  |
-| `ENABLE_API_DOCS`           |        No        | Adds the API reference in production; local development exposes it by default.           |
+`apps/api/.env` contains the local API runtime configuration.
 
-`apps/web/.env` has one browser-safe variable:
+| Variable                    | Required locally | Purpose                                                                  |
+| --------------------------- | :--------------: | ------------------------------------------------------------------------ |
+| `NODE_ENV`                  |        No        | Runtime mode; local example uses `development`.                          |
+| `PORT`                      |        No        | API port; defaults to `3000`.                                            |
+| `CORS_ORIGINS`              |        No        | Allowed browser origins; local example permits the Vite origin.          |
+| `JWT_SECRET`                |       Yes        | Access-token signing secret. Use the example only for local development. |
+| `JWT_EXPIRES_IN`            |        No        | Access-token lifetime; default is `24h`.                                 |
+| `AUTH_RATE_LIMIT_MAX`       |        No        | Maximum authentication requests per rate-limit window.                   |
+| `AUTH_RATE_LIMIT_WINDOW_MS` |        No        | Authentication rate-limit window duration.                               |
+| `LOG_LEVEL`                 |        No        | Pino log level.                                                          |
+| `LOG_PRETTY`                |        No        | Enables readable local logging.                                          |
+| `ENABLE_API_DOCS`           |        No        | Controls the API reference outside the normal development behavior.      |
+| `DATABASE_URL`              |       Yes        | PostgreSQL connection used by Prisma and the API.                        |
 
-| Variable       | Required locally | Purpose                                                                                              |
-| -------------- | :--------------: | ---------------------------------------------------------------------------------------------------- |
-| `VITE_API_URL` |        No        | API base URL. Local development falls back to `http://localhost:3000`; production builds require it. |
+The local example points `DATABASE_URL` to the PostgreSQL container started by `pnpm docker:up`.
 
-### API production
+### Web
 
-Set these API runtime variables in the deployment platform's secret/configuration store:
+`apps/web/.env` contains browser-safe configuration only:
 
-| Variable                                                                                                           | Required | Production rule                                                                      |
-| ------------------------------------------------------------------------------------------------------------------ | :------: | ------------------------------------------------------------------------------------ |
-| `NODE_ENV`                                                                                                         |   Yes    | Must be `production`.                                                                |
-| `DATABASE_URL`                                                                                                     |   Yes    | Production PostgreSQL connection string.                                             |
-| `JWT_SECRET`                                                                                                       |   Yes    | Unique secret of at least 32 characters.                                             |
-| `CORS_ORIGINS`                                                                                                     |   Yes    | Comma-separated exact allowed web origins; no paths, trailing slashes, or wildcards. |
-| `PORT`                                                                                                             |    No    | Defaults to `3000`; set it only when the host requires a port.                       |
-| `JWT_EXPIRES_IN`, `AUTH_RATE_LIMIT_MAX`, `AUTH_RATE_LIMIT_WINDOW_MS`, `LOG_LEVEL`, `LOG_PRETTY`, `ENABLE_API_DOCS` |    No    | Use defaults unless the deployment requires a deliberate override.                   |
+| Variable       | Required locally | Purpose                                                                                            |
+| -------------- | :--------------: | -------------------------------------------------------------------------------------------------- |
+| `VITE_API_URL` |        No        | Base URL used by the generated browser API client. Local development uses `http://localhost:3000`. |
 
-The API does not consume `API_BASE_URL`. Docker's `POSTGRES_*` values are fixed local Compose settings, not API production variables.
-
-In local development, the API explicitly allows browser origins so Vite and local tools can use different ports. In production, only origins in `CORS_ORIGINS` are accepted; malformed or missing configuration prevents startup. Requests without an `Origin` header, such as health checks or server-to-server traffic, are allowed because CORS does not apply to them.
-
-### Web production
-
-Set `VITE_API_URL` to the deployed API's public base URL during the web build. It is public, embedded in the browser bundle, and required before a production build can complete. Do not place database URLs, JWT secrets, or any other secret in the web environment.
-
-### Browser access-token storage
-
-The web application stores its short-lived JWT access token in `localStorage` so an owner session can survive a browser refresh. This is an explicit ParkCore 1.0 tradeoff: a successful same-origin XSS attack could read and reuse that token until it expires. The API still verifies the token on every protected request; browser storage is not proof of authorization.
-
-The current mitigations are React's default escaping, no use of unsafe HTML APIs, controlled dependencies, and the production Content Security Policy configured in `vercel.json`. Keep the policy's `connect-src` synchronized with the deployed `VITE_API_URL`. Do not add refresh tokens or cookie authentication as release polish; changing the session model requires a separately reviewed security and product decision.
-
-### Dependency security override
-
-The root `pnpm.overrides` pins `deepmerge-ts` to `8.0.0`. Prisma 7.9.1 currently pins the vulnerable `7.1.5` through `@prisma/config`; this minimal transitive override removes the published advisory while retaining Prisma 7. It must remain until Prisma publishes a release that declares a patched version itself. Verify `pnpm audit --prod` and the Prisma generation/build workflow whenever that override changes or is removed.
+Never put secrets in `VITE_*` variables; Vite embeds them into the browser build.
 
 ## Run locally
 
@@ -88,50 +67,76 @@ The root `pnpm.overrides` pins `deepmerge-ts` to `8.0.0`. Prisma 7.9.1 currently
 pnpm dev
 ```
 
+Typical local URLs:
+
 - API: `http://localhost:3000`
 - API reference: `http://localhost:3000/docs`
-- Web: Vite's local URL, normally `http://localhost:5173`
+- Web: `http://localhost:5173`
 
-## Commands
+## Root commands
 
-| Task                 | Command                                | Notes                                                       |
-| -------------------- | -------------------------------------- | ----------------------------------------------------------- |
-| Start local database | `pnpm docker:up`                       | Starts the `parkcore-db` container.                         |
-| Prepare database     | `pnpm db:setup`                        | Generates Prisma, applies migrations, and seeds local data. |
-| Develop              | `pnpm dev`                             | Runs API and web from the host.                             |
-| Format check         | `pnpm format:check`                    | Verifies repository formatting without writing files.       |
-| Lint                 | `pnpm lint`                            | Runs API, API-client, and web lint checks.                  |
-| Typecheck            | `pnpm typecheck`                       | Checks all workspace TypeScript projects.                   |
-| Test                 | `pnpm test`                            | Runs API and web unit/integration tests.                    |
-| Browser workflow     | `pnpm --filter @parkcore/web test:e2e` | Uses mocked contract-shaped responses.                      |
-| Verify contract      | `pnpm contract:check`                  | Detects OpenAPI/client drift.                               |
-| Build                | `pnpm build`                           | Requires `VITE_API_URL` for the web production build.       |
-| Release checks       | `pnpm release:readiness`               | Lint, types, coverage, contract, build, and E2E.            |
+| Task                     | Command                                | Purpose                                                          |
+| ------------------------ | -------------------------------------- | ---------------------------------------------------------------- |
+| Start database           | `pnpm docker:up`                       | Start local PostgreSQL.                                          |
+| Stop database            | `pnpm docker:down`                     | Stop local PostgreSQL without deleting its volume.               |
+| Reset database container | `pnpm docker:reset`                    | Remove the local volume and start a clean database. Destructive. |
+| Prepare database         | `pnpm db:setup`                        | Generate Prisma, apply committed migrations, and seed demo data. |
+| Develop                  | `pnpm dev`                             | Run API and web in parallel.                                     |
+| Format check             | `pnpm format:check`                    | Verify repository formatting.                                    |
+| Lint                     | `pnpm lint`                            | Run lint checks across API, client, and web workspaces.          |
+| Typecheck                | `pnpm typecheck`                       | Type-check the TypeScript workspaces.                            |
+| Test                     | `pnpm test`                            | Run API and web test suites.                                     |
+| Coverage                 | `pnpm test:coverage`                   | Run coverage-enforced API and web tests.                         |
+| E2E                      | `pnpm --filter @parkcore/web test:e2e` | Run the default mocked browser workflow.                         |
+| Generate contract        | `pnpm contract:generate`               | Regenerate OpenAPI and the TypeScript API client.                |
+| Verify contract          | `pnpm contract:check`                  | Fail if regenerated contract artifacts differ from Git.          |
+| Build                    | `pnpm build`                           | Generate the contract and build API, client, and web.            |
+| Release checks           | `pnpm release:readiness`               | Run lint, types, coverage, contract, build, and E2E checks.      |
+
+A production-style web build requires `VITE_API_URL`.
 
 ## Workspace workflow
 
-| Workspace             | Responsibility                          | Common command                         |
-| --------------------- | --------------------------------------- | -------------------------------------- |
-| `apps/api`            | API, Prisma, OpenAPI, and backend tests | `pnpm --filter @parkcore/api <script>` |
-| `apps/web`            | Public and owner React application      | `pnpm --filter @parkcore/web <script>` |
-| `packages/api-client` | Generated API contract client           | `pnpm contract:generate`               |
+| Workspace              | Responsibility                              | Example                                    |
+| ---------------------- | ------------------------------------------- | ------------------------------------------ |
+| `@parkcore/api`        | Express API, Prisma, OpenAPI, backend tests | `pnpm --filter @parkcore/api test`         |
+| `@parkcore/web`        | Public and owner React application          | `pnpm --filter @parkcore/web test`         |
+| `@parkcore/api-client` | Generated TypeScript API contract           | `pnpm --filter @parkcore/api-client build` |
 
-The web application uses only `@parkcore/api-client`; it must not import API internals. Regenerate contract artifacts rather than editing generated schema types manually.
+The generated files in `apps/api/openapi.json` and `packages/api-client/src/generated/schema.ts` should be regenerated through the contract scripts rather than edited manually.
 
 ## Database workflow
+
+Start and prepare the local database:
 
 ```bash
 pnpm docker:up
 pnpm db:setup
 ```
 
-Use `pnpm docker:down` to stop the local database. `pnpm docker:reset` removes its local volume and is destructive; never use it against valuable data. Prisma changes use forward migrations only.
+`db:setup` performs:
 
-### Demo seed
+1. Prisma client generation;
+2. committed migration deployment;
+3. demo seeding.
 
-`pnpm db:setup` creates or refreshes the fictional owner selected by `SEED_OWNER_EMAIL` and four coherent demo parkings: three active facilities with varied occupancy and one inactive facility. It includes active, completed, and cancelled sessions, parking-scoped vehicles, and USD pricing snapshots.
+Schema changes use committed forward migrations. Use Prisma development commands from the API workspace when creating a new migration, and never edit an already-applied migration to change history.
 
-The seed replaces sessions and vehicles only for its named demo parkings, so do not use the demo owner for data you need to retain. Its records are fixed; set an optional ISO-8601 `SEED_REFERENCE_TIME` when you need reproducible session timestamps. Without it, active sessions are placed relative to the time the seed runs.
+`pnpm docker:reset` deletes the local PostgreSQL volume. Use it only for disposable local data.
+
+## Demo seed
+
+The seed provides a coherent development/demo state around a named owner and a small set of parking facilities. It includes active, completed, and cancelled sessions and pricing snapshots so both the public and owner flows have meaningful data.
+
+The seed is designed for development/demo use, not production data.
+
+An optional `SEED_REFERENCE_TIME` can be used when reproducible session timestamps are needed.
+
+## Dependency note
+
+The root `pnpm.overrides` currently pins `deepmerge-ts` to `8.0.0` to replace a vulnerable transitive version pulled through the current Prisma dependency chain.
+
+Treat the override as a temporary compatibility/security measure: verify `pnpm audit --prod` and the Prisma generate/build flow before changing or removing it.
 
 ## Related documentation
 
@@ -139,3 +144,4 @@ The seed replaces sessions and vehicles only for its named demo parkings, so do 
 - [Project](PROJECT.md)
 - [Architecture](ARCHITECTURE.md)
 - [Testing](TESTING.md)
+- [Deployment](DEPLOYMENT.md)
