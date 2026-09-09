@@ -133,11 +133,11 @@ export function LandingRoute() {
       <section className="bg-[#ffcc00]">
         <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-12 lg:items-center lg:gap-16 lg:px-8">
           <div className="lg:col-span-7">
-            <p className="inline-flex items-center gap-2 rounded-full border border-[#1d241f]/15 bg-[#f9eaa8]/55 px-3 py-1.5 text-xs font-bold tracking-[0.08em] text-[#283128] uppercase">
+            <p className="inline-flex items-center gap-2 rounded-full border border-[#121417]/15 bg-white/70 px-3 py-1.5 text-xs font-bold tracking-[0.08em] text-[#121417] uppercase">
               <span className="size-1.5 rounded-full bg-[#121417]" />
               {es ? 'Para quienes se mueven todos los días' : 'For everyday movement'}
             </p>
-            <h1 className="mt-7 max-w-3xl font-display text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[#1d241f] sm:text-6xl lg:text-[5.1rem]">
+            <h1 className="mt-7 max-w-3xl font-display text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[#121417] sm:text-6xl lg:text-[5.1rem]">
               {es ? (
                 <>
                   La cochera se siente
@@ -156,7 +156,7 @@ export function LandingRoute() {
                 </>
               )}
             </h1>
-            <p className="mt-7 max-w-xl text-lg font-medium leading-relaxed text-[#344034] sm:text-xl">
+            <p className="mt-7 max-w-xl text-lg font-medium leading-relaxed text-[#2f2f2f] sm:text-xl">
               {es
                 ? 'ParkCore ordena la entrada, el cobro y el historial de una cochera. Para que llegar, estacionar y salir vuelva a ser algo simple.'
                 : 'ParkCore brings order to a facility’s entry, payment, and history—so arriving, parking, and leaving can feel simple again.'}
@@ -181,14 +181,14 @@ export function LandingRoute() {
                 {es ? 'Recorrer la demo' : 'Explore the demo'}
               </DemoLoginButton>
             </div>
-            <p className="mt-8 text-sm leading-relaxed text-[#495544]">
+            <p className="mt-8 text-sm leading-relaxed text-[#2f2f2f]">
               {es
                 ? 'Sin depender de tickets de papel. Sin hacer más difícil una tarea cotidiana.'
                 : 'No dependence on paper tickets. No need to make an everyday task harder.'}
             </p>
           </div>
 
-          <div className="relative lg:col-span-5">
+          <div className="lg:col-span-5">
             <div>
               <ParkingCalculatorWidget />
             </div>
@@ -208,7 +208,7 @@ export function LandingRoute() {
               <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
                 {es ? 'Una experiencia cotidiana' : 'An everyday experience'}
               </p>
-              <h2 className="mt-4 font-display text-4xl font-black leading-[1.02] tracking-[-0.045em] text-[#1d241f] sm:text-5xl">
+              <h2 className="mt-4 font-display text-4xl font-black leading-[1.02] tracking-[-0.045em] text-[#121417] sm:text-5xl">
                 {es
                   ? 'No hace falta reinventar la cochera. Hace falta volverla clara.'
                   : 'Parking does not need reinventing. It needs to be clear.'}
@@ -221,7 +221,7 @@ export function LandingRoute() {
             </p>
           </div>
 
-          <div className="mt-16 grid gap-px overflow-hidden rounded-[2rem] border border-[#1d241f]/10 bg-[#1d241f]/10 md:grid-cols-3">
+          <div className="mt-16 grid gap-px overflow-hidden rounded-[2rem] border border-[#121417]/10 bg-[#121417]/10 md:grid-cols-3">
             {[
               {
                 number: '01',
@@ -247,7 +247,7 @@ export function LandingRoute() {
             ].map((item) => (
               <article key={item.number} className="min-h-64 bg-white p-7 sm:p-8">
                 <span className="font-mono text-xs font-bold text-[#121417]">{item.number}</span>
-                <h3 className="mt-12 max-w-48 font-display text-2xl font-extrabold leading-tight tracking-[-0.03em] text-[#1d241f]">
+                <h3 className="mt-12 max-w-48 font-display text-2xl font-extrabold leading-tight tracking-[-0.03em] text-[#121417]">
                   {es ? item.titleEs : item.titleEn}
                 </h3>
                 <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#526052]">
@@ -277,7 +277,7 @@ export function LandingRoute() {
             </p>
             <Link
               to="/parkings"
-              className="mt-9 inline-flex items-center gap-2 text-sm font-bold text-[#121417] underline decoration-[#ffcc00] decoration-2 underline-offset-4"
+              className="mt-9 inline-flex items-center gap-2 text-sm font-bold text-[#121417] underline decoration-[#ffcc00] decoration-2 underline-offset-4 hover:text-[#121417]"
             >
               {es ? 'Buscar una cochera' : 'Find a facility'}
               <ArrowUpRight aria-hidden="true" className="size-4" />
@@ -317,7 +317,7 @@ export function LandingRoute() {
               <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
                 {es ? 'Cerca de donde vas' : 'Near where you are going'}
               </p>
-              <h2 className="mt-4 font-display text-4xl font-black tracking-[-0.045em] text-[#1d241f] sm:text-5xl">
+              <h2 className="mt-4 font-display text-4xl font-black tracking-[-0.045em] text-[#121417] sm:text-5xl">
                 {es ? 'Elegí el lugar, no el misterio.' : 'Choose the place, not the mystery.'}
               </h2>
             </div>
@@ -335,9 +335,9 @@ export function LandingRoute() {
               <Link
                 key={parking.id}
                 to={parking.id.startsWith('mock-') ? '/parkings' : `/parkings/${parking.id}`}
-                className="group relative flex min-h-72 flex-col justify-between overflow-hidden rounded-[2rem] border border-[#1d241f]/10 bg-[#f7f3ea] p-7 transition-transform hover:-translate-y-1"
+                className="group flex min-h-72 flex-col justify-between rounded-[2rem] border border-[#121417]/10 bg-white p-7 transition-transform hover:-translate-y-1 hover:shadow-[0_8px_0_rgba(18,20,23,0.08)]"
               >
-                <div className="relative">
+                <div>
                   <span className="inline-flex items-center gap-2 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-xs font-bold text-[#121417]">
                     <span className="size-1.5 rounded-full bg-[#121417]" />
                     {parking.isActive
@@ -356,7 +356,7 @@ export function LandingRoute() {
                     {parking.address}
                   </p>
                 </div>
-                <div className="relative mt-10 flex items-end justify-between border-t border-[#1d241f]/10 pt-5">
+                <div className="mt-10 flex items-end justify-between border-t border-[#121417]/10 pt-5">
                   <span>
                     <span className="block text-xs font-medium text-[#526052]">
                       {es ? 'Desde' : 'From'}
@@ -386,7 +386,7 @@ export function LandingRoute() {
             <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
               {es ? 'La operación, sin teatro' : 'Operations, without theatre'}
             </p>
-            <h2 className="mt-4 font-display text-4xl font-black leading-[1.02] tracking-[-0.045em] text-[#1d241f] sm:text-5xl">
+            <h2 className="mt-4 font-display text-4xl font-black leading-[1.02] tracking-[-0.045em] text-[#121417] sm:text-5xl">
               {es
                 ? 'Tres momentos. Una historia que se puede seguir.'
                 : 'Three moments. One story you can follow.'}
@@ -442,7 +442,7 @@ export function LandingRoute() {
             <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
               {es ? 'Preguntas que aparecen en la puerta' : 'Questions that come up at the door'}
             </p>
-            <h2 className="mt-4 font-display text-4xl font-black tracking-[-0.045em] text-[#1d241f] sm:text-5xl">
+            <h2 className="mt-4 font-display text-4xl font-black tracking-[-0.045em] text-[#121417] sm:text-5xl">
               {es
                 ? 'Mejor dejarlo claro desde el principio.'
                 : 'Better to make it clear from the start.'}

@@ -121,7 +121,7 @@ export function ParkingDetailRoute() {
             <h1 className="mt-6 max-w-3xl font-display text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[#1d241f] sm:text-6xl">
               {parking.title}
             </h1>
-            <p className="mt-5 flex max-w-xl items-start gap-2 text-base leading-relaxed text-[#526052] sm:text-lg">
+            <p className="mt-5 flex max-w-xl items-start gap-2 text-base leading-relaxed text-[#3f3f3f] sm:text-lg">
               <MapPin aria-hidden="true" className="mt-1 size-5 shrink-0 text-[#121417]" />
               {parking.address}
             </p>
@@ -133,7 +133,7 @@ export function ParkingDetailRoute() {
             </p>
             <div className="mt-6 grid gap-5 border-y border-[#1d241f]/10 py-5 sm:grid-cols-2 lg:grid-cols-1">
               <div>
-                <p className="text-xs font-medium text-[#526052]">
+                <p className="text-xs font-medium text-[#3f3f3f]">
                   {es ? 'Tarifa por hora' : 'Hourly rate'}
                 </p>
                 <p className="mt-1 font-mono text-2xl font-bold text-[#1d241f]">
@@ -142,7 +142,7 @@ export function ParkingDetailRoute() {
                 </p>
               </div>
               <div>
-                <p className="text-xs font-medium text-[#526052]">
+                <p className="text-xs font-medium text-[#3f3f3f]">
                   {es ? 'Capacidad total' : 'Total capacity'}
                 </p>
                 <p className="mt-1 font-display text-2xl font-extrabold text-[#1d241f]">
@@ -151,7 +151,7 @@ export function ParkingDetailRoute() {
                 </p>
               </div>
             </div>
-            <p className="mt-5 text-sm leading-relaxed text-[#526052]">
+            <p className="mt-5 text-sm leading-relaxed text-[#3f3f3f]">
               {es
                 ? 'La disponibilidad en el momento se confirma al llegar. Esta ficha muestra la información pública de la cochera.'
                 : 'Availability is confirmed on arrival. This page shows the facility’s public information.'}
@@ -196,7 +196,7 @@ export function ParkingDetailRoute() {
               <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
                 {es ? 'Sobre esta cochera' : 'About this facility'}
               </p>
-              <p className="mt-4 text-base leading-relaxed text-[#526052]">
+              <p className="mt-4 text-base leading-relaxed text-[#3f3f3f]">
                 {parking.description ??
                   (es
                     ? 'Esta cochera todavía no sumó una descripción pública. La tarifa, dirección y capacidad están disponibles arriba.'
@@ -233,12 +233,12 @@ function ParkingDetailSkeleton() {
   return (
     <div aria-label="Loading parking" className="min-h-full bg-white px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl animate-pulse">
-        <div className="h-5 w-36 rounded bg-[#e5ded0]" />
-        <div className="mt-10 h-16 max-w-2xl rounded bg-[#e5ded0]" />
-        <div className="mt-5 h-6 max-w-lg rounded bg-[#e5ded0]" />
+        <div className="h-5 w-36 rounded bg-[#e5e5e5]" />
+        <div className="mt-10 h-16 max-w-2xl rounded bg-[#e5e5e5]" />
+        <div className="mt-5 h-6 max-w-lg rounded bg-[#e5e5e5]" />
         <div className="mt-12 grid gap-8 lg:grid-cols-12">
-          <div className="aspect-[16/10] rounded-[2.5rem] bg-[#e5ded0] lg:col-span-7" />
-          <div className="min-h-64 rounded-[2rem] bg-[#e5ded0] lg:col-span-4 lg:col-start-9" />
+          <div className="aspect-[16/10] rounded-[2.5rem] bg-[#e5e5e5] lg:col-span-7" />
+          <div className="min-h-64 rounded-[2rem] bg-[#e5e5e5] lg:col-span-4 lg:col-start-9" />
         </div>
       </div>
     </div>

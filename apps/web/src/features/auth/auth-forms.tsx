@@ -86,9 +86,9 @@ export function AuthFormFrame({
               className="inline-flex items-center gap-2 font-display text-lg font-black tracking-tight text-[#1d241f] lg:hidden"
               to="/"
             >
-              PARKCORE <span className="size-2 rounded-full bg-[#e7bf45]" />
+              PARKCORE <span className="size-2 rounded-full bg-[#ffcc00]" />
             </Link>
-            <p className="mt-10 text-xs font-bold tracking-[0.12em] text-[#b14d30] uppercase lg:mt-0">
+            <p className="mt-10 text-xs font-bold tracking-[0.12em] text-[#121417] uppercase lg:mt-0">
               {eyebrow}
             </p>
             <h1
@@ -98,7 +98,7 @@ export function AuthFormFrame({
               {title}
             </h1>
           </div>
-          <div className="mt-8 [&_.auth-form]:mt-6 [&_.auth-form]:flex [&_.auth-form]:flex-col [&_.auth-form]:gap-4 [&_.field]:space-y-1.5 [&_.field-label]:block [&_.field-label]:text-xs [&_.field-label]:font-bold [&_.field-label]:text-[#465245] [&_.control]:h-12 [&_.control]:w-full [&_.control]:rounded-2xl [&_.control]:border [&_.control]:border-[#1d241f]/10 [&_.control]:bg-[#f3eddf] [&_.control]:px-4 [&_.control]:text-sm [&_.control]:font-medium [&_.control]:text-[#1d241f] [&_.control]:outline-none [&_.control]:transition-colors [&_.control]:focus:border-[#1d241f]/30 [&_.control]:focus:bg-white [&_.form-error]:text-sm [&_.form-error]:font-medium [&_.form-error]:text-[#b42318]">
+          <div className="mt-8 [&_.auth-form]:mt-6 [&_.auth-form]:flex [&_.auth-form]:flex-col [&_.auth-form]:gap-4 [&_.field]:space-y-1.5 [&_.field-label]:block [&_.field-label]:text-xs [&_.field-label]:font-bold [&_.field-label]:text-[#121417] [&_.control]:h-12 [&_.control]:w-full [&_.control]:rounded-2xl [&_.control]:border [&_.control]:border-[#121417]/10 [&_.control]:bg-[#f5f5f5] [&_.control]:px-4 [&_.control]:text-sm [&_.control]:font-medium [&_.control]:text-[#121417] [&_.control]:outline-none [&_.control]:transition-colors [&_.control]:focus:border-[#121417] [&_.control]:focus:bg-white [&_.form-error]:text-sm [&_.form-error]:font-medium [&_.form-error]:text-[#b42318]">
             {children}
           </div>
           <p className="mt-6 border-t border-[#1d241f]/10 pt-5 text-sm leading-relaxed text-[#526052]">
@@ -168,7 +168,7 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         </p>
       ) : null}
       <Button
-        className="h-12 rounded-full bg-[#1d241f] text-[#fffdf7] hover:bg-[#294236]"
+        className="h-12 rounded-full bg-[#121417] text-white hover:bg-[#ffcc00] hover:text-[#121417]"
         disabled={form.formState.isSubmitting}
         fullWidth
         type="submit"
@@ -260,7 +260,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         </p>
       ) : null}
       <Button
-        className="h-12 rounded-full bg-[#1d241f] text-[#fffdf7] hover:bg-[#294236]"
+        className="h-12 rounded-full bg-[#121417] text-white hover:bg-[#ffcc00] hover:text-[#121417]"
         disabled={form.formState.isSubmitting}
         fullWidth
         type="submit"

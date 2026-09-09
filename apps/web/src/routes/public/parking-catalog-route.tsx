@@ -107,7 +107,7 @@ export function ParkingCatalogRoute() {
                 : 'Facilities you can understand before you arrive.'}
             </h1>
           </div>
-          <p className="max-w-lg text-base leading-relaxed text-[#526052] lg:col-span-4 lg:col-start-9 sm:text-lg">
+          <p className="max-w-lg text-base leading-relaxed text-[#3f3f3f] lg:col-span-4 lg:col-start-9 sm:text-lg">
             {es
               ? 'Buscá por zona o compará tarifas. Los datos importantes aparecen primero, sin hacerte recorrer una ciudad de pantallas.'
               : 'Search by area or compare rates. The important details come first, without sending you through a city of screens.'}
@@ -120,7 +120,7 @@ export function ParkingCatalogRoute() {
           onSubmit={applyFilters}
         >
           <div className="lg:col-span-6">
-            <label className="mb-2 block text-xs font-bold text-[#465245]" htmlFor="parking-search">
+            <label className="mb-2 block text-xs font-bold text-[#121417]" htmlFor="parking-search">
               {es ? '¿A dónde vas?' : 'Where are you going?'}
             </label>
             <div className="flex items-center gap-2 rounded-2xl border border-[#121417]/10 bg-[#f5f5f5] px-3 focus-within:border-[#121417]/30 focus-within:bg-white">
@@ -135,7 +135,7 @@ export function ParkingCatalogRoute() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3 lg:col-span-3">
-            <label className="block text-xs font-bold text-[#465245]" htmlFor="min-rate">
+            <label className="block text-xs font-bold text-[#121417]" htmlFor="min-rate">
               {es ? 'Mínimo por hora' : 'Min. rate (USD)'}
               <input
                 className="mt-2 h-12 w-full rounded-2xl border border-[#121417]/10 bg-[#f5f5f5] px-3 text-sm font-medium text-[#121417] outline-none placeholder:text-[#737373] focus:border-[#121417]/30 focus:bg-white"
@@ -149,7 +149,7 @@ export function ParkingCatalogRoute() {
                 type="number"
               />
             </label>
-            <label className="block text-xs font-bold text-[#465245]" htmlFor="max-rate">
+            <label className="block text-xs font-bold text-[#121417]" htmlFor="max-rate">
               {es ? 'Máximo por hora' : 'Max. rate (USD)'}
               <input
                 className="mt-2 h-12 w-full rounded-2xl border border-[#121417]/10 bg-[#f5f5f5] px-3 text-sm font-medium text-[#121417] outline-none placeholder:text-[#737373] focus:border-[#121417]/30 focus:bg-white"
@@ -179,7 +179,7 @@ export function ParkingCatalogRoute() {
         </form>
 
         {parkingQuery.isFetching && !parkingQuery.isLoading ? (
-          <p className="mt-5 text-sm font-medium text-[#526052]" role="status">
+          <p className="mt-5 text-sm font-medium text-[#3f3f3f]" role="status">
             {es ? 'Actualizando cocheras…' : 'Refreshing parkings…'}
           </p>
         ) : null}
@@ -243,11 +243,11 @@ export function ParkingCatalogRoute() {
             {parkingQuery.data.data.map((parking) => (
               <Link
                 aria-label={`${es ? 'Abrir' : 'Open'} ${parking.title}`}
-                className="group flex min-h-72 flex-col justify-between overflow-hidden rounded-[2rem] border border-[#121417]/10 bg-white p-7 transition-transform hover:-translate-y-1"
+                className="group flex min-h-72 flex-col justify-between rounded-[2rem] border border-[#121417]/10 bg-white p-7 transition-transform hover:-translate-y-1 hover:shadow-[0_8px_0_rgba(18,20,23,0.08)]"
                 key={parking.id}
                 to={`/parkings/${parking.id}`}
               >
-                <div className="relative">
+                <div>
                   <span className="inline-flex items-center gap-2 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-xs font-bold text-[#121417]">
                     <span className="size-1.5 rounded-full bg-[#121417]" />
                     {parking.isActive
@@ -261,13 +261,13 @@ export function ParkingCatalogRoute() {
                   <h2 className="mt-12 font-display text-2xl font-extrabold leading-tight tracking-[-0.03em] text-[#1d241f]">
                     {parking.title}
                   </h2>
-                  <p className="mt-3 max-w-64 text-sm leading-relaxed text-[#526052]">
+                  <p className="mt-3 max-w-64 text-sm leading-relaxed text-[#3f3f3f]">
                     {parking.address}
                   </p>
                 </div>
-                <div className="relative mt-8 flex items-end justify-between border-t border-[#1d241f]/10 pt-5">
+                <div className="mt-8 flex items-end justify-between border-t border-[#121417]/10 pt-5">
                   <div>
-                    <span className="block text-xs font-medium text-[#526052]">
+                    <span className="block text-xs font-medium text-[#3f3f3f]">
                       {es ? 'Tarifa por hora' : 'Hourly rate'}
                     </span>
                     <span className="font-mono text-lg font-bold text-[#1d241f]">
@@ -303,7 +303,7 @@ export function ParkingCatalogRoute() {
             >
               {es ? 'Anterior' : 'Previous'}
             </Button>
-            <span aria-live="polite" className="text-sm font-medium text-[#526052]">
+            <span aria-live="polite" className="text-sm font-medium text-[#3f3f3f]">
               {es
                 ? `Página ${String(parkingQuery.data.meta.page)} de ${String(parkingQuery.data.meta.totalPages)}`
                 : `Page ${String(parkingQuery.data.meta.page)} of ${String(parkingQuery.data.meta.totalPages)}`}

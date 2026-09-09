@@ -119,7 +119,7 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
 
       {/* Input 1: Facility selector */}
       <div className="rounded-2xl border border-[#121417]/10 bg-[#f5f5f5] p-4 transition-colors focus-within:border-[#121417]/30 focus-within:bg-white">
-        <label htmlFor={selectId} className="mb-1.5 block text-xs font-semibold text-[#465245]">
+        <label htmlFor={selectId} className="mb-1.5 block text-xs font-semibold text-[#121417]">
           {es ? '¿A qué cochera vas?' : 'Where are you parking?'}
         </label>
         <div className="flex items-center justify-between gap-3">
@@ -147,7 +147,7 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
             <span className="font-mono text-xs font-bold text-[#1d241f]">
               {formatMoney(selectedFacility.hourlyRateCents, currency)}
             </span>
-            <span className="block text-[10px] text-[#526052]">/ h</span>
+            <span className="block text-[10px] text-[#3f3f3f]">/ h</span>
           </div>
         </div>
       </div>
@@ -155,7 +155,7 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
       {/* Input 2: Duration selection */}
       <div className="mt-3 rounded-2xl border border-[#121417]/10 bg-[#f5f5f5] p-4">
         <div className="flex items-center justify-between mb-2.5">
-          <span className="flex items-center gap-1.5 text-xs font-semibold text-[#465245]">
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-[#121417]">
             <Clock aria-hidden="true" className="size-3.5 text-[#121417]" />
             {es ? 'Estadía estimada' : 'Estimated stay'}
           </span>
@@ -187,10 +187,10 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
       <div className="my-5 px-1 text-xs">
         <div className="flex items-baseline justify-between border-t border-[#1d241f]/10 pt-4">
           <div>
-            <span className="block text-xs font-semibold text-[#465245]">
+            <span className="block text-xs font-semibold text-[#121417]">
               {es ? 'Presupuesto orientativo' : 'A simple estimate'}
             </span>
-            <span className="text-[11px] text-[#526052]">
+            <span className="text-[11px] text-[#3f3f3f]">
               {es ? 'Según tarifa publicada' : 'Based on the published rate'}
             </span>
           </div>
@@ -212,7 +212,7 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
         />
       </Link>
 
-      <p className="mt-4 text-center text-[11px] leading-relaxed text-[#526052]">
+      <p className="mt-4 text-center text-[11px] leading-relaxed text-[#3f3f3f]">
         {es
           ? 'Es una estimación: confirmá los detalles de la cochera antes de llegar.'
           : 'This is an estimate: confirm facility details before arriving.'}
