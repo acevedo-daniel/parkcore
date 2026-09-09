@@ -8,10 +8,24 @@ export type LoginRequest = components['schemas']['LoginRequest'];
 export type RegisterRequest = components['schemas']['RegisterRequest'];
 export type User = components['schemas']['UserResponse'];
 
+const demoLoginClient = publicApi as unknown as {
+  POST: (path: '/demo/login') => Promise<{
+    data?: AuthResponse;
+    error: unknown;
+    response: Response;
+  }>;
+};
+
 export async function login(input: LoginRequest): Promise<AuthResponse> {
   const { data, error, response } = await publicApi.POST('/auth/login', { body: input });
   if (data) return data;
   throw new ApiError(getApiErrorMessage(error, 'Unable to sign in.'), response.status);
+}
+
+export async function loginDemo(): Promise<AuthResponse> {
+  const { data, error, response } = await demoLoginClient.POST('/demo/login');
+  if (data) return data;
+  throw new ApiError(getApiErrorMessage(error, 'Demo access is unavailable.'), response.status);
 }
 
 export async function register(input: RegisterRequest): Promise<AuthResponse> {

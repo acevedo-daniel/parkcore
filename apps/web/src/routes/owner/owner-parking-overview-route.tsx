@@ -13,10 +13,13 @@ import { SessionRow } from '../../components/domain/session.js';
 import { ParkingStatus } from '../../components/domain/status.js';
 import { Sheet } from '../../components/ui/dialog.js';
 import { Button } from '../../components/ui/button.js';
+import { Field } from '../../components/ui/field.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { useToast } from '../../components/ui/toast-context.js';
 import { CheckInPanel } from '../../components/domain/check-in-panel.js';
 import { checkIn, getActiveSessions, getOwnedParkings } from '../../lib/api/owner-api.js';
+import { normalizePlate } from '../../lib/plate.js';
+import { useDebouncedValue } from '../../lib/use-debounced-value.js';
 
 export function OwnerParkingOverviewRoute() {
   const { parkingId } = useParams();
@@ -24,12 +27,18 @@ export function OwnerParkingOverviewRoute() {
   const { showToast } = useToast();
   const [checkInOpen, setCheckInOpen] = useState(false);
   const [checkInError, setCheckInError] = useState<string>();
+  const [plateSearch, setPlateSearch] = useState('');
+  const debouncedPlateSearch = useDebouncedValue(normalizePlate(plateSearch), 250);
   const parkingsQuery = useQuery({ queryKey: ['owned-parkings'], queryFn: getOwnedParkings });
   const parking = parkingsQuery.data?.find((item) => item.id === parkingId);
   const activeSessionsQuery = useQuery({
     enabled: Boolean(parking),
-    queryKey: ['active-sessions', parkingId],
-    queryFn: () => getActiveSessions(parkingId ?? ''),
+    queryKey: ['active-sessions', parkingId, debouncedPlateSearch],
+    queryFn: () =>
+      getActiveSessions(
+        parkingId ?? '',
+        debouncedPlateSearch ? { plate: debouncedPlateSearch } : {},
+      ),
   });
   const checkInMutation = useMutation({
     mutationFn: (input: Parameters<typeof checkIn>[1]) => checkIn(parkingId ?? '', input),
@@ -107,6 +116,17 @@ export function OwnerParkingOverviewRoute() {
             <History aria-hidden="true" size={16} /> History
           </Link>
         </header>
+        <Field htmlFor="active-session-plate" label="Search plate">
+          <input
+            className="control"
+            id="active-session-plate"
+            onChange={(event) => {
+              setPlateSearch(event.target.value);
+            }}
+            placeholder="AB123CD"
+            value={plateSearch}
+          />
+        </Field>
         {activeSessionsQuery.isFetching && !activeSessionsQuery.isLoading ? (
           <p className="query-status" role="status">
             Refreshing active sessions…
