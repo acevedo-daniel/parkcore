@@ -32,12 +32,19 @@ export const findOwnerFacilities = async (ownerId: string): Promise<OwnerFacilit
 
 export const findOwnerSessions = async (
   ownerId: string,
-  options: { status?: ParkingSessionStatus; endTimeFrom?: Date },
+  options: { status?: ParkingSessionStatus; endTimeFrom?: Date; endTimeTo?: Date },
 ): Promise<OwnerAnalyticsSession[]> => {
   const where: Prisma.ParkingSessionWhereInput = {
     parking: { ownerId },
     ...(options.status ? { status: options.status } : {}),
-    ...(options.endTimeFrom ? { endTime: { gte: options.endTimeFrom } } : {}),
+    ...(options.endTimeFrom || options.endTimeTo
+      ? {
+          endTime: {
+            ...(options.endTimeFrom ? { gte: options.endTimeFrom } : {}),
+            ...(options.endTimeTo ? { lte: options.endTimeTo } : {}),
+          },
+        }
+      : {}),
   };
 
   return await prisma.parkingSession.findMany({

@@ -8,6 +8,7 @@ import { normalizePlate } from '../vehicle/plate-normalization.js';
 const parkingSessionStatusSchema = z.enum(['ACTIVE', 'COMPLETED', 'CANCELLED']);
 const currencySchema = z.enum(supportedCurrencies);
 const dateTimeSchema = z.iso.datetime().openapi({ format: 'date-time' });
+const dateFilterSchema = z.union([z.iso.date(), z.iso.datetime()]);
 
 export const checkInSchema = vehicleIdentitySchema
   .extend({
@@ -65,15 +66,18 @@ export const parkingSessionQuerySchema = z
       .pipe(z.string().min(1).max(10))
       .optional()
       .openapi({ description: 'Normalized plate search term', example: 'AB123CD' }),
-    dateFrom: dateTimeSchema
+    dateFrom: dateFilterSchema
       .optional()
-      .openapi({ description: 'Include sessions ending on or after this time' }),
-    dateTo: dateTimeSchema
+      .openapi({ description: 'Include sessions starting on or after this date or time' }),
+    dateTo: dateFilterSchema
       .optional()
-      .openapi({ description: 'Include sessions starting on or before this time' }),
+      .openapi({ description: 'Include sessions starting on or before this date or time' }),
   })
   .refine(
-    ({ dateFrom, dateTo }) => dateFrom === undefined || dateTo === undefined || dateFrom <= dateTo,
+    ({ dateFrom, dateTo }) =>
+      dateFrom === undefined ||
+      dateTo === undefined ||
+      new Date(dateFrom).getTime() <= new Date(dateTo).getTime(),
     {
       message: 'dateFrom must be less than or equal to dateTo',
       path: ['dateFrom'],

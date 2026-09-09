@@ -21,4 +21,22 @@ describe('parking session query schema', () => {
       }),
     ).toThrow('dateFrom must be less than or equal to dateTo');
   });
+
+  it('accepts date-only filters for history queries', () => {
+    expect(
+      parkingSessionQuerySchema.parse({
+        dateFrom: '2026-02-01',
+        dateTo: '2026-02-28',
+      }),
+    ).toMatchObject({ dateFrom: '2026-02-01', dateTo: '2026-02-28' });
+  });
+
+  it('compares mixed date-only and date-time filters by instant', () => {
+    expect(
+      parkingSessionQuerySchema.parse({
+        dateFrom: '2026-02-01',
+        dateTo: '2026-02-01T23:59:59.000Z',
+      }),
+    ).toMatchObject({ dateFrom: '2026-02-01', dateTo: '2026-02-01T23:59:59.000Z' });
+  });
 });

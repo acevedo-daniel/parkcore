@@ -69,6 +69,7 @@ describe('analytics service', () => {
   it('returns a zero-filled revenue and volume series for the requested window', async () => {
     vi.mocked(analyticsRepository.findOwnerSessions).mockResolvedValue([
       session({ endTime: new Date('2026-01-14T09:00:00.000Z') }),
+      session({ endTime: new Date('2026-01-16T09:00:00.000Z') }),
     ]);
 
     const revenue = await getRevenue('owner-1', { days: 7 }, now);
@@ -84,6 +85,7 @@ describe('analytics service', () => {
       expect.objectContaining({
         status: 'COMPLETED',
         endTimeFrom: new Date('2026-01-09T00:00:00.000Z'),
+        endTimeTo: now,
       }),
     );
   });

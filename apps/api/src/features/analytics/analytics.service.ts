@@ -50,6 +50,7 @@ export const getSummary = async (ownerId: string, now = new Date()) => {
     analyticsRepository.findOwnerSessions(ownerId, {
       status: 'COMPLETED',
       endTimeFrom: startOfUtcDay(now),
+      endTimeTo: now,
     }),
   ]);
 
@@ -87,6 +88,7 @@ const getCompletedWindow = async (ownerId: string, days: number, now: Date) =>
   await analyticsRepository.findOwnerSessions(ownerId, {
     status: 'COMPLETED',
     endTimeFrom: getWindowStart(days, now),
+    endTimeTo: now,
   });
 
 export const getRevenue = async (ownerId: string, query: AnalyticsQuery, now = new Date()) => {
@@ -95,7 +97,9 @@ export const getRevenue = async (ownerId: string, query: AnalyticsQuery, now = n
   for (const session of sessions) {
     if (session.endTime) {
       const key = dateKey(session.endTime);
-      values.set(key, (values.get(key) ?? 0) + (session.totalAmountCents ?? 0));
+      if (values.has(key)) {
+        values.set(key, (values.get(key) ?? 0) + (session.totalAmountCents ?? 0));
+      }
     }
   }
 
@@ -112,7 +116,9 @@ export const getVolume = async (ownerId: string, query: AnalyticsQuery, now = ne
   for (const session of sessions) {
     if (session.endTime) {
       const key = dateKey(session.endTime);
-      values.set(key, (values.get(key) ?? 0) + 1);
+      if (values.has(key)) {
+        values.set(key, (values.get(key) ?? 0) + 1);
+      }
     }
   }
 

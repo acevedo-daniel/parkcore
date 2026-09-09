@@ -1544,23 +1544,39 @@
           },
           {
             "schema": {
-              "type": "string",
-              "format": "date-time",
-              "description": "Include sessions ending on or after this time"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              ],
+              "description": "Include sessions starting on or after this date or time"
             },
             "required": false,
-            "description": "Include sessions ending on or after this time",
+            "description": "Include sessions starting on or after this date or time",
             "name": "dateFrom",
             "in": "query"
           },
           {
             "schema": {
-              "type": "string",
-              "format": "date-time",
-              "description": "Include sessions starting on or before this time"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              ],
+              "description": "Include sessions starting on or before this date or time"
             },
             "required": false,
-            "description": "Include sessions starting on or before this time",
+            "description": "Include sessions starting on or before this date or time",
             "name": "dateTo",
             "in": "query"
           }

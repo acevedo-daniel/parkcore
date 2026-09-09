@@ -446,9 +446,9 @@ export interface paths {
                     status?: "ACTIVE" | "COMPLETED" | "CANCELLED";
                     /** @description Normalized plate search term */
                     plate?: string;
-                    /** @description Include sessions ending on or after this time */
+                    /** @description Include sessions starting on or after this date or time */
                     dateFrom?: string;
-                    /** @description Include sessions starting on or before this time */
+                    /** @description Include sessions starting on or before this date or time */
                     dateTo?: string;
                 };
                 header?: never;
