@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, Check, Clock, MapPin, ShieldCheck, Sparkles, Zap } from 'lucide-react';
+import { ArrowRight, Clock, MapPin, ReceiptText } from 'lucide-react';
 import { useId, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 
@@ -94,12 +94,6 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
   const totalCents = selectedFacility.hourlyRateCents * selectedHours;
   const currency = selectedFacility.currency;
 
-  // Realistic mock of free spaces based on capacity
-  const simulatedFreeSpots = useMemo(() => {
-    const cap = selectedFacility.capacity;
-    return Math.max(6, Math.round(cap * 0.18));
-  }, [selectedFacility.capacity]);
-
   const targetLink = selectedFacility.id.startsWith('mock-')
     ? '/parkings'
     : `/parkings/${selectedFacility.id}`;
@@ -107,69 +101,69 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'relative w-full max-w-[480px] rounded-[32px] bg-white p-6 sm:p-8 shadow-[0_24px_54px_-12px_rgba(0,0,0,0.18)] border border-black/5 text-[#121417]',
+        'relative w-full max-w-[460px] rounded-[2rem_2rem_4.5rem_2rem] border border-[#1d241f]/10 bg-[#fffdf7] p-6 text-[#1d241f] shadow-[0_16px_0_rgba(29,36,31,0.13)] sm:p-8',
         className,
       )}
     >
-      {/* Top pill badge */}
-      <div className="flex items-center justify-between gap-2 pb-4">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#f4f5f1] px-3 py-1 text-xs font-semibold text-[#121417]">
-          <ShieldCheck aria-hidden="true" className="size-3.5 text-[#10b981]" />
-          {es ? 'Tarifa garantizada sin sorpresas' : 'Guaranteed transparent fee'}
-        </span>
-        <span className="flex items-center gap-1.5 text-xs font-bold text-[#10b981]">
-          <span className="size-2 rounded-full bg-[#10b981] animate-pulse" />
-          {es ? 'En vivo' : 'Live'}
-        </span>
+      <div className="mb-5 flex items-start justify-between gap-4 border-b border-[#1d241f]/10 pb-5">
+        <div>
+          <p className="text-xs font-bold tracking-[0.1em] text-[#b14d30] uppercase">
+            {es ? 'Antes de salir' : 'Before you go'}
+          </p>
+          <h2 className="mt-1 font-display text-xl font-extrabold tracking-[-0.03em] text-[#1d241f]">
+            {es ? 'Calculá una estadía' : 'Estimate a stay'}
+          </h2>
+        </div>
+        <ReceiptText aria-hidden="true" className="mt-1 size-5 text-[#b14d30]" />
       </div>
 
       {/* Input 1: Facility selector */}
-      <div className="rounded-2xl bg-[#f7f8f5] p-4 transition-colors hover:bg-[#f1f3ee] border border-transparent focus-within:border-black/20">
-        <label htmlFor={selectId} className="block text-xs font-medium text-[#404550] mb-1.5">
-          {es ? '¿Dónde vas a estacionar?' : 'Where are you parking?'}
+      <div className="rounded-2xl border border-[#1d241f]/10 bg-[#f3eddf] p-4 transition-colors focus-within:border-[#1d241f]/30 focus-within:bg-[#fffdf7]">
+        <label htmlFor={selectId} className="mb-1.5 block text-xs font-semibold text-[#465245]">
+          {es ? '¿A qué cochera vas?' : 'Where are you parking?'}
         </label>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div className="size-8 rounded-full bg-[#ffcc00] flex items-center justify-center shrink-0 text-[#121417] shadow-xs">
-              <MapPin aria-hidden="true" className="size-4" />
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#e7bf45] text-[#1d241f]">
+              <MapPin aria-hidden="true" className="size-3.5" />
             </div>
             <select
               id={selectId}
               aria-label={es ? 'Elegir cochera' : 'Choose facility'}
-              className="w-full bg-transparent font-display text-base sm:text-lg font-bold text-[#121417] focus:outline-none cursor-pointer truncate"
+              className="w-full cursor-pointer truncate bg-transparent font-display text-base font-bold text-[#1d241f] focus:outline-none"
               value={selectedFacility.id}
               onChange={(e) => {
                 setSelectedId(e.target.value);
               }}
             >
               {availableFacilities.map((facility) => (
-                <option key={facility.id} value={facility.id} className="text-[#121417]">
+                <option key={facility.id} value={facility.id} className="text-[#1d241f]">
                   {facility.title}
                 </option>
               ))}
             </select>
           </div>
           <div className="text-right shrink-0">
-            <span className="font-mono text-xs sm:text-sm font-bold text-[#121417]">
+            <span className="font-mono text-xs font-bold text-[#1d241f]">
               {formatMoney(selectedFacility.hourlyRateCents, currency)}
             </span>
-            <span className="block text-[11px] text-[#404550]">/ h</span>
+            <span className="block text-[10px] text-[#526052]">/ h</span>
           </div>
         </div>
       </div>
 
       {/* Input 2: Duration selection */}
-      <div className="mt-3 rounded-2xl bg-[#f7f8f5] p-4 border border-transparent focus-within:border-black/20">
+      <div className="mt-3 rounded-2xl border border-[#1d241f]/10 bg-[#f3eddf] p-4">
         <div className="flex items-center justify-between mb-2.5">
-          <span className="text-xs font-medium text-[#404550] flex items-center gap-1.5">
-            <Clock aria-hidden="true" className="size-3.5" />
-            {es ? 'Tiempo estimado de estadía' : 'Estimated stay duration'}
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-[#465245]">
+            <Clock aria-hidden="true" className="size-3.5 text-[#b14d30]" />
+            {es ? 'Estadía estimada' : 'Estimated stay'}
           </span>
-          <span className="font-mono text-xs font-bold text-[#121417]">
+          <span className="font-mono text-xs font-bold text-[#1d241f]">
             {selectedHours} {selectedHours === 1 ? (es ? 'hora' : 'hour') : es ? 'horas' : 'hours'}
           </span>
         </div>
-        <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+        <div className="grid grid-cols-4 gap-1.5">
           {DURATION_OPTIONS.map((opt) => (
             <button
               key={opt.hours}
@@ -178,10 +172,10 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
                 setSelectedHours(opt.hours);
               }}
               className={cn(
-                'rounded-xl py-2 px-1 text-center text-xs font-bold transition-all',
+                'cursor-pointer rounded-xl px-1 py-2 text-center text-xs font-bold transition-all',
                 selectedHours === opt.hours
-                  ? 'bg-[#121417] text-white shadow-sm scale-[1.02]'
-                  : 'bg-white text-[#121417] hover:bg-white/80 border border-black/5',
+                  ? 'bg-[#1d241f] text-[#fffdf7] shadow-xs'
+                  : 'border border-[#1d241f]/5 bg-[#fffdf7] text-[#1d241f] hover:bg-white',
               )}
             >
               {es ? opt.labelEs : opt.labelEn}
@@ -190,39 +184,17 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
         </div>
       </div>
 
-      {/* Breakdown Items (Wise style) */}
-      <div className="my-5 space-y-3 px-1 text-xs">
-        <div className="flex items-center justify-between text-[#404550]">
-          <span className="flex items-center gap-2">
-            <Zap aria-hidden="true" className="size-4 text-[#ffcc00] shrink-0 fill-[#ffcc00]" />
-            {es ? 'Ingreso ágil' : 'Seamless entry'}
-          </span>
-          <span className="font-medium text-[#121417]">
-            {es ? 'Con patente o código QR' : 'Via plate scan or QR'}
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between text-[#404550]">
-          <span className="flex items-center gap-2">
-            <Sparkles aria-hidden="true" className="size-4 text-[#10b981] shrink-0" />
-            {es ? 'Lugares disponibles hoy' : 'Live spots available'}
-          </span>
-          <span className="font-mono font-bold text-[#10b981] flex items-center gap-1">
-            <Check aria-hidden="true" className="size-3" />
-            {simulatedFreeSpots} {es ? 'libres en este momento' : 'free right now'}
-          </span>
-        </div>
-
-        <div className="pt-2 border-t border-black/8 flex items-baseline justify-between">
+      <div className="my-5 px-1 text-xs">
+        <div className="flex items-baseline justify-between border-t border-[#1d241f]/10 pt-4">
           <div>
-            <span className="block text-xs font-medium text-[#404550]">
-              {es ? 'Total estimado a pagar' : 'Estimated total cost'}
+            <span className="block text-xs font-semibold text-[#465245]">
+              {es ? 'Presupuesto orientativo' : 'A simple estimate'}
             </span>
-            <span className="text-[11px] text-[#717684]">
-              {es ? 'Fraccionamiento justo por minuto' : 'Fair per-minute billing'}
+            <span className="text-[11px] text-[#526052]">
+              {es ? 'Según tarifa publicada' : 'Based on the published rate'}
             </span>
           </div>
-          <span className="font-display text-3xl font-extrabold tracking-tight text-[#121417] tabular-nums">
+          <span className="tabular-nums font-display text-3xl font-extrabold tracking-tight text-[#1d241f]">
             {formatMoney(totalCents, currency)}
           </span>
         </div>
@@ -231,19 +203,19 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
       {/* CTA Button */}
       <Link
         to={targetLink}
-        className="group flex w-full items-center justify-center gap-2 rounded-full bg-[#ffcc00] py-4 px-6 text-center font-display text-base font-bold text-[#121417] transition-all hover:bg-[#e6b800] hover:shadow-md active:scale-[0.99]"
+        className="group flex w-full items-center justify-center gap-2 rounded-full bg-[#1d241f] px-6 py-4 text-center font-display text-base font-bold text-[#fffdf7] shadow-[0_5px_0_#b14d30] transition-transform hover:-translate-y-0.5 active:translate-y-0"
       >
-        <span>{es ? 'Ver cochera e ingresar' : 'View parking & enter'}</span>
+        <span>{es ? 'Ver la cochera' : 'View this facility'}</span>
         <ArrowRight
           aria-hidden="true"
           className="size-4 transition-transform group-hover:translate-x-1"
         />
       </Link>
 
-      <p className="mt-3 text-center text-[11px] text-[#717684]">
+      <p className="mt-4 text-center text-[11px] leading-relaxed text-[#526052]">
         {es
-          ? 'No necesitás descargar ninguna app · Pagás al salir'
-          : 'No app download required · Pay when leaving'}
+          ? 'Es una estimación: confirmá los detalles de la cochera antes de llegar.'
+          : 'This is an estimate: confirm facility details before arriving.'}
       </p>
     </div>
   );
