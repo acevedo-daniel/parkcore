@@ -1,28 +1,25 @@
 import type { components } from '@parkcore/api-client';
 
-import { cn } from '../../lib/cn.js';
+import { Badge } from '../ui/badge.js';
 
 type SessionStatusValue = components['schemas']['ParkingSessionResponse']['status'];
 
 export function ParkingStatus({ isActive }: { isActive: boolean }) {
   return (
-    <span className={cn('status', isActive ? 'status-active' : 'status-inactive')}>
-      <span aria-hidden="true">●</span> {isActive ? 'Active' : 'Inactive'}
-    </span>
+    <Badge variant={isActive ? 'success' : 'secondary'} dot>
+      {isActive ? 'Active' : 'Inactive'}
+    </Badge>
   );
 }
 
 export function SessionStatus({ status }: { status: SessionStatusValue }) {
-  const className =
-    status === 'ACTIVE'
-      ? 'status-active'
-      : status === 'COMPLETED'
-        ? 'status-completed'
-        : 'status-cancelled';
+  const variant =
+    status === 'ACTIVE' ? 'success' : status === 'COMPLETED' ? 'secondary' : 'destructive';
+
   return (
-    <span className={cn('status', className)}>
+    <Badge variant={variant} dot>
       {status[0]}
       {status.slice(1).toLowerCase()}
-    </span>
+    </Badge>
   );
 }

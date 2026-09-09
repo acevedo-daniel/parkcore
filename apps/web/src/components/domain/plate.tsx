@@ -1,7 +1,5 @@
+import { LicensePlateBadge } from '../ui/license-plate-badge.js';
+
 export function Plate({ plate }: { plate: string }) {
-  return (
-    <span className="plate" aria-label={`Vehicle plate ${plate}`} title={plate}>
-      {plate}
-    </span>
-  );
+  return <LicensePlateBadge plate={plate} title={plate} />;
 }
