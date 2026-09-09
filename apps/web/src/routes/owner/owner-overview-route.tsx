@@ -1,10 +1,13 @@
 import { Link } from 'react-router';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import { OwnerParkingPanel } from '../../features/parking/owner-parking-panel.js';
 import { useOwnedParkingOperations } from '../../features/parking/use-owned-parking-operations.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
 
 export function OwnerOverviewRoute() {
+  const { language } = useAppearance();
+  const es = language === 'es';
   const { parkings, parkingsQuery } = useOwnedParkingOperations();
 
   if (parkingsQuery.isLoading) return <OwnerPanelsSkeleton />;
@@ -24,12 +27,14 @@ export function OwnerOverviewRoute() {
       <EmptyState
         action={
           <Link className="button button-primary" to="/app/parkings/new">
-            Create parking
+            {es ? 'Crear cochera' : 'Create parking'}
           </Link>
         }
         title="No parking operations yet"
       >
-        Create your first facility to start recording visits.
+        {es
+          ? 'Creá tu primera cochera para empezar a registrar estadías.'
+          : 'Create your first facility to start recording visits.'}
       </EmptyState>
     );
   }
@@ -37,13 +42,13 @@ export function OwnerOverviewRoute() {
     <section className="owner-page stack-owner" aria-labelledby="overview-title">
       <header className="owner-page-header">
         <div>
-          <p className="type-label">Operations</p>
+          <p className="type-label">{es ? 'Operaciones' : 'Operations'}</p>
           <h1 className="type-page-title" id="overview-title">
-            Current facilities
+            {es ? 'Cocheras actuales' : 'Current facilities'}
           </h1>
         </div>
         <Link className="button button-primary" to="/app/parkings/new">
-          Create parking
+          {es ? 'Crear cochera' : 'Create parking'}
         </Link>
       </header>
       <div className="owner-parking-panels">
@@ -59,7 +64,7 @@ export function OwnerOverviewRoute() {
         ))}
       </div>
       <Link className="button button-secondary owner-list-link" to="/app/parkings">
-        Manage parkings
+        {es ? 'Gestionar cocheras' : 'Manage parkings'}
       </Link>
     </section>
   );

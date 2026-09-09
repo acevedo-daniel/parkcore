@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { History, Pencil, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 
 import {
@@ -44,6 +44,29 @@ export function OwnerParkingOverviewRoute() {
     mutationFn: (input: Parameters<typeof checkIn>[1]) => checkIn(parkingId ?? '', input),
   });
 
+  useEffect(() => {
+    const onShortcut = (event: KeyboardEvent) => {
+      const target = event.target;
+      if (
+        event.key.toLowerCase() !== 'n' ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        !parking?.isActive ||
+        (target instanceof HTMLElement &&
+          target.matches('input, textarea, select, [contenteditable="true"]'))
+      ) {
+        return;
+      }
+      event.preventDefault();
+      setCheckInOpen(true);
+    };
+    window.addEventListener('keydown', onShortcut);
+    return () => {
+      window.removeEventListener('keydown', onShortcut);
+    };
+  }, [parking?.isActive]);
+
   if (parkingsQuery.isLoading) return <Skeleton className="owner-overview-skeleton" />;
   if (parkingsQuery.isError || !parkingId)
     return (
@@ -86,7 +109,7 @@ export function OwnerParkingOverviewRoute() {
       </header>
       <div className="owner-operation-actions">
         <Button disabled={!parking.isActive} onClick={openCheckIn}>
-          <Plus aria-hidden="true" size={17} /> Check in
+          <Plus aria-hidden="true" size={17} /> Check in <kbd aria-hidden="true">N</kbd>
         </Button>
         {!parking.isActive ? (
           <p className="field-help">Reactivate this parking before accepting new check-ins.</p>

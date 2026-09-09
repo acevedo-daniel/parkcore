@@ -20,6 +20,12 @@ export async function loginDemo(): Promise<AuthResponse> {
   throw new ApiError(getApiErrorMessage(error, 'Demo access is unavailable.'), response.status);
 }
 
+export async function resetDemo() {
+  const { data, error, response } = await authenticatedApi.POST('/demo/reset', {});
+  if (data) return data;
+  throw new ApiError(getApiErrorMessage(error, 'Unable to reset the demo.'), response.status);
+}
+
 export async function register(input: RegisterRequest): Promise<AuthResponse> {
   const { data, error, response } = await publicApi.POST('/auth/register', { body: input });
   if (data) return data;

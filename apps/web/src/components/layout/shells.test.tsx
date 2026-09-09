@@ -1,4 +1,5 @@
 import { render, screen, within } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import type { ReactNode } from 'react';
@@ -7,6 +8,7 @@ import { describe, expect, it } from 'vitest';
 import { OwnerLayout } from './owner-layout.js';
 import { PublicLayout } from './public-layout.js';
 import { AppearanceProvider } from '../../app/appearance-provider.js';
+import { ToastProvider } from '../ui/feedback.js';
 import { AuthProvider } from '../../features/auth/auth-provider.js';
 
 function renderRoute(element: ReactNode, path: string) {
@@ -17,7 +19,11 @@ function renderRoute(element: ReactNode, path: string) {
   return render(
     <AppearanceProvider>
       <AuthProvider>
-        <RouterProvider router={router} />
+        <ToastProvider>
+          <QueryClientProvider client={new QueryClient()}>
+            <RouterProvider router={router} />
+          </QueryClientProvider>
+        </ToastProvider>
       </AuthProvider>
     </AppearanceProvider>,
   );

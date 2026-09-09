@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate, useNavigation } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { DemoResetControl } from '../../features/auth/demo-reset-control.js';
 import { useAuth } from '../../features/auth/use-auth.js';
 import { cn } from '../../lib/cn.js';
 import { useDocumentMeta } from '../../lib/document-meta.js';
@@ -77,6 +78,7 @@ export function OwnerLayout() {
             </time>
             <AppearanceControls compact />
           </div>
+          <DemoResetControl />
           <NavLink
             className={({ isActive }) => cn('owner-nav-link', isActive && 'is-active')}
             to="/app/profile"

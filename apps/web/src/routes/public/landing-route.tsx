@@ -1,10 +1,13 @@
 import { ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import { DemoLoginButton } from '../../features/auth/demo-login-button.js';
 import { PARKCORE_PUBLIC_URL, useDocumentMeta } from '../../lib/document-meta.js';
 
 export function LandingRoute() {
+  const { language } = useAppearance();
+  const es = language === 'es';
   const navigate = useNavigate();
   useDocumentMeta({
     description:
@@ -16,23 +19,25 @@ export function LandingRoute() {
     <div className="landing stack-landing">
       <section className="landing-hero" aria-labelledby="landing-title">
         <div className="landing-copy">
-          <p className="type-label">Parking operations</p>
+          <p className="type-label">{es ? 'Operaciones de cocheras' : 'Parking operations'}</p>
           <h1 className="type-hero" id="landing-title">
-            Parking,
+            {es ? 'Cocheras,' : 'Parking,'}
             <br />
-            under control.
+            {es ? 'bajo control.' : 'under control.'}
           </h1>
           <p className="landing-intro">
-            Find active parking facilities or run your own operation with a clear view of sessions,
-            capacity and rate.
+            {es
+              ? 'Encontrá cocheras activas o gestioná tu operación con visibilidad clara de estadías, capacidad y tarifas.'
+              : 'Find active parking facilities or run your own operation with a clear view of sessions, capacity and rate.'}
           </p>
           <div className="landing-actions">
             <Link className="button button-primary" to="/parkings">
-              Explore parkings <ArrowRight aria-hidden="true" size={16} />
+              {es ? 'Explorar cocheras' : 'Explore parkings'}{' '}
+              <ArrowRight aria-hidden="true" size={16} />
             </Link>
             <DemoLoginButton onSuccess={() => void navigate('/app', { replace: true })} />
             <Link className="button button-secondary" to="/login">
-              Owner login
+              {es ? 'Acceso operador' : 'Owner login'}
             </Link>
           </div>
         </div>
@@ -45,11 +50,11 @@ export function LandingRoute() {
           <div className="operation-metrics">
             <div>
               <strong className="type-metric">18 / 64</strong>
-              <span className="type-label">Current sessions</span>
+              <span className="type-label">{es ? 'Estadías activas' : 'Current sessions'}</span>
             </div>
             <div>
               <strong className="type-operational">USD 24.00</strong>
-              <span className="type-label">Per hour</span>
+              <span className="type-label">{es ? 'Por hora' : 'Per hour'}</span>
             </div>
           </div>
           <div className="operation-meter" aria-hidden="true">
@@ -66,14 +71,26 @@ export function LandingRoute() {
       </section>
       <section className="landing-split" aria-label="ParkCore surfaces">
         <div>
-          <p className="type-label">Discover</p>
-          <h2 className="type-section-title">Find active parking.</h2>
-          <p className="field-help">Location, rate, capacity and operational status.</p>
+          <p className="type-label">{es ? 'Descubrir' : 'Discover'}</p>
+          <h2 className="type-section-title">
+            {es ? 'Encontrá una cochera activa.' : 'Find active parking.'}
+          </h2>
+          <p className="field-help">
+            {es
+              ? 'Ubicación, tarifa, capacidad y estado operativo.'
+              : 'Location, rate, capacity and operational status.'}
+          </p>
         </div>
         <div>
-          <p className="type-label">Operate</p>
-          <h2 className="type-section-title">Run your facility.</h2>
-          <p className="field-help">Capacity, check-ins, active sessions and checkout.</p>
+          <p className="type-label">{es ? 'Operar' : 'Operate'}</p>
+          <h2 className="type-section-title">
+            {es ? 'Gestioná tu cochera.' : 'Run your facility.'}
+          </h2>
+          <p className="field-help">
+            {es
+              ? 'Capacidad, ingresos, estadías activas y cobro.'
+              : 'Capacity, check-ins, active sessions and checkout.'}
+          </p>
         </div>
       </section>
     </div>

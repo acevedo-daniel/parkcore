@@ -44,7 +44,17 @@ interface AppearanceContextValue {
   toggleTheme: () => void;
 }
 
-const AppearanceContext = createContext<AppearanceContextValue | null>(null);
+const fallbackAppearance: AppearanceContextValue = {
+  language: 'en',
+  locale: 'en-US',
+  setLanguage: () => undefined,
+  suggestTheme: () => undefined,
+  t: (key) => copy.en[key],
+  theme: 'light',
+  toggleTheme: () => undefined,
+};
+
+const AppearanceContext = createContext<AppearanceContextValue>(fallbackAppearance);
 
 function getStoredValue<T extends string>(key: string, values: readonly T[]) {
   const value = window.localStorage.getItem(key);
@@ -109,8 +119,9 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   return <AppearanceContext.Provider value={value}>{children}</AppearanceContext.Provider>;
 }
 
+// Context hooks intentionally share this module with their provider.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAppearance() {
   const context = useContext(AppearanceContext);
-  if (!context) throw new Error('useAppearance must be used inside AppearanceProvider');
   return context;
 }
