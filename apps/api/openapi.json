@@ -43,6 +43,10 @@
     {
       "name": "Analytics",
       "description": "Owner operational analytics"
+    },
+    {
+      "name": "Demo",
+      "description": "Controlled public demo access and restoration"
     }
   ],
   "components": {
@@ -1035,6 +1039,35 @@
         "required": [
           "days",
           "data"
+        ],
+        "additionalProperties": false
+      },
+      "DemoStatusResponse": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "description": "Whether the configured demo operator is available for one-click access"
+          }
+        },
+        "required": [
+          "available"
+        ],
+        "additionalProperties": false
+      },
+      "DemoResetResponse": {
+        "type": "object",
+        "properties": {
+          "restored": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "Canonical demo data was restored"
+          }
+        },
+        "required": [
+          "restored"
         ],
         "additionalProperties": false
       }
@@ -2431,6 +2464,154 @@
           },
           "401": {
             "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/demo/status": {
+      "get": {
+        "tags": [
+          "Demo"
+        ],
+        "summary": "Get demo availability",
+        "description": "Reports whether one-click demo access is currently available.",
+        "responses": {
+          "200": {
+            "description": "Demo availability",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoStatusResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Demo status lookup failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/demo/login": {
+      "post": {
+        "tags": [
+          "Demo"
+        ],
+        "summary": "Start a demo operator session",
+        "description": "Creates a session only for the configured demo operator. No credentials are accepted or returned.",
+        "responses": {
+          "200": {
+            "description": "Demo session created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Demo access is temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Demo login failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/demo/reset": {
+      "post": {
+        "tags": [
+          "Demo"
+        ],
+        "summary": "Restore canonical demo data",
+        "description": "Requires the configured demo operator session. Concurrent resets conflict and requests are rate-limited.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Canonical demo data restored",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoResetResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Account is not allowed to reset demo data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A reset is already in progress or demo access is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Demo reset failed",
             "content": {
               "application/json": {
                 "schema": {
