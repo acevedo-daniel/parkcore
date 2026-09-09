@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { randomBytes } from 'node:crypto';
 import argon2 from 'argon2';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Prisma, PrismaClient } from './generated/client.js';
@@ -418,10 +419,7 @@ async function main(): Promise<void> {
   const adapter = new PrismaPg({ connectionString: databaseUrl });
   const prisma = new PrismaClient({ adapter });
   const ownerEmail = process.env.SEED_OWNER_EMAIL ?? 'owner@parkcore.dev';
-  const ownerPassword = process.env.SEED_OWNER_PASSWORD;
-  if (!ownerPassword) {
-    throw new Error('SEED_OWNER_PASSWORD is required to run seed');
-  }
+  const ownerPassword = process.env.SEED_OWNER_PASSWORD ?? randomBytes(32).toString('base64url');
   const referenceTime = getReferenceTime();
   const passwordHash = await argon2.hash(ownerPassword);
 
