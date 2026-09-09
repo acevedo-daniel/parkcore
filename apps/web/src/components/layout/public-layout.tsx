@@ -22,9 +22,6 @@ function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
           {link.label}
         </NavLink>
       ))}
-      <Link className="public-get-started" to="/register" onClick={onNavigate}>
-        Get started
-      </Link>
     </>
   );
 }
@@ -61,11 +58,6 @@ function PublicMobileMenu() {
             </DialogPrimitive.Close>
             <DialogPrimitive.Close asChild>
               <Link to="/login">Sign in</Link>
-            </DialogPrimitive.Close>
-            <DialogPrimitive.Close asChild>
-              <Link className="public-get-started" to="/register">
-                Get started
-              </Link>
             </DialogPrimitive.Close>
           </nav>
         </DialogPrimitive.Content>

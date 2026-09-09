@@ -61,13 +61,13 @@ test('keeps public mobile navigation and main content usable with a keyboard', a
   await expect(page.getByRole('button', { name: 'Close navigation' })).toBeFocused();
 
   await page.keyboard.press('Shift+Tab');
-  await expect(menu.getByRole('link', { name: 'Get started' })).toBeFocused();
+  await expect(menu.getByRole('link', { name: 'Sign in' })).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(menu).toBeHidden();
   await expect(menuTrigger).toBeFocused();
 });
 
-test('registers, creates a parking, checks in, and completes a parking session', async ({
+test('signs in, creates a parking, checks in, and completes a parking session', async ({
   page,
 }) => {
   let parking: Parking | undefined;
@@ -79,8 +79,8 @@ test('registers, creates a parking, checks in, and completes a parking session',
     const respond = (body: unknown, status = 200) =>
       route.fulfill({ body: JSON.stringify(body), contentType: 'application/json', status });
 
-    if (request.method() === 'POST' && url.pathname === '/auth/register') {
-      await respond({ accessToken: 'e2e-token', user: owner }, 201);
+    if (request.method() === 'POST' && url.pathname === '/auth/login') {
+      await respond({ accessToken: 'e2e-token', user: owner });
       return;
     }
     if (request.method() === 'GET' && url.pathname === '/parkings/me') {
@@ -167,12 +167,10 @@ test('registers, creates a parking, checks in, and completes a parking session',
     );
   });
 
-  await page.goto('/');
-  await page.getByRole('link', { name: 'Get started' }).click();
-  await page.getByLabel('Name (optional)').fill('ParkCore Owner');
+  await page.goto('/login');
   await page.getByLabel('Email').fill(owner.email);
   await page.getByLabel('Password').fill('password123');
-  await page.getByRole('button', { name: 'Create account' }).click();
+  await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL(/\/app$/);
   await page.getByRole('link', { name: 'Create parking' }).click();
 
