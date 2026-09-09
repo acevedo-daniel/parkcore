@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { randomBytes } from 'node:crypto';
 import argon2 from 'argon2';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Prisma, PrismaClient } from './generated/client.js';
@@ -34,10 +35,8 @@ interface DemoParking {
   title: string;
 }
 
-const databaseUrl = process.env.DATABASE_URL;
-
-const DEFAULT_SEED_REFERENCE_TIME = '2026-01-15T12:00:00.000Z';
-const CANONICAL_SEED_EXPECTATIONS = {
+export const DEFAULT_SEED_REFERENCE_TIME = '2026-01-15T12:00:00.000Z';
+export const CANONICAL_SEED_EXPECTATIONS = {
   parkings: 4,
   sessions: 24,
   activeSessions: 10,
@@ -45,13 +44,6 @@ const CANONICAL_SEED_EXPECTATIONS = {
   cancelledSessions: 3,
   completedRevenueCents: 30_950,
 } as const;
-
-if (!databaseUrl) {
-  throw new Error('DATABASE_URL is required to run seed');
-}
-
-const adapter = new PrismaPg({ connectionString: databaseUrl });
-const prisma = new PrismaClient({ adapter });
 
 const minutesBefore = (reference: Date, minutes: number) =>
   new Date(reference.getTime() - minutes * 60_000);
@@ -400,9 +392,34 @@ async function seedSessions(
   }
 }
 
+/**
+ * Rebuilds only the configured demo owner's operational data. The owner record
+ * and every other account remain untouched, so this can safely back both the
+ * seed command and the authenticated demo reset endpoint.
+ */
+export async function restoreCanonicalDemoData(
+  client: DatabaseClient,
+  ownerId: string,
+  referenceTime = new Date(DEFAULT_SEED_REFERENCE_TIME),
+): Promise<void> {
+  await client.parking.deleteMany({ where: { ownerId } });
+
+  for (const parkingSeed of demoParkings) {
+    const parking = await upsertParking(client, ownerId, parkingSeed);
+    await seedSessions(client, parking.id, parkingSeed, referenceTime);
+  }
+}
+
 async function main(): Promise<void> {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL is required to run seed');
+  }
+
+  const adapter = new PrismaPg({ connectionString: databaseUrl });
+  const prisma = new PrismaClient({ adapter });
   const ownerEmail = process.env.SEED_OWNER_EMAIL ?? 'owner@parkcore.dev';
-  const ownerPassword = process.env.SEED_OWNER_PASSWORD ?? 'OwnerPassw0rd!123';
+  const ownerPassword = process.env.SEED_OWNER_PASSWORD ?? randomBytes(32).toString('base64url');
   const referenceTime = getReferenceTime();
   const passwordHash = await argon2.hash(ownerPassword);
 
@@ -424,10 +441,7 @@ async function main(): Promise<void> {
       },
     });
 
-    for (const parkingSeed of demoParkings) {
-      const parking = await upsertParking(transaction, demoOwner.id, parkingSeed);
-      await seedSessions(transaction, parking.id, parkingSeed, referenceTime);
-    }
+    await restoreCanonicalDemoData(transaction, demoOwner.id, referenceTime);
 
     return demoOwner;
   });
@@ -479,12 +493,10 @@ async function main(): Promise<void> {
   );
 }
 
-main()
-  .catch((error: unknown) => {
+if (process.argv[1]?.endsWith('seed.ts')) {
+  void main().catch((error: unknown) => {
     console.error('Seed failed');
     console.error(error);
     process.exitCode = 1;
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
   });
+}

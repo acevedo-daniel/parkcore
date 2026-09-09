@@ -19,6 +19,7 @@ function renderGuard(status: AuthContextValue['status']) {
   );
   const value: AuthContextValue = {
     login: vi.fn().mockResolvedValue(undefined),
+    loginDemo: vi.fn().mockResolvedValue(undefined),
     logout: vi.fn(),
     register: vi.fn().mockResolvedValue(undefined),
     restore: vi.fn().mockResolvedValue(undefined),

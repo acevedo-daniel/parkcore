@@ -14,3 +14,13 @@ export function createAuthRateLimiter(_scope: 'register' | 'login') {
     message: buildAuthRateLimitMessage(),
   });
 }
+
+export function createDemoResetRateLimiter() {
+  return rateLimit({
+    windowMs: env.DEMO_RESET_RATE_LIMIT_WINDOW_MS,
+    limit: env.DEMO_RESET_RATE_LIMIT_MAX,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    message: buildAuthRateLimitMessage(),
+  });
+}

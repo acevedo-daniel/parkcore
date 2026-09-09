@@ -184,7 +184,7 @@ test('signs in, creates a parking, checks in, and completes a parking session', 
   await expect(page).toHaveURL(/\/app\/parkings\/parking-1$/);
 
   await page.getByRole('button', { name: 'Check in', exact: true }).click();
-  await page.getByLabel('Plate').fill('ab-123 cd');
+  await page.getByLabel('Plate', { exact: true }).fill('ab-123 cd');
   await page.getByRole('button', { name: 'Start session' }).click();
   await expect(page.getByRole('link', { name: 'Open session for AB123CD' })).toBeVisible();
 

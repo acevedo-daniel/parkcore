@@ -7,6 +7,7 @@ export type AuthStatus = 'authenticated' | 'loading' | 'unauthenticated' | 'unav
 export interface AuthContextValue {
   errorMessage?: string;
   login: (input: LoginRequest) => Promise<void>;
+  loginDemo: () => Promise<void>;
   logout: () => void;
   register: (input: RegisterRequest) => Promise<void>;
   restore: () => Promise<void>;
