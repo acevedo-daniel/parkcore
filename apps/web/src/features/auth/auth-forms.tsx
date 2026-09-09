@@ -192,11 +192,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
 }
 
 export function LoginFooter() {
-  return (
-    <>
-      No account yet? <Link to="/register">Get started</Link>.
-    </>
-  );
+  return <>Access is provisioned by the facility owner.</>;
 }
 
 export function RegisterFooter() {

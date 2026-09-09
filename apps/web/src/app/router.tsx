@@ -1,9 +1,15 @@
-import { createBrowserRouter, Outlet } from 'react-router';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router';
 
 import { OwnerLayout } from '../components/layout/owner-layout.js';
 import { PublicLayout } from '../components/layout/public-layout.js';
 import { RequireAuthentication } from '../routes/auth/auth-guard.js';
 import { OwnerNotFoundRoute } from '../routes/owner/owner-not-found-route.js';
+import {
+  OwnerParkingEditRedirect,
+  OwnerParkingHistoryRedirect,
+  OwnerParkingRedirect,
+  RegisterRedirect,
+} from '../routes/owner/owner-redirects.js';
 import { OwnerRouteErrorBoundary, PublicRouteErrorBoundary } from '../routes/route-boundaries.js';
 
 export const router = createBrowserRouter([
@@ -42,9 +48,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'register',
-            lazy: async () => ({
-              Component: (await import('../routes/auth/register-route.js')).RegisterRoute,
-            }),
+            element: <RegisterRedirect />,
           },
           {
             path: '*',
@@ -129,6 +133,19 @@ export const router = createBrowserRouter([
           },
         ],
       },
+    ],
+  },
+  {
+    path: 'owner',
+    children: [
+      { index: true, element: <Navigate replace to="/app" /> },
+      { path: 'dashboard', element: <Navigate replace to="/app" /> },
+      { path: 'parkings', element: <Navigate replace to="/app/parkings" /> },
+      { path: 'parkings/new', element: <Navigate replace to="/app/parkings/new" /> },
+      { path: 'parkings/:parkingId', element: <OwnerParkingRedirect /> },
+      { path: 'parkings/:parkingId/edit', element: <OwnerParkingEditRedirect /> },
+      { path: 'parkings/:parkingId/history', element: <OwnerParkingHistoryRedirect /> },
+      { path: '*', element: <Navigate replace to="/app" /> },
     ],
   },
 ]);

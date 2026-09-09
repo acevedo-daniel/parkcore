@@ -25,9 +25,8 @@ describe('application shells', () => {
     renderRoute(<PublicLayout />, '/');
     expect(screen.getByRole('banner')).toBeTruthy();
     expect(screen.getByRole('navigation', { name: 'Public navigation' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Get started' }).getAttribute('href')).toBe(
-      '/register',
-    );
+    expect(screen.getByRole('link', { name: 'Sign in' }).getAttribute('href')).toBe('/login');
+    expect(screen.queryByRole('link', { name: 'Get started' })).toBeNull();
   });
 
   it('opens an accessible compact public navigation when requested', async () => {
