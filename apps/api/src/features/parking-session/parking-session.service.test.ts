@@ -285,6 +285,31 @@ describe('parking session service', () => {
       status: 'COMPLETED' satisfies ParkingSessionStatus,
     });
     expect(result.meta.totalPages).toBe(3);
+
+    const filteredQuery: ParkingSessionQuery = {
+      page: 1,
+      limit: 10,
+      status: 'COMPLETED',
+      plate: 'AB123CD',
+      dateFrom: '2026-02-01T00:00:00.000Z',
+      dateTo: '2026-02-28T23:59:59.000Z',
+    };
+    vi.mocked(parkingSessionRepository.findByParking).mockResolvedValue({ data: [], total: 0 });
+    await getSessionsByParking('owner-1', 'parking-1', filteredQuery);
+    expect(parkingSessionRepository.findByParking).toHaveBeenLastCalledWith('parking-1', {
+      skip: 0,
+      take: 10,
+      status: 'COMPLETED',
+      plate: 'AB123CD',
+      dateFrom: '2026-02-01T00:00:00.000Z',
+      dateTo: '2026-02-28T23:59:59.000Z',
+    });
+
+    vi.mocked(parkingSessionRepository.findActiveByParking).mockResolvedValue(sessions);
+    await getActiveSessionsByParking('owner-1', 'parking-1', { plate: 'AB123CD' });
+    expect(parkingSessionRepository.findActiveByParking).toHaveBeenLastCalledWith('parking-1', {
+      plate: 'AB123CD',
+    });
   });
 
   it('rejects missing or foreign sessions', async () => {

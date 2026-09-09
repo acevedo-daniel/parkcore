@@ -36,6 +36,16 @@ interface DemoParking {
 
 const databaseUrl = process.env.DATABASE_URL;
 
+const DEFAULT_SEED_REFERENCE_TIME = '2026-01-15T12:00:00.000Z';
+const CANONICAL_SEED_EXPECTATIONS = {
+  parkings: 4,
+  sessions: 24,
+  activeSessions: 10,
+  completedSessions: 11,
+  cancelledSessions: 3,
+  completedRevenueCents: 30_950,
+} as const;
+
 if (!databaseUrl) {
   throw new Error('DATABASE_URL is required to run seed');
 }
@@ -48,7 +58,7 @@ const minutesBefore = (reference: Date, minutes: number) =>
 
 function getReferenceTime() {
   const configured = process.env.SEED_REFERENCE_TIME;
-  if (!configured) return new Date();
+  if (!configured) return new Date(DEFAULT_SEED_REFERENCE_TIME);
 
   const reference = new Date(configured);
   if (Number.isNaN(reference.getTime())) {
@@ -127,6 +137,20 @@ const demoParkings: DemoParking[] = [
         status: 'CANCELLED',
         startMinutesAgo: 430,
       },
+      {
+        plate: 'OLD001',
+        type: 'CAR',
+        status: 'COMPLETED',
+        durationMinutes: 90,
+        endMinutesAgo: 2 * 1440,
+      },
+      {
+        plate: 'OLD002',
+        type: 'CAR',
+        status: 'COMPLETED',
+        durationMinutes: 60,
+        endMinutesAgo: 9 * 1440,
+      },
     ],
   },
   {
@@ -167,6 +191,13 @@ const demoParkings: DemoParking[] = [
         status: 'COMPLETED',
         durationMinutes: 26,
         endMinutesAgo: 220,
+      },
+      {
+        plate: 'OLD003',
+        type: 'CAR',
+        status: 'COMPLETED',
+        durationMinutes: 120,
+        endMinutesAgo: 16 * 1440,
       },
     ],
   },
@@ -239,6 +270,13 @@ const demoParkings: DemoParking[] = [
         status: 'CANCELLED',
         startMinutesAgo: 310,
       },
+      {
+        plate: 'OLD004',
+        type: 'LARGE',
+        status: 'COMPLETED',
+        durationMinutes: 45,
+        endMinutesAgo: 24 * 1440,
+      },
     ],
   },
   {
@@ -278,6 +316,13 @@ const demoParkings: DemoParking[] = [
         model: '208',
         status: 'CANCELLED',
         startMinutesAgo: 1_100,
+      },
+      {
+        plate: 'OLD005',
+        type: 'LARGE',
+        status: 'COMPLETED',
+        durationMinutes: 180,
+        endMinutesAgo: 31 * 1440,
       },
     ],
   },
@@ -387,8 +432,50 @@ async function main(): Promise<void> {
     return demoOwner;
   });
 
+  const [
+    parkingCount,
+    sessionCount,
+    activeSessions,
+    completedSessions,
+    cancelledSessions,
+    completedRevenue,
+    oldestSession,
+  ] = await Promise.all([
+    prisma.parking.count({ where: { ownerId: owner.id } }),
+    prisma.parkingSession.count({ where: { parking: { ownerId: owner.id } } }),
+    prisma.parkingSession.count({ where: { parking: { ownerId: owner.id }, status: 'ACTIVE' } }),
+    prisma.parkingSession.count({ where: { parking: { ownerId: owner.id }, status: 'COMPLETED' } }),
+    prisma.parkingSession.count({ where: { parking: { ownerId: owner.id }, status: 'CANCELLED' } }),
+    prisma.parkingSession.aggregate({
+      where: { parking: { ownerId: owner.id }, status: 'COMPLETED' },
+      _sum: { totalAmountCents: true },
+    }),
+    prisma.parkingSession.findFirst({
+      where: { parking: { ownerId: owner.id } },
+      orderBy: { startTime: 'asc' },
+      select: { startTime: true },
+    }),
+  ]);
+
+  const oldestAllowed = minutesBefore(referenceTime, 30 * 1440);
+  if (
+    parkingCount !== CANONICAL_SEED_EXPECTATIONS.parkings ||
+    sessionCount !== CANONICAL_SEED_EXPECTATIONS.sessions ||
+    activeSessions !== CANONICAL_SEED_EXPECTATIONS.activeSessions ||
+    completedSessions !== CANONICAL_SEED_EXPECTATIONS.completedSessions ||
+    cancelledSessions !== CANONICAL_SEED_EXPECTATIONS.cancelledSessions ||
+    (completedRevenue._sum.totalAmountCents ?? 0) !==
+      CANONICAL_SEED_EXPECTATIONS.completedRevenueCents ||
+    oldestSession === null ||
+    oldestSession.startTime > oldestAllowed
+  ) {
+    throw new Error(
+      `Canonical seed assertions failed: parkings=${String(parkingCount)}, sessions=${String(sessionCount)}, active=${String(activeSessions)}, completed=${String(completedSessions)}, cancelled=${String(cancelledSessions)}, revenue=${String(completedRevenue._sum.totalAmountCents ?? 0)}, oldest=${oldestSession?.startTime.toISOString() ?? 'missing'}`,
+    );
+  }
+
   console.log(
-    `Seed completed for ${owner.email}: ${String(demoParkings.length)} parkings and ${String(demoParkings.reduce((count, parking) => count + parking.sessions.length, 0))} sessions.`,
+    `Seed completed for ${owner.email}: ${String(parkingCount)} parkings and ${String(sessionCount)} sessions.`,
   );
 }
 

@@ -44,6 +44,7 @@ export function generateOpenApiDocument() {
       { name: 'Parking Sessions', description: 'Vehicle stay lifecycle' },
       { name: 'User', description: 'User profile management' },
       { name: 'System', description: 'Operational endpoints' },
+      { name: 'Analytics', description: 'Owner operational analytics' },
     ],
   });
 }

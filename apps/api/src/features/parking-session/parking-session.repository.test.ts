@@ -6,6 +6,10 @@ const { mockPrisma, mockTransaction } = vi.hoisted(() => {
     mockTransaction,
     mockPrisma: {
       $transaction: mockTransaction,
+      parkingSession: {
+        findMany: vi.fn(),
+        count: vi.fn(),
+      },
     },
   };
 });
@@ -17,6 +21,7 @@ import {
   cancelIfActive,
   completeIfActive,
   createActiveIfAvailable,
+  findByParking,
 } from './parking-session.repository.js';
 
 const transactionClient = {
@@ -103,6 +108,34 @@ describe('parking session repository', () => {
       expect(transactionClient.parkingSession.create).toHaveBeenCalledTimes(1);
     },
   );
+
+  it('filters historical sessions by normalized plate and start date range', async () => {
+    mockPrisma.parkingSession.findMany.mockResolvedValue([]);
+    mockPrisma.parkingSession.count.mockResolvedValue(0);
+
+    await expect(
+      findByParking('parking-1', {
+        skip: 0,
+        take: 10,
+        plate: 'AB123CD',
+        dateFrom: '2026-02-01',
+        dateTo: '2026-02-28',
+      }),
+    ).resolves.toEqual({ data: [], total: 0 });
+
+    const expectedWhere = {
+      parkingId: 'parking-1',
+      vehicle: { plate: { contains: 'AB123CD' } },
+      startTime: {
+        gte: new Date('2026-02-01'),
+        lte: new Date('2026-02-28T23:59:59.999Z'),
+      },
+    };
+    expect(mockPrisma.parkingSession.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expectedWhere, skip: 0, take: 10 }),
+    );
+    expect(mockPrisma.parkingSession.count).toHaveBeenCalledWith({ where: expectedWhere });
+  });
 
   it('completes with one conditional ACTIVE transition', async () => {
     const endTime = new Date('2026-02-21T10:00:00.000Z');

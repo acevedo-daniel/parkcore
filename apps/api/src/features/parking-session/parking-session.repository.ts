@@ -37,6 +37,13 @@ const parkingSessionWithRelationsSelect = {
   parking: { select: { id: true, title: true, ownerId: true } },
 } as const satisfies Prisma.ParkingSessionSelect;
 
+const parseDateFilter = (value: string, endOfDay = false): Date => {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return new Date(`${value}T${endOfDay ? '23:59:59.999' : '00:00:00.000'}Z`);
+  }
+  return new Date(value);
+};
+
 export type ParkingSessionWithVehicle = Prisma.ParkingSessionGetPayload<{
   select: typeof parkingSessionWithVehicleSelect;
 }>;
@@ -56,9 +63,14 @@ export const findById = async (id: string): Promise<ParkingSessionWithRelations 
 
 export const findActiveByParking = async (
   parkingId: string,
+  options: { plate?: string } = {},
 ): Promise<ParkingSessionWithVehicle[]> => {
   return await prisma.parkingSession.findMany({
-    where: { parkingId, status: 'ACTIVE' },
+    where: {
+      parkingId,
+      status: 'ACTIVE',
+      ...(options.plate ? { vehicle: { plate: { contains: options.plate } } } : {}),
+    },
     orderBy: { startTime: 'desc' },
     select: parkingSessionWithVehicleSelect,
   });
@@ -66,11 +78,27 @@ export const findActiveByParking = async (
 
 export const findByParking = async (
   parkingId: string,
-  options: { skip: number; take: number; status?: ParkingSessionStatus },
+  options: {
+    skip: number;
+    take: number;
+    status?: ParkingSessionStatus;
+    plate?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  },
 ): Promise<{ data: ParkingSessionWithVehicle[]; total: number }> => {
   const where: Prisma.ParkingSessionWhereInput = {
     parkingId,
     ...(options.status ? { status: options.status } : {}),
+    ...(options.plate ? { vehicle: { plate: { contains: options.plate } } } : {}),
+    ...(options.dateFrom || options.dateTo
+      ? {
+          startTime: {
+            ...(options.dateFrom ? { gte: parseDateFilter(options.dateFrom) } : {}),
+            ...(options.dateTo ? { lte: parseDateFilter(options.dateTo, true) } : {}),
+          },
+        }
+      : {}),
   };
   const [data, total] = await Promise.all([
     prisma.parkingSession.findMany({

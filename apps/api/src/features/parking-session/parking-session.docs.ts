@@ -4,6 +4,7 @@ import {
   checkInSchema,
   parkingParamsSchema,
   parkingSessionListResponseSchema,
+  parkingSessionActiveQuerySchema,
   parkingSessionParamsSchema,
   parkingSessionQuerySchema,
   parkingSessionResponseSchema,
@@ -59,7 +60,7 @@ export function registerParkingSessionDocs(registry: OpenAPIRegistry): void {
     tags: ['Parking Sessions'],
     summary: 'List active parking sessions',
     security: [{ bearerAuth: [] }],
-    request: { params: parkingParamsSchema },
+    request: { params: parkingParamsSchema, query: parkingSessionActiveQuerySchema },
     responses: {
       200: {
         description: 'Active parking sessions',

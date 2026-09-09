@@ -5,6 +5,7 @@ import {
   checkInSchema,
   parkingParamsSchema,
   parkingSessionParamsSchema,
+  parkingSessionActiveQuerySchema,
   parkingSessionQuerySchema,
 } from './parking-session.schema.js';
 
@@ -26,7 +27,8 @@ export const checkOut = async (req: Request, res: Response): Promise<void> => {
 export const listActive = async (req: Request, res: Response): Promise<void> => {
   const userId = getAuthenticatedUserId(req);
   const { parkingId } = parkingParamsSchema.parse(req.params);
-  const sessions = await parkingSessionService.getActiveSessionsByParking(userId, parkingId);
+  const query = parkingSessionActiveQuerySchema.parse(req.query);
+  const sessions = await parkingSessionService.getActiveSessionsByParking(userId, parkingId, query);
   res.json(sessions);
 };
 
