@@ -7,7 +7,7 @@ type SessionStatusValue = components['schemas']['ParkingSessionResponse']['statu
 export function ParkingStatus({ isActive }: { isActive: boolean }) {
   return (
     <span className={cn('status', isActive ? 'status-active' : 'status-inactive')}>
-      {isActive ? 'Active' : 'Inactive'}
+      <span aria-hidden="true">●</span> {isActive ? 'Active' : 'Inactive'}
     </span>
   );
 }

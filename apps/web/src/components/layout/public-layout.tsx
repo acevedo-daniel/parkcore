@@ -1,8 +1,12 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Menu, X } from 'lucide-react';
-import { Link, NavLink, Outlet, useNavigation } from 'react-router';
+import { useEffect } from 'react';
+import { Link, NavLink, Outlet, useNavigate, useNavigation } from 'react-router';
 
+import { useAppearance } from '../../app/appearance-provider.js';
+import { DemoLoginButton } from '../../features/auth/demo-login-button.js';
 import { cn } from '../../lib/cn.js';
+import { AppearanceControls } from '../ui/appearance-controls.js';
 
 const publicLinks = [
   { label: 'Parkings', to: '/parkings' },
@@ -27,6 +31,7 @@ function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 function PublicMobileMenu() {
+  const { t } = useAppearance();
   return (
     <DialogPrimitive.Root>
       <DialogPrimitive.Trigger asChild>
@@ -59,6 +64,8 @@ function PublicMobileMenu() {
             <DialogPrimitive.Close asChild>
               <Link to="/login">Sign in</Link>
             </DialogPrimitive.Close>
+            <AppearanceControls compact />
+            <span className="demo-status">{t('demo.live')}</span>
           </nav>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
@@ -67,13 +74,28 @@ function PublicMobileMenu() {
 }
 
 export function PublicLayout() {
+  const { suggestTheme, t } = useAppearance();
+  const navigate = useNavigate();
   const navigation = useNavigation();
+  useEffect(() => {
+    suggestTheme('light');
+  }, [suggestTheme]);
   return (
     <div className="public-shell">
       <a className="skip-link" href="#public-main">
         Skip to main content
       </a>
       <header className="public-header">
+        <div className="demo-flight-deck">
+          <div className="demo-flight-deck-inner">
+            <span className="demo-status">{t('demo.live')}</span>
+            <span className="type-small demo-disclosure">Canonical operational data</span>
+            <DemoLoginButton
+              onSuccess={() => void navigate('/app', { replace: true })}
+              variant="primary"
+            />
+          </div>
+        </div>
         <div className="public-header-inner">
           <Link aria-label="ParkCore home" className="brand-mark" to="/">
             PARKCORE
@@ -81,6 +103,9 @@ export function PublicLayout() {
           <nav aria-label="Public navigation" className="public-desktop-nav">
             <PublicLinks />
           </nav>
+          <div className="public-header-tools">
+            <AppearanceControls />
+          </div>
           <div className="public-mobile-nav">
             <PublicMobileMenu />
           </div>

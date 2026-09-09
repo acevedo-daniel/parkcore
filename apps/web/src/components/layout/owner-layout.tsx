@@ -1,9 +1,12 @@
 import { Building2, LayoutDashboard, LogOut, UserRound } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate, useNavigation } from 'react-router';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import { useAuth } from '../../features/auth/use-auth.js';
 import { cn } from '../../lib/cn.js';
 import { useDocumentMeta } from '../../lib/document-meta.js';
+import { AppearanceControls } from '../ui/appearance-controls.js';
 
 const ownerLinks = [
   { Icon: LayoutDashboard, label: 'Overview', to: '/app' },
@@ -24,9 +27,20 @@ function OwnerLink({ Icon, label, to }: (typeof ownerLinks)[number]) {
 }
 
 export function OwnerLayout() {
+  const { suggestTheme, t } = useAppearance();
   const { logout } = useAuth();
   const navigate = useNavigate();
   const navigation = useNavigation();
+  const [clock, setClock] = useState(() => new Date());
+  useEffect(() => {
+    suggestTheme('dark');
+    const interval = window.setInterval(() => {
+      setClock(new Date());
+    }, 30_000);
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [suggestTheme]);
   useDocumentMeta({
     description: 'Operate ParkCore parking facilities with active sessions, capacity and rates.',
     noIndex: true,
@@ -43,15 +57,26 @@ export function OwnerLayout() {
         Skip to main content
       </a>
       <aside className="owner-sidebar">
-        <Link aria-label="ParkCore operations" className="brand-mark" to="/app">
-          PARKCORE
-        </Link>
+        <div className="owner-brand-block">
+          <Link aria-label="ParkCore operations" className="brand-mark" to="/app">
+            PARKCORE
+          </Link>
+          <span className="type-label">{t('demo.live')}</span>
+        </div>
         <nav aria-label="Owner navigation" className="owner-navigation">
           {ownerLinks.map((link) => (
             <OwnerLink key={link.to} {...link} />
           ))}
         </nav>
         <div className="owner-account">
+          <div className="owner-utilities">
+            <time className="system-clock" dateTime={clock.toISOString()}>
+              {new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(
+                clock,
+              )}
+            </time>
+            <AppearanceControls compact />
+          </div>
           <NavLink
             className={({ isActive }) => cn('owner-nav-link', isActive && 'is-active')}
             to="/app/profile"
@@ -69,7 +94,7 @@ export function OwnerLayout() {
         <Link className="brand-mark" to="/app">
           PARKCORE
         </Link>
-        <span className="type-label">Operations</span>
+        <span className="type-label">{t('nav.operations')}</span>
         <button aria-label="Sign out" className="icon-button" onClick={signOut} type="button">
           <LogOut aria-hidden="true" size={17} />
         </button>

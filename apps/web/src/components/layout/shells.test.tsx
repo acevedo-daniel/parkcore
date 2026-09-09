@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 import { OwnerLayout } from './owner-layout.js';
 import { PublicLayout } from './public-layout.js';
+import { AppearanceProvider } from '../../app/appearance-provider.js';
 import { AuthProvider } from '../../features/auth/auth-provider.js';
 
 function renderRoute(element: ReactNode, path: string) {
@@ -14,9 +15,11 @@ function renderRoute(element: ReactNode, path: string) {
     { initialEntries: [path] },
   );
   return render(
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>,
+    <AppearanceProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </AppearanceProvider>,
   );
 }
 
