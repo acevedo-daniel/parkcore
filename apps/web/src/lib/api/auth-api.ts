@@ -14,6 +14,12 @@ export async function login(input: LoginRequest): Promise<AuthResponse> {
   throw new ApiError(getApiErrorMessage(error, 'Unable to sign in.'), response.status);
 }
 
+export async function loginDemo(): Promise<AuthResponse> {
+  const { data, error, response } = await publicApi.POST('/demo/login', {});
+  if (data) return data;
+  throw new ApiError(getApiErrorMessage(error, 'Demo access is unavailable.'), response.status);
+}
+
 export async function register(input: RegisterRequest): Promise<AuthResponse> {
   const { data, error, response } = await publicApi.POST('/auth/register', { body: input });
   if (data) return data;

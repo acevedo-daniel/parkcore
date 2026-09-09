@@ -1,9 +1,11 @@
 import { ArrowRight } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
+import { DemoLoginButton } from '../../features/auth/demo-login-button.js';
 import { PARKCORE_PUBLIC_URL, useDocumentMeta } from '../../lib/document-meta.js';
 
 export function LandingRoute() {
+  const navigate = useNavigate();
   useDocumentMeta({
     description:
       'Find active parking facilities or operate your own parking with clear sessions, capacity and rates.',
@@ -28,6 +30,7 @@ export function LandingRoute() {
             <Link className="button button-primary" to="/parkings">
               Explore parkings <ArrowRight aria-hidden="true" size={16} />
             </Link>
+            <DemoLoginButton onSuccess={() => void navigate('/app', { replace: true })} />
             <Link className="button button-secondary" to="/login">
               Owner login
             </Link>

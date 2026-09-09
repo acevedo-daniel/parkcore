@@ -54,6 +54,18 @@ afterEach(() => {
 });
 
 describe('parking session history pagination', () => {
+  it('uses the normalized plate from URL state when loading history', async () => {
+    api.getOwnedParkings.mockResolvedValue([parkingFixture()]);
+    api.getParkingSessions.mockResolvedValue(sessionList([parkingSessionFixture()]));
+    renderHistory('/app/parkings/parking-1/sessions?plate=%20ab-123%20cd%20');
+
+    await screen.findByRole('link', { name: 'Open session for AB123CD' });
+    expect(api.getParkingSessions).toHaveBeenLastCalledWith('parking-1', {
+      page: 1,
+      plate: 'AB123CD',
+    });
+  });
+
   it('preserves the status filter while moving to the next page', async () => {
     const user = userEvent.setup();
     api.getOwnedParkings.mockResolvedValue([parkingFixture()]);

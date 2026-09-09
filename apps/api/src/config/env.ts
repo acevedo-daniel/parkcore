@@ -42,6 +42,17 @@ const envSchema = z
       .int()
       .positive()
       .default(15 * 60 * 1000),
+    DEMO_OWNER_EMAIL: z.string().trim().toLowerCase().pipe(z.email()).default('owner@parkcore.dev'),
+    DEMO_RESET_RATE_LIMIT_MAX: z.coerce
+      .number({ error: 'Invalid DEMO_RESET_RATE_LIMIT_MAX' })
+      .int()
+      .positive()
+      .default(3),
+    DEMO_RESET_RATE_LIMIT_WINDOW_MS: z.coerce
+      .number({ error: 'Invalid DEMO_RESET_RATE_LIMIT_WINDOW_MS' })
+      .int()
+      .positive()
+      .default(15 * 60 * 1000),
   })
   .superRefine((value, ctx) => {
     const corsOrigins = parseCorsOrigins(value.CORS_ORIGINS);

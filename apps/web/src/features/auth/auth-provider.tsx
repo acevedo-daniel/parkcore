@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import {
   getCurrentUser,
   login,
+  loginDemo,
   register,
   type LoginRequest,
   type RegisterRequest,
@@ -81,6 +82,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [completeAuthentication],
   );
 
+  const loginDemoUser = useCallback(async () => {
+    completeAuthentication(await loginDemo());
+  }, [completeAuthentication]);
+
   const registerUser = useCallback(
     async (input: RegisterRequest) => {
       completeAuthentication(await register(input));
@@ -96,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       errorMessage,
       login: loginUser,
+      loginDemo: loginDemoUser,
       logout: clearSession,
       register: registerUser,
       restore,
@@ -103,7 +109,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       updateUser,
       user,
     }),
-    [clearSession, errorMessage, loginUser, registerUser, restore, status, updateUser, user],
+    [
+      clearSession,
+      errorMessage,
+      loginDemoUser,
+      loginUser,
+      registerUser,
+      restore,
+      status,
+      updateUser,
+      user,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

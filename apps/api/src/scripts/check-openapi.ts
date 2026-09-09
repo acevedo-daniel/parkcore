@@ -39,6 +39,9 @@ const requiredPaths = [
   '/sessions/{sessionId}',
   '/sessions/{sessionId}/check-out',
   '/sessions/{sessionId}/cancel',
+  '/demo/status',
+  '/demo/login',
+  '/demo/reset',
 ];
 
 const forbiddenPathPrefixes = ['/bookings', '/reviews'];
@@ -51,6 +54,8 @@ const requiredSchemas = [
   'VehicleSummary',
   'ParkingSessionResponse',
   'ParkingSessionListResponse',
+  'DemoStatusResponse',
+  'DemoResetResponse',
 ];
 const dateTimeFields: Record<string, string[]> = {
   UserResponse: ['createdAt', 'updatedAt'],

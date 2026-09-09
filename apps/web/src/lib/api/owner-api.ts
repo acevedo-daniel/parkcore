@@ -12,6 +12,10 @@ export type UpdateProfileRequest =
 export type ParkingSessionQuery = NonNullable<
   paths['/parkings/{parkingId}/sessions']['get']['parameters']['query']
 >;
+export interface ActiveSessionQuery {
+  plate?: string;
+}
+
 function ownerError(error: unknown, response: Response, fallback: string): never {
   throw new ApiError(getApiErrorMessage(error, fallback), response.status);
 }
@@ -40,10 +44,13 @@ export async function updateParking(
   return ownerError(error, response, 'Unable to update this parking.');
 }
 
-export async function getActiveSessions(parkingId: string): Promise<ParkingSession[]> {
+export async function getActiveSessions(
+  parkingId: string,
+  query: ActiveSessionQuery = {},
+): Promise<ParkingSession[]> {
   const { data, error, response } = await authenticatedApi.GET(
     '/parkings/{parkingId}/sessions/active',
-    { params: { path: { parkingId } } },
+    { params: { path: { parkingId }, query } },
   );
   if (data) return data;
   return ownerError(error, response, 'Unable to load active sessions.');

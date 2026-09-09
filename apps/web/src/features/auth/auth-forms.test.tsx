@@ -11,14 +11,16 @@ import { ApiError } from '../../lib/api/api-error.js';
 afterEach(cleanup);
 
 function renderWithAuth(children: React.ReactNode, overrides: Partial<AuthContextValue> = {}) {
+  const { loginDemo, ...otherOverrides } = overrides;
   const value: AuthContextValue = {
     login: vi.fn().mockResolvedValue(undefined),
+    loginDemo: loginDemo ?? vi.fn().mockResolvedValue(undefined),
     logout: vi.fn(),
     register: vi.fn().mockResolvedValue(undefined),
     restore: vi.fn().mockResolvedValue(undefined),
     status: 'unauthenticated',
     updateUser: vi.fn(),
-    ...overrides,
+    ...otherOverrides,
   };
   return {
     ...render(

@@ -15,6 +15,7 @@ import { parkingSessionRouter } from './src/features/parking-session/parking-ses
 import { parkingRouter } from './src/features/parking/parking.routes.js';
 import { userRouter } from './src/features/user/user.routes.js';
 import { analyticsRouter } from './src/features/analytics/analytics.routes.js';
+import { demoRouter } from './src/features/demo/demo.routes.js';
 
 const app = express();
 
@@ -51,6 +52,7 @@ app.use('/parkings', parkingRouter);
 app.use('/sessions', parkingSessionRouter);
 app.use('/auth', authRouter);
 app.use('/analytics', analyticsRouter);
+app.use('/demo', demoRouter);
 
 app.use((_req, _res, next) => {
   next(new NotFoundError('Route not found'));
