@@ -33,6 +33,7 @@ export function registerDemoDocs(registry: OpenAPIRegistry): void {
         content: { 'application/json': { schema: authResponseSchema } },
       },
       409: errorResponse('Demo access is temporarily unavailable'),
+      429: errorResponse('Too many requests'),
       500: errorResponse('Demo login failed'),
     },
   });

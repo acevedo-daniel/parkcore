@@ -16,12 +16,6 @@ export interface ActiveSessionQuery {
   plate?: string;
 }
 
-const activeSessionClient = authenticatedApi as unknown as {
-  GET: (
-    path: '/parkings/{parkingId}/sessions/active',
-    options: { params: { path: { parkingId: string }; query: ActiveSessionQuery } },
-  ) => Promise<{ data?: ParkingSession[]; error: unknown; response: Response }>;
-};
 function ownerError(error: unknown, response: Response, fallback: string): never {
   throw new ApiError(getApiErrorMessage(error, fallback), response.status);
 }
@@ -54,7 +48,7 @@ export async function getActiveSessions(
   parkingId: string,
   query: ActiveSessionQuery = {},
 ): Promise<ParkingSession[]> {
-  const { data, error, response } = await activeSessionClient.GET(
+  const { data, error, response } = await authenticatedApi.GET(
     '/parkings/{parkingId}/sessions/active',
     { params: { path: { parkingId }, query } },
   );
