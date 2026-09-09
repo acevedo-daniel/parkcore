@@ -1,14 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
-import { Search } from 'lucide-react';
+import { ArrowRight, Search, SlidersHorizontal, X } from 'lucide-react';
 import { useState, type SyntheticEvent } from 'react';
-import { useSearchParams } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 
-import { ParkingListItem } from '../../components/domain/parking.js';
+import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../../components/ui/button.js';
-import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
-import { Field, Input } from '../../components/ui/field.js';
-import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
 import { getPublicParkings, type PublicParkingQuery } from '../../lib/api/public-api.js';
+import { cn } from '../../lib/cn.js';
+import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
+import { formatMoney } from '../../lib/format.js';
 
 function rateToCents(value: string) {
   const normalized = value.trim();
@@ -29,11 +29,16 @@ function getFormText(formData: FormData, name: string) {
 }
 
 export function ParkingCatalogRoute() {
+  const { language } = useAppearance();
+  const es = language === 'es';
   useDocumentMeta({
-    description: 'Browse active ParkCore parking facilities by address and hourly rate.',
+    description: es
+      ? 'Explorá cocheras activas por zona y tarifa por hora.'
+      : 'Browse active ParkCore parking facilities by address and hourly rate.',
     publicUrl: publicUrl('/parkings'),
-    title: 'Parkings | ParkCore',
+    title: es ? 'Cocheras | ParkCore' : 'Parkings | ParkCore',
   });
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [filterError, setFilterError] = useState<string>();
   const page = pageFromSearchParams(searchParams);
@@ -49,6 +54,7 @@ export function ParkingCatalogRoute() {
     queryFn: () => getPublicParkings(query),
     placeholderData: (previousData) => previousData,
   });
+  const hasFilters = [...searchParams.keys()].some((key) => key !== 'page');
 
   const applyFilters = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -62,11 +68,15 @@ export function ParkingCatalogRoute() {
       (minRateText.trim() && minRate === undefined) ||
       (maxRateText.trim() && maxRate === undefined)
     ) {
-      setFilterError('Rates must be greater than 0.');
+      setFilterError(es ? 'Las tarifas deben ser mayores que 0.' : 'Rates must be greater than 0.');
       return;
     }
     if (minRate !== undefined && maxRate !== undefined && minRate > maxRate) {
-      setFilterError('Minimum rate cannot exceed maximum rate.');
+      setFilterError(
+        es
+          ? 'La tarifa mínima no puede superar la máxima.'
+          : 'Minimum rate cannot exceed maximum rate.',
+      );
       return;
     }
     setFilterError(undefined);
@@ -85,118 +95,263 @@ export function ParkingCatalogRoute() {
   };
 
   return (
-    <section className="public-catalog stack-landing" aria-labelledby="catalog-title">
-      <header className="catalog-header">
-        <p className="type-label">Public catalog</p>
-        <h1 className="type-page-title" id="catalog-title">
-          Parkings
-        </h1>
-        <p className="landing-intro">Find an active facility by address or rate.</p>
-      </header>
-      <form className="catalog-filters" key={searchParams.toString()} onSubmit={applyFilters}>
-        <Field htmlFor="parking-search" label="Search">
-          <div className="search-control">
-            <Search aria-hidden="true" size={17} />
-            <Input
-              id="parking-search"
-              defaultValue={searchParams.get('search') ?? ''}
-              name="search"
-              placeholder="Name or address"
-            />
+    <section className="min-h-full bg-[#f7f3ea] pb-20 pt-10 sm:pb-28 sm:pt-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <header className="grid gap-8 border-b border-[#1d241f]/10 pb-10 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-7">
+            <p className="text-xs font-bold tracking-[0.12em] text-[#b14d30] uppercase">
+              {es ? 'Encontrá dónde dejarlo' : 'Find where to leave it'}
+            </p>
+            <h1 className="mt-4 font-display text-4xl font-black leading-[1.02] tracking-[-0.05em] text-[#1d241f] sm:text-5xl lg:text-6xl">
+              {es
+                ? 'Cocheras que se entienden antes de llegar.'
+                : 'Facilities you can understand before you arrive.'}
+            </h1>
           </div>
-        </Field>
-        <Field htmlFor="min-rate" label="Min. rate (USD)">
-          <Input
-            id="min-rate"
-            inputMode="decimal"
-            min="0.01"
-            step="0.01"
-            type="number"
-            defaultValue={searchParams.get('minRate') ?? ''}
-            name="minRate"
-          />
-        </Field>
-        <Field htmlFor="max-rate" label="Max. rate (USD)">
-          <Input
-            id="max-rate"
-            inputMode="decimal"
-            min="0.01"
-            step="0.01"
-            type="number"
-            defaultValue={searchParams.get('maxRate') ?? ''}
-            name="maxRate"
-          />
-        </Field>
-        <Button type="submit">Apply filters</Button>
-      </form>
-      {filterError ? (
-        <p className="field-error" role="alert">
-          {filterError}
-        </p>
-      ) : null}
-      {parkingQuery.isLoading ? <CatalogSkeleton /> : null}
-      {parkingQuery.isFetching && !parkingQuery.isLoading ? (
-        <p className="query-status" role="status">
-          Refreshing parkings…
-        </p>
-      ) : null}
-      {parkingQuery.isError ? (
-        <ErrorState
-          onRetry={() => {
-            void parkingQuery.refetch();
-          }}
+          <p className="max-w-lg text-base leading-relaxed text-[#526052] lg:col-span-4 lg:col-start-9 sm:text-lg">
+            {es
+              ? 'Buscá por zona o compará tarifas. Los datos importantes aparecen primero, sin hacerte recorrer una ciudad de pantallas.'
+              : 'Search by area or compare rates. The important details come first, without sending you through a city of screens.'}
+          </p>
+        </header>
+
+        <form
+          className="mt-8 grid gap-4 rounded-[2rem] border border-[#1d241f]/10 bg-[#fffdf7] p-5 shadow-[0_8px_0_rgba(29,36,31,0.08)] lg:grid-cols-12 lg:items-end lg:p-6"
+          key={searchParams.toString()}
+          onSubmit={applyFilters}
         >
-          We could not load active parkings.
-        </ErrorState>
-      ) : null}
-      {parkingQuery.data?.data.length === 0 ? (
-        <EmptyState title="No active parkings">Try a different address or rate range.</EmptyState>
-      ) : null}
-      {parkingQuery.data?.data.map((parking, index) => (
-        <ParkingListItem
-          key={parking.id}
-          identifier={index + 1}
-          parking={parking}
-          to={`/parkings/${parking.id}`}
-        />
-      ))}
-      {parkingQuery.data ? (
-        <nav aria-label="Parking catalog pagination" className="pagination-controls">
-          <Button
-            disabled={!parkingQuery.data.meta.hasPreviousPage}
-            type="button"
-            variant="secondary"
-            onClick={() => {
-              changePage(parkingQuery.data.meta.page - 1);
-            }}
+          <div className="lg:col-span-6">
+            <label className="mb-2 block text-xs font-bold text-[#465245]" htmlFor="parking-search">
+              {es ? '¿A dónde vas?' : 'Where are you going?'}
+            </label>
+            <div className="flex items-center gap-2 rounded-2xl border border-[#1d241f]/10 bg-[#f3eddf] px-3 focus-within:border-[#1d241f]/30 focus-within:bg-white">
+              <Search aria-hidden="true" className="size-4 shrink-0 text-[#b14d30]" />
+              <input
+                className="h-12 w-full bg-transparent text-sm font-medium text-[#1d241f] outline-none placeholder:text-[#748074]"
+                defaultValue={searchParams.get('search') ?? ''}
+                id="parking-search"
+                name="search"
+                placeholder={es ? 'Nombre, barrio o dirección' : 'Name, neighborhood, or address'}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 lg:col-span-3">
+            <label className="block text-xs font-bold text-[#465245]" htmlFor="min-rate">
+              {es ? 'Mínimo por hora' : 'Min. rate (USD)'}
+              <input
+                className="mt-2 h-12 w-full rounded-2xl border border-[#1d241f]/10 bg-[#f3eddf] px-3 text-sm font-medium text-[#1d241f] outline-none placeholder:text-[#748074] focus:border-[#1d241f]/30 focus:bg-white"
+                defaultValue={searchParams.get('minRate') ?? ''}
+                id="min-rate"
+                inputMode="decimal"
+                min="0.01"
+                name="minRate"
+                placeholder="—"
+                step="0.01"
+                type="number"
+              />
+            </label>
+            <label className="block text-xs font-bold text-[#465245]" htmlFor="max-rate">
+              {es ? 'Máximo por hora' : 'Max. rate (USD)'}
+              <input
+                className="mt-2 h-12 w-full rounded-2xl border border-[#1d241f]/10 bg-[#f3eddf] px-3 text-sm font-medium text-[#1d241f] outline-none placeholder:text-[#748074] focus:border-[#1d241f]/30 focus:bg-white"
+                defaultValue={searchParams.get('maxRate') ?? ''}
+                id="max-rate"
+                inputMode="decimal"
+                min="0.01"
+                name="maxRate"
+                placeholder="—"
+                step="0.01"
+                type="number"
+              />
+            </label>
+          </div>
+          <button
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#1d241f] px-5 text-sm font-bold text-[#fffdf7] shadow-[0_4px_0_#b14d30] transition-transform hover:-translate-y-0.5 active:translate-y-0 lg:col-span-3"
+            type="submit"
           >
-            Previous
-          </Button>
-          <span className="type-operational" aria-live="polite">
-            Page {parkingQuery.data.meta.page} of {parkingQuery.data.meta.totalPages}
-          </span>
-          <Button
-            disabled={!parkingQuery.data.meta.hasNextPage}
-            type="button"
-            variant="secondary"
-            onClick={() => {
-              changePage(parkingQuery.data.meta.page + 1);
-            }}
+            <SlidersHorizontal aria-hidden="true" className="size-4" />
+            {es ? 'Aplicar filtros' : 'Apply filters'}
+          </button>
+          {filterError ? (
+            <p className="lg:col-span-full text-sm font-medium text-[#b42318]" role="alert">
+              {filterError}
+            </p>
+          ) : null}
+        </form>
+
+        {parkingQuery.isFetching && !parkingQuery.isLoading ? (
+          <p className="mt-5 text-sm font-medium text-[#526052]" role="status">
+            {es ? 'Actualizando cocheras…' : 'Refreshing parkings…'}
+          </p>
+        ) : null}
+        {parkingQuery.isLoading ? <CatalogSkeleton /> : null}
+        {parkingQuery.isError ? (
+          <section
+            className="mt-10 rounded-[2rem] border border-[#b14d30]/25 bg-[#fff7f3] p-8"
+            role="alert"
           >
-            Next
-          </Button>
-        </nav>
-      ) : null}
+            <p className="text-xs font-bold tracking-[0.12em] text-[#b14d30] uppercase">
+              {es ? 'No pudimos cargar el directorio' : 'We could not load the directory'}
+            </p>
+            <p className="mt-3 text-base text-[#543524]">
+              {es
+                ? 'Probá actualizar las cocheras en unos instantes.'
+                : 'We could not load active parkings. Try refreshing in a moment.'}
+            </p>
+            <button
+              className="mt-5 rounded-full bg-[#1d241f] px-5 py-3 text-sm font-bold text-[#fffdf7]"
+              onClick={() => {
+                void parkingQuery.refetch();
+              }}
+              type="button"
+            >
+              {es ? 'Reintentar' : 'Try again'}
+            </button>
+          </section>
+        ) : null}
+        {parkingQuery.data?.data.length === 0 ? (
+          <section className="mt-10 rounded-[2rem] border border-dashed border-[#1d241f]/20 bg-[#fffdf7] p-8 text-center">
+            <p className="text-xs font-bold tracking-[0.12em] text-[#b14d30] uppercase">
+              {es ? 'Sin coincidencias' : 'No matches yet'}
+            </p>
+            <h2 className="mt-3 font-display text-2xl font-extrabold text-[#1d241f]">
+              {es ? 'No encontramos cocheras con esos filtros.' : 'No active parkings'}
+            </h2>
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[#526052]">
+              {es
+                ? 'Probá con otra zona o ampliá el rango de tarifas.'
+                : 'Try a different address or rate range.'}
+            </p>
+            {hasFilters ? (
+              <button
+                className="mt-5 inline-flex items-center gap-2 rounded-full border border-[#1d241f]/15 px-4 py-2.5 text-sm font-bold text-[#1d241f] hover:bg-[#f3eddf]"
+                onClick={() => {
+                  setSearchParams({});
+                }}
+                type="button"
+              >
+                <X aria-hidden="true" className="size-4" />
+                {es ? 'Limpiar filtros' : 'Clear filters'}
+              </button>
+            ) : null}
+          </section>
+        ) : null}
+        {parkingQuery.data?.data.length ? (
+          <div
+            aria-label={es ? 'Resultados de cocheras' : 'Parking results'}
+            className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3"
+          >
+            {parkingQuery.data.data.map((parking, index) => (
+              <Link
+                aria-label={`${es ? 'Abrir' : 'Open'} ${parking.title}`}
+                className="group relative flex min-h-72 flex-col justify-between overflow-hidden rounded-[2rem] border border-[#1d241f]/10 bg-[#fffdf7] p-7 transition-transform hover:-translate-y-1"
+                key={parking.id}
+                to={`/parkings/${parking.id}`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'absolute -right-10 -top-12 size-40 rounded-full opacity-80',
+                    index % 3 === 0
+                      ? 'bg-[#e7bf45]'
+                      : index % 3 === 1
+                        ? 'bg-[#d9e2d1]'
+                        : 'bg-[#e5a28d]',
+                  )}
+                />
+                <div className="relative">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[#f3eddf] px-3 py-1.5 text-xs font-bold text-[#465245]">
+                    <span className="size-1.5 rounded-full bg-[#c75b37]" />
+                    {parking.isActive
+                      ? es
+                        ? 'Cochera activa'
+                        : 'Facility active'
+                      : es
+                        ? 'Consultar'
+                        : 'Check first'}
+                  </span>
+                  <h2 className="mt-12 font-display text-2xl font-extrabold leading-tight tracking-[-0.03em] text-[#1d241f]">
+                    {parking.title}
+                  </h2>
+                  <p className="mt-3 max-w-64 text-sm leading-relaxed text-[#526052]">
+                    {parking.address}
+                  </p>
+                </div>
+                <div className="relative mt-8 flex items-end justify-between border-t border-[#1d241f]/10 pt-5">
+                  <div>
+                    <span className="block text-xs font-medium text-[#526052]">
+                      {es ? 'Tarifa por hora' : 'Hourly rate'}
+                    </span>
+                    <span className="font-mono text-lg font-bold text-[#1d241f]">
+                      {formatMoney(parking.hourlyRateCents, parking.currency)}
+                      <span className="text-xs font-medium"> / h</span>
+                    </span>
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-[#1d241f]">
+                    {es ? 'Ver detalles' : 'View details'}
+                    <ArrowRight
+                      aria-hidden="true"
+                      className="size-3.5 transition-transform group-hover:translate-x-1"
+                    />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : null}
+        {parkingQuery.data ? (
+          <nav
+            aria-label={es ? 'Paginación de cocheras' : 'Parking catalog pagination'}
+            className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-[#1d241f]/10 pt-7"
+          >
+            <Button
+              className="rounded-full border-[#1d241f]/15 bg-[#fffdf7] text-[#1d241f] hover:bg-[#f3eddf]"
+              disabled={!parkingQuery.data.meta.hasPreviousPage}
+              onClick={() => {
+                changePage(parkingQuery.data.meta.page - 1);
+              }}
+              type="button"
+              variant="secondary"
+            >
+              {es ? 'Anterior' : 'Previous'}
+            </Button>
+            <span aria-live="polite" className="text-sm font-medium text-[#526052]">
+              {es
+                ? `Página ${String(parkingQuery.data.meta.page)} de ${String(parkingQuery.data.meta.totalPages)}`
+                : `Page ${String(parkingQuery.data.meta.page)} of ${String(parkingQuery.data.meta.totalPages)}`}
+            </span>
+            <Button
+              className="rounded-full border-[#1d241f]/15 bg-[#fffdf7] text-[#1d241f] hover:bg-[#f3eddf]"
+              disabled={!parkingQuery.data.meta.hasNextPage}
+              onClick={() => {
+                changePage(parkingQuery.data.meta.page + 1);
+              }}
+              type="button"
+              variant="secondary"
+            >
+              {es ? 'Siguiente' : 'Next'}
+            </Button>
+          </nav>
+        ) : null}
+      </div>
     </section>
   );
 }
 
 function CatalogSkeleton() {
   return (
-    <div className="catalog-skeleton" aria-label="Loading parkings">
-      <Skeleton />
-      <Skeleton />
-      <Skeleton />
+    <div aria-label="Loading parkings" className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }, (_, index) => (
+        <div
+          className="min-h-72 animate-pulse rounded-[2rem] border border-[#1d241f]/10 bg-[#fffdf7] p-7"
+          key={index}
+        >
+          <div className="h-7 w-28 rounded-full bg-[#ebe4d6]" />
+          <div className="mt-14 h-7 w-3/4 rounded bg-[#ebe4d6]" />
+          <div className="mt-3 h-4 w-1/2 rounded bg-[#ebe4d6]" />
+          <div className="mt-20 h-px bg-[#ebe4d6]" />
+        </div>
+      ))}
     </div>
   );
 }
