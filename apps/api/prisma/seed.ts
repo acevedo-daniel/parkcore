@@ -34,8 +34,10 @@ interface DemoParking {
   title: string;
 }
 
-export const DEFAULT_SEED_REFERENCE_TIME = '2026-01-15T12:00:00.000Z';
-export const CANONICAL_SEED_EXPECTATIONS = {
+const databaseUrl = process.env.DATABASE_URL;
+
+const DEFAULT_SEED_REFERENCE_TIME = '2026-01-15T12:00:00.000Z';
+const CANONICAL_SEED_EXPECTATIONS = {
   parkings: 4,
   sessions: 24,
   activeSessions: 10,
@@ -43,6 +45,13 @@ export const CANONICAL_SEED_EXPECTATIONS = {
   cancelledSessions: 3,
   completedRevenueCents: 30_950,
 } as const;
+
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL is required to run seed');
+}
+
+const adapter = new PrismaPg({ connectionString: databaseUrl });
+const prisma = new PrismaClient({ adapter });
 
 const minutesBefore = (reference: Date, minutes: number) =>
   new Date(reference.getTime() - minutes * 60_000);

@@ -4,7 +4,6 @@ import { registerParkingSessionDocs } from '../features/parking-session/parking-
 import { registerParkingDocs } from '../features/parking/parking.docs.js';
 import { registerUserDocs } from '../features/user/user.docs.js';
 import { registerAnalyticsDocs } from '../features/analytics/analytics.docs.js';
-import { registerDemoDocs } from '../features/demo/demo.docs.js';
 
 export function registerFeatureDocs(registry: OpenAPIRegistry): void {
   registerAuthDocs(registry);
@@ -12,5 +11,4 @@ export function registerFeatureDocs(registry: OpenAPIRegistry): void {
   registerParkingDocs(registry);
   registerUserDocs(registry);
   registerAnalyticsDocs(registry);
-  registerDemoDocs(registry);
 }

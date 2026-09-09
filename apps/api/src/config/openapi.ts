@@ -45,7 +45,6 @@ export function generateOpenApiDocument() {
       { name: 'User', description: 'User profile management' },
       { name: 'System', description: 'Operational endpoints' },
       { name: 'Analytics', description: 'Owner operational analytics' },
-      { name: 'Demo', description: 'Controlled public demo access and restoration' },
     ],
   });
 }
