@@ -70,6 +70,33 @@ describe('vehicle service', () => {
     });
   });
 
+  it('keeps normalized plate identity scoped to the parking facility', async () => {
+    const firstParkingVehicle = buildVehicle({ id: 'vehicle-1', parkingId: 'parking-1' });
+    const secondParkingVehicle = buildVehicle({ id: 'vehicle-2', parkingId: 'parking-2' });
+    vi.mocked(vehicleRepository.findByPlate).mockResolvedValue(null);
+    vi.mocked(vehicleRepository.create)
+      .mockResolvedValueOnce(firstParkingVehicle)
+      .mockResolvedValueOnce(secondParkingVehicle);
+
+    await expect(
+      findOrCreateForAuthorizedParking('parking-1', { plate: 'ab-123-cd' }),
+    ).resolves.toEqual(firstParkingVehicle);
+    await expect(
+      findOrCreateForAuthorizedParking('parking-2', { plate: 'AB 123 CD' }),
+    ).resolves.toEqual(secondParkingVehicle);
+
+    expect(vehicleRepository.findByPlate).toHaveBeenNthCalledWith(1, 'AB123CD', 'parking-1');
+    expect(vehicleRepository.findByPlate).toHaveBeenNthCalledWith(2, 'AB123CD', 'parking-2');
+    expect(vehicleRepository.create).toHaveBeenNthCalledWith(1, {
+      plate: 'AB123CD',
+      parkingId: 'parking-1',
+    });
+    expect(vehicleRepository.create).toHaveBeenNthCalledWith(2, {
+      plate: 'AB123CD',
+      parkingId: 'parking-2',
+    });
+  });
+
   it('reuses a concurrently registered vehicle after a unique collision', async () => {
     const vehicle = buildVehicle({ plate: 'AB123CD' });
     const uniquePlateError = Object.assign(

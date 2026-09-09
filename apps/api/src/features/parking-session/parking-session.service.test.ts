@@ -247,6 +247,7 @@ describe('parking session service', () => {
 
       await expect(cancelSession('owner-1', activeSession.id)).resolves.toMatchObject({
         status: 'CANCELLED',
+        totalAmountCents: null,
       });
       expect(parkingSessionRepository.cancelIfActive).toHaveBeenCalledWith(activeSession.id);
     });

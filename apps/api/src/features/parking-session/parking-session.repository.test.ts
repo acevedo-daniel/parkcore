@@ -88,6 +88,22 @@ describe('parking session repository', () => {
     expect(transactionClient.parkingSession.create).not.toHaveBeenCalled();
   });
 
+  it.each([0, 19])(
+    'accepts check-in while active count is below capacity (active count: %s)',
+    async (activeCount) => {
+      const session = buildSessionWithVehicle();
+      transactionClient.parkingSession.count.mockResolvedValue(activeCount);
+      transactionClient.parkingSession.findFirst.mockResolvedValue(null);
+      transactionClient.parkingSession.create.mockResolvedValue(session);
+
+      await expect(
+        createActiveIfAvailable('parking-1', 'vehicle-1', 20, 1500, 'USD', visitData),
+      ).resolves.toEqual(session);
+
+      expect(transactionClient.parkingSession.create).toHaveBeenCalledTimes(1);
+    },
+  );
+
   it('completes with one conditional ACTIVE transition', async () => {
     const endTime = new Date('2026-02-21T10:00:00.000Z');
     const completedSession = {
@@ -129,9 +145,10 @@ describe('parking session repository', () => {
     transactionClient.parkingSession.findUniqueOrThrow.mockResolvedValue(cancelledSession);
 
     await expect(cancelIfActive('session-1')).resolves.toEqual(cancelledSession);
+    expect(cancelledSession.totalAmountCents).toBeNull();
     expect(transactionClient.parkingSession.updateMany).toHaveBeenCalledWith({
       where: { id: 'session-1', status: 'ACTIVE' },
-      data: { status: 'CANCELLED' },
+      data: { status: 'CANCELLED', totalAmountCents: null },
     });
   });
 });
