@@ -129,20 +129,12 @@ export function LandingRoute() {
       : FALLBACK_PARKINGS;
 
   return (
-    <div className="landing-page overflow-hidden bg-[#f7f3ea] text-[#1d241f]">
-      <section className="relative isolate overflow-hidden bg-[#e7bf45]">
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 h-24 bg-[#f7f3ea] [clip-path:polygon(0_58%,24%_88%,52%_62%,76%_88%,100%_44%,100%_100%,0_100%)]"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute -right-24 top-12 size-[30rem] rounded-full border-[32px] border-[#f6d76d]/75"
-        />
-        <div className="relative mx-auto grid max-w-7xl gap-12 px-4 pb-28 pt-14 sm:px-6 sm:pb-36 sm:pt-20 lg:grid-cols-12 lg:items-center lg:gap-16 lg:px-8">
+    <div className="landing-page overflow-hidden bg-white text-[#121417]">
+      <section className="bg-[#ffcc00]">
+        <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-12 lg:items-center lg:gap-16 lg:px-8">
           <div className="lg:col-span-7">
             <p className="inline-flex items-center gap-2 rounded-full border border-[#1d241f]/15 bg-[#f9eaa8]/55 px-3 py-1.5 text-xs font-bold tracking-[0.08em] text-[#283128] uppercase">
-              <span className="size-1.5 rounded-full bg-[#c75b37]" />
+              <span className="size-1.5 rounded-full bg-[#121417]" />
               {es ? 'Para quienes se mueven todos los días' : 'For everyday movement'}
             </p>
             <h1 className="mt-7 max-w-3xl font-display text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[#1d241f] sm:text-6xl lg:text-[5.1rem]">
@@ -172,7 +164,7 @@ export function LandingRoute() {
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <Link
                 to="/parkings"
-                className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#1d241f] px-6 py-3 text-sm font-bold text-[#fffdf7] shadow-[0_8px_0_#b14d30] transition-transform hover:-translate-y-0.5 active:translate-y-0"
+                className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#121417] px-6 py-3 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 hover:bg-white hover:text-[#121417] active:translate-y-0"
               >
                 {es ? 'Ver cocheras' : 'Browse facilities'}
                 <ArrowRight
@@ -184,7 +176,7 @@ export function LandingRoute() {
                 onSuccess={() => {
                   void navigate('/app', { replace: true });
                 }}
-                className="min-h-12 rounded-full border border-[#1d241f]/20 bg-[#f9eaa8] px-6 py-3 text-sm font-bold text-[#1d241f] transition-colors hover:bg-[#fff5c6]"
+                className="min-h-12 rounded-full border border-[#121417]/20 bg-white px-6 py-3 text-sm font-bold text-[#121417] transition-colors hover:bg-[#121417] hover:text-white"
               >
                 {es ? 'Recorrer la demo' : 'Explore the demo'}
               </DemoLoginButton>
@@ -197,14 +189,10 @@ export function LandingRoute() {
           </div>
 
           <div className="relative lg:col-span-5">
-            <div
-              aria-hidden="true"
-              className="absolute -inset-x-8 top-12 h-[calc(100%-2rem)] rounded-[48%_52%_46%_54%/42%_44%_56%_58%] bg-[#ca643d]"
-            />
-            <div className="relative rotate-[-1.5deg]">
+            <div>
               <ParkingCalculatorWidget />
             </div>
-            <p className="relative ml-auto mt-5 max-w-[22rem] rotate-[1deg] rounded-bl-3xl rounded-tr-3xl bg-[#fffdf7] px-5 py-4 text-sm font-medium leading-relaxed text-[#465245] shadow-sm">
+            <p className="ml-auto mt-5 max-w-[22rem] border-l-4 border-[#121417] bg-white px-5 py-4 text-sm font-medium leading-relaxed text-[#121417] shadow-sm">
               {es
                 ? 'Elegí una cochera, calculá una estadía y llegá con la información importante a mano.'
                 : 'Choose a facility, estimate a stay, and arrive with the information that matters.'}
@@ -213,11 +201,11 @@ export function LandingRoute() {
         </div>
       </section>
 
-      <section className="bg-[#f7f3ea] py-20 sm:py-28">
+      <section className="bg-white py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-5">
-              <p className="text-xs font-bold tracking-[0.12em] text-[#b14d30] uppercase">
+              <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
                 {es ? 'Una experiencia cotidiana' : 'An everyday experience'}
               </p>
               <h2 className="mt-4 font-display text-4xl font-black leading-[1.02] tracking-[-0.045em] text-[#1d241f] sm:text-5xl">
@@ -226,7 +214,7 @@ export function LandingRoute() {
                   : 'Parking does not need reinventing. It needs to be clear.'}
               </h2>
             </div>
-            <p className="max-w-xl text-base leading-relaxed text-[#526052] lg:col-span-5 lg:col-start-8 sm:text-lg">
+            <p className="max-w-xl text-base leading-relaxed text-[#3f3f3f] lg:col-span-5 lg:col-start-8 sm:text-lg">
               {es
                 ? 'La tecnología está para sacar ruido del camino: que la tarifa se entienda, que la entrada quede registrada y que nadie tenga que buscar un papel al salir.'
                 : 'Technology should remove noise: make rates understandable, record each arrival, and keep nobody looking for a scrap of paper at the exit.'}
@@ -257,8 +245,8 @@ export function LandingRoute() {
                 bodyEn: 'A clear closeout, with no rituals or hidden information.',
               },
             ].map((item) => (
-              <article key={item.number} className="min-h-64 bg-[#fffdf7] p-7 sm:p-8">
-                <span className="font-mono text-xs font-bold text-[#b14d30]">{item.number}</span>
+              <article key={item.number} className="min-h-64 bg-white p-7 sm:p-8">
+                <span className="font-mono text-xs font-bold text-[#121417]">{item.number}</span>
                 <h3 className="mt-12 max-w-48 font-display text-2xl font-extrabold leading-tight tracking-[-0.03em] text-[#1d241f]">
                   {es ? item.titleEs : item.titleEn}
                 </h3>
@@ -271,14 +259,10 @@ export function LandingRoute() {
         </div>
       </section>
 
-      <section className="relative border-y border-[#1d241f]/10 bg-[#d9e2d1] py-20 sm:py-28">
-        <div
-          aria-hidden="true"
-          className="absolute left-0 top-0 h-16 w-full bg-[#f7f3ea] [clip-path:polygon(0_0,100%_0,100%_35%,76%_100%,47%_44%,16%_100%,0_45%)]"
-        />
-        <div className="relative mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-          <article className="rounded-[2rem_2rem_5rem_2rem] bg-[#fffdf7] p-8 shadow-[0_12px_0_rgba(29,36,31,0.09)] sm:p-10">
-            <span className="inline-flex rounded-full bg-[#f5df88] px-3 py-1.5 text-xs font-bold text-[#394234]">
+      <section className="border-y border-[#121417]/10 bg-[#f5f5f5] py-20 sm:py-28">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+          <article className="rounded-[2rem_2rem_5rem_2rem] bg-white p-8 shadow-[0_12px_0_rgba(18,20,23,0.09)] sm:p-10">
+            <span className="inline-flex rounded-full bg-[#ffcc00] px-3 py-1.5 text-xs font-bold text-[#121417]">
               {es ? 'Para quien maneja' : 'For drivers'}
             </span>
             <h2 className="mt-7 max-w-md font-display text-3xl font-black leading-[1.04] tracking-[-0.04em] text-[#1d241f] sm:text-4xl">
@@ -286,22 +270,22 @@ export function LandingRoute() {
                 ? 'Dejá de adivinar cómo va a ser estacionar.'
                 : 'Stop guessing what parking will be like.'}
             </h2>
-            <p className="mt-5 max-w-md text-base leading-relaxed text-[#526052]">
+            <p className="mt-5 max-w-md text-base leading-relaxed text-[#3f3f3f]">
               {es
                 ? 'Consultá las cocheras, entendé la tarifa y guardá el comprobante de una estadía en el mismo lugar.'
                 : 'Browse facilities, understand the rate, and keep a stay receipt in one place.'}
             </p>
             <Link
               to="/parkings"
-              className="mt-9 inline-flex items-center gap-2 text-sm font-bold text-[#1d241f] underline decoration-[#c75b37] decoration-2 underline-offset-4 hover:text-[#b14d30]"
+              className="mt-9 inline-flex items-center gap-2 text-sm font-bold text-[#121417] underline decoration-[#ffcc00] decoration-2 underline-offset-4"
             >
               {es ? 'Buscar una cochera' : 'Find a facility'}
               <ArrowUpRight aria-hidden="true" className="size-4" />
             </Link>
           </article>
 
-          <article className="rounded-[5rem_2rem_2rem_2rem] bg-[#294236] p-8 text-[#fffdf7] shadow-[0_12px_0_rgba(29,36,31,0.14)] sm:p-10">
-            <span className="inline-flex rounded-full bg-[#d9e2d1] px-3 py-1.5 text-xs font-bold text-[#294236]">
+          <article className="rounded-[5rem_2rem_2rem_2rem] bg-[#121417] p-8 text-white shadow-[0_12px_0_rgba(18,20,23,0.14)] sm:p-10">
+            <span className="inline-flex rounded-full bg-[#ffcc00] px-3 py-1.5 text-xs font-bold text-[#121417]">
               {es ? 'Para quien abre la persiana' : 'For facility operators'}
             </span>
             <h2 className="mt-7 max-w-md font-display text-3xl font-black leading-[1.04] tracking-[-0.04em] sm:text-4xl">
@@ -309,7 +293,7 @@ export function LandingRoute() {
                 ? 'Que el trabajo de todos los días deje de depender de la memoria.'
                 : 'Let everyday work stop depending on memory.'}
             </h2>
-            <p className="mt-5 max-w-md text-base leading-relaxed text-[#d9e2d1]">
+            <p className="mt-5 max-w-md text-base leading-relaxed text-[#f5f5f5]">
               {es
                 ? 'Cada ingreso, cobro y salida queda a la vista. La operación conserva el ritmo de la cochera, no el de una planilla.'
                 : 'Every entry, payment, and exit stays visible. The operation keeps the rhythm of the facility, not a spreadsheet.'}
@@ -318,7 +302,7 @@ export function LandingRoute() {
               onSuccess={() => {
                 void navigate('/app', { replace: true });
               }}
-              className="mt-9 rounded-full bg-[#f5df88] px-5 py-3 text-sm font-bold text-[#1d241f] transition-colors hover:bg-[#fff1ae]"
+              className="mt-9 rounded-full bg-[#ffcc00] px-5 py-3 text-sm font-bold text-[#121417] transition-colors hover:bg-white"
             >
               {es ? 'Ver una jornada de ejemplo' : 'See an example day'}
             </DemoLoginButton>
@@ -326,11 +310,11 @@ export function LandingRoute() {
         </div>
       </section>
 
-      <section className="bg-[#fffdf7] py-20 sm:py-28">
+      <section className="bg-white py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-bold tracking-[0.12em] text-[#b14d30] uppercase">
+              <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
                 {es ? 'Cerca de donde vas' : 'Near where you are going'}
               </p>
               <h2 className="mt-4 font-display text-4xl font-black tracking-[-0.045em] text-[#1d241f] sm:text-5xl">
@@ -339,7 +323,7 @@ export function LandingRoute() {
             </div>
             <Link
               to="/parkings"
-              className="inline-flex items-center gap-2 text-sm font-bold text-[#1d241f] underline decoration-[#c75b37] decoration-2 underline-offset-4 hover:text-[#b14d30]"
+              className="inline-flex items-center gap-2 text-sm font-bold text-[#121417] underline decoration-[#ffcc00] decoration-2 underline-offset-4"
             >
               {es ? 'Ver todas las cocheras' : 'See all facilities'}
               <ArrowUpRight aria-hidden="true" className="size-4" />
@@ -347,26 +331,15 @@ export function LandingRoute() {
           </div>
 
           <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {featuredParkings.map((parking, index) => (
+            {featuredParkings.map((parking) => (
               <Link
                 key={parking.id}
                 to={parking.id.startsWith('mock-') ? '/parkings' : `/parkings/${parking.id}`}
                 className="group relative flex min-h-72 flex-col justify-between overflow-hidden rounded-[2rem] border border-[#1d241f]/10 bg-[#f7f3ea] p-7 transition-transform hover:-translate-y-1"
               >
-                <div
-                  aria-hidden="true"
-                  className={cn(
-                    'absolute -right-10 -top-12 size-40 rounded-full opacity-80',
-                    index % 3 === 0
-                      ? 'bg-[#e7bf45]'
-                      : index % 3 === 1
-                        ? 'bg-[#d9e2d1]'
-                        : 'bg-[#e5a28d]',
-                  )}
-                />
                 <div className="relative">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-[#fffdf7] px-3 py-1.5 text-xs font-bold text-[#465245]">
-                    <span className="size-1.5 rounded-full bg-[#c75b37]" />
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-xs font-bold text-[#121417]">
+                    <span className="size-1.5 rounded-full bg-[#121417]" />
                     {parking.isActive
                       ? es
                         ? 'Cochera activa'
@@ -378,8 +351,8 @@ export function LandingRoute() {
                   <h3 className="mt-12 max-w-64 font-display text-2xl font-extrabold leading-tight tracking-[-0.03em] text-[#1d241f]">
                     {parking.title}
                   </h3>
-                  <p className="mt-3 flex max-w-64 items-start gap-2 text-sm leading-relaxed text-[#526052]">
-                    <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-[#b14d30]" />
+                  <p className="mt-3 flex max-w-64 items-start gap-2 text-sm leading-relaxed text-[#3f3f3f]">
+                    <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-[#121417]" />
                     {parking.address}
                   </p>
                 </div>
@@ -407,10 +380,10 @@ export function LandingRoute() {
         </div>
       </section>
 
-      <section className="bg-[#e5a28d] py-20 sm:py-28">
+      <section className="bg-[#ffcc00] py-20 sm:py-28">
         <div className="mx-auto grid max-w-7xl gap-14 px-4 sm:px-6 lg:grid-cols-12 lg:items-center lg:px-8">
           <div className="lg:col-span-5">
-            <p className="text-xs font-bold tracking-[0.12em] text-[#743823] uppercase">
+            <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
               {es ? 'La operación, sin teatro' : 'Operations, without theatre'}
             </p>
             <h2 className="mt-4 font-display text-4xl font-black leading-[1.02] tracking-[-0.045em] text-[#1d241f] sm:text-5xl">
@@ -418,7 +391,7 @@ export function LandingRoute() {
                 ? 'Tres momentos. Una historia que se puede seguir.'
                 : 'Three moments. One story you can follow.'}
             </h2>
-            <p className="mt-6 max-w-lg text-base leading-relaxed text-[#543524] sm:text-lg">
+            <p className="mt-6 max-w-lg text-base leading-relaxed text-[#121417] sm:text-lg">
               {es
                 ? 'La herramienta acompaña lo que ya sucede en una cochera: recibir un auto, registrar una estadía y cerrar el día con tranquilidad.'
                 : 'The tool supports what already happens at a facility: receive a car, record a stay, and close the day with confidence.'}
@@ -445,18 +418,15 @@ export function LandingRoute() {
                 textEn: 'Closeout leaves a receipt and a record for whoever needs it.',
               },
             ].map((item, index) => (
-              <li
-                key={item.labelEs}
-                className="flex gap-5 rounded-[1.75rem] bg-[#fff6ed]/80 p-5 sm:p-6"
-              >
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#1d241f] font-mono text-sm font-bold text-[#f5df88]">
+              <li key={item.labelEs} className="flex gap-5 rounded-[1.75rem] bg-white p-5 sm:p-6">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#121417] font-mono text-sm font-bold text-[#ffcc00]">
                   0{index + 1}
                 </span>
                 <div>
                   <h3 className="font-display text-lg font-extrabold text-[#1d241f]">
                     {es ? item.labelEs : item.labelEn}
                   </h3>
-                  <p className="mt-1 text-sm leading-relaxed text-[#543524]">
+                  <p className="mt-1 text-sm leading-relaxed text-[#3f3f3f]">
                     {es ? item.textEs : item.textEn}
                   </p>
                 </div>
@@ -466,10 +436,10 @@ export function LandingRoute() {
         </div>
       </section>
 
-      <section className="bg-[#f7f3ea] py-20 sm:py-28">
+      <section className="bg-white py-20 sm:py-28">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <p className="text-xs font-bold tracking-[0.12em] text-[#b14d30] uppercase">
+            <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
               {es ? 'Preguntas que aparecen en la puerta' : 'Questions that come up at the door'}
             </p>
             <h2 className="mt-4 font-display text-4xl font-black tracking-[-0.045em] text-[#1d241f] sm:text-5xl">
@@ -484,11 +454,11 @@ export function LandingRoute() {
               return (
                 <div
                   key={faq.questionEs}
-                  className="overflow-hidden rounded-[1.5rem] border border-[#1d241f]/10 bg-[#fffdf7]"
+                  className="overflow-hidden rounded-[1.5rem] border border-[#121417]/10 bg-white"
                 >
                   <button
                     aria-expanded={isOpen}
-                    className="flex w-full items-center justify-between gap-5 p-5 text-left font-display text-base font-bold text-[#1d241f] transition-colors hover:bg-[#f3eddf] sm:p-6"
+                    className="flex w-full items-center justify-between gap-5 p-5 text-left font-display text-base font-bold text-[#121417] transition-colors hover:bg-[#f5f5f5] sm:p-6"
                     onClick={() => {
                       setOpenFaqIndex(isOpen ? null : index);
                     }}
@@ -498,7 +468,7 @@ export function LandingRoute() {
                     <ChevronDown
                       aria-hidden="true"
                       className={cn(
-                        'size-5 shrink-0 text-[#b14d30] transition-transform',
+                        'size-5 shrink-0 text-[#121417] transition-transform',
                         isOpen && 'rotate-180',
                       )}
                     />
@@ -515,23 +485,15 @@ export function LandingRoute() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-[#294236] px-4 py-20 text-[#fffdf7] sm:px-6 sm:py-28 lg:px-8">
-        <div
-          aria-hidden="true"
-          className="absolute -left-24 -top-28 size-80 rounded-full border-[28px] border-[#d9e2d1]/20"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute -bottom-32 right-0 size-96 rounded-full bg-[#c75b37]/30"
-        />
-        <div className="relative mx-auto max-w-3xl text-center">
-          <ReceiptText aria-hidden="true" className="mx-auto size-8 text-[#f5df88]" />
+      <section className="bg-[#121417] px-4 py-20 text-white sm:px-6 sm:py-28 lg:px-8">
+        <div className="mx-auto max-w-3xl text-center">
+          <ReceiptText aria-hidden="true" className="mx-auto size-8 text-[#ffcc00]" />
           <h2 className="mt-6 font-display text-4xl font-black leading-[1.02] tracking-[-0.045em] sm:text-5xl">
             {es
               ? 'Que la cochera vuelva a ser un lugar simple de usar.'
               : 'Let parking become simple to use again.'}
           </h2>
-          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-[#d9e2d1] sm:text-lg">
+          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-[#f5f5f5] sm:text-lg">
             {es
               ? 'Entrá a la demo de operador o encontrá una cochera cerca. Los dos caminos empiezan sin fricción.'
               : 'Enter the operator demo or find a nearby facility. Both paths start without friction.'}
@@ -541,13 +503,13 @@ export function LandingRoute() {
               onSuccess={() => {
                 void navigate('/app', { replace: true });
               }}
-              className="rounded-full bg-[#f5df88] px-6 py-3 text-sm font-bold text-[#1d241f] transition-colors hover:bg-[#fff1ae]"
+              className="rounded-full bg-[#ffcc00] px-6 py-3 text-sm font-bold text-[#121417] transition-colors hover:bg-white"
             >
               {es ? 'Probar como operador' : 'Try as an operator'}
             </DemoLoginButton>
             <Link
               to="/parkings"
-              className="inline-flex min-h-12 items-center justify-center rounded-full border border-[#d9e2d1]/50 px-6 py-3 text-sm font-bold text-[#fffdf7] transition-colors hover:bg-[#d9e2d1]/10"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/50 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white hover:text-[#121417]"
             >
               {es ? 'Buscar cocheras' : 'Browse facilities'}
             </Link>
@@ -555,29 +517,29 @@ export function LandingRoute() {
         </div>
       </section>
 
-      <footer className="bg-[#1d241f] px-4 py-10 text-[#d9e2d1] sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 border-t border-[#d9e2d1]/20 pt-8 sm:flex-row sm:items-end sm:justify-between">
+      <footer className="bg-[#121417] px-4 py-10 text-[#f5f5f5] sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-8 border-t border-white/20 pt-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Link
-              className="inline-flex items-center gap-2 font-display text-xl font-black tracking-tight text-[#fffdf7]"
+              className="inline-flex items-center gap-2 font-display text-xl font-black tracking-tight text-white"
               to="/"
             >
-              PARKCORE <span className="size-2 rounded-full bg-[#f5df88]" />
+              PARKCORE <span className="size-2 rounded-full bg-[#ffcc00]" />
             </Link>
-            <p className="mt-3 max-w-sm text-sm leading-relaxed text-[#b6c3b3]">
+            <p className="mt-3 max-w-sm text-sm leading-relaxed text-[#d4d4d4]">
               {es
                 ? 'Para estacionar, cobrar y llevar una cochera con los pies en la tierra.'
                 : 'For parking, billing, and running a facility with both feet on the ground.'}
             </p>
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold">
-            <Link className="hover:text-[#f5df88]" to="/parkings">
+            <Link className="hover:text-[#ffcc00]" to="/parkings">
               {es ? 'Cocheras' : 'Facilities'}
             </Link>
-            <Link className="hover:text-[#f5df88]" to="/login">
+            <Link className="hover:text-[#ffcc00]" to="/login">
               {es ? 'Ingresar' : 'Sign in'}
             </Link>
-            <span className="text-[#b6c3b3]">© {new Date().getFullYear()} ParkCore</span>
+            <span className="text-[#d4d4d4]">© {new Date().getFullYear()} ParkCore</span>
           </div>
         </div>
       </footer>

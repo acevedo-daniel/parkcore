@@ -51,28 +51,17 @@ export function AuthFormFrame({
 }) {
   const { language } = useAppearance();
   return (
-    <section
-      aria-labelledby="auth-title"
-      className="relative min-h-full overflow-hidden bg-[#f7f3ea] py-12 sm:py-20"
-    >
-      <div
-        aria-hidden="true"
-        className="absolute -left-20 top-20 size-72 rounded-full border-[28px] border-[#e7bf45]/65"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute -bottom-32 -right-24 size-96 rounded-full bg-[#d9e2d1]"
-      />
-      <div className="relative mx-auto grid max-w-5xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:items-stretch lg:px-8">
-        <div className="hidden rounded-[3rem_3rem_7rem_3rem] bg-[#294236] p-10 text-[#fffdf7] shadow-[0_12px_0_rgba(29,36,31,0.15)] lg:flex lg:flex-col lg:justify-between">
+    <section aria-labelledby="auth-title" className="min-h-full bg-white py-12 sm:py-20">
+      <div className="mx-auto grid max-w-5xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:items-stretch lg:px-8">
+        <div className="hidden rounded-[3rem_3rem_7rem_3rem] bg-[#121417] p-10 text-white shadow-[0_12px_0_rgba(18,20,23,0.15)] lg:flex lg:flex-col lg:justify-between">
           <div>
             <Link
-              className="inline-flex items-center gap-2 font-display text-xl font-black tracking-tight text-[#fffdf7]"
+              className="inline-flex items-center gap-2 font-display text-xl font-black tracking-tight text-white"
               to="/"
             >
-              PARKCORE <span className="size-2 rounded-full bg-[#f5df88]" />
+              PARKCORE <span className="size-2 rounded-full bg-[#ffcc00]" />
             </Link>
-            <p className="mt-16 text-xs font-bold tracking-[0.12em] text-[#f5df88] uppercase">
+            <p className="mt-16 text-xs font-bold tracking-[0.12em] text-[#ffcc00] uppercase">
               {eyebrow}
             </p>
             <p
@@ -83,15 +72,15 @@ export function AuthFormFrame({
                 ? 'Una operación clara, desde la entrada hasta el cierre.'
                 : 'A clear operation, from arrival through closeout.'}
             </p>
-            <p className="mt-6 max-w-sm text-base leading-relaxed text-[#d9e2d1]">
+            <p className="mt-6 max-w-sm text-base leading-relaxed text-[#f5f5f5]">
               Una entrada directa para volver a la operación, sin configurar nada de más.
             </p>
           </div>
-          <p className="max-w-sm text-sm leading-relaxed text-[#b6c3b3]">
+          <p className="max-w-sm text-sm leading-relaxed text-[#d4d4d4]">
             La demo usa datos de ejemplo para recorrer una jornada completa de cochera.
           </p>
         </div>
-        <div className="rounded-[2rem_2rem_4.5rem_2rem] border border-[#1d241f]/10 bg-[#fffdf7] p-6 shadow-[0_10px_0_rgba(29,36,31,0.08)] sm:p-8 lg:p-10">
+        <div className="rounded-[2rem_2rem_4.5rem_2rem] border border-[#121417]/10 bg-white p-6 shadow-[0_10px_0_rgba(18,20,23,0.08)] sm:p-8 lg:p-10">
           <div>
             <Link
               className="inline-flex items-center gap-2 font-display text-lg font-black tracking-tight text-[#1d241f] lg:hidden"

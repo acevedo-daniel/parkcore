@@ -101,30 +101,30 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'relative w-full max-w-[460px] rounded-[2rem_2rem_4.5rem_2rem] border border-[#1d241f]/10 bg-[#fffdf7] p-6 text-[#1d241f] shadow-[0_16px_0_rgba(29,36,31,0.13)] sm:p-8',
+        'relative w-full max-w-[460px] rounded-[2rem_2rem_4.5rem_2rem] border border-[#121417]/10 bg-white p-6 text-[#121417] shadow-[0_10px_0_rgba(18,20,23,0.16)] sm:p-8',
         className,
       )}
     >
       <div className="mb-5 flex items-start justify-between gap-4 border-b border-[#1d241f]/10 pb-5">
         <div>
-          <p className="text-xs font-bold tracking-[0.1em] text-[#b14d30] uppercase">
+          <p className="text-xs font-bold tracking-[0.1em] text-[#121417] uppercase">
             {es ? 'Antes de salir' : 'Before you go'}
           </p>
           <h2 className="mt-1 font-display text-xl font-extrabold tracking-[-0.03em] text-[#1d241f]">
             {es ? 'Calculá una estadía' : 'Estimate a stay'}
           </h2>
         </div>
-        <ReceiptText aria-hidden="true" className="mt-1 size-5 text-[#b14d30]" />
+        <ReceiptText aria-hidden="true" className="mt-1 size-5 text-[#121417]" />
       </div>
 
       {/* Input 1: Facility selector */}
-      <div className="rounded-2xl border border-[#1d241f]/10 bg-[#f3eddf] p-4 transition-colors focus-within:border-[#1d241f]/30 focus-within:bg-[#fffdf7]">
+      <div className="rounded-2xl border border-[#121417]/10 bg-[#f5f5f5] p-4 transition-colors focus-within:border-[#121417]/30 focus-within:bg-white">
         <label htmlFor={selectId} className="mb-1.5 block text-xs font-semibold text-[#465245]">
           {es ? '¿A qué cochera vas?' : 'Where are you parking?'}
         </label>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#e7bf45] text-[#1d241f]">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#ffcc00] text-[#121417]">
               <MapPin aria-hidden="true" className="size-3.5" />
             </div>
             <select
@@ -153,10 +153,10 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
       </div>
 
       {/* Input 2: Duration selection */}
-      <div className="mt-3 rounded-2xl border border-[#1d241f]/10 bg-[#f3eddf] p-4">
+      <div className="mt-3 rounded-2xl border border-[#121417]/10 bg-[#f5f5f5] p-4">
         <div className="flex items-center justify-between mb-2.5">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-[#465245]">
-            <Clock aria-hidden="true" className="size-3.5 text-[#b14d30]" />
+            <Clock aria-hidden="true" className="size-3.5 text-[#121417]" />
             {es ? 'Estadía estimada' : 'Estimated stay'}
           </span>
           <span className="font-mono text-xs font-bold text-[#1d241f]">
@@ -174,8 +174,8 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
               className={cn(
                 'cursor-pointer rounded-xl px-1 py-2 text-center text-xs font-bold transition-all',
                 selectedHours === opt.hours
-                  ? 'bg-[#1d241f] text-[#fffdf7] shadow-xs'
-                  : 'border border-[#1d241f]/5 bg-[#fffdf7] text-[#1d241f] hover:bg-white',
+                  ? 'bg-[#121417] text-white shadow-xs'
+                  : 'border border-[#121417]/5 bg-white text-[#121417] hover:bg-[#ffcc00]',
               )}
             >
               {es ? opt.labelEs : opt.labelEn}
@@ -203,7 +203,7 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
       {/* CTA Button */}
       <Link
         to={targetLink}
-        className="group flex w-full items-center justify-center gap-2 rounded-full bg-[#1d241f] px-6 py-4 text-center font-display text-base font-bold text-[#fffdf7] shadow-[0_5px_0_#b14d30] transition-transform hover:-translate-y-0.5 active:translate-y-0"
+        className="group flex w-full items-center justify-center gap-2 rounded-full bg-[#121417] px-6 py-4 text-center font-display text-base font-bold text-white transition-transform hover:-translate-y-0.5 hover:bg-[#ffcc00] hover:text-[#121417] active:translate-y-0"
       >
         <span>{es ? 'Ver la cochera' : 'View this facility'}</span>
         <ArrowRight

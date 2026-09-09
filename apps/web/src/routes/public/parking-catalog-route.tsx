@@ -6,7 +6,6 @@ import { Link, useSearchParams } from 'react-router';
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../../components/ui/button.js';
 import { getPublicParkings, type PublicParkingQuery } from '../../lib/api/public-api.js';
-import { cn } from '../../lib/cn.js';
 import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
 import { formatMoney } from '../../lib/format.js';
 
@@ -95,11 +94,11 @@ export function ParkingCatalogRoute() {
   };
 
   return (
-    <section className="min-h-full bg-[#f7f3ea] pb-20 pt-10 sm:pb-28 sm:pt-16">
+    <section className="min-h-full bg-white pb-20 pt-10 sm:pb-28 sm:pt-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <header className="grid gap-8 border-b border-[#1d241f]/10 pb-10 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-7">
-            <p className="text-xs font-bold tracking-[0.12em] text-[#b14d30] uppercase">
+            <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
               {es ? 'Encontrá dónde dejarlo' : 'Find where to leave it'}
             </p>
             <h1 className="mt-4 font-display text-4xl font-black leading-[1.02] tracking-[-0.05em] text-[#1d241f] sm:text-5xl lg:text-6xl">
@@ -116,7 +115,7 @@ export function ParkingCatalogRoute() {
         </header>
 
         <form
-          className="mt-8 grid gap-4 rounded-[2rem] border border-[#1d241f]/10 bg-[#fffdf7] p-5 shadow-[0_8px_0_rgba(29,36,31,0.08)] lg:grid-cols-12 lg:items-end lg:p-6"
+          className="mt-8 grid gap-4 rounded-[2rem] border border-[#121417]/10 bg-white p-5 shadow-[0_8px_0_rgba(18,20,23,0.08)] lg:grid-cols-12 lg:items-end lg:p-6"
           key={searchParams.toString()}
           onSubmit={applyFilters}
         >
@@ -124,8 +123,8 @@ export function ParkingCatalogRoute() {
             <label className="mb-2 block text-xs font-bold text-[#465245]" htmlFor="parking-search">
               {es ? '¿A dónde vas?' : 'Where are you going?'}
             </label>
-            <div className="flex items-center gap-2 rounded-2xl border border-[#1d241f]/10 bg-[#f3eddf] px-3 focus-within:border-[#1d241f]/30 focus-within:bg-white">
-              <Search aria-hidden="true" className="size-4 shrink-0 text-[#b14d30]" />
+            <div className="flex items-center gap-2 rounded-2xl border border-[#121417]/10 bg-[#f5f5f5] px-3 focus-within:border-[#121417]/30 focus-within:bg-white">
+              <Search aria-hidden="true" className="size-4 shrink-0 text-[#121417]" />
               <input
                 className="h-12 w-full bg-transparent text-sm font-medium text-[#1d241f] outline-none placeholder:text-[#748074]"
                 defaultValue={searchParams.get('search') ?? ''}
@@ -139,7 +138,7 @@ export function ParkingCatalogRoute() {
             <label className="block text-xs font-bold text-[#465245]" htmlFor="min-rate">
               {es ? 'Mínimo por hora' : 'Min. rate (USD)'}
               <input
-                className="mt-2 h-12 w-full rounded-2xl border border-[#1d241f]/10 bg-[#f3eddf] px-3 text-sm font-medium text-[#1d241f] outline-none placeholder:text-[#748074] focus:border-[#1d241f]/30 focus:bg-white"
+                className="mt-2 h-12 w-full rounded-2xl border border-[#121417]/10 bg-[#f5f5f5] px-3 text-sm font-medium text-[#121417] outline-none placeholder:text-[#737373] focus:border-[#121417]/30 focus:bg-white"
                 defaultValue={searchParams.get('minRate') ?? ''}
                 id="min-rate"
                 inputMode="decimal"
@@ -153,7 +152,7 @@ export function ParkingCatalogRoute() {
             <label className="block text-xs font-bold text-[#465245]" htmlFor="max-rate">
               {es ? 'Máximo por hora' : 'Max. rate (USD)'}
               <input
-                className="mt-2 h-12 w-full rounded-2xl border border-[#1d241f]/10 bg-[#f3eddf] px-3 text-sm font-medium text-[#1d241f] outline-none placeholder:text-[#748074] focus:border-[#1d241f]/30 focus:bg-white"
+                className="mt-2 h-12 w-full rounded-2xl border border-[#121417]/10 bg-[#f5f5f5] px-3 text-sm font-medium text-[#121417] outline-none placeholder:text-[#737373] focus:border-[#121417]/30 focus:bg-white"
                 defaultValue={searchParams.get('maxRate') ?? ''}
                 id="max-rate"
                 inputMode="decimal"
@@ -166,7 +165,7 @@ export function ParkingCatalogRoute() {
             </label>
           </div>
           <button
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#1d241f] px-5 text-sm font-bold text-[#fffdf7] shadow-[0_4px_0_#b14d30] transition-transform hover:-translate-y-0.5 active:translate-y-0 lg:col-span-3"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#121417] px-5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5 hover:bg-[#ffcc00] hover:text-[#121417] active:translate-y-0 lg:col-span-3"
             type="submit"
           >
             <SlidersHorizontal aria-hidden="true" className="size-4" />
@@ -187,19 +186,19 @@ export function ParkingCatalogRoute() {
         {parkingQuery.isLoading ? <CatalogSkeleton /> : null}
         {parkingQuery.isError ? (
           <section
-            className="mt-10 rounded-[2rem] border border-[#b14d30]/25 bg-[#fff7f3] p-8"
+            className="mt-10 rounded-[2rem] border border-[#121417]/20 bg-[#f5f5f5] p-8"
             role="alert"
           >
-            <p className="text-xs font-bold tracking-[0.12em] text-[#b14d30] uppercase">
+            <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
               {es ? 'No pudimos cargar el directorio' : 'We could not load the directory'}
             </p>
-            <p className="mt-3 text-base text-[#543524]">
+            <p className="mt-3 text-base text-[#3f3f3f]">
               {es
                 ? 'Probá actualizar las cocheras en unos instantes.'
                 : 'We could not load active parkings. Try refreshing in a moment.'}
             </p>
             <button
-              className="mt-5 rounded-full bg-[#1d241f] px-5 py-3 text-sm font-bold text-[#fffdf7]"
+              className="mt-5 rounded-full bg-[#121417] px-5 py-3 text-sm font-bold text-white hover:bg-[#ffcc00] hover:text-[#121417]"
               onClick={() => {
                 void parkingQuery.refetch();
               }}
@@ -210,8 +209,8 @@ export function ParkingCatalogRoute() {
           </section>
         ) : null}
         {parkingQuery.data?.data.length === 0 ? (
-          <section className="mt-10 rounded-[2rem] border border-dashed border-[#1d241f]/20 bg-[#fffdf7] p-8 text-center">
-            <p className="text-xs font-bold tracking-[0.12em] text-[#b14d30] uppercase">
+          <section className="mt-10 rounded-[2rem] border border-dashed border-[#121417]/20 bg-white p-8 text-center">
+            <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
               {es ? 'Sin coincidencias' : 'No matches yet'}
             </p>
             <h2 className="mt-3 font-display text-2xl font-extrabold text-[#1d241f]">
@@ -224,7 +223,7 @@ export function ParkingCatalogRoute() {
             </p>
             {hasFilters ? (
               <button
-                className="mt-5 inline-flex items-center gap-2 rounded-full border border-[#1d241f]/15 px-4 py-2.5 text-sm font-bold text-[#1d241f] hover:bg-[#f3eddf]"
+                className="mt-5 inline-flex items-center gap-2 rounded-full border border-[#121417]/15 px-4 py-2.5 text-sm font-bold text-[#121417] hover:bg-[#ffcc00]"
                 onClick={() => {
                   setSearchParams({});
                 }}
@@ -241,27 +240,16 @@ export function ParkingCatalogRoute() {
             aria-label={es ? 'Resultados de cocheras' : 'Parking results'}
             className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3"
           >
-            {parkingQuery.data.data.map((parking, index) => (
+            {parkingQuery.data.data.map((parking) => (
               <Link
                 aria-label={`${es ? 'Abrir' : 'Open'} ${parking.title}`}
-                className="group relative flex min-h-72 flex-col justify-between overflow-hidden rounded-[2rem] border border-[#1d241f]/10 bg-[#fffdf7] p-7 transition-transform hover:-translate-y-1"
+                className="group flex min-h-72 flex-col justify-between overflow-hidden rounded-[2rem] border border-[#121417]/10 bg-white p-7 transition-transform hover:-translate-y-1"
                 key={parking.id}
                 to={`/parkings/${parking.id}`}
               >
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    'absolute -right-10 -top-12 size-40 rounded-full opacity-80',
-                    index % 3 === 0
-                      ? 'bg-[#e7bf45]'
-                      : index % 3 === 1
-                        ? 'bg-[#d9e2d1]'
-                        : 'bg-[#e5a28d]',
-                  )}
-                />
                 <div className="relative">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-[#f3eddf] px-3 py-1.5 text-xs font-bold text-[#465245]">
-                    <span className="size-1.5 rounded-full bg-[#c75b37]" />
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-xs font-bold text-[#121417]">
+                    <span className="size-1.5 rounded-full bg-[#121417]" />
                     {parking.isActive
                       ? es
                         ? 'Cochera activa'
@@ -305,7 +293,7 @@ export function ParkingCatalogRoute() {
             className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-[#1d241f]/10 pt-7"
           >
             <Button
-              className="rounded-full border-[#1d241f]/15 bg-[#fffdf7] text-[#1d241f] hover:bg-[#f3eddf]"
+              className="rounded-full border-[#121417]/15 bg-white text-[#121417] hover:bg-[#ffcc00]"
               disabled={!parkingQuery.data.meta.hasPreviousPage}
               onClick={() => {
                 changePage(parkingQuery.data.meta.page - 1);
@@ -321,7 +309,7 @@ export function ParkingCatalogRoute() {
                 : `Page ${String(parkingQuery.data.meta.page)} of ${String(parkingQuery.data.meta.totalPages)}`}
             </span>
             <Button
-              className="rounded-full border-[#1d241f]/15 bg-[#fffdf7] text-[#1d241f] hover:bg-[#f3eddf]"
+              className="rounded-full border-[#121417]/15 bg-white text-[#121417] hover:bg-[#ffcc00]"
               disabled={!parkingQuery.data.meta.hasNextPage}
               onClick={() => {
                 changePage(parkingQuery.data.meta.page + 1);
@@ -343,7 +331,7 @@ function CatalogSkeleton() {
     <div aria-label="Loading parkings" className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: 6 }, (_, index) => (
         <div
-          className="min-h-72 animate-pulse rounded-[2rem] border border-[#1d241f]/10 bg-[#fffdf7] p-7"
+          className="min-h-72 animate-pulse rounded-[2rem] border border-[#121417]/10 bg-white p-7"
           key={index}
         >
           <div className="h-7 w-28 rounded-full bg-[#ebe4d6]" />

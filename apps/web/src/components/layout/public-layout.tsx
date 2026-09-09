@@ -45,7 +45,7 @@ function PublicMobileMenu() {
       <DialogPrimitive.Trigger asChild>
         <button
           aria-label="Open navigation"
-          className="icon-button public-menu-trigger size-10 rounded-full border border-black/8 bg-white flex items-center justify-center text-[#121417] hover:bg-black/5 transition-colors cursor-pointer"
+          className="icon-button public-menu-trigger flex size-10 items-center justify-center rounded-full border border-[#121417]/15 bg-white text-[#121417] transition-colors hover:bg-[#ffcc00] cursor-pointer"
           type="button"
         >
           <Menu aria-hidden="true" size={20} />
@@ -53,7 +53,7 @@ function PublicMobileMenu() {
       </DialogPrimitive.Trigger>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="public-menu-overlay fixed inset-0 z-50 bg-black/40 backdrop-blur-xs animate-in fade-in" />
-        <DialogPrimitive.Content className="public-menu-content fixed inset-y-0 right-0 z-50 w-full max-w-xs bg-[#fcfbf9] border-l border-black/8 p-6 shadow-2xl flex flex-col justify-between animate-in slide-in-from-right">
+        <DialogPrimitive.Content className="public-menu-content fixed inset-y-0 right-0 z-50 flex w-full max-w-xs flex-col justify-between border-l border-[#121417]/15 bg-white p-6 shadow-2xl animate-in slide-in-from-right">
           <div>
             <header className="public-menu-header flex items-center justify-between border-b border-black/8 pb-4 mb-6">
               <DialogPrimitive.Title className="brand-mark font-display text-lg font-extrabold tracking-tight text-[#121417]">
@@ -65,7 +65,7 @@ function PublicMobileMenu() {
               <DialogPrimitive.Close asChild>
                 <button
                   aria-label="Close navigation"
-                  className="icon-button size-9 rounded-full border border-black/8 bg-white flex items-center justify-center text-[#121417] hover:bg-black/5 transition-colors cursor-pointer"
+                  className="icon-button flex size-9 items-center justify-center rounded-full border border-[#121417]/15 bg-white text-[#121417] transition-colors hover:bg-[#ffcc00] cursor-pointer"
                   type="button"
                 >
                   <X aria-hidden="true" size={18} />
@@ -126,13 +126,13 @@ export function PublicLayout() {
     suggestTheme('light');
   }, [suggestTheme]);
   return (
-    <div className="public-shell min-h-screen flex flex-col bg-[#fcfbf9] text-[#121417] font-sans antialiased selection:bg-[#ffcc00] selection:text-[#121417]">
+    <div className="public-shell min-h-screen flex flex-col bg-white text-[#121417] font-sans antialiased selection:bg-[#ffcc00] selection:text-[#121417]">
       <a className="skip-link" href="#public-main">
         Skip to main content
       </a>
 
       {/* Unified, sleek, Wise-standard navbar */}
-      <header className="public-header sticky top-0 z-40 w-full border-b border-black/[0.06] bg-[#fcfbf9]/90 backdrop-blur-md transition-all">
+      <header className="public-header sticky top-0 z-40 w-full border-b border-[#121417]/10 bg-white/90 backdrop-blur-md transition-all">
         <div className="public-header-inner max-w-7xl mx-auto flex h-18 sm:h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Brand mark */}
           <div className="flex items-center gap-10">
@@ -142,7 +142,7 @@ export function PublicLayout() {
               to="/"
             >
               <span>PARKCORE</span>
-              <span className="size-2 rounded-full bg-[#ffcc00] transition-transform group-hover:scale-125" />
+              <span className="size-2 rounded-full bg-[#ffcc00]" />
             </Link>
 
             {/* Desktop Navigation */}
@@ -170,7 +170,7 @@ export function PublicLayout() {
               onSuccess={() => {
                 void navigate('/app', { replace: true });
               }}
-              className="hidden sm:inline-flex rounded-full bg-[#121417] text-white hover:bg-black px-5 py-2.5 text-xs font-bold transition-all shadow-xs"
+              className="hidden sm:inline-flex rounded-full bg-[#121417] text-white hover:bg-[#ffcc00] hover:text-[#121417] px-5 py-2.5 text-xs font-bold transition-colors shadow-xs"
             />
 
             <div className="public-mobile-nav md:hidden">

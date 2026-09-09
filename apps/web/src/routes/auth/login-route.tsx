@@ -28,7 +28,7 @@ export function LoginRoute() {
         footer={<LoginFooter />}
         title={es ? 'Volvé a tu cochera.' : 'Return to your facility.'}
       >
-        <div className="rounded-[1.75rem] bg-[#e7bf45] p-5 text-[#1d241f] shadow-[0_5px_0_#ca643d]">
+        <div className="rounded-[1.75rem] bg-[#ffcc00] p-5 text-[#121417] shadow-[0_5px_0_#121417]">
           <div className="flex items-center gap-2 text-xs font-bold tracking-[0.1em] uppercase">
             <Sparkles aria-hidden="true" className="size-4" />
             {es ? 'Para recorrer ParkCore' : 'To explore ParkCore'}
@@ -45,7 +45,7 @@ export function LoginRoute() {
             onSuccess={() => {
               void navigate('/app', { replace: true });
             }}
-            className="mt-5 w-full rounded-full bg-[#1d241f] px-5 py-3 text-sm font-bold text-[#fffdf7] transition-colors hover:bg-[#294236]"
+            className="mt-5 w-full rounded-full bg-[#121417] px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-white hover:text-[#121417]"
           >
             {es ? 'Entrar a la demo' : 'Enter the demo'}
             <ArrowRight aria-hidden="true" className="ml-2 inline size-4" />
