@@ -368,7 +368,10 @@ export interface paths {
         /** List active parking sessions */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Normalized plate search term */
+                    plate?: string;
+                };
                 header?: never;
                 path: {
                     /** @description Parking UUID */
@@ -441,6 +444,12 @@ export interface paths {
                     limit?: number;
                     /** @description Filter by session status */
                     status?: "ACTIVE" | "COMPLETED" | "CANCELLED";
+                    /** @description Normalized plate search term */
+                    plate?: string;
+                    /** @description Include sessions ending on or after this time */
+                    dateFrom?: string;
+                    /** @description Include sessions starting on or before this time */
+                    dateTo?: string;
                 };
                 header?: never;
                 path: {
@@ -1033,6 +1042,222 @@ export interface paths {
         };
         trace?: never;
     };
+    "/analytics/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get fleet analytics summary */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Fleet analytics summary */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AnalyticsSummaryResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/revenue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get revenue series */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Number of days in the analytics window */
+                    days?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Daily revenue series */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AnalyticsRevenueResponse"];
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/volume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get completed session volume series */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Number of days in the analytics window */
+                    days?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Daily completed session series */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AnalyticsVolumeResponse"];
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/analytics/facilities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get facility analytics */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Number of days in the analytics window */
+                    days?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Facility analytics */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AnalyticsFacilitiesResponse"];
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1434,6 +1659,64 @@ export interface components {
             lng?: number;
             /** @description Whether the parking accepts check-ins */
             isActive?: boolean;
+        };
+        AnalyticsSummaryResponse: {
+            activeVehicles: number;
+            totalCapacity: number;
+            occupancyPercent: number;
+            completedToday: number;
+            revenueTodayCents: number;
+            /** @enum {string} */
+            currency: "USD";
+            facilities: components["schemas"]["FacilityAnalytics"][];
+        };
+        FacilityAnalytics: {
+            /**
+             * Format: uuid
+             * @description Parking UUID
+             */
+            parkingId: string;
+            /** @description Parking title */
+            title: string;
+            /** @description Whether the facility accepts check-ins */
+            isActive: boolean;
+            /** @description Current active sessions */
+            activeVehicles: number;
+            /** @description Maximum active sessions */
+            capacity: number;
+            /** @description Occupancy percentage */
+            occupancyPercent: number;
+            /** @description Completed sessions in the selected window */
+            completedSessions: number;
+            /** @description Completed revenue in integer cents */
+            revenueCents: number;
+            /**
+             * @description Revenue currency
+             * @enum {string}
+             */
+            currency: "USD";
+        };
+        AnalyticsRevenueResponse: {
+            days: 7 | 30;
+            /** @enum {string} */
+            currency: "USD";
+            data: {
+                /** Format: date */
+                date: string;
+                revenueCents: number;
+            }[];
+        };
+        AnalyticsVolumeResponse: {
+            days: 7 | 30;
+            data: {
+                /** Format: date */
+                date: string;
+                completedSessions: number;
+            }[];
+        };
+        AnalyticsFacilitiesResponse: {
+            days: 7 | 30;
+            data: components["schemas"]["FacilityAnalytics"][];
         };
     };
     responses: never;

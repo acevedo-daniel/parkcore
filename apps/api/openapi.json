@@ -39,6 +39,10 @@
     {
       "name": "System",
       "description": "Operational endpoints"
+    },
+    {
+      "name": "Analytics",
+      "description": "Owner operational analytics"
     }
   ],
   "components": {
@@ -789,6 +793,250 @@
           }
         },
         "additionalProperties": false
+      },
+      "AnalyticsSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "activeVehicles": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalCapacity": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "occupancyPercent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "completedToday": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "revenueTodayCents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD"
+            ]
+          },
+          "facilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacilityAnalytics"
+            }
+          }
+        },
+        "required": [
+          "activeVehicles",
+          "totalCapacity",
+          "occupancyPercent",
+          "completedToday",
+          "revenueTodayCents",
+          "currency",
+          "facilities"
+        ],
+        "additionalProperties": false
+      },
+      "FacilityAnalytics": {
+        "type": "object",
+        "properties": {
+          "parkingId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parking UUID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Parking title"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the facility accepts check-ins"
+          },
+          "activeVehicles": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Current active sessions"
+          },
+          "capacity": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Maximum active sessions"
+          },
+          "occupancyPercent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Occupancy percentage"
+          },
+          "completedSessions": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Completed sessions in the selected window"
+          },
+          "revenueCents": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Completed revenue in integer cents"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD"
+            ],
+            "description": "Revenue currency"
+          }
+        },
+        "required": [
+          "parkingId",
+          "title",
+          "isActive",
+          "activeVehicles",
+          "capacity",
+          "occupancyPercent",
+          "completedSessions",
+          "revenueCents",
+          "currency"
+        ],
+        "additionalProperties": false
+      },
+      "AnalyticsRevenueResponse": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "anyOf": [
+              {
+                "type": "number",
+                "enum": [
+                  7
+                ]
+              },
+              {
+                "type": "number",
+                "enum": [
+                  30
+                ]
+              }
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "USD"
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "revenueCents": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "date",
+                "revenueCents"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "days",
+          "currency",
+          "data"
+        ],
+        "additionalProperties": false
+      },
+      "AnalyticsVolumeResponse": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "anyOf": [
+              {
+                "type": "number",
+                "enum": [
+                  7
+                ]
+              },
+              {
+                "type": "number",
+                "enum": [
+                  30
+                ]
+              }
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "completedSessions": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "date",
+                "completedSessions"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "days",
+          "data"
+        ],
+        "additionalProperties": false
+      },
+      "AnalyticsFacilitiesResponse": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "anyOf": [
+              {
+                "type": "number",
+                "enum": [
+                  7
+                ]
+              },
+              {
+                "type": "number",
+                "enum": [
+                  30
+                ]
+              }
+            ]
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacilityAnalytics"
+            }
+          }
+        },
+        "required": [
+          "days",
+          "data"
+        ],
+        "additionalProperties": false
       }
     },
     "parameters": {}
@@ -1157,6 +1405,17 @@
             "description": "Parking UUID",
             "name": "parkingId",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Normalized plate search term",
+              "example": "AB123CD"
+            },
+            "required": false,
+            "description": "Normalized plate search term",
+            "name": "plate",
+            "in": "query"
           }
         ],
         "responses": {
@@ -1270,6 +1529,39 @@
             "required": false,
             "description": "Filter by session status",
             "name": "status",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Normalized plate search term",
+              "example": "AB123CD"
+            },
+            "required": false,
+            "description": "Normalized plate search term",
+            "name": "plate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Include sessions ending on or after this time"
+            },
+            "required": false,
+            "description": "Include sessions ending on or after this time",
+            "name": "dateFrom",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Include sessions starting on or before this time"
+            },
+            "required": false,
+            "description": "Include sessions starting on or before this time",
+            "name": "dateTo",
             "in": "query"
           }
         ],
@@ -1911,6 +2203,218 @@
           },
           "401": {
             "description": "Unauthorized - Invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/summary": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get fleet analytics summary",
+        "responses": {
+          "200": {
+            "description": "Fleet analytics summary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsSummaryResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/revenue": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get revenue series",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "default": 30,
+              "description": "Number of days in the analytics window",
+              "example": 30
+            },
+            "required": false,
+            "description": "Number of days in the analytics window",
+            "name": "days",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daily revenue series",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsRevenueResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/volume": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get completed session volume series",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "default": 30,
+              "description": "Number of days in the analytics window",
+              "example": 30
+            },
+            "required": false,
+            "description": "Number of days in the analytics window",
+            "name": "days",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daily completed session series",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsVolumeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/analytics/facilities": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get facility analytics",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "default": 30,
+              "description": "Number of days in the analytics window",
+              "example": 30
+            },
+            "required": false,
+            "description": "Number of days in the analytics window",
+            "name": "days",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Facility analytics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsFacilitiesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {

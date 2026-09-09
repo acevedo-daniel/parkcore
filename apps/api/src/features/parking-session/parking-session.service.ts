@@ -6,6 +6,7 @@ import * as vehicleService from '../vehicle/vehicle.service.js';
 import * as parkingSessionRepository from './parking-session.repository.js';
 import type {
   CheckIn,
+  ParkingSessionActiveQuery,
   ParkingSessionQuery,
   ParkingSessionResponse,
   VisitData,
@@ -83,11 +84,12 @@ export const checkOut = async (
 export const getActiveSessionsByParking = async (
   ownerId: string,
   parkingId: string,
+  query: ParkingSessionActiveQuery = {},
 ): Promise<ParkingSessionResponse[]> => {
   const parking = await parkingService.findById(parkingId);
   if (parking.ownerId !== ownerId)
     throw new ForbiddenError("You don't have access to this parking");
-  const sessions = await parkingSessionRepository.findActiveByParking(parkingId);
+  const sessions = await parkingSessionRepository.findActiveByParking(parkingId, query);
   return sessions.map(toParkingSessionResponse);
 };
 
@@ -100,11 +102,14 @@ export const getSessionsByParking = async (
   if (parking.ownerId !== ownerId)
     throw new ForbiddenError("You don't have access to this parking");
 
-  const { page, limit, status } = query;
+  const { page, limit, status, plate, dateFrom, dateTo } = query;
   const result = await parkingSessionRepository.findByParking(parkingId, {
     skip: (page - 1) * limit,
     take: limit,
-    status,
+    ...(status ? { status } : {}),
+    ...(plate ? { plate } : {}),
+    ...(dateFrom ? { dateFrom } : {}),
+    ...(dateTo ? { dateTo } : {}),
   });
   return createPaginatedResult(
     result.data.map(toParkingSessionResponse),

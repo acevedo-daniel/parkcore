@@ -56,9 +56,14 @@ export const findById = async (id: string): Promise<ParkingSessionWithRelations 
 
 export const findActiveByParking = async (
   parkingId: string,
+  options: { plate?: string } = {},
 ): Promise<ParkingSessionWithVehicle[]> => {
   return await prisma.parkingSession.findMany({
-    where: { parkingId, status: 'ACTIVE' },
+    where: {
+      parkingId,
+      status: 'ACTIVE',
+      ...(options.plate ? { vehicle: { plate: { contains: options.plate } } } : {}),
+    },
     orderBy: { startTime: 'desc' },
     select: parkingSessionWithVehicleSelect,
   });
@@ -66,11 +71,34 @@ export const findActiveByParking = async (
 
 export const findByParking = async (
   parkingId: string,
-  options: { skip: number; take: number; status?: ParkingSessionStatus },
+  options: {
+    skip: number;
+    take: number;
+    status?: ParkingSessionStatus;
+    plate?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  },
 ): Promise<{ data: ParkingSessionWithVehicle[]; total: number }> => {
   const where: Prisma.ParkingSessionWhereInput = {
     parkingId,
     ...(options.status ? { status: options.status } : {}),
+    ...(options.plate ? { vehicle: { plate: { contains: options.plate } } } : {}),
+    ...(options.dateFrom || options.dateTo
+      ? {
+          OR: [
+            {
+              endTime: {
+                ...(options.dateFrom ? { gte: new Date(options.dateFrom) } : {}),
+                ...(options.dateTo ? { lte: new Date(options.dateTo) } : {}),
+              },
+            },
+            ...(options.dateTo
+              ? [{ endTime: null, startTime: { lte: new Date(options.dateTo) } }]
+              : []),
+          ],
+        }
+      : {}),
   };
   const [data, total] = await Promise.all([
     prisma.parkingSession.findMany({

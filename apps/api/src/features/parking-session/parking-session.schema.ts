@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { supportedCurrencies } from '../../utils/currency.js';
 import { paginationMetaSchema } from '../../utils/pagination.schema.js';
 import { vehicleIdentitySchema } from '../vehicle/vehicle.schema.js';
+import { normalizePlate } from '../vehicle/plate-normalization.js';
 
 const parkingSessionStatusSchema = z.enum(['ACTIVE', 'COMPLETED', 'CANCELLED']);
 const currencySchema = z.enum(supportedCurrencies);
@@ -39,24 +40,58 @@ export const parkingSessionParamsSchema = z.strictObject({
   sessionId: z.uuid({ error: 'Invalid ID' }).openapi({ description: 'Parking session UUID' }),
 });
 
-export const parkingSessionQuerySchema = z.strictObject({
-  page: z.coerce
-    .number()
-    .int()
-    .positive()
-    .default(1)
-    .openapi({ description: 'Page number', example: 1 }),
-  limit: z.coerce
-    .number()
-    .int()
-    .positive()
-    .max(100)
-    .default(10)
-    .openapi({ description: 'Items per page', example: 10 }),
-  status: parkingSessionStatusSchema
-    .optional()
-    .openapi({ description: 'Filter by session status', example: 'ACTIVE' }),
-});
+export const parkingSessionQuerySchema = z
+  .strictObject({
+    page: z.coerce
+      .number()
+      .int()
+      .positive()
+      .default(1)
+      .openapi({ description: 'Page number', example: 1 }),
+    limit: z.coerce
+      .number()
+      .int()
+      .positive()
+      .max(100)
+      .default(10)
+      .openapi({ description: 'Items per page', example: 10 }),
+    status: parkingSessionStatusSchema
+      .optional()
+      .openapi({ description: 'Filter by session status', example: 'ACTIVE' }),
+    plate: z
+      .string()
+      .trim()
+      .transform(normalizePlate)
+      .pipe(z.string().min(1).max(10))
+      .optional()
+      .openapi({ description: 'Normalized plate search term', example: 'AB123CD' }),
+    dateFrom: dateTimeSchema
+      .optional()
+      .openapi({ description: 'Include sessions ending on or after this time' }),
+    dateTo: dateTimeSchema
+      .optional()
+      .openapi({ description: 'Include sessions starting on or before this time' }),
+  })
+  .refine(
+    ({ dateFrom, dateTo }) => dateFrom === undefined || dateTo === undefined || dateFrom <= dateTo,
+    {
+      message: 'dateFrom must be less than or equal to dateTo',
+      path: ['dateFrom'],
+    },
+  )
+  .openapi('ParkingSessionQuery');
+
+export const parkingSessionActiveQuerySchema = z
+  .strictObject({
+    plate: z
+      .string()
+      .trim()
+      .transform(normalizePlate)
+      .pipe(z.string().min(1).max(10))
+      .optional()
+      .openapi({ description: 'Normalized plate search term', example: 'AB123CD' }),
+  })
+  .openapi('ParkingSessionActiveQuery');
 
 export const vehicleSummarySchema = z
   .strictObject({
@@ -100,6 +135,7 @@ export const parkingSessionListResponseSchema = z
 
 export type CheckIn = z.infer<typeof checkInSchema>;
 export type ParkingSessionQuery = z.infer<typeof parkingSessionQuerySchema>;
+export type ParkingSessionActiveQuery = z.infer<typeof parkingSessionActiveQuerySchema>;
 export type ParkingSessionResponse = z.infer<typeof parkingSessionResponseSchema>;
 export type VisitData = Pick<CheckIn, 'customerName' | 'customerPhone' | 'notes'>;
 
