@@ -55,6 +55,14 @@
   --color-info-foreground: var(--info-foreground);
   --color-info-text: var(--info-text);
 
+  --color-brand-yellow: var(--brand-yellow);
+  --color-brand-yellow-hover: var(--brand-yellow-hover);
+  --color-brand-yellow-subtle: var(--brand-yellow-subtle);
+  --color-ink: var(--ink-primary);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+  --color-surface-warm: var(--surface-warm);
+
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
   --shadow-hover: var(--shadow-hover);
@@ -63,6 +71,15 @@
 }
 
 :root {
+  /* Wise-inspired Curbside Golden & Deep Ink tokens */
+  --brand-yellow: #ffcc00;
+  --brand-yellow-hover: #e6b800;
+  --brand-yellow-subtle: #fff8db;
+  --ink-primary: #121417;
+  --ink-secondary: #3f444e;
+  --ink-muted: #64748b;
+  --surface-warm: #f7f8f5;
+
   /* Canonical runtime tokens - Public Concrete Baseline */
   --public-canvas: #f8f9fa;
   --public-surface: #ffffff;

@@ -5,6 +5,7 @@ import { publicApi } from './api-client.js';
 
 export type PublicParkingQuery = NonNullable<paths['/parkings']['get']['parameters']['query']>;
 export type Parking = components['schemas']['ParkingResponse'];
+export type PublicParking = Parking;
 export type ParkingList = components['schemas']['ParkingListResponse'];
 
 export { ApiError as PublicApiError };
