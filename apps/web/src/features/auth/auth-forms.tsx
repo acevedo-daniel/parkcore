@@ -59,7 +59,7 @@ export function AuthFormFrame({
               className="inline-flex items-center gap-2 font-display text-xl font-black tracking-tight text-white"
               to="/"
             >
-              PARKCORE <span className="size-2 rounded-full bg-[#ffcc00]" />
+              PARKCORE
             </Link>
             <p className="mt-16 text-xs font-bold tracking-[0.12em] text-[#ffcc00] uppercase">
               {eyebrow}
@@ -86,7 +86,7 @@ export function AuthFormFrame({
               className="inline-flex items-center gap-2 font-display text-lg font-black tracking-tight text-[#1d241f] lg:hidden"
               to="/"
             >
-              PARKCORE <span className="size-2 rounded-full bg-[#ffcc00]" />
+              PARKCORE
             </Link>
             <p className="mt-10 text-xs font-bold tracking-[0.12em] text-[#121417] uppercase lg:mt-0">
               {eyebrow}

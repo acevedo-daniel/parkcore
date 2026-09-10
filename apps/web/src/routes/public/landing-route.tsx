@@ -192,11 +192,6 @@ export function LandingRoute() {
             <div>
               <ParkingCalculatorWidget />
             </div>
-            <p className="ml-auto mt-5 max-w-[22rem] border-l-4 border-[#121417] bg-white px-5 py-4 text-sm font-medium leading-relaxed text-[#121417] shadow-sm">
-              {es
-                ? 'Elegí una cochera, calculá una estadía y llegá con la información importante a mano.'
-                : 'Choose a facility, estimate a stay, and arrive with the information that matters.'}
-            </p>
           </div>
         </div>
       </section>
@@ -503,7 +498,7 @@ export function LandingRoute() {
               onSuccess={() => {
                 void navigate('/app', { replace: true });
               }}
-              className="rounded-full bg-[#ffcc00] px-6 py-3 text-sm font-bold text-[#121417] transition-colors hover:bg-white"
+              className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#ffcc00] px-6 py-3 text-sm font-bold text-[#121417] transition-colors hover:bg-white"
             >
               {es ? 'Probar como operador' : 'Try as an operator'}
             </DemoLoginButton>
@@ -524,7 +519,7 @@ export function LandingRoute() {
               className="inline-flex items-center gap-2 font-display text-xl font-black tracking-tight text-white"
               to="/"
             >
-              PARKCORE <span className="size-2 rounded-full bg-[#ffcc00]" />
+              PARKCORE
             </Link>
             <p className="mt-3 max-w-sm text-sm leading-relaxed text-[#d4d4d4]">
               {es

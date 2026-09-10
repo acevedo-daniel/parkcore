@@ -42,7 +42,7 @@ function OwnerLink({
 }
 
 export function OwnerLayout() {
-  const { suggestTheme, t } = useAppearance();
+  const { language, suggestTheme, t } = useAppearance();
   const { logout } = useAuth();
   const navigate = useNavigate();
   const navigation = useNavigation();
@@ -77,13 +77,12 @@ export function OwnerLayout() {
       </a>
       <aside className="owner-sidebar hidden md:flex md:w-64 md:flex-col md:justify-between border-r border-[#121417] bg-white p-6 shrink-0">
         <div className="flex flex-col gap-6">
-          <div className="owner-brand-block flex items-center justify-between pb-6 border-b border-[#121417]">
+          <div className="owner-brand-block flex flex-col items-start gap-3 border-b border-[#121417] pb-5">
             <Link
               aria-label="ParkCore operations"
-              className="brand-mark flex items-center gap-2 font-display text-lg font-bold tracking-[-0.06em] text-[#121417] transition-colors hover:text-[#45423c]"
+              className="brand-mark font-display text-lg font-bold tracking-[-0.035em] text-[#121417] transition-colors hover:text-[#45423c]"
               to="/app"
             >
-              <span className="size-2 bg-[#ffcc00]" />
               PARKCORE
             </Link>
             <span className="demo-status">{t('demo.live')}</span>
@@ -94,8 +93,8 @@ export function OwnerLayout() {
             ))}
           </nav>
         </div>
-        <div className="owner-account flex flex-col gap-3 pt-6 border-t border-[#121417]">
-          <div className="owner-utilities flex items-center justify-between">
+        <div className="owner-account flex flex-col gap-4 border-t border-[#121417] pt-5">
+          <div className="flex items-center justify-between">
             <time
               className="system-clock font-mono text-xs text-foreground-muted tabular-nums"
               dateTime={clock.toISOString()}
@@ -104,39 +103,50 @@ export function OwnerLayout() {
                 clock,
               )}
             </time>
-            <AppearanceControls compact />
           </div>
-          <DemoResetControl />
-          <NavLink
-            className={({ isActive }) =>
-              cn(
-                'owner-nav-link flex items-center gap-3 px-3.5 py-2 rounded-[var(--radius-sm)] text-sm font-medium transition-colors',
-                isActive
-                  ? 'is-active bg-[#121417] text-white font-semibold'
-                  : 'text-foreground-secondary hover:text-foreground hover:bg-[#f1eee7]',
-              )
-            }
-            to="/app/profile"
-          >
-            <UserRound aria-hidden="true" size={16} />
-            <span>{t('nav.profile')}</span>
-          </NavLink>
-          <button
-            className="owner-nav-link owner-sign-out flex items-center gap-3 px-3.5 py-2 rounded-[var(--radius-sm)] text-sm font-medium text-foreground-secondary hover:bg-[#f1eee7] hover:text-foreground transition-colors w-full text-left cursor-pointer"
-            onClick={signOut}
-            type="button"
-          >
-            <LogOut aria-hidden="true" size={16} />
-            <span>{t('nav.signOut')}</span>
-          </button>
+          <section className="rounded-[var(--radius-sm)] border border-[#121417]/10 bg-[#f5f5f5] p-3">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#6d695f]">
+              {language === 'es' ? 'Preferencias' : 'Preferences'}
+            </p>
+            <AppearanceControls compact />
+          </section>
+          <section className="border-t border-[#121417]/10 pt-3">
+            <p className="mb-1 px-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#6d695f]">
+              {language === 'es' ? 'Cuenta' : 'Account'}
+            </p>
+            <NavLink
+              className={({ isActive }) =>
+                cn(
+                  'owner-nav-link flex items-center gap-3 px-3.5 py-2 rounded-[var(--radius-sm)] text-sm font-medium transition-colors',
+                  isActive
+                    ? 'is-active bg-[#121417] text-white font-semibold'
+                    : 'text-foreground-secondary hover:text-foreground hover:bg-[#f1eee7]',
+                )
+              }
+              to="/app/profile"
+            >
+              <UserRound aria-hidden="true" size={16} />
+              <span>{t('nav.profile')}</span>
+            </NavLink>
+            <button
+              className="owner-nav-link owner-sign-out flex w-full cursor-pointer items-center gap-3 rounded-[var(--radius-sm)] px-3.5 py-2 text-left text-sm font-medium text-foreground-secondary transition-colors hover:bg-[#f1eee7] hover:text-foreground"
+              onClick={signOut}
+              type="button"
+            >
+              <LogOut aria-hidden="true" size={16} />
+              <span>{t('nav.signOut')}</span>
+            </button>
+          </section>
+          <div className="border-t border-[#121417]/10 pt-3">
+            <DemoResetControl />
+          </div>
         </div>
       </aside>
       <header className="owner-mobile-header md:hidden flex items-center justify-between h-14 px-4 border-b border-[#121417] bg-white sticky top-0 z-30">
         <Link
-          className="brand-mark flex items-center gap-2 font-display text-base font-bold tracking-[-0.06em] text-[#121417]"
+          className="brand-mark font-display text-base font-bold tracking-[-0.035em] text-[#121417]"
           to="/app"
         >
-          <span className="size-2 bg-[#ffcc00]" />
           PARKCORE
         </Link>
         <div className="flex items-center gap-2">

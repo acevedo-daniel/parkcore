@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, Clock, MapPin, ReceiptText } from 'lucide-react';
-import { useId, useMemo, useState } from 'react';
+import { ArrowRight, ChevronDown, Clock, MapPin, ReceiptText } from 'lucide-react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
@@ -69,7 +69,8 @@ const DURATION_OPTIONS = [
 export function ParkingCalculatorWidget({ className }: { className?: string }) {
   const { language } = useAppearance();
   const es = language === 'es';
-  const selectId = useId();
+  const pickerId = useId();
+  const pickerRef = useRef<HTMLDivElement>(null);
 
   const parkingsQuery = useQuery({
     queryKey: ['public-parkings-widget'],
@@ -84,6 +85,19 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
 
   const [selectedId, setSelectedId] = useState<string>('');
   const [selectedHours, setSelectedHours] = useState<number>(2);
+  const [isFacilityMenuOpen, setIsFacilityMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+        setIsFacilityMenuOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', closeOnOutsidePointer);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsidePointer);
+    };
+  }, []);
 
   const selectedFacility: PublicParking = useMemo(() => {
     const found = availableFacilities.find((f) => f.id === selectedId);
@@ -119,29 +133,65 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
 
       {/* Input 1: Facility selector */}
       <div className="rounded-2xl border border-[#121417]/10 bg-[#f5f5f5] p-4 transition-colors focus-within:border-[#121417]/30 focus-within:bg-white">
-        <label htmlFor={selectId} className="mb-1.5 block text-xs font-semibold text-[#121417]">
+        <p className="mb-1.5 block text-xs font-semibold text-[#121417]">
           {es ? '¿A qué cochera vas?' : 'Where are you parking?'}
-        </label>
+        </p>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#ffcc00] text-[#121417]">
               <MapPin aria-hidden="true" className="size-3.5" />
             </div>
-            <select
-              id={selectId}
-              aria-label={es ? 'Elegir cochera' : 'Choose facility'}
-              className="w-full cursor-pointer truncate bg-transparent font-display text-base font-bold text-[#1d241f] focus:outline-none"
-              value={selectedFacility.id}
-              onChange={(e) => {
-                setSelectedId(e.target.value);
-              }}
-            >
-              {availableFacilities.map((facility) => (
-                <option key={facility.id} value={facility.id} className="text-[#1d241f]">
-                  {facility.title}
-                </option>
-              ))}
-            </select>
+            <div className="relative min-w-0 flex-1" ref={pickerRef}>
+              <button
+                aria-controls={pickerId}
+                aria-expanded={isFacilityMenuOpen}
+                aria-haspopup="listbox"
+                aria-label={`${es ? 'Elegir cochera' : 'Choose facility'}: ${selectedFacility.title}`}
+                className="flex w-full items-center justify-between gap-2 truncate bg-transparent text-left font-display text-base font-bold text-[#1d241f]"
+                onClick={() => {
+                  setIsFacilityMenuOpen((open) => !open);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') setIsFacilityMenuOpen(false);
+                }}
+                type="button"
+              >
+                <span className="truncate">{selectedFacility.title}</span>
+                <ChevronDown
+                  aria-hidden="true"
+                  className={cn(
+                    'size-4 shrink-0 transition-transform',
+                    isFacilityMenuOpen && 'rotate-180',
+                  )}
+                />
+              </button>
+              {isFacilityMenuOpen ? (
+                <div
+                  className="absolute left-0 top-[calc(100%+0.7rem)] z-20 w-[min(19rem,calc(100vw-4rem))] overflow-hidden rounded-2xl border border-[#121417] bg-white p-1.5 shadow-[0_10px_0_rgba(18,20,23,0.16)]"
+                  id={pickerId}
+                  role="listbox"
+                >
+                  {availableFacilities.map((facility) => (
+                    <button
+                      aria-selected={selectedFacility.id === facility.id}
+                      className={cn(
+                        'flex w-full cursor-pointer items-center rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#121417] transition-colors hover:bg-[#ffcc00]',
+                        selectedFacility.id === facility.id && 'bg-[#f5f5f5]',
+                      )}
+                      key={facility.id}
+                      onClick={() => {
+                        setSelectedId(facility.id);
+                        setIsFacilityMenuOpen(false);
+                      }}
+                      role="option"
+                      type="button"
+                    >
+                      {facility.title}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           </div>
           <div className="text-right shrink-0">
             <span className="font-mono text-xs font-bold text-[#1d241f]">

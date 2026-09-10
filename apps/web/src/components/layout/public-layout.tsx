@@ -144,7 +144,6 @@ export function PublicLayout() {
               to="/"
             >
               <span>PARKCORE</span>
-              <span className="size-2 rounded-full bg-[#ffcc00]" />
             </Link>
 
             {/* Desktop Navigation */}
