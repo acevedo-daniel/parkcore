@@ -96,7 +96,7 @@ pnpm contract:check
 pnpm build
 ```
 
-`pnpm build` requires `VITE_API_URL`; the local web `.env` supplies it after setup. CI runs formatting, API checks with PostgreSQL, web checks, the browser workflow, and contract verification. See [Testing](docs/TESTING.md) for test boundaries, coverage thresholds, and release verification.
+`pnpm build` requires `VITE_API_URL`; the local web `.env` supplies it after setup. CI runs formatting, API checks with PostgreSQL, web checks, the local real-stack browser workflow, and contract verification. See [Testing](docs/TESTING.md) for test boundaries, coverage thresholds, and release verification.
 
 ## Documentation
 

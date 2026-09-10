@@ -161,12 +161,6 @@ export function PublicLayout() {
               <AppearanceControls />
             </div>
 
-            {/* Hidden semantic bridge for tests that verify demo disclosure without cluttering UI */}
-            <div className="demo-flight-deck visually-hidden">
-              <span className="demo-status">{t('demo.live')}</span>
-              <span className="type-small demo-disclosure">Canonical operational data</span>
-            </div>
-
             <DemoLoginButton
               onSuccess={() => {
                 void navigate('/app', { replace: true });

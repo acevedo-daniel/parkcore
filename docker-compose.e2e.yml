@@ -1,0 +1,17 @@
+name: parkcore-e2e
+
+services:
+  parkcore-e2e-db:
+    image: postgres:18.1
+    environment:
+      POSTGRES_USER: parkcore
+      POSTGRES_PASSWORD: parkcore
+      POSTGRES_DB: parkcore-e2e
+    ports:
+      - '5433:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U parkcore -d parkcore-e2e']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s

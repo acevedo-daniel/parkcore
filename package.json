@@ -50,6 +50,8 @@
     "docker:reset": "docker compose down -v && docker compose up -d",
     "docker:logs": "docker compose logs -f",
     "docker:ps": "docker compose ps",
+    "e2e:local:db:up": "docker compose -f docker-compose.e2e.yml up -d --wait",
+    "e2e:local:db:down": "docker compose -f docker-compose.e2e.yml down -v --remove-orphans",
     "db:setup": "pnpm --filter @parkcore/api db:setup",
     "release:readiness": "pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm contract:check && pnpm build && pnpm --filter @parkcore/web test:e2e"
   },

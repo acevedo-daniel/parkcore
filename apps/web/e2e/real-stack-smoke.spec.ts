@@ -1,42 +1,35 @@
 import { expect, test } from '@playwright/test';
 
-test('registers, operates, completes, and cleans up a real parking session', async ({ page }) => {
-  const timestamp = Date.now();
-  const runId = Math.floor(timestamp / 1000)
-    .toString(36)
-    .toUpperCase();
-  const email = `real-smoke-${runId}-${String(timestamp)}@example.com`;
-  const plate = `RS${runId}`;
+test('operates, completes, and cleans up a real parking session', async ({ page }) => {
+  const email = 'owner@parkcore.dev';
+  const password = 'ParkCoreLocalE2ESeed!123';
+  const plate = 'RSLOCAL1';
 
-  await page.goto('/');
-  await page.getByRole('link', { name: 'Parkings', exact: true }).click();
-  await expect(page).toHaveURL(/\/parkings$/);
-  await page.getByRole('link', { name: 'Get started' }).click();
-  await expect(page).toHaveURL(/\/register$/);
-  await page.getByLabel('Name (optional)').fill('Real Stack Smoke');
+  await page.addInitScript("localStorage.setItem('parkcore-lang', 'en');");
+  await page.goto('/login');
+  await expect(page).toHaveURL(/\/login$/);
   await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password').fill('ParkCoreRealSmoke!');
-  const registerResponse = page.waitForResponse(
-    (response) =>
-      response.url().endsWith('/auth/register') && response.request().method() === 'POST',
+  await page.getByLabel('Password').fill(password);
+  const loginResponse = page.waitForResponse(
+    (response) => response.url().endsWith('/auth/login') && response.request().method() === 'POST',
   );
-  await page.getByRole('button', { name: 'Create account' }).click();
-  const apiBaseUrl = new URL((await registerResponse).url()).origin;
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  const apiBaseUrl = new URL((await loginResponse).url()).origin;
   await expect(page).toHaveURL(/\/app$/);
 
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/login\?returnTo=%2Fapp$/);
   await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password').fill('ParkCoreRealSmoke!');
+  await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL(/\/app$/);
   await page.reload();
   await expect(page).toHaveURL(/\/app$/);
-  await expect(page.getByRole('link', { name: 'Create parking' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'New facility' })).toBeVisible();
 
-  await page.getByRole('link', { name: 'Create parking' }).click();
-  await page.getByLabel('Name').fill(`Real smoke ${runId}`);
-  await page.getByLabel('Address').fill('511 Production Smoke Avenue');
+  await page.getByRole('link', { name: 'New facility' }).click();
+  await page.getByLabel('Name').fill('Local real-stack smoke');
+  await page.getByLabel('Address').fill('511 Local Smoke Avenue');
   await page.getByLabel('Latitude').fill('-34.61');
   await page.getByLabel('Longitude').fill('-58.38');
   await page.getByLabel('Capacity').fill('3');
@@ -51,7 +44,7 @@ test('registers, operates, completes, and cleans up a real parking session', asy
   await expect(page.getByRole('button', { name: 'Check in', exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Check in', exact: true }).click();
-  await page.getByLabel('Plate').fill(plate);
+  await page.getByRole('textbox', { name: 'Plate' }).fill(plate);
   await page.getByLabel('Type').selectOption('CAR');
   await page.getByRole('button', { name: 'Start session' }).click();
   await expect(page.getByRole('link', { name: `Open session for ${plate}` })).toBeVisible();

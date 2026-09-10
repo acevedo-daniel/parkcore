@@ -116,6 +116,23 @@ jobs:
   web-e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      DATABASE_URL: postgresql://parkcore:parkcore@localhost:5432/parkcore-e2e
+
+    services:
+      parkcore-e2e-db:
+        image: postgres:18.1
+        env:
+          POSTGRES_USER: parkcore
+          POSTGRES_PASSWORD: parkcore
+          POSTGRES_DB: parkcore-e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U parkcore -d parkcore-e2e"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
 
     steps:
       - name: Checkout
@@ -139,8 +156,18 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm --filter @parkcore/web exec playwright install --with-deps chromium
 
-      - name: Run browser workflow
-        run: pnpm --filter @parkcore/web test:e2e
+      - name: Run local real-stack browser workflow
+        run: pnpm --filter @parkcore/web test:e2e:local
+
+      - name: Upload browser diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-e2e-local-real-stack-diagnostics
+          path: |
+            apps/web/test-results/local-real-stack/
+            apps/web/playwright-report/local-real-stack/
+          if-no-files-found: ignore
 
   contract:
     runs-on: ubuntu-latest

@@ -75,24 +75,27 @@ Typical local URLs:
 
 ## Root commands
 
-| Task                     | Command                                | Purpose                                                          |
-| ------------------------ | -------------------------------------- | ---------------------------------------------------------------- |
-| Start database           | `pnpm docker:up`                       | Start local PostgreSQL.                                          |
-| Stop database            | `pnpm docker:down`                     | Stop local PostgreSQL without deleting its volume.               |
-| Reset database container | `pnpm docker:reset`                    | Remove the local volume and start a clean database. Destructive. |
-| Prepare database         | `pnpm db:setup`                        | Generate Prisma, apply committed migrations, and seed demo data. |
-| Develop                  | `pnpm dev`                             | Run API and web in parallel.                                     |
-| Format check             | `pnpm format:check`                    | Verify repository formatting.                                    |
-| Authored text check      | `pnpm text:check`                      | Reject forbidden em dash characters in authored repository text. |
-| Lint                     | `pnpm lint`                            | Run lint checks across API, client, and web workspaces.          |
-| Typecheck                | `pnpm typecheck`                       | Type-check the TypeScript workspaces.                            |
-| Test                     | `pnpm test`                            | Run API and web test suites.                                     |
-| Coverage                 | `pnpm test:coverage`                   | Run coverage-enforced API and web tests.                         |
-| E2E                      | `pnpm --filter @parkcore/web test:e2e` | Run the default mocked browser workflow.                         |
-| Generate contract        | `pnpm contract:generate`               | Regenerate OpenAPI and the TypeScript API client.                |
-| Verify contract          | `pnpm contract:check`                  | Fail if regenerated contract artifacts differ from Git.          |
-| Build                    | `pnpm build`                           | Generate the contract and build API, client, and web.            |
-| Release checks           | `pnpm release:readiness`               | Run lint, types, coverage, contract, build, and E2E checks.      |
+| Task                     | Command                                      | Purpose                                                           |
+| ------------------------ | -------------------------------------------- | ----------------------------------------------------------------- |
+| Start database           | `pnpm docker:up`                             | Start local PostgreSQL.                                           |
+| Stop database            | `pnpm docker:down`                           | Stop local PostgreSQL without deleting its volume.                |
+| Reset database container | `pnpm docker:reset`                          | Remove the local volume and start a clean database. Destructive.  |
+| Start isolated E2E DB    | `pnpm e2e:local:db:up`                       | Start the disposable PostgreSQL service for local real-stack E2E. |
+| Stop isolated E2E DB     | `pnpm e2e:local:db:down`                     | Remove the disposable PostgreSQL service and its data.            |
+| Prepare database         | `pnpm db:setup`                              | Generate Prisma, apply committed migrations, and seed demo data.  |
+| Develop                  | `pnpm dev`                                   | Run API and web in parallel.                                      |
+| Format check             | `pnpm format:check`                          | Verify repository formatting.                                     |
+| Authored text check      | `pnpm text:check`                            | Reject forbidden em dash characters in authored repository text.  |
+| Lint                     | `pnpm lint`                                  | Run lint checks across API, client, and web workspaces.           |
+| Typecheck                | `pnpm typecheck`                             | Type-check the TypeScript workspaces.                             |
+| Test                     | `pnpm test`                                  | Run API and web test suites.                                      |
+| Coverage                 | `pnpm test:coverage`                         | Run coverage-enforced API and web tests.                          |
+| E2E                      | `pnpm --filter @parkcore/web test:e2e`       | Run the default mocked browser workflow.                          |
+| Local real-stack E2E     | `pnpm --filter @parkcore/web test:e2e:local` | Run the owner workflow against local API and PostgreSQL.          |
+| Generate contract        | `pnpm contract:generate`                     | Regenerate OpenAPI and the TypeScript API client.                 |
+| Verify contract          | `pnpm contract:check`                        | Fail if regenerated contract artifacts differ from Git.           |
+| Build                    | `pnpm build`                                 | Generate the contract and build API, client, and web.             |
+| Release checks           | `pnpm release:readiness`                     | Run lint, types, coverage, contract, build, and E2E checks.       |
 
 A production-style web build requires `VITE_API_URL`.
 
