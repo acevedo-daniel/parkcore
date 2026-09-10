@@ -22,8 +22,8 @@ function OwnerLink({ Icon, label, to }: (typeof ownerLinks)[number]) {
         cn(
           'owner-nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-[var(--radius-sm)] text-sm font-medium transition-colors',
           isActive
-            ? 'is-active bg-surface-raised text-foreground font-semibold shadow-xs border-l-2 border-primary'
-            : 'text-foreground-secondary hover:text-foreground hover:bg-surface-subtle',
+            ? 'is-active bg-[#121417] text-white font-semibold'
+            : 'text-foreground-secondary hover:text-foreground hover:bg-[#f1eee7]',
         )
       }
       to={to}
@@ -41,7 +41,7 @@ export function OwnerLayout() {
   const navigation = useNavigation();
   const [clock, setClock] = useState(() => new Date());
   useEffect(() => {
-    suggestTheme('dark');
+    suggestTheme('light');
     const interval = window.setInterval(() => {
       setClock(new Date());
     }, 30_000);
@@ -64,15 +64,15 @@ export function OwnerLayout() {
       <a className="skip-link" href="#owner-main">
         Skip to main content
       </a>
-      <aside className="owner-sidebar hidden md:flex md:w-64 md:flex-col md:justify-between border-r border-border bg-surface p-6 shrink-0">
+      <aside className="owner-sidebar hidden md:flex md:w-64 md:flex-col md:justify-between border-r border-[#121417] bg-white p-6 shrink-0">
         <div className="flex flex-col gap-6">
-          <div className="owner-brand-block flex items-center justify-between pb-6 border-b border-border">
+          <div className="owner-brand-block flex items-center justify-between pb-6 border-b border-[#121417]">
             <Link
               aria-label="ParkCore operations"
-              className="brand-mark flex items-center gap-2 font-display text-lg font-bold tracking-tight text-foreground transition-colors hover:text-primary"
+              className="brand-mark flex items-center gap-2 font-display text-lg font-bold tracking-[-0.06em] text-[#121417] transition-colors hover:text-[#45423c]"
               to="/app"
             >
-              <span className="size-2 rounded-full bg-primary ring-4 ring-primary/20" />
+              <span className="size-2 bg-[#ffcc00]" />
               PARKCORE
             </Link>
             <span className="demo-status">{t('demo.live')}</span>
@@ -83,7 +83,7 @@ export function OwnerLayout() {
             ))}
           </nav>
         </div>
-        <div className="owner-account flex flex-col gap-3 pt-6 border-t border-border">
+        <div className="owner-account flex flex-col gap-3 pt-6 border-t border-[#121417]">
           <div className="owner-utilities flex items-center justify-between">
             <time
               className="system-clock font-mono text-xs text-foreground-muted tabular-nums"
@@ -101,8 +101,8 @@ export function OwnerLayout() {
               cn(
                 'owner-nav-link flex items-center gap-3 px-3.5 py-2 rounded-[var(--radius-sm)] text-sm font-medium transition-colors',
                 isActive
-                  ? 'is-active bg-surface-raised text-foreground font-semibold'
-                  : 'text-foreground-secondary hover:text-foreground hover:bg-surface-subtle',
+                  ? 'is-active bg-[#121417] text-white font-semibold'
+                  : 'text-foreground-secondary hover:text-foreground hover:bg-[#f1eee7]',
               )
             }
             to="/app/profile"
@@ -111,7 +111,7 @@ export function OwnerLayout() {
             <span>Profile</span>
           </NavLink>
           <button
-            className="owner-nav-link owner-sign-out flex items-center gap-3 px-3.5 py-2 rounded-[var(--radius-sm)] text-sm font-medium text-danger hover:bg-danger-surface transition-colors w-full text-left cursor-pointer"
+            className="owner-nav-link owner-sign-out flex items-center gap-3 px-3.5 py-2 rounded-[var(--radius-sm)] text-sm font-medium text-foreground-secondary hover:bg-[#f1eee7] hover:text-foreground transition-colors w-full text-left cursor-pointer"
             onClick={signOut}
             type="button"
           >
@@ -120,19 +120,19 @@ export function OwnerLayout() {
           </button>
         </div>
       </aside>
-      <header className="owner-mobile-header md:hidden flex items-center justify-between h-14 px-4 border-b border-border bg-surface sticky top-0 z-30">
+      <header className="owner-mobile-header md:hidden flex items-center justify-between h-14 px-4 border-b border-[#121417] bg-white sticky top-0 z-30">
         <Link
-          className="brand-mark flex items-center gap-2 font-display text-base font-bold text-foreground"
+          className="brand-mark flex items-center gap-2 font-display text-base font-bold tracking-[-0.06em] text-[#121417]"
           to="/app"
         >
-          <span className="size-2 rounded-full bg-primary" />
+          <span className="size-2 bg-[#ffcc00]" />
           PARKCORE
         </Link>
         <div className="flex items-center gap-2">
           <span className="type-label">{t('nav.operations')}</span>
           <button
             aria-label="Sign out"
-            className="icon-button size-9 rounded-md border border-border bg-surface-raised flex items-center justify-center text-foreground hover:bg-surface-hover transition-colors"
+            className="icon-button size-9 rounded-md border border-[#121417] bg-white flex items-center justify-center text-[#121417] hover:bg-[#f1eee7] transition-colors"
             onClick={signOut}
             type="button"
           >
@@ -149,7 +149,7 @@ export function OwnerLayout() {
         </div>
       ) : null}
       <main
-        className="owner-main flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-24 md:pb-8"
+        className="owner-main flex-1 p-5 sm:p-7 lg:p-10 max-w-7xl mx-auto w-full pb-24 md:pb-10"
         id="owner-main"
         tabIndex={-1}
       >
@@ -157,7 +157,7 @@ export function OwnerLayout() {
       </main>
       <nav
         aria-label="Owner mobile navigation"
-        className="owner-mobile-nav md:hidden fixed bottom-0 inset-x-0 h-16 border-t border-border bg-surface/95 backdrop-blur-md z-30 flex items-center justify-around px-4"
+        className="owner-mobile-nav md:hidden fixed bottom-0 inset-x-0 h-16 border-t border-[#121417] bg-white/95 backdrop-blur-md z-30 flex items-center justify-around px-4"
       >
         {ownerLinks.map((link) => (
           <OwnerLink key={link.to} {...link} />
@@ -167,7 +167,7 @@ export function OwnerLayout() {
             cn(
               'owner-nav-link flex flex-col items-center gap-1 text-xs font-medium transition-colors',
               isActive
-                ? 'is-active text-primary font-semibold'
+                ? 'is-active text-[#121417] font-semibold'
                 : 'text-foreground-secondary hover:text-foreground',
             )
           }
