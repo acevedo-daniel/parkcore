@@ -159,7 +159,7 @@ export function LandingRoute() {
             <p className="mt-7 max-w-xl text-lg font-medium leading-relaxed text-[#2f2f2f] sm:text-xl">
               {es
                 ? 'ParkCore ordena la entrada, el cobro y el historial de una cochera. Para que llegar, estacionar y salir vuelva a ser algo simple.'
-                : 'ParkCore brings order to a facility’s entry, payment, and history—so arriving, parking, and leaving can feel simple again.'}
+                : 'ParkCore brings order to a facility’s entry, payment, and history, so arriving, parking, and leaving can feel simple again.'}
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <Link

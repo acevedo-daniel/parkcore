@@ -27,4 +27,6 @@ Thumbs.db
 **/test-results/
 **/playwright-report/
 apps/api/prisma/generated/
-local-docs
+
+docs-local
+AGENTS.md

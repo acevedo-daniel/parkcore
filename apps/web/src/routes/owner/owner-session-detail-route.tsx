@@ -158,16 +158,16 @@ export function OwnerSessionDetailRoute() {
         <DetailCard
           entries={[
             [es ? 'Tipo' : 'Type', session.vehicle.type.replaceAll('_', ' ')],
-            [es ? 'Marca' : 'Brand', session.vehicle.brand ?? '—'],
-            [es ? 'Modelo' : 'Model', session.vehicle.model ?? '—'],
+            [es ? 'Marca' : 'Brand', session.vehicle.brand ?? 'N/A'],
+            [es ? 'Modelo' : 'Model', session.vehicle.model ?? 'N/A'],
           ]}
           title={es ? 'Vehículo' : 'Vehicle'}
         />
         <DetailCard
           entries={[
-            [es ? 'Cliente' : 'Customer', session.customerName ?? '—'],
-            [es ? 'Teléfono' : 'Phone', session.customerPhone ?? '—'],
-            [es ? 'Notas' : 'Notes', session.notes ?? '—'],
+            [es ? 'Cliente' : 'Customer', session.customerName ?? 'N/A'],
+            [es ? 'Teléfono' : 'Phone', session.customerPhone ?? 'N/A'],
+            [es ? 'Notas' : 'Notes', session.notes ?? 'N/A'],
           ]}
           title={es ? 'Visita' : 'Visit'}
         />

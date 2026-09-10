@@ -1,4 +1,4 @@
-# ParkCore — Testing
+# ParkCore - Testing
 
 > Test strategy, boundaries, data setup, coverage thresholds, and release verification for ParkCore 1.0.
 
@@ -129,11 +129,11 @@ The browser-QA command runs the real-stack workflow across Chromium, Firefox, an
 
 `.github/workflows/ci.yml` separates verification into five jobs:
 
-1. **format** — repository formatting;
-2. **api** — PostgreSQL bootstrap, API coverage/quality, OpenAPI and build readiness;
-3. **web** — frontend lint, typecheck, tests, and build;
-4. **web-e2e** — Playwright browser workflow;
-5. **contract** — generated API/client drift detection.
+1. **format**: repository formatting;
+2. **api**: PostgreSQL bootstrap, API coverage/quality, OpenAPI and build readiness;
+3. **web**: frontend lint, typecheck, tests, and build;
+4. **web-e2e**: Playwright browser workflow;
+5. **contract**: generated API/client drift detection.
 
 CI runs for pushes and pull requests targeting `main`.
 

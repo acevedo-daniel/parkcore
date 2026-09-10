@@ -1,4 +1,4 @@
-# ParkCore — Architecture
+# ParkCore - Architecture
 
 > System boundaries, dependency rules, contract flow, persistence model, and architectural trade-offs for ParkCore 1.0.
 

@@ -1,4 +1,4 @@
-# ParkCore — Project
+# ParkCore - Project
 
 > Product scope, actors, domain model, and durable business rules for ParkCore 1.0.
 
