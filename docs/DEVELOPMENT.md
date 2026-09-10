@@ -1,4 +1,4 @@
-# ParkCore — Development
+# ParkCore - Development
 
 > Local setup, environment configuration, workspace commands, and database workflow for ParkCore 1.0.
 

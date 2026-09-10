@@ -1,4 +1,4 @@
-# ParkCore — Deployment
+# ParkCore - Deployment
 
 > Production topology, configuration boundaries, migrations, release flow, and validation for ParkCore 1.0.
 

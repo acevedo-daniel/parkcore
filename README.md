@@ -99,8 +99,8 @@ pnpm build
 
 ## Documentation
 
-- [Project](docs/PROJECT.md) — product scope, users, and durable domain rules.
-- [Architecture](docs/ARCHITECTURE.md) — system boundaries, data flow, and dependency rules.
-- [Development](docs/DEVELOPMENT.md) — local environment and workspace workflow.
-- [Testing](docs/TESTING.md) — test strategy, database setup, and quality gates.
-- [Deployment](docs/DEPLOYMENT.md) — production configuration, migrations, and validation.
+- [Project](docs/PROJECT.md): product scope, users, and durable domain rules.
+- [Architecture](docs/ARCHITECTURE.md): system boundaries, data flow, and dependency rules.
+- [Development](docs/DEVELOPMENT.md): local environment and workspace workflow.
+- [Testing](docs/TESTING.md): test strategy, database setup, and quality gates.
+- [Deployment](docs/DEPLOYMENT.md): production configuration, migrations, and validation.
