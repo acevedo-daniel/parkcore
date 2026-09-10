@@ -13,7 +13,7 @@ type Language = 'en' | 'es';
 
 const copy = {
   en: {
-    'demo.live': 'DEMO · LIVE',
+    'demo.live': 'Try the example',
     'nav.directory': 'Directory',
     'nav.operations': 'Operations',
     'nav.overview': 'Overview',
@@ -33,7 +33,7 @@ const copy = {
     'theme.light': 'Switch to light theme',
   },
   es: {
-    'demo.live': 'DEMO · EN VIVO',
+    'demo.live': 'Probá el ejemplo',
     'nav.directory': 'Directorio',
     'nav.operations': 'Operaciones',
     'nav.overview': 'Resumen',

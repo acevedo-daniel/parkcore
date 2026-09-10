@@ -42,7 +42,7 @@ export function SessionRow({ session, to }: { session: Session; to: string }) {
   return (
     <Link
       aria-label={`Open session for ${session.vehicle.plate}`}
-      className="group grid gap-4 rounded-[1.35rem] border border-[#121417] bg-white p-5 text-[#121417] transition-colors hover:bg-[#ffcc00] sm:grid-cols-[minmax(9rem,1.1fr)_minmax(7rem,0.8fr)_minmax(8rem,1fr)_auto] sm:items-center"
+      className="group grid gap-4 rounded-[1.35rem] border border-[#121417] bg-white p-5 text-[#121417] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ffcc00] hover:shadow-[0_6px_0_rgba(18,20,23,0.12)] sm:grid-cols-[minmax(9rem,1.1fr)_minmax(7rem,0.8fr)_minmax(8rem,1fr)_auto] sm:items-center"
       to={to}
     >
       <div className="flex items-center gap-3">

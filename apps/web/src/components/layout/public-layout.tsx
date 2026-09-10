@@ -21,7 +21,7 @@ function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
           key={link.to}
           className={({ isActive }) =>
             cn(
-              'public-nav-link px-4 py-2 rounded-full text-sm font-semibold transition-all',
+              'public-nav-link rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px',
               isActive
                 ? 'is-active bg-black/5 text-[#121417]'
                 : 'text-[#404550] hover:text-[#121417] hover:bg-black/[0.03]',

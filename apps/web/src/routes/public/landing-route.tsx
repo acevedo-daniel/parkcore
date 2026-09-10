@@ -453,7 +453,7 @@ export function LandingRoute() {
                 >
                   <button
                     aria-expanded={isOpen}
-                    className="flex w-full items-center justify-between gap-5 p-5 text-left font-display text-base font-bold text-[#121417] transition-colors hover:bg-[#f5f5f5] sm:p-6"
+                    className="flex w-full items-center justify-between gap-5 p-5 text-left font-display text-base font-bold text-[#121417] transition-colors hover:bg-[#f5f5f5] active:bg-[#ebe8df] sm:p-6"
                     onClick={() => {
                       setOpenFaqIndex(isOpen ? null : index);
                     }}
@@ -469,7 +469,7 @@ export function LandingRoute() {
                     />
                   </button>
                   {isOpen ? (
-                    <p className="border-t border-[#1d241f]/10 px-5 pb-6 pt-4 text-sm leading-relaxed text-[#526052] sm:px-6">
+                    <p className="parkcore-reveal border-t border-[#1d241f]/10 px-5 pb-6 pt-4 text-sm leading-relaxed text-[#526052] sm:px-6">
                       {es ? faq.answerEs : faq.answerEn}
                     </p>
                   ) : null}

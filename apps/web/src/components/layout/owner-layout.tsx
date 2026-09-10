@@ -77,7 +77,7 @@ export function OwnerLayout() {
       </a>
       <aside className="owner-sidebar hidden md:flex md:w-64 md:flex-col md:justify-between border-r border-[#121417] bg-white p-6 shrink-0">
         <div className="flex flex-col gap-6">
-          <div className="owner-brand-block flex flex-col items-start gap-3 border-b border-[#121417] pb-5">
+          <div className="owner-brand-block border-b border-[#121417] pb-5">
             <Link
               aria-label="ParkCore operations"
               className="brand-mark font-display text-lg font-bold tracking-[-0.035em] text-[#121417] transition-colors hover:text-[#45423c]"
@@ -85,7 +85,6 @@ export function OwnerLayout() {
             >
               PARKCORE
             </Link>
-            <span className="demo-status">{t('demo.live')}</span>
           </div>
           <nav aria-label={t('nav.owner')} className="owner-navigation flex flex-col gap-1">
             {ownerLinks.map((link) => (

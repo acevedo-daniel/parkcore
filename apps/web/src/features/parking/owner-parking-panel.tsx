@@ -31,7 +31,7 @@ export function OwnerParkingPanel({
       aria-label={
         es ? `Abrir operaciones de ${parking.title}` : `Open operations for ${parking.title}`
       }
-      className="owner-parking-panel group flex min-h-72 flex-col justify-between rounded-[1.5rem] border border-[#121417] bg-white p-5 text-[#121417] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ffcc00] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#121417] focus-visible:ring-offset-4"
+      className="owner-parking-panel group flex min-h-72 flex-col justify-between rounded-[1.5rem] border border-[#121417] bg-white p-5 text-[#121417] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ffcc00] hover:shadow-[0_7px_0_rgba(18,20,23,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#121417] focus-visible:ring-offset-4"
       to={`/app/parkings/${parking.id}`}
     >
       <div>

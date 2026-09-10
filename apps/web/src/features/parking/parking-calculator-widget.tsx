@@ -167,7 +167,7 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
               </button>
               {isFacilityMenuOpen ? (
                 <div
-                  className="absolute left-0 top-[calc(100%+0.7rem)] z-20 w-[min(19rem,calc(100vw-4rem))] overflow-hidden rounded-2xl border border-[#121417] bg-white p-1.5 shadow-[0_10px_0_rgba(18,20,23,0.16)]"
+                  className="parkcore-reveal absolute left-0 top-[calc(100%+0.7rem)] z-20 w-[min(19rem,calc(100vw-4rem))] overflow-hidden rounded-2xl border border-[#121417] bg-white p-1.5 shadow-[0_10px_0_rgba(18,20,23,0.16)]"
                   id={pickerId}
                   role="listbox"
                 >
@@ -222,7 +222,7 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
                 setSelectedHours(opt.hours);
               }}
               className={cn(
-                'cursor-pointer rounded-xl px-1 py-2 text-center text-xs font-bold transition-all',
+                'cursor-pointer rounded-xl px-1 py-2 text-center text-xs font-bold transition-all active:scale-[0.97]',
                 selectedHours === opt.hours
                   ? 'bg-[#121417] text-white shadow-xs'
                   : 'border border-[#121417]/5 bg-white text-[#121417] hover:bg-[#ffcc00]',
