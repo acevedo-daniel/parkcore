@@ -157,26 +157,26 @@ export function OwnerSessionDetailRoute() {
       <div className="grid gap-4 lg:grid-cols-3">
         <DetailCard
           entries={[
-            ['Type', session.vehicle.type.replaceAll('_', ' ')],
-            ['Brand', session.vehicle.brand ?? '—'],
-            ['Model', session.vehicle.model ?? '—'],
+            [es ? 'Tipo' : 'Type', session.vehicle.type.replaceAll('_', ' ')],
+            [es ? 'Marca' : 'Brand', session.vehicle.brand ?? '—'],
+            [es ? 'Modelo' : 'Model', session.vehicle.model ?? '—'],
           ]}
-          title="Vehicle"
+          title={es ? 'Vehículo' : 'Vehicle'}
         />
         <DetailCard
           entries={[
-            ['Customer', session.customerName ?? '—'],
-            ['Phone', session.customerPhone ?? '—'],
-            ['Notes', session.notes ?? '—'],
+            [es ? 'Cliente' : 'Customer', session.customerName ?? '—'],
+            [es ? 'Teléfono' : 'Phone', session.customerPhone ?? '—'],
+            [es ? 'Notas' : 'Notes', session.notes ?? '—'],
           ]}
-          title="Visit"
+          title={es ? 'Visita' : 'Visit'}
         />
         <section className="rounded-[1.35rem] border border-[#121417] bg-white p-5 text-[#121417]">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-            Parking
+            {es ? 'Cochera' : 'Parking'}
           </p>
           <dl className="mt-5 space-y-4">
-            <DetailItem label="Facility">
+            <DetailItem label={es ? 'Cochera' : 'Facility'}>
               {parking ? (
                 <Link
                   className="font-bold underline decoration-[#ffcc00] decoration-4 underline-offset-4"
@@ -189,22 +189,24 @@ export function OwnerSessionDetailRoute() {
               )}
             </DetailItem>
             {parking ? (
-              <DetailItem label="Address">
+              <DetailItem label={es ? 'Dirección' : 'Address'}>
                 <span className="flex items-start gap-1.5">
                   <MapPin aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
                   {parking.address}
                 </span>
               </DetailItem>
             ) : null}
-            <DetailItem label="Started">
+            <DetailItem label={es ? 'Ingreso' : 'Started'}>
               <OperationalTimestamp value={session.startTime} />
             </DetailItem>
-            <DetailItem label="Rate snapshot">
+            <DetailItem label={es ? 'Tarifa registrada' : 'Rate snapshot'}>
               {formatMoney(session.hourlyRateCents, session.currency)} / H
             </DetailItem>
-            <DetailItem label="Total">
+            <DetailItem label={es ? 'Total' : 'Total'}>
               {session.totalAmountCents === null
-                ? 'Pending checkout'
+                ? es
+                  ? 'Pendiente de cobro'
+                  : 'Pending checkout'
                 : formatMoney(session.totalAmountCents, session.currency)}
             </DetailItem>
           </dl>
@@ -212,10 +214,14 @@ export function OwnerSessionDetailRoute() {
       </div>
 
       <Dialog
-        description="Review the current calculation before completing this session. The backend confirms the final amount."
+        description={
+          es
+            ? 'Revisá el cálculo antes de cerrar la estadía. El importe final se confirma al completar el cobro.'
+            : 'Review the current calculation before completing this session. The final amount is confirmed at checkout.'
+        }
         onOpenChange={setCheckoutOpen}
         open={checkoutOpen}
-        title="Complete checkout"
+        title={es ? 'Cobrar y cerrar estadía' : 'Complete checkout'}
       >
         <div className="space-y-5 pt-6">
           <div className="flex items-center justify-between gap-4">
@@ -231,21 +237,33 @@ export function OwnerSessionDetailRoute() {
             fullWidth
             onClick={() => void completeCheckout()}
           >
-            {checkoutMutation.isPending ? 'Completing…' : 'Complete checkout'}
+            {checkoutMutation.isPending
+              ? es
+                ? 'Cobrando…'
+                : 'Completing…'
+              : es
+                ? 'Cobrar y cerrar estadía'
+                : 'Complete checkout'}
           </Button>
         </div>
       </Dialog>
 
       <Dialog
-        description={`Cancelling ${session.vehicle.plate} ends this active session without a checkout. This cannot be undone.`}
+        description={
+          es
+            ? `Cancelar ${session.vehicle.plate} finaliza esta estadía sin cobrar. No se puede deshacer.`
+            : `Cancelling ${session.vehicle.plate} ends this active session without a checkout. This cannot be undone.`
+        }
         onOpenChange={setCancelOpen}
         open={cancelOpen}
-        title="Cancel active session"
+        title={es ? 'Cancelar estadía activa' : 'Cancel active session'}
       >
         <div className="space-y-5 pt-6">
           <Plate plate={session.vehicle.plate} />
           <p className="border-l-4 border-[#ffcc00] pl-4 text-sm leading-relaxed text-[#45423c]">
-            The parking will be available for a new check-in after cancellation.
+            {es
+              ? 'La cochera quedará disponible para registrar un nuevo ingreso.'
+              : 'The parking will be available for a new check-in after cancellation.'}
           </p>
           <Button
             className="border-[#121417] bg-[#121417] text-white hover:bg-[#30312d]"
@@ -253,7 +271,13 @@ export function OwnerSessionDetailRoute() {
             fullWidth
             onClick={() => void cancelSession()}
           >
-            {cancelMutation.isPending ? 'Cancelling…' : 'Cancel session'}
+            {cancelMutation.isPending
+              ? es
+                ? 'Cancelando…'
+                : 'Cancelling…'
+              : es
+                ? 'Cancelar estadía'
+                : 'Cancel session'}
           </Button>
         </div>
       </Dialog>
