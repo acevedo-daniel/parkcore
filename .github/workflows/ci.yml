@@ -14,9 +14,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  format:
+  quality:
+    name: Quality
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -40,7 +41,14 @@ jobs:
       - name: Verify formatting
         run: pnpm format:check
 
-  api:
+      - name: Run lint
+        run: pnpm lint
+
+      - name: Run typecheck
+        run: pnpm typecheck
+
+  api_tests_integration:
+    name: API Tests and Integration
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -76,20 +84,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Database bootstrap check
+      - name: Bootstrap PostgreSQL database
         run: pnpm --filter @parkcore/api db:setup
 
-      - name: API quality checks
-        run: pnpm --filter @parkcore/api quality:ci
+      - name: Run API coverage tests
+        run: pnpm --filter @parkcore/api test:coverage
 
-      - name: API build and release readiness checks
-        run: pnpm --filter @parkcore/api release:readiness
-
-  web:
+  web_tests:
+    name: Web Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    env:
-      VITE_API_URL: https://api.example.invalid
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
@@ -107,13 +111,35 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build API client
-        run: pnpm --filter @parkcore/api-client build
+      - name: Run web tests
+        run: pnpm --filter @parkcore/web test
 
-      - name: Frontend checks
-        run: pnpm --filter @parkcore/web lint && pnpm --filter @parkcore/web typecheck && pnpm --filter @parkcore/web test && pnpm --filter @parkcore/web build
+  contract:
+    name: Contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
 
-  web-e2e:
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify generated API contract
+        run: pnpm contract:check
+
+  real_stack_e2e:
+    name: Real stack E2E
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -150,9 +176,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build API client
-        run: pnpm --filter @parkcore/api-client build
-
       - name: Install Playwright Chromium
         run: pnpm --filter @parkcore/web exec playwright install --with-deps chromium
 
@@ -169,9 +192,12 @@ jobs:
             apps/web/playwright-report/local-real-stack/
           if-no-files-found: ignore
 
-  contract:
+  production:
+    name: Production
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+    env:
+      VITE_API_URL: https://api.example.invalid
 
     steps:
       - name: Checkout
@@ -189,5 +215,35 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Verify generated API contract
-        run: pnpm contract:check
+      - name: Build deployable workspaces
+        run: pnpm build
+
+  ci_gate:
+    name: CI Gate
+    if: always()
+    needs:
+      - quality
+      - api_tests_integration
+      - web_tests
+      - contract
+      - real_stack_e2e
+      - production
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Verify required jobs
+        env:
+          QUALITY_RESULT: ${{ needs.quality.result }}
+          API_RESULT: ${{ needs.api_tests_integration.result }}
+          WEB_RESULT: ${{ needs.web_tests.result }}
+          CONTRACT_RESULT: ${{ needs.contract.result }}
+          E2E_RESULT: ${{ needs.real_stack_e2e.result }}
+          PRODUCTION_RESULT: ${{ needs.production.result }}
+        run: |
+          test "$QUALITY_RESULT" = "success"
+          test "$API_RESULT" = "success"
+          test "$WEB_RESULT" = "success"
+          test "$CONTRACT_RESULT" = "success"
+          test "$E2E_RESULT" = "success"
+          test "$PRODUCTION_RESULT" = "success"

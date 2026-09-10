@@ -43,11 +43,10 @@ CI provisions a PostgreSQL service, then runs:
 
 ```bash
 pnpm --filter @parkcore/api db:setup
-pnpm --filter @parkcore/api quality:ci
-pnpm --filter @parkcore/api release:readiness
+pnpm --filter @parkcore/api test:coverage
 ```
 
-This verifies that committed migrations and the seed can bootstrap a fresh database before the API quality checks run.
+This verifies that committed migrations and the seed can bootstrap a fresh database before the API coverage tests run. Repository-wide lint and typecheck belong to the separate `Quality` job, while deployable builds belong to `Production`.
 
 ### Web
 
@@ -160,13 +159,15 @@ The browser-QA command runs the real-stack workflow across Chromium, Firefox, an
 
 ## CI
 
-`.github/workflows/ci.yml` separates verification into five jobs:
+`.github/workflows/ci.yml` separates verification into six conceptual jobs and one final gate:
 
-1. **format**: repository formatting;
-2. **api**: PostgreSQL bootstrap, API coverage/quality, OpenAPI and build readiness;
-3. **web**: frontend lint, typecheck, tests, and build;
-4. **web-e2e**: local real-stack Playwright browser workflow with PostgreSQL and failure diagnostics;
-5. **contract**: generated API/client drift detection.
+1. **Quality**: authored text, formatting, lint, and typecheck;
+2. **API Tests and Integration**: PostgreSQL bootstrap and API coverage tests;
+3. **Web Tests**: browser-facing unit and component tests;
+4. **Contract**: generated API/client drift detection;
+5. **Real stack E2E**: local real-stack Playwright browser workflow with PostgreSQL and failure diagnostics;
+6. **Production**: deployable API, client, and web builds;
+7. **CI Gate**: the stable required check that fails when any verification job fails, is cancelled, or is skipped.
 
 CI runs for pushes and pull requests targeting `main`.
 
