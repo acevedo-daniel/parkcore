@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import type { CreateParkingRequest, Parking } from '../../lib/api/owner-api.js';
 import { Button } from '../../components/ui/button.js';
 import { Checkbox, Field, Input, Select, Textarea } from '../../components/ui/field.js';
@@ -59,6 +60,8 @@ export function ParkingForm({
   onSubmit: (input: CreateParkingRequest & { isActive?: boolean }) => Promise<void> | void;
   parking?: Parking;
 }) {
+  const { language } = useAppearance();
+  const es = language === 'es';
   const form = useForm<ParkingFormValues>({
     defaultValues: defaults(parking),
     resolver: zodResolver(parkingFormSchema),
@@ -70,43 +73,55 @@ export function ParkingForm({
 
   return (
     <form
-      className="parking-form"
+      className="parking-form grid gap-5 lg:grid-cols-2"
       noValidate
       onSubmit={(event) => {
         void submit(event);
       }}
     >
-      <fieldset>
-        <legend className="type-label">General</legend>
-        <Field error={form.formState.errors.title?.message} htmlFor="parking-title" label="Name">
+      <fieldset className="space-y-5 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:p-6 lg:col-span-2">
+        <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
+          {es ? 'Información general' : 'General information'}
+        </legend>
+        <Field
+          error={form.formState.errors.title?.message}
+          htmlFor="parking-title"
+          label={es ? 'Nombre' : 'Name'}
+        >
           <Input id="parking-title" {...form.register('title')} />
         </Field>
         <Field
           error={form.formState.errors.description?.message}
           htmlFor="parking-description"
-          label="Description"
+          label={es ? 'Descripción' : 'Description'}
         >
           <Textarea id="parking-description" rows={4} {...form.register('description')} />
         </Field>
         <Field
           error={form.formState.errors.image?.message}
           htmlFor="parking-image"
-          label="Image URL"
+          label={es ? 'URL de imagen' : 'Image URL'}
         >
           <Input id="parking-image" inputMode="url" type="url" {...form.register('image')} />
         </Field>
       </fieldset>
-      <fieldset>
-        <legend className="type-label">Location</legend>
+      <fieldset className="space-y-5 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:p-6">
+        <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
+          {es ? 'Ubicación' : 'Location'}
+        </legend>
         <Field
           error={form.formState.errors.address?.message}
           htmlFor="parking-address"
-          label="Address"
+          label={es ? 'Dirección' : 'Address'}
         >
           <Input id="parking-address" {...form.register('address')} />
         </Field>
-        <div className="form-grid-two">
-          <Field error={form.formState.errors.lat?.message} htmlFor="parking-lat" label="Latitude">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field
+            error={form.formState.errors.lat?.message}
+            htmlFor="parking-lat"
+            label={es ? 'Latitud' : 'Latitude'}
+          >
             <Input
               id="parking-lat"
               required
@@ -115,7 +130,11 @@ export function ParkingForm({
               {...form.register('lat', { valueAsNumber: true })}
             />
           </Field>
-          <Field error={form.formState.errors.lng?.message} htmlFor="parking-lng" label="Longitude">
+          <Field
+            error={form.formState.errors.lng?.message}
+            htmlFor="parking-lng"
+            label={es ? 'Longitud' : 'Longitude'}
+          >
             <Input
               id="parking-lng"
               required
@@ -126,13 +145,15 @@ export function ParkingForm({
           </Field>
         </div>
       </fieldset>
-      <fieldset>
-        <legend className="type-label">Operations</legend>
-        <div className="form-grid-two">
+      <fieldset className="space-y-5 rounded-[1.5rem] border border-[#121417]/12 bg-[#f5f5f5] p-5 sm:p-6">
+        <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
+          {es ? 'Operación' : 'Operations'}
+        </legend>
+        <div className="grid gap-4 sm:grid-cols-2">
           <Field
             error={form.formState.errors.capacity?.message}
             htmlFor="parking-capacity"
-            label="Capacity"
+            label={es ? 'Capacidad' : 'Capacity'}
           >
             <Input
               id="parking-capacity"
@@ -144,7 +165,7 @@ export function ParkingForm({
           <Field
             error={form.formState.errors.hourlyRate?.message}
             htmlFor="parking-rate"
-            label="Hourly rate (USD)"
+            label={es ? 'Tarifa por hora (USD)' : 'Hourly rate (USD)'}
           >
             <Input
               id="parking-rate"
@@ -155,18 +176,20 @@ export function ParkingForm({
             />
           </Field>
         </div>
-        <Field htmlFor="parking-currency" label="Currency">
+        <Field htmlFor="parking-currency" label={es ? 'Moneda' : 'Currency'}>
           <Select disabled id="parking-currency" value="USD">
             <option value="USD">USD</option>
           </Select>
         </Field>
       </fieldset>
       {parking ? (
-        <fieldset>
-          <legend className="type-label">Status</legend>
+        <fieldset className="space-y-3 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:p-6 lg:col-span-2">
+          <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
+            {es ? 'Disponibilidad' : 'Availability'}
+          </legend>
           <Checkbox
             id="parking-active"
-            label="Accept new check-ins"
+            label={es ? 'Aceptar nuevos ingresos' : 'Accept new check-ins'}
             {...form.register('isActive')}
           />
         </fieldset>
@@ -176,8 +199,22 @@ export function ParkingForm({
           {error}
         </p>
       ) : null}
-      <Button disabled={isSubmitting} type="submit">
-        {isSubmitting ? 'Saving…' : parking ? 'Save changes' : 'Create parking'}
+      <Button
+        className="justify-self-start rounded-full px-6"
+        disabled={isSubmitting}
+        type="submit"
+      >
+        {isSubmitting
+          ? es
+            ? 'Guardando…'
+            : 'Saving…'
+          : parking
+            ? es
+              ? 'Guardar cambios'
+              : 'Save changes'
+            : es
+              ? 'Crear cochera'
+              : 'Create parking'}
       </Button>
     </form>
   );

@@ -102,3 +102,30 @@ export async function updateProfile(input: UpdateProfileRequest) {
   if (data) return data;
   return ownerError(error, response, 'Unable to update your profile.');
 }
+
+export type AnalyticsSummary = components['schemas']['AnalyticsSummaryResponse'];
+export type AnalyticsRevenue = components['schemas']['AnalyticsRevenueResponse'];
+export type AnalyticsVolume = components['schemas']['AnalyticsVolumeResponse'];
+export type FacilityAnalytics = components['schemas']['FacilityAnalytics'];
+
+export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
+  const { data, error, response } = await authenticatedApi.GET('/analytics/summary');
+  if (data) return data;
+  return ownerError(error, response, 'Unable to load analytics summary.');
+}
+
+export async function getAnalyticsRevenue(days: 7 | 30 = 7): Promise<AnalyticsRevenue> {
+  const { data, error, response } = await authenticatedApi.GET('/analytics/revenue', {
+    params: { query: { days } },
+  });
+  if (data) return data;
+  return ownerError(error, response, 'Unable to load revenue telemetry.');
+}
+
+export async function getAnalyticsVolume(days: 7 | 30 = 7): Promise<AnalyticsVolume> {
+  const { data, error, response } = await authenticatedApi.GET('/analytics/volume', {
+    params: { query: { days } },
+  });
+  if (data) return data;
+  return ownerError(error, response, 'Unable to load volume telemetry.');
+}

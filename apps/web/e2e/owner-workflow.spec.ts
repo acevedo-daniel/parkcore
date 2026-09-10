@@ -42,6 +42,7 @@ test('serves the SPA entry for direct public and owner routes', async ({ request
 });
 
 test('keeps public mobile navigation and main content usable with a keyboard', async ({ page }) => {
+  await page.addInitScript("localStorage.setItem('parkcore-lang', 'en');");
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
 
@@ -60,8 +61,10 @@ test('keeps public mobile navigation and main content usable with a keyboard', a
   await expect(menu).toBeVisible();
   await expect(page.getByRole('button', { name: 'Close navigation' })).toBeFocused();
 
+  const signIn = menu.getByRole('link', { name: 'Sign in' });
+  await signIn.focus();
   await page.keyboard.press('Shift+Tab');
-  await expect(menu.getByRole('link', { name: 'Sign in' })).toBeFocused();
+  await expect(menu.getByRole('link', { name: 'Parkings' })).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(menu).toBeHidden();
   await expect(menuTrigger).toBeFocused();
@@ -70,6 +73,7 @@ test('keeps public mobile navigation and main content usable with a keyboard', a
 test('signs in, creates a parking, checks in, and completes a parking session', async ({
   page,
 }) => {
+  await page.addInitScript("localStorage.setItem('parkcore-lang', 'en');");
   let parking: Parking | undefined;
   let session: ParkingSession | undefined;
 

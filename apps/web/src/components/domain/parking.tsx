@@ -49,25 +49,55 @@ export function Metric({ label, value }: { label: string; value: string | number
 
 export function OccupancyMeter({ active, capacity }: { active: number; capacity: number }) {
   const percentage = capacity === 0 ? 0 : Math.min(100, Math.round((active / capacity) * 100));
-  const threshold = percentage >= 90 ? 'critical' : percentage >= 70 ? 'warning' : 'neutral';
+  const threshold =
+    active >= capacity
+      ? 'full'
+      : percentage >= 95
+        ? 'critical'
+        : percentage >= 90
+          ? 'critical'
+          : percentage >= 70
+            ? 'warning'
+            : 'optimal';
+  const status =
+    threshold === 'full'
+      ? 'Intake locked · facility full'
+      : threshold === 'critical'
+        ? percentage >= 95
+          ? 'Nearly full'
+          : 'Critical capacity'
+        : threshold === 'warning'
+          ? 'Elevated occupancy'
+          : 'Optimal capacity';
+  const available = Math.max(0, capacity - active);
   return (
-    <div className={cn('occupancy', `occupancy-${threshold}`)}>
-      <div className="occupancy-heading">
-        <span className="type-metric">
-          {active} / {capacity}
+    <div
+      className={cn(
+        'capacity-gauge',
+        `capacity-gauge-${threshold}`,
+        `occupancy-${threshold === 'optimal' ? 'neutral' : threshold}`,
+      )}
+    >
+      <div className="capacity-gauge-heading">
+        <span className="type-label">Occupancy gauge</span>
+        <span className="type-operational">
+          {active} / {capacity} inside
         </span>
-        <span className="type-label">Occupied</span>
       </div>
       <div
         aria-label={`${String(active)} of ${String(capacity)} spaces occupied`}
         aria-valuemax={capacity}
         aria-valuemin={0}
         aria-valuenow={active}
-        className="occupancy-track"
+        className="capacity-gauge-track"
         role="progressbar"
       >
-        <div className="occupancy-fill" style={{ width: `${String(percentage)}%` }} />
+        <div className="capacity-gauge-fill" style={{ width: `${String(percentage)}%` }} />
       </div>
+      <p className="capacity-gauge-status">
+        <span aria-hidden="true">●</span> {status} · {available}{' '}
+        {available === 1 ? 'spot' : 'spots'} available
+      </p>
     </div>
   );
 }

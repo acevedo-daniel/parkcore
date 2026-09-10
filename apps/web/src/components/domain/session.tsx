@@ -3,6 +3,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import { formatDuration, formatMoney, formatTimestamp } from '../../lib/format.js';
 import { Plate } from './plate.js';
 import { SessionStatus } from './status.js';
@@ -36,20 +37,52 @@ export function ElapsedDuration({ startTime }: { startTime: string }) {
 }
 
 export function SessionRow({ session, to }: { session: Session; to: string }) {
+  const { language } = useAppearance();
+  const es = language === 'es';
   return (
-    <Link aria-label={`Open session for ${session.vehicle.plate}`} className="session-row" to={to}>
-      <Plate plate={session.vehicle.plate} />
-      <span className="type-small">{session.vehicle.type.replaceAll('_', ' ')}</span>
-      <OperationalTimestamp value={session.startTime} />
-      {session.endTime ? (
-        <span className="type-operational">
-          {formatDuration(session.startTime, session.endTime)}
+    <Link
+      aria-label={`Open session for ${session.vehicle.plate}`}
+      className="group grid gap-4 rounded-[1.35rem] border border-[#121417] bg-white p-5 text-[#121417] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ffcc00] hover:shadow-[0_6px_0_rgba(18,20,23,0.12)] sm:grid-cols-[minmax(9rem,1.1fr)_minmax(7rem,0.8fr)_minmax(8rem,1fr)_auto] sm:items-center"
+      to={to}
+    >
+      <div className="flex items-center gap-3">
+        <Plate plate={session.vehicle.plate} />
+        <span className="text-xs font-semibold text-[#45423c]">
+          {session.vehicle.type.replaceAll('_', ' ')}
         </span>
-      ) : (
-        <ElapsedDuration startTime={session.startTime} />
-      )}
-      <SessionStatus status={session.status} />
-      <ArrowUpRight aria-hidden="true" size={18} />
+      </div>
+      <div>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
+          {es ? 'Ingreso' : 'Arrived'}
+        </p>
+        <div className="mt-1 text-sm font-semibold">
+          <OperationalTimestamp value={session.startTime} />
+        </div>
+      </div>
+      <div>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
+          {es ? 'Transcurrido' : 'Elapsed'}
+        </p>
+        <div className="mt-1 text-sm font-semibold">
+          {session.endTime ? (
+            <span className="type-operational">
+              {formatDuration(session.startTime, session.endTime)}
+            </span>
+          ) : (
+            <ElapsedDuration startTime={session.startTime} />
+          )}
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-4 sm:justify-end">
+        <span className="rounded-full border border-[#121417] px-2.5 py-1 text-xs font-bold">
+          {session.status[0]}
+          {session.status.slice(1).toLowerCase()}
+        </span>
+        <ArrowUpRight
+          aria-hidden="true"
+          className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+        />
+      </div>
     </Link>
   );
 }
@@ -82,6 +115,8 @@ export function SessionHistoryRow({ session, to }: { session: Session; to: strin
 }
 
 export function CheckoutSummary({ session }: { session: Session }) {
+  const { language } = useAppearance();
+  const es = language === 'es';
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -98,36 +133,49 @@ export function CheckoutSummary({ session }: { session: Session }) {
   const total = session.totalAmountCents ?? preview?.totalAmountCents;
   const chargedHours = preview?.chargedHours;
   return (
-    <section className="checkout-summary" aria-label="Checkout summary">
-      <div className="summary-row">
-        <span className="type-label">Started</span>
+    <section
+      aria-label="Checkout summary"
+      className="rounded-[1.35rem] border border-[#121417] bg-[#f1eee7] p-5 text-[#121417]"
+    >
+      <div className="flex items-center justify-between gap-4 border-b border-[#121417]/20 pb-3">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
+          {es ? 'Ingreso' : 'Started'}
+        </span>
         <OperationalTimestamp value={session.startTime} />
       </div>
       {!session.endTime ? (
-        <div className="summary-row">
-          <span className="type-label">Current calculation</span>
+        <div className="flex items-center justify-between gap-4 border-b border-[#121417]/20 py-3">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
+            {es ? 'Cálculo actual' : 'Current calculation'}
+          </span>
           <time className="type-operational" dateTime={now.toISOString()}>
             {formatTimestamp(now.toISOString())}
           </time>
         </div>
       ) : null}
-      <div className="summary-row">
-        <span className="type-label">Rate</span>
+      <div className="flex items-center justify-between gap-4 border-b border-[#121417]/20 py-3">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
+          {es ? 'Tarifa' : 'Rate'}
+        </span>
         <span className="type-operational">
           {formatMoney(session.hourlyRateCents, session.currency)} / H
         </span>
       </div>
       {chargedHours ? (
-        <div className="summary-row">
-          <span className="type-label">Charged</span>
+        <div className="flex items-center justify-between gap-4 border-b border-[#121417]/20 py-3">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
+            {es ? 'Cobrado' : 'Charged'}
+          </span>
           <span className="type-operational">
-            {chargedHours} {chargedHours === 1 ? 'hour' : 'hours'}
+            {chargedHours} {chargedHours === 1 ? (es ? 'hora' : 'hour') : es ? 'horas' : 'hours'}
           </span>
         </div>
       ) : null}
-      <div className="summary-total">
-        <span className="type-label">Total</span>
-        <strong className="type-metric">
+      <div className="flex items-end justify-between gap-4 pt-5">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
+          Total
+        </span>
+        <strong className="font-display text-3xl font-bold leading-none tracking-[-0.055em] tabular-nums">
           {total === undefined ? '—' : formatMoney(total, session.currency)}
         </strong>
       </div>

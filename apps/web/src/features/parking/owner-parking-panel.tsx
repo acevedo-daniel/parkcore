@@ -1,14 +1,9 @@
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, MapPin } from 'lucide-react';
 import { Link } from 'react-router';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import type { Parking } from '../../lib/api/owner-api.js';
-import {
-  Metric,
-  OccupancyMeter,
-  ParkingIdentity,
-  RateDisplay,
-} from '../../components/domain/parking.js';
-import { ParkingStatus } from '../../components/domain/status.js';
+import { formatMoney } from '../../lib/format.js';
 
 export function OwnerParkingPanel({
   activeSessionCount,
@@ -23,31 +18,97 @@ export function OwnerParkingPanel({
   occupancyLoading?: boolean;
   parking: Parking;
 }) {
+  const { language } = useAppearance();
+  const es = language === 'es';
+  const occupancy =
+    activeSessionCount === undefined || parking.capacity === 0
+      ? 0
+      : Math.min(100, Math.round((activeSessionCount / parking.capacity) * 100));
+  const available = Math.max(0, parking.capacity - (activeSessionCount ?? 0));
+
   return (
     <Link
-      aria-label={`Open operations for ${parking.title}`}
-      className="owner-parking-panel"
+      aria-label={
+        es ? `Abrir operaciones de ${parking.title}` : `Open operations for ${parking.title}`
+      }
+      className="owner-parking-panel group flex min-h-72 flex-col justify-between rounded-[1.5rem] border border-[#121417] bg-white p-5 text-[#121417] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ffcc00] hover:shadow-[0_7px_0_rgba(18,20,23,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#121417] focus-visible:ring-offset-4"
       to={`/app/parkings/${parking.id}`}
     >
-      <div className="owner-parking-panel-header">
-        <ParkingIdentity identifier={identifier} parking={parking} />
-        <span className="owner-panel-link">
-          Open <ArrowUpRight aria-hidden="true" size={17} />
-        </span>
-      </div>
-      <div className="owner-parking-panel-data">
-        <ParkingStatus isActive={parking.isActive} />
-        {occupancyError ? (
-          <span className="type-small" role="status">
-            Occupancy unavailable
+      <div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="rounded-full border border-[#121417] px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em]">
+            {es ? 'Cochera' : 'Facility'} {String(identifier).padStart(2, '0')}
           </span>
+          <span className="flex items-center gap-1 text-xs font-bold">
+            {es ? 'Abrir' : 'Open'}
+            <ArrowUpRight
+              aria-hidden="true"
+              className="size-3.5 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            />
+          </span>
+        </div>
+
+        <h3 className="mt-7 font-display text-2xl font-bold leading-[0.95] tracking-[-0.055em]">
+          {parking.title}
+        </h3>
+        <p className="mt-3 flex items-start gap-2 text-sm leading-snug text-[#45423c]">
+          <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+          <span>{parking.address}</span>
+        </p>
+      </div>
+
+      <div className="mt-8 border-t border-[#121417]/20 pt-4">
+        {occupancyError ? (
+          <p className="text-sm text-[#45423c]" role="status">
+            {es ? 'La ocupación no está disponible ahora.' : 'Occupancy is unavailable right now.'}
+          </p>
         ) : occupancyLoading || activeSessionCount === undefined ? (
-          <span className="type-small">Loading occupancy…</span>
+          <div
+            className="animate-pulse space-y-2"
+            aria-label={es ? 'Cargando ocupación' : 'Loading occupancy'}
+          >
+            <div className="h-3 w-28 rounded-full bg-[#e7e4dd]" />
+            <div className="h-2 w-full rounded-full bg-[#e7e4dd]" />
+          </div>
         ) : (
-          <OccupancyMeter active={activeSessionCount} capacity={parking.capacity} />
+          <div>
+            <div className="flex items-baseline justify-between gap-3">
+              <p className="font-mono text-sm font-bold tabular-nums">
+                {activeSessionCount} / {parking.capacity}
+              </p>
+              <p className="text-xs font-semibold text-[#45423c]">
+                {available} {es ? 'libres' : 'open'} · {occupancy}%
+              </p>
+            </div>
+            <div
+              aria-label={
+                es
+                  ? `${String(activeSessionCount)} de ${String(parking.capacity)} plazas ocupadas`
+                  : `${String(activeSessionCount)} of ${String(parking.capacity)} spots occupied`
+              }
+              aria-valuemax={parking.capacity}
+              aria-valuemin={0}
+              aria-valuenow={activeSessionCount}
+              className="mt-3 h-2 overflow-hidden rounded-full bg-[#e7e4dd]"
+              role="progressbar"
+            >
+              <div
+                className="h-full rounded-full bg-[#121417]"
+                style={{ width: `${String(occupancy)}%` }}
+              />
+            </div>
+          </div>
         )}
-        <Metric label="Capacity" value={parking.capacity} />
-        <RateDisplay currency={parking.currency} hourlyRateCents={parking.hourlyRateCents} />
+
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <span className="text-xs font-semibold text-[#45423c]">
+            {parking.isActive ? (es ? 'En operación' : 'Operating') : es ? 'Pausada' : 'Paused'}
+          </span>
+          <span className="font-mono text-sm font-bold tabular-nums">
+            {formatMoney(parking.hourlyRateCents, parking.currency)}
+            <span className="font-sans text-xs font-medium text-[#45423c]"> / h</span>
+          </span>
+        </div>
       </div>
     </Link>
   );

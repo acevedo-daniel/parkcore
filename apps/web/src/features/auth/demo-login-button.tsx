@@ -7,9 +7,13 @@ import { useAuth } from './use-auth.js';
 export function DemoLoginButton({
   onSuccess,
   variant = 'secondary',
+  className,
+  children,
 }: {
   onSuccess: () => void;
   variant?: 'primary' | 'secondary';
+  className?: string;
+  children?: React.ReactNode;
 }) {
   const { loginDemo } = useAuth();
   const [error, setError] = useState<string>();
@@ -33,12 +37,13 @@ export function DemoLoginButton({
   return (
     <div className="stack-tight">
       <Button
+        className={className}
         disabled={isSubmitting}
         onClick={() => void startDemo()}
         type="button"
         variant={variant}
       >
-        {isSubmitting ? 'Opening demo…' : 'Try the demo'}
+        {isSubmitting ? 'Opening demo…' : (children ?? 'Try the demo')}
       </Button>
       {error ? (
         <p className="form-error" role="alert">

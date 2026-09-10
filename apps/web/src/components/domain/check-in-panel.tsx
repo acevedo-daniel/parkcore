@@ -4,6 +4,7 @@ import type { SyntheticEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../ui/button.js';
 import { Field, Input, Select, Textarea } from '../ui/field.js';
 
@@ -35,6 +36,9 @@ const checkInFormSchema = z.object({
 type CheckInForm = z.infer<typeof checkInFormSchema>;
 type CheckInRequest = components['schemas']['CheckInRequest'];
 
+const controlClassName =
+  'block h-12 w-full rounded-xl border border-[#121417] bg-white px-3 text-[#121417] shadow-none focus:border-[#121417] focus:ring-2 focus:ring-[#ffcc00]';
+
 export function CheckInPanel({
   error,
   isSubmitting,
@@ -44,6 +48,8 @@ export function CheckInPanel({
   isSubmitting?: boolean;
   onSubmit: (input: CheckInRequest) => void | Promise<void>;
 }) {
+  const { language } = useAppearance();
+  const es = language === 'es';
   const {
     formState: { errors },
     handleSubmit,
@@ -81,54 +87,97 @@ export function CheckInPanel({
   };
 
   return (
-    <form className="check-in-panel" noValidate onSubmit={onFormSubmit}>
-      <Field error={errors.plate?.message} htmlFor="check-in-plate" label="Plate">
+    <form className="space-y-5 pt-6" noValidate onSubmit={onFormSubmit}>
+      <Field
+        error={errors.plate?.message}
+        htmlFor="check-in-plate"
+        label={es ? 'Patente' : 'Plate'}
+      >
         <Input
-          id="check-in-plate"
           autoComplete="off"
+          className={`${controlClassName} font-mono font-bold tracking-[0.12em]`}
+          id="check-in-plate"
           placeholder="AB123CD"
           {...register('plate')}
         />
       </Field>
-      <p className="field-help">
-        Plates are normalized. Known vehicles are reused within this parking.
+      <p className="text-sm leading-relaxed text-[#45423c]">
+        {es
+          ? 'La patente se normaliza. Los vehículos conocidos se reutilizan dentro de esta cochera.'
+          : 'Plates are normalized. Known vehicles are reused within this parking.'}
       </p>
-      <div className="form-divider">
-        <span className="type-label">Vehicle</span>
+
+      <FormDivider label={es ? 'Vehículo' : 'Vehicle'} />
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field error={errors.type?.message} htmlFor="check-in-type" label={es ? 'Tipo' : 'Type'}>
+          <Select className={controlClassName} id="check-in-type" {...register('type')}>
+            <option value="CAR">{es ? 'Auto' : 'Car'}</option>
+            <option value="MOTORCYCLE">{es ? 'Moto' : 'Motorcycle'}</option>
+            <option value="LARGE">{es ? 'Vehículo grande' : 'Large vehicle'}</option>
+          </Select>
+        </Field>
+        <Field htmlFor="check-in-brand" label={es ? 'Marca' : 'Brand'}>
+          <Input className={controlClassName} id="check-in-brand" {...register('brand')} />
+        </Field>
       </div>
-      <Field error={errors.type?.message} htmlFor="check-in-type" label="Type">
-        <Select id="check-in-type" {...register('type')}>
-          <option value="CAR">Car</option>
-          <option value="MOTORCYCLE">Motorcycle</option>
-          <option value="LARGE">Large vehicle</option>
-        </Select>
+      <Field htmlFor="check-in-model" label={es ? 'Modelo' : 'Model'}>
+        <Input className={controlClassName} id="check-in-model" {...register('model')} />
       </Field>
-      <Field htmlFor="check-in-brand" label="Brand">
-        <Input id="check-in-brand" {...register('brand')} />
-      </Field>
-      <Field htmlFor="check-in-model" label="Model">
-        <Input id="check-in-model" {...register('model')} />
-      </Field>
-      <div className="form-divider">
-        <span className="type-label">Visitor · optional</span>
+
+      <FormDivider label={es ? 'Visitante · opcional' : 'Visitor · optional'} />
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field htmlFor="check-in-name" label={es ? 'Nombre' : 'Name'}>
+          <Input className={controlClassName} id="check-in-name" {...register('customerName')} />
+        </Field>
+        <Field htmlFor="check-in-phone" label={es ? 'Teléfono' : 'Phone'}>
+          <Input
+            className={controlClassName}
+            id="check-in-phone"
+            inputMode="tel"
+            {...register('customerPhone')}
+          />
+        </Field>
       </div>
-      <Field htmlFor="check-in-name" label="Name">
-        <Input id="check-in-name" {...register('customerName')} />
+      <Field htmlFor="check-in-notes" label={es ? 'Notas' : 'Notes'}>
+        <Textarea
+          className="block min-h-24 w-full rounded-xl border border-[#121417] bg-white px-3 py-2 text-[#121417] shadow-none focus:border-[#121417] focus:ring-2 focus:ring-[#ffcc00]"
+          id="check-in-notes"
+          {...register('notes')}
+        />
       </Field>
-      <Field htmlFor="check-in-phone" label="Phone">
-        <Input id="check-in-phone" inputMode="tel" {...register('customerPhone')} />
-      </Field>
-      <Field htmlFor="check-in-notes" label="Notes">
-        <Textarea id="check-in-notes" {...register('notes')} />
-      </Field>
+
       {error ? (
-        <p className="field-error" role="alert">
+        <p
+          className="border border-[#121417] bg-[#ffcc00] p-3 text-sm font-semibold text-[#121417]"
+          role="alert"
+        >
           {error}
         </p>
       ) : null}
-      <Button disabled={isSubmitting} fullWidth type="submit">
-        {isSubmitting ? 'Starting session…' : 'Start session'}
+      <Button
+        className="border-[#121417] bg-[#121417] text-white hover:bg-[#30312d]"
+        disabled={isSubmitting}
+        fullWidth
+        type="submit"
+      >
+        {isSubmitting
+          ? es
+            ? 'Iniciando estadía…'
+            : 'Starting session…'
+          : es
+            ? 'Iniciar estadía'
+            : 'Start session'}
       </Button>
     </form>
+  );
+}
+
+function FormDivider({ label }: { label: string }) {
+  return (
+    <div className="border-t border-[#121417]/20 pt-5">
+      <span className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#6d695f]">
+        {label}
+      </span>
+    </div>
   );
 }

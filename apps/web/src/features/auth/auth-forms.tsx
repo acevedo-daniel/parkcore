@@ -4,9 +4,10 @@ import { Link } from 'react-router';
 import type { ReactNode } from 'react';
 import { z } from 'zod';
 
-import { ApiError } from '../../lib/api/api-error.js';
+import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../../components/ui/button.js';
 import { Field, Input } from '../../components/ui/field.js';
+import { ApiError } from '../../lib/api/api-error.js';
 import { useAuth } from './use-auth.js';
 
 const emailSchema = z.string().trim().pipe(z.email('Enter a valid email address.'));
@@ -48,22 +49,71 @@ export function AuthFormFrame({
   eyebrow: string;
   title: string;
 }) {
+  const { language } = useAppearance();
   return (
-    <section className="auth-frame" aria-labelledby="auth-title">
-      <div className="auth-intro">
-        <p className="type-label">{eyebrow}</p>
-        <h1 className="type-page-title" id="auth-title">
-          {title}
-        </h1>
+    <section aria-labelledby="auth-title" className="min-h-full bg-white py-12 sm:py-20">
+      <div className="mx-auto grid max-w-5xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:items-stretch lg:px-8">
+        <div className="hidden rounded-[3rem_3rem_7rem_3rem] bg-[#121417] p-10 text-white shadow-[0_12px_0_rgba(18,20,23,0.15)] lg:flex lg:flex-col lg:justify-between">
+          <div>
+            <Link
+              className="inline-flex items-center gap-2 font-display text-xl font-black tracking-tight text-white"
+              to="/"
+            >
+              PARKCORE
+            </Link>
+            <p className="mt-16 text-xs font-bold tracking-[0.12em] text-[#ffcc00] uppercase">
+              {eyebrow}
+            </p>
+            <p
+              aria-hidden="true"
+              className="mt-5 font-display text-4xl font-black leading-[1.02] tracking-[-0.05em]"
+            >
+              {language === 'es'
+                ? 'Una operación clara, desde la entrada hasta el cierre.'
+                : 'A clear operation, from arrival through closeout.'}
+            </p>
+            <p className="mt-6 max-w-sm text-base leading-relaxed text-[#f5f5f5]">
+              Una entrada directa para volver a la operación, sin configurar nada de más.
+            </p>
+          </div>
+          <p className="max-w-sm text-sm leading-relaxed text-[#d4d4d4]">
+            La demo usa datos de ejemplo para recorrer una jornada completa de cochera.
+          </p>
+        </div>
+        <div className="rounded-[2rem_2rem_4.5rem_2rem] border border-[#121417]/10 bg-white p-6 shadow-[0_10px_0_rgba(18,20,23,0.08)] sm:p-8 lg:p-10">
+          <div>
+            <Link
+              className="inline-flex items-center gap-2 font-display text-lg font-black tracking-tight text-[#1d241f] lg:hidden"
+              to="/"
+            >
+              PARKCORE
+            </Link>
+            <p className="mt-10 text-xs font-bold tracking-[0.12em] text-[#121417] uppercase lg:mt-0">
+              {eyebrow}
+            </p>
+            <h1
+              className="mt-3 font-display text-3xl font-black tracking-[-0.04em] text-[#1d241f] lg:text-4xl"
+              id="auth-title"
+            >
+              {title}
+            </h1>
+          </div>
+          <div className="mt-8 [&_.auth-form]:mt-6 [&_.auth-form]:flex [&_.auth-form]:flex-col [&_.auth-form]:gap-4 [&_.field]:space-y-1.5 [&_.field-label]:block [&_.field-label]:text-xs [&_.field-label]:font-bold [&_.field-label]:text-[#121417] [&_.control]:h-12 [&_.control]:w-full [&_.control]:rounded-2xl [&_.control]:border [&_.control]:border-[#121417]/10 [&_.control]:bg-[#f5f5f5] [&_.control]:px-4 [&_.control]:text-sm [&_.control]:font-medium [&_.control]:text-[#121417] [&_.control]:outline-none [&_.control]:transition-colors [&_.control]:focus:border-[#121417] [&_.control]:focus:bg-white [&_.form-error]:text-sm [&_.form-error]:font-medium [&_.form-error]:text-[#b42318]">
+            {children}
+          </div>
+          <p className="mt-6 border-t border-[#1d241f]/10 pt-5 text-sm leading-relaxed text-[#526052]">
+            {footer}
+          </p>
+        </div>
       </div>
-      {children}
-      <p className="auth-footer type-small">{footer}</p>
     </section>
   );
 }
 
 export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
   const { login } = useAuth();
+  const { language } = useAppearance();
+  const es = language === 'es';
   const form = useForm<LoginValues>({
     defaultValues: { email: '', password: '' },
     resolver: zodResolver(loginSchema),
@@ -98,7 +148,11 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           {...form.register('email')}
         />
       </Field>
-      <Field error={form.formState.errors.password?.message} htmlFor="password" label="Password">
+      <Field
+        error={form.formState.errors.password?.message}
+        htmlFor="password"
+        label={es ? 'Contraseña' : 'Password'}
+      >
         <Input
           autoComplete="current-password"
           aria-describedby={form.formState.errors.password ? 'password-error' : undefined}
@@ -113,8 +167,19 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           {form.formState.errors.root.message}
         </p>
       ) : null}
-      <Button fullWidth disabled={form.formState.isSubmitting} type="submit">
-        {form.formState.isSubmitting ? 'Signing in…' : 'Sign in'}
+      <Button
+        className="h-12 rounded-full bg-[#121417] text-white hover:bg-[#ffcc00] hover:text-[#121417]"
+        disabled={form.formState.isSubmitting}
+        fullWidth
+        type="submit"
+      >
+        {form.formState.isSubmitting
+          ? es
+            ? 'Ingresando…'
+            : 'Signing in…'
+          : es
+            ? 'Ingresar'
+            : 'Sign in'}
       </Button>
     </form>
   );
@@ -122,6 +187,8 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
 
 export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
   const { register: registerUser } = useAuth();
+  const { language } = useAppearance();
+  const es = language === 'es';
   const form = useForm<RegisterValues>({
     defaultValues: { email: '', name: '', password: '' },
     resolver: zodResolver(registerSchema),
@@ -148,7 +215,11 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         void submit(event);
       }}
     >
-      <Field error={form.formState.errors.name?.message} htmlFor="name" label="Name (optional)">
+      <Field
+        error={form.formState.errors.name?.message}
+        htmlFor="name"
+        label={es ? 'Nombre (opcional)' : 'Name (optional)'}
+      >
         <Input
           aria-describedby={form.formState.errors.name ? 'name-error' : undefined}
           aria-invalid={Boolean(form.formState.errors.name)}
@@ -169,7 +240,11 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
           {...form.register('email')}
         />
       </Field>
-      <Field error={form.formState.errors.password?.message} htmlFor="password" label="Password">
+      <Field
+        error={form.formState.errors.password?.message}
+        htmlFor="password"
+        label={es ? 'Contraseña' : 'Password'}
+      >
         <Input
           autoComplete="new-password"
           aria-describedby={form.formState.errors.password ? 'password-error' : undefined}
@@ -184,19 +259,40 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
           {form.formState.errors.root.message}
         </p>
       ) : null}
-      <Button fullWidth disabled={form.formState.isSubmitting} type="submit">
-        {form.formState.isSubmitting ? 'Creating account…' : 'Create account'}
+      <Button
+        className="h-12 rounded-full bg-[#121417] text-white hover:bg-[#ffcc00] hover:text-[#121417]"
+        disabled={form.formState.isSubmitting}
+        fullWidth
+        type="submit"
+      >
+        {form.formState.isSubmitting
+          ? es
+            ? 'Creando cuenta…'
+            : 'Creating account…'
+          : es
+            ? 'Crear cuenta'
+            : 'Create account'}
       </Button>
     </form>
   );
 }
 
 export function LoginFooter() {
-  return <>Access is provisioned by the facility owner.</>;
+  const { language } = useAppearance();
+  return language === 'es' ? (
+    <>El acceso se habilita desde la cochera.</>
+  ) : (
+    <>Access is provisioned by the facility owner.</>
+  );
 }
 
 export function RegisterFooter() {
-  return (
+  const { language } = useAppearance();
+  return language === 'es' ? (
+    <>
+      ¿Ya tenés una cuenta? <Link to="/login">Ingresá</Link>.
+    </>
+  ) : (
     <>
       Already have an account? <Link to="/login">Sign in</Link>.
     </>
