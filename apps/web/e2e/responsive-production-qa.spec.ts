@@ -136,6 +136,7 @@ test('keeps the deployed public and owner surfaces usable at production viewport
   let token = '';
 
   try {
+    await page.addInitScript("localStorage.setItem('parkcore-lang', 'en');");
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/register');
     await page.getByLabel('Name (optional)').fill('Responsive Production QA');

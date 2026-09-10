@@ -16,8 +16,19 @@ const copy = {
     'demo.live': 'DEMO · LIVE',
     'nav.directory': 'Directory',
     'nav.operations': 'Operations',
+    'nav.overview': 'Overview',
+    'nav.parkings': 'Parkings',
     'nav.profile': 'Profile',
     'nav.signOut': 'Sign out',
+    'nav.skipMain': 'Skip to main content',
+    'nav.open': 'Open navigation',
+    'nav.close': 'Close navigation',
+    'nav.public': 'Public navigation',
+    'nav.owner': 'Owner navigation',
+    'nav.ownerMobile': 'Owner navigation, mobile',
+    'appearance.language': 'Select language',
+    'appearance.languageTheme': 'Language and theme',
+    'route.loading': 'Loading route',
     'theme.dark': 'Switch to dark theme',
     'theme.light': 'Switch to light theme',
   },
@@ -25,8 +36,19 @@ const copy = {
     'demo.live': 'DEMO · EN VIVO',
     'nav.directory': 'Directorio',
     'nav.operations': 'Operaciones',
+    'nav.overview': 'Resumen',
+    'nav.parkings': 'Cocheras',
     'nav.profile': 'Perfil',
     'nav.signOut': 'Cerrar sesión',
+    'nav.skipMain': 'Saltar al contenido principal',
+    'nav.open': 'Abrir navegación',
+    'nav.close': 'Cerrar navegación',
+    'nav.public': 'Navegación pública',
+    'nav.owner': 'Navegación de operador',
+    'nav.ownerMobile': 'Navegación de operador, móvil',
+    'appearance.language': 'Seleccionar idioma',
+    'appearance.languageTheme': 'Idioma y tema',
+    'route.loading': 'Cargando vista',
     'theme.dark': 'Cambiar a tema oscuro',
     'theme.light': 'Cambiar a tema claro',
   },
@@ -122,6 +144,5 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
 // Context hooks intentionally share this module with their provider.
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAppearance() {
-  const context = useContext(AppearanceContext);
-  return context;
+  return useContext(AppearanceContext);
 }

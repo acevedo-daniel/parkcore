@@ -8,12 +8,12 @@ import { DemoLoginButton } from '../../features/auth/demo-login-button.js';
 import { cn } from '../../lib/cn.js';
 import { AppearanceControls } from '../ui/appearance-controls.js';
 
-const publicLinks = [
-  { label: 'Parkings', to: '/parkings' },
-  { label: 'Sign in', to: '/login' },
-];
-
 function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
+  const { language, t } = useAppearance();
+  const publicLinks = [
+    { label: t('nav.parkings'), to: '/parkings' },
+    { label: language === 'es' ? 'Ingresar' : 'Sign in', to: '/login' },
+  ];
   return (
     <div className="flex items-center gap-1.5">
       {publicLinks.map((link) => (
@@ -38,13 +38,13 @@ function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 function PublicMobileMenu() {
-  const { t } = useAppearance();
+  const { language, t } = useAppearance();
   const navigate = useNavigate();
   return (
     <DialogPrimitive.Root>
       <DialogPrimitive.Trigger asChild>
         <button
-          aria-label="Open navigation"
+          aria-label={t('nav.open')}
           className="icon-button public-menu-trigger flex size-10 items-center justify-center rounded-full border border-[#121417]/15 bg-white text-[#121417] transition-colors hover:bg-[#ffcc00] cursor-pointer"
           type="button"
         >
@@ -64,7 +64,7 @@ function PublicMobileMenu() {
               </DialogPrimitive.Description>
               <DialogPrimitive.Close asChild>
                 <button
-                  aria-label="Close navigation"
+                  aria-label={t('nav.close')}
                   className="icon-button flex size-9 items-center justify-center rounded-full border border-[#121417]/15 bg-white text-[#121417] transition-colors hover:bg-[#ffcc00] cursor-pointer"
                   type="button"
                 >
@@ -73,13 +73,13 @@ function PublicMobileMenu() {
               </DialogPrimitive.Close>
             </header>
 
-            <nav aria-label="Public navigation" className="public-mobile-links flex flex-col gap-2">
+            <nav aria-label={t('nav.public')} className="public-mobile-links flex flex-col gap-2">
               <DialogPrimitive.Close asChild>
                 <Link
                   className="px-4 py-3 rounded-2xl text-base font-bold text-[#121417] hover:bg-black/5 transition-colors"
                   to="/parkings"
                 >
-                  Parkings
+                  {t('nav.parkings')}
                 </Link>
               </DialogPrimitive.Close>
               <DialogPrimitive.Close asChild>
@@ -87,7 +87,7 @@ function PublicMobileMenu() {
                   className="px-4 py-3 rounded-2xl text-base font-bold text-[#121417] hover:bg-black/5 transition-colors"
                   to="/login"
                 >
-                  Sign in
+                  {language === 'es' ? 'Ingresar' : 'Sign in'}
                 </Link>
               </DialogPrimitive.Close>
             </nav>
@@ -95,7 +95,9 @@ function PublicMobileMenu() {
 
           <div className="pt-6 border-t border-black/8 flex flex-col gap-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[#404550]">Idioma y tema</span>
+              <span className="text-xs font-medium text-[#404550]">
+                {t('appearance.languageTheme')}
+              </span>
               <AppearanceControls compact />
             </div>
             <div className="pt-2">
@@ -128,7 +130,7 @@ export function PublicLayout() {
   return (
     <div className="public-shell min-h-screen flex flex-col bg-white text-[#121417] font-sans antialiased selection:bg-[#ffcc00] selection:text-[#121417]">
       <a className="skip-link" href="#public-main">
-        Skip to main content
+        {t('nav.skipMain')}
       </a>
 
       {/* Unified, sleek, Wise-standard navbar */}
@@ -147,7 +149,7 @@ export function PublicLayout() {
 
             {/* Desktop Navigation */}
             <nav
-              aria-label="Public navigation"
+              aria-label={t('nav.public')}
               className="public-desktop-nav hidden md:flex items-center"
             >
               <PublicLinks />
@@ -184,8 +186,9 @@ export function PublicLayout() {
         <div
           aria-live="polite"
           className="route-loading-bar fixed top-0 inset-x-0 h-1 bg-[#ffcc00] animate-pulse z-50"
+          role="status"
         >
-          Loading route
+          <span className="visually-hidden">{t('route.loading')}</span>
         </div>
       ) : null}
 

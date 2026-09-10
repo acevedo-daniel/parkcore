@@ -3,6 +3,7 @@ import { ChevronLeft, History, MapPin, Pencil, Plus, Search } from 'lucide-react
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import { CheckInPanel } from '../../components/domain/check-in-panel.js';
 import { SessionRow } from '../../components/domain/session.js';
 import { Button } from '../../components/ui/button.js';
@@ -14,6 +15,8 @@ import { normalizePlate } from '../../lib/plate.js';
 import { useDebouncedValue } from '../../lib/use-debounced-value.js';
 
 export function OwnerParkingOverviewRoute() {
+  const { language } = useAppearance();
+  const es = language === 'es';
   const { parkingId } = useParams();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
@@ -65,14 +68,16 @@ export function OwnerParkingOverviewRoute() {
   if (parkingsQuery.isError || !parkingId) {
     return (
       <ErrorState onRetry={() => void parkingsQuery.refetch()}>
-        We could not load this parking.
+        {es ? 'No pudimos cargar esta cochera.' : 'We could not load this parking.'}
       </ErrorState>
     );
   }
   if (!parking) {
     return (
-      <ErrorState title="Parking unavailable">
-        This parking is not available in your account.
+      <ErrorState title={es ? 'Cochera no disponible' : 'Parking unavailable'}>
+        {es
+          ? 'Esta cochera no está disponible en tu cuenta.'
+          : 'This parking is not available in your account.'}
       </ErrorState>
     );
   }
@@ -94,12 +99,12 @@ export function OwnerParkingOverviewRoute() {
           to="/app/parkings"
         >
           <ChevronLeft aria-hidden="true" className="size-4" />
-          All facilities
+          {es ? 'Todas las cocheras' : 'All facilities'}
         </Link>
         <div className="mt-7 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div className="max-w-2xl">
             <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-[#6d695f]">
-              Facility operation
+              {es ? 'Operación de cochera' : 'Facility operation'}
             </p>
             <h1
               className="mt-3 font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] text-[#121417] sm:text-5xl"
@@ -114,7 +119,7 @@ export function OwnerParkingOverviewRoute() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-[#121417] px-3 py-2 text-xs font-bold text-[#121417]">
-              {parking.isActive ? 'Operating' : 'Paused'}
+              {parking.isActive ? (es ? 'En operación' : 'Operating') : es ? 'Pausada' : 'Paused'}
             </span>
             <Button
               asChild
@@ -122,8 +127,11 @@ export function OwnerParkingOverviewRoute() {
               size="sm"
               variant="outline"
             >
-              <Link aria-label={`Edit ${parking.title}`} to={`/app/parkings/${parking.id}/edit`}>
-                <Pencil aria-hidden="true" className="size-3.5" /> Edit
+              <Link
+                aria-label={es ? `Editar ${parking.title}` : `Edit ${parking.title}`}
+                to={`/app/parkings/${parking.id}/edit`}
+              >
+                <Pencil aria-hidden="true" className="size-3.5" /> {es ? 'Editar' : 'Edit'}
               </Link>
             </Button>
           </div>
@@ -136,7 +144,7 @@ export function OwnerParkingOverviewRoute() {
           aria-labelledby="check-in-title"
         >
           <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#ffcc00]">
-            Arrivals
+            {es ? 'Ingresos' : 'Arrivals'}
           </p>
           <div className="mt-6 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <div>
@@ -144,11 +152,12 @@ export function OwnerParkingOverviewRoute() {
                 className="font-display text-3xl font-bold leading-none tracking-[-0.055em]"
                 id="check-in-title"
               >
-                Ready for the next vehicle.
+                {es ? 'Listo para el próximo vehículo.' : 'Ready for the next vehicle.'}
               </h2>
               <p className="mt-3 max-w-md text-sm leading-relaxed text-white/65">
-                Record a plate first. Vehicle and visitor details are optional and can be added in
-                the same step.
+                {es
+                  ? 'Registrá primero la patente. Los datos del vehículo y visitante son opcionales y se pueden sumar en el mismo paso.'
+                  : 'Record a plate first. Vehicle and visitor details are optional and can be added in the same step.'}
               </p>
             </div>
             <Button
@@ -156,7 +165,7 @@ export function OwnerParkingOverviewRoute() {
               disabled={!parking.isActive}
               onClick={openCheckIn}
             >
-              <Plus aria-hidden="true" className="size-4" /> Check in{' '}
+              <Plus aria-hidden="true" className="size-4" /> {es ? 'Ingresar' : 'Check in'}{' '}
               <kbd
                 aria-hidden="true"
                 className="ml-1 rounded border border-[#121417]/30 px-1.5 py-0.5 font-mono text-[10px]"
@@ -167,7 +176,9 @@ export function OwnerParkingOverviewRoute() {
           </div>
           {!parking.isActive ? (
             <p className="mt-6 border-t border-white/20 pt-4 text-sm text-white/70">
-              Reactivate this parking before accepting new check-ins.
+              {es
+                ? 'Reactivá esta cochera antes de aceptar nuevos ingresos.'
+                : 'Reactivate this parking before accepting new check-ins.'}
             </p>
           ) : null}
         </section>
@@ -179,7 +190,7 @@ export function OwnerParkingOverviewRoute() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#6d695f]">
-                Capacity
+                {es ? 'Capacidad' : 'Capacity'}
               </p>
               <h2
                 className="mt-3 font-display text-4xl font-bold leading-none tracking-[-0.06em] tabular-nums"
@@ -193,7 +204,11 @@ export function OwnerParkingOverviewRoute() {
             <span className="font-mono text-sm font-bold tabular-nums">{occupancyPercent}%</span>
           </div>
           {occupancyQuery.isError ? (
-            <p className="mt-8 text-sm text-[#45423c]">Occupancy is unavailable right now.</p>
+            <p className="mt-8 text-sm text-[#45423c]">
+              {es
+                ? 'La ocupación no está disponible ahora.'
+                : 'Occupancy is unavailable right now.'}
+            </p>
           ) : (
             <>
               <div
@@ -223,13 +238,13 @@ export function OwnerParkingOverviewRoute() {
         <div className="flex flex-col justify-between gap-5 border-b border-[#121417] pb-5 sm:flex-row sm:items-end">
           <div>
             <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#6d695f]">
-              On site
+              {es ? 'En la cochera' : 'On site'}
             </p>
             <h2
               className="mt-2 font-display text-3xl font-bold leading-none tracking-[-0.055em] text-[#121417]"
               id="active-sessions-title"
             >
-              Active sessions
+              {es ? 'Estadías activas' : 'Active sessions'}
             </h2>
           </div>
           <Button
@@ -239,13 +254,13 @@ export function OwnerParkingOverviewRoute() {
             variant="outline"
           >
             <Link to={`/app/parkings/${parking.id}/sessions`}>
-              <History aria-hidden="true" className="size-3.5" /> History
+              <History aria-hidden="true" className="size-3.5" /> {es ? 'Historial' : 'History'}
             </Link>
           </Button>
         </div>
 
         <label className="relative mt-6 block max-w-md" htmlFor="active-session-plate">
-          <span className="visually-hidden">Search plate</span>
+          <span className="visually-hidden">{es ? 'Buscar patente' : 'Search plate'}</span>
           <Search
             aria-hidden="true"
             className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#6d695f]"
@@ -256,7 +271,7 @@ export function OwnerParkingOverviewRoute() {
             onChange={(event) => {
               setPlateSearch(event.target.value);
             }}
-            placeholder="Search plate, e.g. AB123CD"
+            placeholder={es ? 'Buscar patente, ej. AB123CD' : 'Search plate, e.g. AB123CD'}
             value={plateSearch}
           />
         </label>
@@ -282,18 +297,24 @@ export function OwnerParkingOverviewRoute() {
                 void activeSessionsQuery.refetch();
               }}
             >
-              We could not load active sessions.
+              {es
+                ? 'No pudimos cargar las estadías activas.'
+                : 'We could not load active sessions.'}
             </ErrorState>
           ) : activeSessions?.length === 0 ? (
             <EmptyState
               action={
                 parking.isActive ? (
-                  <Button onClick={openCheckIn}>Check in vehicle</Button>
+                  <Button onClick={openCheckIn}>
+                    {es ? 'Ingresar vehículo' : 'Check in vehicle'}
+                  </Button>
                 ) : undefined
               }
-              title="No active sessions"
+              title={es ? 'No hay estadías activas' : 'No active sessions'}
             >
-              Check in a vehicle to begin operations.
+              {es
+                ? 'Ingresá un vehículo para comenzar a operar.'
+                : 'Check in a vehicle to begin operations.'}
             </EmptyState>
           ) : (
             <div className="grid gap-3">
@@ -306,19 +327,27 @@ export function OwnerParkingOverviewRoute() {
       </section>
 
       <Sheet
-        description="Record a vehicle entering this facility."
+        description={
+          es
+            ? 'Registrá el ingreso de un vehículo a esta cochera.'
+            : 'Record a vehicle entering this facility.'
+        }
         onOpenChange={(open) => {
           setCheckInOpen(open && parking.isActive);
         }}
         open={parking.isActive && checkInOpen}
-        title="Check in vehicle"
+        title={es ? 'Ingresar vehículo' : 'Check in vehicle'}
       >
         <CheckInPanel
           error={checkInError}
           isSubmitting={checkInMutation.isPending}
           onSubmit={async (input) => {
             if (!parking.isActive) {
-              setCheckInError('Reactivate this parking before accepting new check-ins.');
+              setCheckInError(
+                es
+                  ? 'Reactivá esta cochera antes de aceptar nuevos ingresos.'
+                  : 'Reactivate this parking before accepting new check-ins.',
+              );
               return;
             }
             setCheckInError(undefined);
@@ -326,11 +355,17 @@ export function OwnerParkingOverviewRoute() {
               const session = await checkInMutation.mutateAsync(input);
               await queryClient.invalidateQueries({ queryKey: ['active-sessions', parking.id] });
               await queryClient.invalidateQueries({ queryKey: ['parking-sessions', parking.id] });
-              showToast(`${session.vehicle.plate} checked in.`);
+              showToast(
+                es ? `${session.vehicle.plate} ingresó.` : `${session.vehicle.plate} checked in.`,
+              );
               setCheckInOpen(false);
             } catch (reason) {
               setCheckInError(
-                reason instanceof Error ? reason.message : 'Unable to start this session.',
+                reason instanceof Error
+                  ? reason.message
+                  : es
+                    ? 'No pudimos iniciar esta estadía.'
+                    : 'Unable to start this session.',
               );
             }
           }}

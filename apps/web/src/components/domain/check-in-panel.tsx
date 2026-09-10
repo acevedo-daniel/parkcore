@@ -4,6 +4,7 @@ import type { SyntheticEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../ui/button.js';
 import { Field, Input, Select, Textarea } from '../ui/field.js';
 
@@ -47,6 +48,8 @@ export function CheckInPanel({
   isSubmitting?: boolean;
   onSubmit: (input: CheckInRequest) => void | Promise<void>;
 }) {
+  const { language } = useAppearance();
+  const es = language === 'es';
   const {
     formState: { errors },
     handleSubmit,
@@ -85,7 +88,11 @@ export function CheckInPanel({
 
   return (
     <form className="space-y-5 pt-6" noValidate onSubmit={onFormSubmit}>
-      <Field error={errors.plate?.message} htmlFor="check-in-plate" label="Plate">
+      <Field
+        error={errors.plate?.message}
+        htmlFor="check-in-plate"
+        label={es ? 'Patente' : 'Plate'}
+      >
         <Input
           autoComplete="off"
           className={`${controlClassName} font-mono font-bold tracking-[0.12em]`}
@@ -95,32 +102,34 @@ export function CheckInPanel({
         />
       </Field>
       <p className="text-sm leading-relaxed text-[#45423c]">
-        Plates are normalized. Known vehicles are reused within this parking.
+        {es
+          ? 'La patente se normaliza. Los vehículos conocidos se reutilizan dentro de esta cochera.'
+          : 'Plates are normalized. Known vehicles are reused within this parking.'}
       </p>
 
-      <FormDivider label="Vehicle" />
+      <FormDivider label={es ? 'Vehículo' : 'Vehicle'} />
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field error={errors.type?.message} htmlFor="check-in-type" label="Type">
+        <Field error={errors.type?.message} htmlFor="check-in-type" label={es ? 'Tipo' : 'Type'}>
           <Select className={controlClassName} id="check-in-type" {...register('type')}>
-            <option value="CAR">Car</option>
-            <option value="MOTORCYCLE">Motorcycle</option>
-            <option value="LARGE">Large vehicle</option>
+            <option value="CAR">{es ? 'Auto' : 'Car'}</option>
+            <option value="MOTORCYCLE">{es ? 'Moto' : 'Motorcycle'}</option>
+            <option value="LARGE">{es ? 'Vehículo grande' : 'Large vehicle'}</option>
           </Select>
         </Field>
-        <Field htmlFor="check-in-brand" label="Brand">
+        <Field htmlFor="check-in-brand" label={es ? 'Marca' : 'Brand'}>
           <Input className={controlClassName} id="check-in-brand" {...register('brand')} />
         </Field>
       </div>
-      <Field htmlFor="check-in-model" label="Model">
+      <Field htmlFor="check-in-model" label={es ? 'Modelo' : 'Model'}>
         <Input className={controlClassName} id="check-in-model" {...register('model')} />
       </Field>
 
-      <FormDivider label="Visitor · optional" />
+      <FormDivider label={es ? 'Visitante · opcional' : 'Visitor · optional'} />
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field htmlFor="check-in-name" label="Name">
+        <Field htmlFor="check-in-name" label={es ? 'Nombre' : 'Name'}>
           <Input className={controlClassName} id="check-in-name" {...register('customerName')} />
         </Field>
-        <Field htmlFor="check-in-phone" label="Phone">
+        <Field htmlFor="check-in-phone" label={es ? 'Teléfono' : 'Phone'}>
           <Input
             className={controlClassName}
             id="check-in-phone"
@@ -129,7 +138,7 @@ export function CheckInPanel({
           />
         </Field>
       </div>
-      <Field htmlFor="check-in-notes" label="Notes">
+      <Field htmlFor="check-in-notes" label={es ? 'Notas' : 'Notes'}>
         <Textarea
           className="block min-h-24 w-full rounded-xl border border-[#121417] bg-white px-3 py-2 text-[#121417] shadow-none focus:border-[#121417] focus:ring-2 focus:ring-[#ffcc00]"
           id="check-in-notes"
@@ -151,7 +160,13 @@ export function CheckInPanel({
         fullWidth
         type="submit"
       >
-        {isSubmitting ? 'Starting session…' : 'Start session'}
+        {isSubmitting
+          ? es
+            ? 'Iniciando estadía…'
+            : 'Starting session…'
+          : es
+            ? 'Iniciar estadía'
+            : 'Start session'}
       </Button>
     </form>
   );

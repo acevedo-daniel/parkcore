@@ -33,8 +33,8 @@ describe('application shells', () => {
   it('renders restrained public navigation in a semantic header', () => {
     renderRoute(<PublicLayout />, '/');
     expect(screen.getByRole('banner')).toBeTruthy();
-    expect(screen.getByRole('navigation', { name: 'Public navigation' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Sign in' }).getAttribute('href')).toBe('/login');
+    expect(screen.getByRole('navigation', { name: 'Navegación pública' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Ingresar' }).getAttribute('href')).toBe('/login');
     expect(screen.queryByRole('link', { name: 'Get started' })).toBeNull();
   });
 
@@ -42,17 +42,17 @@ describe('application shells', () => {
     const user = userEvent.setup();
     renderRoute(<PublicLayout />, '/');
 
-    await user.click(screen.getByRole('button', { name: 'Open navigation' }));
+    await user.click(screen.getByRole('button', { name: 'Abrir navegación' }));
     const dialog = await screen.findByRole('dialog');
-    expect(within(dialog).getByRole('navigation', { name: 'Public navigation' })).toBeTruthy();
-    expect(within(dialog).getByRole('link', { name: 'Parkings' })).toBeTruthy();
+    expect(within(dialog).getByRole('navigation', { name: 'Navegación pública' })).toBeTruthy();
+    expect(within(dialog).getByRole('link', { name: 'Cocheras' })).toBeTruthy();
   });
 
   it('renders owner navigation without fictional product areas', () => {
     renderRoute(<OwnerLayout />, '/app');
-    const navigation = screen.getByRole('navigation', { name: 'Owner navigation' });
-    expect(navigation.textContent).toContain('Overview');
-    expect(navigation.textContent).toContain('Parkings');
+    const navigation = screen.getByRole('navigation', { name: 'Navegación de operador' });
+    expect(navigation.textContent).toContain('Resumen');
+    expect(navigation.textContent).toContain('Cocheras');
     expect(navigation.textContent).not.toContain('Payments');
     expect(document.title).toBe('ParkCore | Operations');
   });

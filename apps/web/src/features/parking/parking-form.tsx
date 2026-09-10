@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import type { CreateParkingRequest, Parking } from '../../lib/api/owner-api.js';
 import { Button } from '../../components/ui/button.js';
 import { Checkbox, Field, Input, Select, Textarea } from '../../components/ui/field.js';
@@ -59,6 +60,8 @@ export function ParkingForm({
   onSubmit: (input: CreateParkingRequest & { isActive?: boolean }) => Promise<void> | void;
   parking?: Parking;
 }) {
+  const { language } = useAppearance();
+  const es = language === 'es';
   const form = useForm<ParkingFormValues>({
     defaultValues: defaults(parking),
     resolver: zodResolver(parkingFormSchema),
@@ -78,30 +81,34 @@ export function ParkingForm({
     >
       <fieldset>
         <legend className="type-label">General</legend>
-        <Field error={form.formState.errors.title?.message} htmlFor="parking-title" label="Name">
+        <Field
+          error={form.formState.errors.title?.message}
+          htmlFor="parking-title"
+          label={es ? 'Nombre' : 'Name'}
+        >
           <Input id="parking-title" {...form.register('title')} />
         </Field>
         <Field
           error={form.formState.errors.description?.message}
           htmlFor="parking-description"
-          label="Description"
+          label={es ? 'Descripción' : 'Description'}
         >
           <Textarea id="parking-description" rows={4} {...form.register('description')} />
         </Field>
         <Field
           error={form.formState.errors.image?.message}
           htmlFor="parking-image"
-          label="Image URL"
+          label={es ? 'URL de imagen' : 'Image URL'}
         >
           <Input id="parking-image" inputMode="url" type="url" {...form.register('image')} />
         </Field>
       </fieldset>
       <fieldset>
-        <legend className="type-label">Location</legend>
+        <legend className="type-label">{es ? 'Ubicación' : 'Location'}</legend>
         <Field
           error={form.formState.errors.address?.message}
           htmlFor="parking-address"
-          label="Address"
+          label={es ? 'Dirección' : 'Address'}
         >
           <Input id="parking-address" {...form.register('address')} />
         </Field>

@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
+import { AppearanceProvider } from '../../app/appearance-provider.js';
 import { Button, IconButton } from './button.js';
 import { EmptyState, ErrorState } from './feedback.js';
 
@@ -40,5 +41,18 @@ describe('core UI feedback and actions', () => {
     expect(screen.getByRole('alert').textContent).toContain('The operation could not be loaded.');
     await user.click(screen.getByRole('button', { name: 'Try again' }));
     expect(onRetry).toHaveBeenCalledOnce();
+  });
+
+  it('uses the selected language in shared feedback states', () => {
+    window.localStorage.setItem('parkcore-lang', 'es');
+    render(
+      <AppearanceProvider>
+        <ErrorState onRetry={() => undefined}>No se pudo cargar la operación.</ErrorState>
+      </AppearanceProvider>,
+    );
+
+    expect(screen.getByRole('button', { name: 'Reintentar' })).toBeTruthy();
+    expect(screen.getByText('Necesita atención')).toBeTruthy();
+    window.localStorage.removeItem('parkcore-lang');
   });
 });

@@ -9,18 +9,25 @@ import { cn } from '../../lib/cn.js';
 import { useDocumentMeta } from '../../lib/document-meta.js';
 import { AppearanceControls } from '../ui/appearance-controls.js';
 
-const ownerLinks = [
-  { Icon: LayoutDashboard, label: 'Overview', to: '/app' },
-  { Icon: Building2, label: 'Parkings', to: '/app/parkings' },
-];
-
-function OwnerLink({ Icon, label, to }: (typeof ownerLinks)[number]) {
+function OwnerLink({
+  compact = false,
+  Icon,
+  label,
+  to,
+}: {
+  compact?: boolean;
+  Icon: typeof LayoutDashboard;
+  label: string;
+  to: string;
+}) {
   return (
     <NavLink
       end={to === '/app'}
       className={({ isActive }) =>
         cn(
-          'owner-nav-link flex items-center gap-3 px-3.5 py-2.5 rounded-[var(--radius-sm)] text-sm font-medium transition-colors',
+          compact
+            ? 'owner-nav-link flex min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-medium transition-colors'
+            : 'owner-nav-link flex items-center gap-3 rounded-[var(--radius-sm)] px-3.5 py-2.5 text-sm font-medium transition-colors',
           isActive
             ? 'is-active bg-[#121417] text-white font-semibold'
             : 'text-foreground-secondary hover:text-foreground hover:bg-[#f1eee7]',
@@ -40,6 +47,10 @@ export function OwnerLayout() {
   const navigate = useNavigate();
   const navigation = useNavigation();
   const [clock, setClock] = useState(() => new Date());
+  const ownerLinks = [
+    { Icon: LayoutDashboard, label: t('nav.overview'), to: '/app' },
+    { Icon: Building2, label: t('nav.parkings'), to: '/app/parkings' },
+  ];
   useEffect(() => {
     suggestTheme('light');
     const interval = window.setInterval(() => {
@@ -62,7 +73,7 @@ export function OwnerLayout() {
   return (
     <div className="owner-theme owner-shell min-h-screen flex flex-col md:flex-row bg-canvas text-foreground">
       <a className="skip-link" href="#owner-main">
-        Skip to main content
+        {t('nav.skipMain')}
       </a>
       <aside className="owner-sidebar hidden md:flex md:w-64 md:flex-col md:justify-between border-r border-[#121417] bg-white p-6 shrink-0">
         <div className="flex flex-col gap-6">
@@ -77,7 +88,7 @@ export function OwnerLayout() {
             </Link>
             <span className="demo-status">{t('demo.live')}</span>
           </div>
-          <nav aria-label="Owner navigation" className="owner-navigation flex flex-col gap-1">
+          <nav aria-label={t('nav.owner')} className="owner-navigation flex flex-col gap-1">
             {ownerLinks.map((link) => (
               <OwnerLink key={link.to} {...link} />
             ))}
@@ -108,7 +119,7 @@ export function OwnerLayout() {
             to="/app/profile"
           >
             <UserRound aria-hidden="true" size={16} />
-            <span>Profile</span>
+            <span>{t('nav.profile')}</span>
           </NavLink>
           <button
             className="owner-nav-link owner-sign-out flex items-center gap-3 px-3.5 py-2 rounded-[var(--radius-sm)] text-sm font-medium text-foreground-secondary hover:bg-[#f1eee7] hover:text-foreground transition-colors w-full text-left cursor-pointer"
@@ -116,7 +127,7 @@ export function OwnerLayout() {
             type="button"
           >
             <LogOut aria-hidden="true" size={16} />
-            <span>Sign out</span>
+            <span>{t('nav.signOut')}</span>
           </button>
         </div>
       </aside>
@@ -131,7 +142,7 @@ export function OwnerLayout() {
         <div className="flex items-center gap-2">
           <span className="type-label">{t('nav.operations')}</span>
           <button
-            aria-label="Sign out"
+            aria-label={t('nav.signOut')}
             className="icon-button size-9 rounded-md border border-[#121417] bg-white flex items-center justify-center text-[#121417] hover:bg-[#f1eee7] transition-colors"
             onClick={signOut}
             type="button"
@@ -144,8 +155,9 @@ export function OwnerLayout() {
         <div
           aria-live="polite"
           className="route-loading-bar fixed top-0 inset-x-0 h-1 bg-primary animate-pulse z-50"
+          role="status"
         >
-          Loading route
+          <span className="visually-hidden">{t('route.loading')}</span>
         </div>
       ) : null}
       <main
@@ -156,16 +168,16 @@ export function OwnerLayout() {
         <Outlet />
       </main>
       <nav
-        aria-label="Owner mobile navigation"
+        aria-label={t('nav.ownerMobile')}
         className="owner-mobile-nav md:hidden fixed bottom-0 inset-x-0 h-16 border-t border-[#121417] bg-white/95 backdrop-blur-md z-30 flex items-center justify-around px-4"
       >
         {ownerLinks.map((link) => (
-          <OwnerLink key={link.to} {...link} />
+          <OwnerLink compact key={link.to} {...link} />
         ))}
         <NavLink
           className={({ isActive }) =>
             cn(
-              'owner-nav-link flex flex-col items-center gap-1 text-xs font-medium transition-colors',
+              'owner-nav-link flex min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-medium transition-colors',
               isActive
                 ? 'is-active text-[#121417] font-semibold'
                 : 'text-foreground-secondary hover:text-foreground',
@@ -174,7 +186,7 @@ export function OwnerLayout() {
           to="/app/profile"
         >
           <UserRound aria-hidden="true" size={18} />
-          <span>Profile</span>
+          <span>{t('nav.profile')}</span>
         </NavLink>
       </nav>
     </div>

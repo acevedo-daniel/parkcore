@@ -42,6 +42,7 @@ test('serves the SPA entry for direct public and owner routes', async ({ request
 });
 
 test('keeps public mobile navigation and main content usable with a keyboard', async ({ page }) => {
+  await page.addInitScript("localStorage.setItem('parkcore-lang', 'en');");
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
 

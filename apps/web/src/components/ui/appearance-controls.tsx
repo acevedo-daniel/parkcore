@@ -10,7 +10,7 @@ export function AppearanceControls({ compact = false }: { compact?: boolean }) {
   return (
     <div className={cn('flex items-center gap-2', compact && 'w-full justify-between')}>
       <div
-        aria-label="Select language"
+        aria-label={t('appearance.language')}
         className="flex items-center rounded-full border border-[#121417]/15 bg-white p-1 shadow-sm"
         role="group"
       >

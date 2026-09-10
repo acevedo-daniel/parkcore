@@ -3,6 +3,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import { formatDuration, formatMoney, formatTimestamp } from '../../lib/format.js';
 import { Plate } from './plate.js';
 import { SessionStatus } from './status.js';
@@ -36,6 +37,8 @@ export function ElapsedDuration({ startTime }: { startTime: string }) {
 }
 
 export function SessionRow({ session, to }: { session: Session; to: string }) {
+  const { language } = useAppearance();
+  const es = language === 'es';
   return (
     <Link
       aria-label={`Open session for ${session.vehicle.plate}`}
@@ -50,7 +53,7 @@ export function SessionRow({ session, to }: { session: Session; to: string }) {
       </div>
       <div>
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
-          Arrived
+          {es ? 'Ingreso' : 'Arrived'}
         </p>
         <div className="mt-1 text-sm font-semibold">
           <OperationalTimestamp value={session.startTime} />
@@ -58,7 +61,7 @@ export function SessionRow({ session, to }: { session: Session; to: string }) {
       </div>
       <div>
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
-          Elapsed
+          {es ? 'Transcurrido' : 'Elapsed'}
         </p>
         <div className="mt-1 text-sm font-semibold">
           {session.endTime ? (
@@ -112,6 +115,8 @@ export function SessionHistoryRow({ session, to }: { session: Session; to: strin
 }
 
 export function CheckoutSummary({ session }: { session: Session }) {
+  const { language } = useAppearance();
+  const es = language === 'es';
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -134,14 +139,14 @@ export function CheckoutSummary({ session }: { session: Session }) {
     >
       <div className="flex items-center justify-between gap-4 border-b border-[#121417]/20 pb-3">
         <span className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
-          Started
+          {es ? 'Ingreso' : 'Started'}
         </span>
         <OperationalTimestamp value={session.startTime} />
       </div>
       {!session.endTime ? (
         <div className="flex items-center justify-between gap-4 border-b border-[#121417]/20 py-3">
           <span className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
-            Current calculation
+            {es ? 'Cálculo actual' : 'Current calculation'}
           </span>
           <time className="type-operational" dateTime={now.toISOString()}>
             {formatTimestamp(now.toISOString())}
@@ -150,7 +155,7 @@ export function CheckoutSummary({ session }: { session: Session }) {
       ) : null}
       <div className="flex items-center justify-between gap-4 border-b border-[#121417]/20 py-3">
         <span className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
-          Rate
+          {es ? 'Tarifa' : 'Rate'}
         </span>
         <span className="type-operational">
           {formatMoney(session.hourlyRateCents, session.currency)} / H
@@ -159,10 +164,10 @@ export function CheckoutSummary({ session }: { session: Session }) {
       {chargedHours ? (
         <div className="flex items-center justify-between gap-4 border-b border-[#121417]/20 py-3">
           <span className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
-            Charged
+            {es ? 'Cobrado' : 'Charged'}
           </span>
           <span className="type-operational">
-            {chargedHours} {chargedHours === 1 ? 'hour' : 'hours'}
+            {chargedHours} {chargedHours === 1 ? (es ? 'hora' : 'hour') : es ? 'horas' : 'hours'}
           </span>
         </div>
       ) : null}

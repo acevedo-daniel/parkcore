@@ -3,6 +3,7 @@ import { Ban, Check, ChevronLeft, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import { Plate } from '../../components/domain/plate.js';
 import { CheckoutSummary, OperationalTimestamp } from '../../components/domain/session.js';
 import { Button } from '../../components/ui/button.js';
@@ -18,6 +19,8 @@ import {
 import { formatMoney } from '../../lib/format.js';
 
 export function OwnerSessionDetailRoute() {
+  const { language } = useAppearance();
+  const es = language === 'es';
   const { sessionId } = useParams();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
@@ -42,7 +45,7 @@ export function OwnerSessionDetailRoute() {
           void parkingsQuery.refetch();
         }}
       >
-        We could not load this session.
+        {es ? 'No pudimos cargar esta estadía.' : 'We could not load this session.'}
       </ErrorState>
     );
   }
@@ -61,7 +64,7 @@ export function OwnerSessionDetailRoute() {
     try {
       await checkoutMutation.mutateAsync();
       await refreshOperation();
-      showToast('Session checked out.');
+      showToast(es ? 'La estadía se cerró.' : 'Session checked out.');
       setCheckoutOpen(false);
     } catch (reason) {
       setActionError(
@@ -74,7 +77,7 @@ export function OwnerSessionDetailRoute() {
     try {
       await cancelMutation.mutateAsync();
       await refreshOperation();
-      showToast('Session cancelled.');
+      showToast(es ? 'La estadía se canceló.' : 'Session cancelled.');
       setCancelOpen(false);
     } catch (reason) {
       setActionError(reason instanceof Error ? reason.message : 'Unable to cancel this session.');
@@ -88,12 +91,19 @@ export function OwnerSessionDetailRoute() {
           className="inline-flex items-center gap-1 text-sm font-bold text-[#121417] underline decoration-[#ffcc00] decoration-4 underline-offset-4"
           to={`/app/parkings/${session.parkingId}`}
         >
-          <ChevronLeft aria-hidden="true" className="size-4" /> Parking operation
+          <ChevronLeft aria-hidden="true" className="size-4" />{' '}
+          {es ? 'Operación de cochera' : 'Parking operation'}
         </Link>
         <div className="mt-7 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
             <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-[#6d695f]">
-              {canOperate ? 'Active session' : 'Completed session'}
+              {canOperate
+                ? es
+                  ? 'Estadía activa'
+                  : 'Active session'
+                : es
+                  ? 'Estadía finalizada'
+                  : 'Completed session'}
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-4">
               <Plate plate={session.vehicle.plate} />
@@ -117,7 +127,8 @@ export function OwnerSessionDetailRoute() {
                   setCheckoutOpen(true);
                 }}
               >
-                <Check aria-hidden="true" className="size-4" /> Check out
+                <Check aria-hidden="true" className="size-4" />{' '}
+                {es ? 'Cobrar y salir' : 'Check out'}
               </Button>
               <Button
                 className="border-[#121417] bg-white text-[#121417] hover:bg-[#f1eee7]"
@@ -126,7 +137,8 @@ export function OwnerSessionDetailRoute() {
                 }}
                 variant="outline"
               >
-                <Ban aria-hidden="true" className="size-4" /> Cancel session
+                <Ban aria-hidden="true" className="size-4" />{' '}
+                {es ? 'Cancelar estadía' : 'Cancel session'}
               </Button>
             </div>
           ) : null}
