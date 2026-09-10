@@ -35,6 +35,9 @@ const checkInFormSchema = z.object({
 type CheckInForm = z.infer<typeof checkInFormSchema>;
 type CheckInRequest = components['schemas']['CheckInRequest'];
 
+const controlClassName =
+  'block h-12 w-full rounded-xl border border-[#121417] bg-white px-3 text-[#121417] shadow-none focus:border-[#121417] focus:ring-2 focus:ring-[#ffcc00]';
+
 export function CheckInPanel({
   error,
   isSubmitting,
@@ -81,54 +84,85 @@ export function CheckInPanel({
   };
 
   return (
-    <form className="check-in-panel" noValidate onSubmit={onFormSubmit}>
+    <form className="space-y-5 pt-6" noValidate onSubmit={onFormSubmit}>
       <Field error={errors.plate?.message} htmlFor="check-in-plate" label="Plate">
         <Input
-          id="check-in-plate"
           autoComplete="off"
+          className={`${controlClassName} font-mono font-bold tracking-[0.12em]`}
+          id="check-in-plate"
           placeholder="AB123CD"
           {...register('plate')}
         />
       </Field>
-      <p className="field-help">
+      <p className="text-sm leading-relaxed text-[#45423c]">
         Plates are normalized. Known vehicles are reused within this parking.
       </p>
-      <div className="form-divider">
-        <span className="type-label">Vehicle</span>
+
+      <FormDivider label="Vehicle" />
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field error={errors.type?.message} htmlFor="check-in-type" label="Type">
+          <Select className={controlClassName} id="check-in-type" {...register('type')}>
+            <option value="CAR">Car</option>
+            <option value="MOTORCYCLE">Motorcycle</option>
+            <option value="LARGE">Large vehicle</option>
+          </Select>
+        </Field>
+        <Field htmlFor="check-in-brand" label="Brand">
+          <Input className={controlClassName} id="check-in-brand" {...register('brand')} />
+        </Field>
       </div>
-      <Field error={errors.type?.message} htmlFor="check-in-type" label="Type">
-        <Select id="check-in-type" {...register('type')}>
-          <option value="CAR">Car</option>
-          <option value="MOTORCYCLE">Motorcycle</option>
-          <option value="LARGE">Large vehicle</option>
-        </Select>
-      </Field>
-      <Field htmlFor="check-in-brand" label="Brand">
-        <Input id="check-in-brand" {...register('brand')} />
-      </Field>
       <Field htmlFor="check-in-model" label="Model">
-        <Input id="check-in-model" {...register('model')} />
+        <Input className={controlClassName} id="check-in-model" {...register('model')} />
       </Field>
-      <div className="form-divider">
-        <span className="type-label">Visitor · optional</span>
+
+      <FormDivider label="Visitor · optional" />
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field htmlFor="check-in-name" label="Name">
+          <Input className={controlClassName} id="check-in-name" {...register('customerName')} />
+        </Field>
+        <Field htmlFor="check-in-phone" label="Phone">
+          <Input
+            className={controlClassName}
+            id="check-in-phone"
+            inputMode="tel"
+            {...register('customerPhone')}
+          />
+        </Field>
       </div>
-      <Field htmlFor="check-in-name" label="Name">
-        <Input id="check-in-name" {...register('customerName')} />
-      </Field>
-      <Field htmlFor="check-in-phone" label="Phone">
-        <Input id="check-in-phone" inputMode="tel" {...register('customerPhone')} />
-      </Field>
       <Field htmlFor="check-in-notes" label="Notes">
-        <Textarea id="check-in-notes" {...register('notes')} />
+        <Textarea
+          className="block min-h-24 w-full rounded-xl border border-[#121417] bg-white px-3 py-2 text-[#121417] shadow-none focus:border-[#121417] focus:ring-2 focus:ring-[#ffcc00]"
+          id="check-in-notes"
+          {...register('notes')}
+        />
       </Field>
+
       {error ? (
-        <p className="field-error" role="alert">
+        <p
+          className="border border-[#121417] bg-[#ffcc00] p-3 text-sm font-semibold text-[#121417]"
+          role="alert"
+        >
           {error}
         </p>
       ) : null}
-      <Button disabled={isSubmitting} fullWidth type="submit">
+      <Button
+        className="border-[#121417] bg-[#121417] text-white hover:bg-[#30312d]"
+        disabled={isSubmitting}
+        fullWidth
+        type="submit"
+      >
         {isSubmitting ? 'Starting session…' : 'Start session'}
       </Button>
     </form>
+  );
+}
+
+function FormDivider({ label }: { label: string }) {
+  return (
+    <div className="border-t border-[#121417]/20 pt-5">
+      <span className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#6d695f]">
+        {label}
+      </span>
+    </div>
   );
 }

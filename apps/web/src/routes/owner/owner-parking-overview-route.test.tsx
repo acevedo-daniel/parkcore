@@ -81,6 +81,22 @@ describe('parking operations', () => {
     );
   });
 
+  it('keeps capacity based on all active sessions while filtering by plate', async () => {
+    const user = userEvent.setup();
+    api.getOwnedParkings.mockResolvedValue([parkingFixture()]);
+    api.getActiveSessions
+      .mockResolvedValueOnce([parkingSessionFixture()])
+      .mockResolvedValueOnce([]);
+    renderOverview();
+
+    await screen.findByRole('link', { name: 'Open session for AB123CD' });
+    await user.type(screen.getByRole('textbox', { name: 'Search plate' }), 'zzzz');
+
+    expect(await screen.findByText('No active sessions')).toBeTruthy();
+    expect(screen.getByRole('progressbar', { name: '1 of 12 spaces occupied' })).toBeTruthy();
+    expect(api.getActiveSessions).toHaveBeenLastCalledWith('parking-1', { plate: 'ZZZZ' });
+  });
+
   it('does not expose any check-in path for an inactive parking', async () => {
     api.getOwnedParkings.mockResolvedValue([parkingFixture({ isActive: false })]);
     api.getActiveSessions.mockResolvedValue([]);
