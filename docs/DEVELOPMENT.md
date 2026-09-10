@@ -134,9 +134,9 @@ An optional `SEED_REFERENCE_TIME` can be used when reproducible session timestam
 
 ## Dependency note
 
-The root `pnpm.overrides` currently pins `deepmerge-ts` to `8.0.0` to replace a vulnerable transitive version pulled through the current Prisma dependency chain.
+The root `pnpm.overrides` pins the audited transitive dependencies `deepmerge-ts` to `8.0.0`, `fast-uri` to `3.1.7`, `mysql2` to `3.23.1`, and `qs` to `6.16.0`.
 
-Treat the override as a temporary compatibility/security measure: verify `pnpm audit --prod` and the Prisma generate/build flow before changing or removing it.
+Treat these overrides as compatibility and security measures: verify `pnpm audit --prod` and the Prisma generate/build flow before changing or removing them.
 
 ## Related documentation
 

@@ -23,6 +23,17 @@ Real-stack browser checks are available for explicit production verification but
 
 ## Test data and dependencies
 
+### Dependency baseline
+
+Verification starts from the committed dependency graph:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm audit --prod
+```
+
+The production audit must report no known vulnerabilities before the workspace checks run. See [Development](DEVELOPMENT.md#dependency-note) for the maintained transitive security overrides.
+
 ### API
 
 API tests use PostgreSQL rather than an in-memory substitute for persistence-sensitive behavior.
