@@ -83,6 +83,7 @@ Typical local URLs:
 | Prepare database         | `pnpm db:setup`                        | Generate Prisma, apply committed migrations, and seed demo data. |
 | Develop                  | `pnpm dev`                             | Run API and web in parallel.                                     |
 | Format check             | `pnpm format:check`                    | Verify repository formatting.                                    |
+| Authored text check      | `pnpm text:check`                      | Reject forbidden em dash characters in authored repository text. |
 | Lint                     | `pnpm lint`                            | Run lint checks across API, client, and web workspaces.          |
 | Typecheck                | `pnpm typecheck`                       | Type-check the TypeScript workspaces.                            |
 | Test                     | `pnpm test`                            | Run API and web test suites.                                     |

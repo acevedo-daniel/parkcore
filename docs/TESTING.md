@@ -70,6 +70,7 @@ The test strategy protects the rules that define the parking workflow:
 From the repository root:
 
 ```bash
+pnpm text:check
 pnpm format:check
 pnpm lint
 pnpm typecheck

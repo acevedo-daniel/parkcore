@@ -85,6 +85,7 @@ On macOS or Linux, replace `Copy-Item` with `cp`. The API starts at `http://loca
 ## Quality
 
 ```bash
+pnpm text:check
 pnpm format:check
 pnpm lint
 pnpm typecheck
