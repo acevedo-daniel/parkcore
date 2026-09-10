@@ -144,7 +144,7 @@ export function ParkingCatalogRoute() {
                 inputMode="decimal"
                 min="0.01"
                 name="minRate"
-                placeholder="—"
+                placeholder="0.00"
                 step="0.01"
                 type="number"
               />
@@ -158,7 +158,7 @@ export function ParkingCatalogRoute() {
                 inputMode="decimal"
                 min="0.01"
                 name="maxRate"
-                placeholder="—"
+                placeholder="0.00"
                 step="0.01"
                 type="number"
               />

@@ -197,7 +197,7 @@ export function OwnerParkingOverviewRoute() {
                 id="capacity-title"
               >
                 {occupancyQuery.isLoading
-                  ? '—'
+                  ? 'N/A'
                   : `${String(occupancy)} / ${String(parking.capacity)}`}
               </h2>
             </div>

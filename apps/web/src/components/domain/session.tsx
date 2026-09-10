@@ -90,7 +90,7 @@ export function SessionRow({ session, to }: { session: Session; to: string }) {
 export function SessionHistoryRow({ session, to }: { session: Session; to: string }) {
   const total =
     session.totalAmountCents === null
-      ? '—'
+      ? 'N/A'
       : formatMoney(session.totalAmountCents, session.currency);
   return (
     <Link
@@ -176,7 +176,7 @@ export function CheckoutSummary({ session }: { session: Session }) {
           Total
         </span>
         <strong className="font-display text-3xl font-bold leading-none tracking-[-0.055em] tabular-nums">
-          {total === undefined ? '—' : formatMoney(total, session.currency)}
+          {total === undefined ? 'N/A' : formatMoney(total, session.currency)}
         </strong>
       </div>
     </section>

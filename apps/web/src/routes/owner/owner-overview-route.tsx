@@ -141,23 +141,23 @@ export function OwnerOverviewRoute() {
                 : 'Loading capacity'
           }
           label={es ? 'Vehículos ahora' : 'Vehicles now'}
-          value={summary ? String(summary.activeVehicles) : '—'}
+          value={summary ? String(summary.activeVehicles) : 'N/A'}
         />
         <MetricCard
           detail={es ? 'Ocupación de toda la red' : 'Across your network'}
           label={es ? 'Ocupación' : 'Occupancy'}
           progress={occupancy}
-          value={summary ? `${String(summary.occupancyPercent)}%` : '—'}
+          value={summary ? `${String(summary.occupancyPercent)}%` : 'N/A'}
         />
         <MetricCard
           detail={es ? 'Egresos registrados hoy' : 'Check-outs recorded today'}
           label={es ? 'Rotación de hoy' : 'Today’s turnover'}
-          value={summary ? String(summary.completedToday) : '—'}
+          value={summary ? String(summary.completedToday) : 'N/A'}
         />
         <MetricCard
           detail={es ? 'Ingresos de la jornada' : 'Revenue collected today'}
           label={es ? 'Facturación de hoy' : 'Today’s revenue'}
-          value={summary ? formatMoney(summary.revenueTodayCents, summary.currency) : '—'}
+          value={summary ? formatMoney(summary.revenueTodayCents, summary.currency) : 'N/A'}
         />
       </div>
 
