@@ -10,10 +10,13 @@ const owner: User = {
   createdAt: '2026-08-17T09:00:00.000Z',
   email: 'owner@parkcore.test',
   id: 'owner-1',
+  kind: 'OWNER',
   lastName: null,
   name: 'ParkCore Owner',
   phone: null,
   photoUrl: null,
+  timezone: 'America/Argentina/Buenos_Aires',
+  demoExpiresAt: null,
   updatedAt: '2026-08-17T09:00:00.000Z',
 };
 
@@ -28,6 +31,14 @@ function sessionList(data: ParkingSession[]) {
       total: data.length,
       totalPages: 1,
     },
+    aggregate: {
+      totalSessions: data.length,
+      activeSessions: data.filter((session) => session.status === 'ACTIVE').length,
+      completedSessions: data.filter((session) => session.status === 'COMPLETED').length,
+      cancelledSessions: data.filter((session) => session.status === 'CANCELLED').length,
+      revenueByCurrency: [],
+    },
+    timezone: 'America/Argentina/Buenos_Aires',
   } satisfies components['schemas']['ParkingSessionListResponse'];
 }
 
@@ -102,10 +113,16 @@ test('signs in, creates a parking, checks in, and completes a parking session', 
         id: 'parking-1',
         image: null,
         isActive: true,
+        is24Hours: true,
+        isListed: false,
         lat: -34.61,
         lng: -58.38,
+        neighborhood: 'Downtown',
+        opensAt: null,
         ownerId: owner.id,
         title: 'North Garage',
+        timezone: 'America/Argentina/Buenos_Aires',
+        closesAt: null,
         updatedAt: '2026-08-17T09:05:00.000Z',
       };
       await respond(parking, 201);
@@ -172,13 +189,14 @@ test('signs in, creates a parking, checks in, and completes a parking session', 
   });
 
   await page.goto('/login');
-  await page.getByLabel('Email').fill(owner.email);
+  await page.getByLabel('Email').fill(owner.email ?? '');
   await page.getByLabel('Password').fill('password123');
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL(/\/app$/);
   await page.getByRole('link', { name: 'Create parking' }).click();
 
   await page.getByLabel('Name').fill('North Garage');
+  await page.getByLabel('Neighborhood').fill('Downtown');
   await page.getByLabel('Address').fill('202 North Street');
   await page.getByLabel('Latitude').fill('-34.61');
   await page.getByLabel('Longitude').fill('-58.38');

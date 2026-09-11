@@ -4,12 +4,17 @@ const { mockPrisma } = vi.hoisted(() => ({
   mockPrisma: {
     parking: { findMany: vi.fn() },
     parkingSession: { findMany: vi.fn() },
+    user: { findUniqueOrThrow: vi.fn() },
   },
 }));
 
 vi.mock('../../config/prisma.js', () => ({ prisma: mockPrisma }));
 
-import { findOwnerFacilities, findOwnerSessions } from './analytics.repository.js';
+import {
+  findOwnerFacilities,
+  findOwnerSessions,
+  findOwnerTimezone,
+} from './analytics.repository.js';
 
 describe('analytics repository', () => {
   beforeEach(() => vi.clearAllMocks());
@@ -25,6 +30,18 @@ describe('analytics repository', () => {
         orderBy: { title: 'asc' },
       }),
     );
+  });
+
+  it('loads the owner timezone for network date boundaries', async () => {
+    mockPrisma.user.findUniqueOrThrow.mockResolvedValue({
+      timezone: 'America/New_York',
+    });
+
+    await expect(findOwnerTimezone('owner-1')).resolves.toBe('America/New_York');
+    expect(mockPrisma.user.findUniqueOrThrow).toHaveBeenCalledWith({
+      where: { id: 'owner-1' },
+      select: { timezone: true },
+    });
   });
 
   it('bounds session analytics by owner, status, and completion window', async () => {

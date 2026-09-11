@@ -43,15 +43,27 @@ describe('vehicle service', () => {
 
   it('updates only stable metadata explicitly supplied by a returning vehicle', async () => {
     const vehicle = buildVehicle({ plate: 'AB123CD', brand: 'Toyota', model: 'Corolla' });
-    const updatedVehicle = buildVehicle({ ...vehicle, brand: 'Honda' });
+    const updatedVehicle = buildVehicle({
+      ...vehicle,
+      type: 'MOTORCYCLE',
+      brand: 'Honda',
+      model: 'CB500',
+    });
     vi.mocked(vehicleRepository.findByPlate).mockResolvedValue(vehicle);
     vi.mocked(vehicleRepository.updateStableMetadata).mockResolvedValue(updatedVehicle);
 
     await expect(
-      findOrCreateForAuthorizedParking('parking-1', { plate: 'AB123CD', brand: 'Honda' }),
+      findOrCreateForAuthorizedParking('parking-1', {
+        plate: 'AB123CD',
+        type: 'MOTORCYCLE',
+        brand: 'Honda',
+        model: 'CB500',
+      }),
     ).resolves.toEqual(updatedVehicle);
     expect(vehicleRepository.updateStableMetadata).toHaveBeenCalledWith(vehicle.id, {
+      type: 'MOTORCYCLE',
       brand: 'Honda',
+      model: 'CB500',
     });
   });
 

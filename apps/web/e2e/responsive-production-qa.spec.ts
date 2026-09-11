@@ -165,8 +165,10 @@ test('keeps the deployed public and owner surfaces usable at production viewport
     const registerResponse = await page.request.post(`${apiBaseUrl}/auth/register`, {
       data: {
         email,
-        name: 'Responsive Production QA',
+        lastName: 'QA',
+        name: 'Responsive Production',
         password: 'ParkCoreResponsiveQA!',
+        timezone: 'America/Argentina/Buenos_Aires',
       },
     });
     expect(registerResponse.status()).toBe(201);
@@ -179,6 +181,7 @@ test('keeps the deployed public and owner surfaces usable at production viewport
 
     await page.goto('/app/parkings/new');
     await page.getByLabel('Name').fill(title);
+    await page.getByLabel('Neighborhood').fill('Downtown');
     await page.getByLabel('Address').fill('513 Responsive QA Avenue');
     await page.getByLabel('Latitude').fill('-34.61');
     await page.getByLabel('Longitude').fill('-58.38');

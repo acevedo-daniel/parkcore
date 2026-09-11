@@ -85,8 +85,20 @@
             "format": "uuid",
             "description": "User UUID"
           },
-          "email": {
+          "kind": {
             "type": "string",
+            "enum": [
+              "OWNER",
+              "DEMO",
+              "SHOWCASE"
+            ],
+            "description": "User identity kind"
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "email",
             "description": "User email address"
           },
@@ -118,6 +130,18 @@
             ],
             "description": "Profile photo URL"
           },
+          "timezone": {
+            "type": "string",
+            "description": "User IANA timezone"
+          },
+          "demoExpiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Demo access expiration time"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time",
@@ -131,11 +155,14 @@
         },
         "required": [
           "id",
+          "kind",
           "email",
           "name",
           "lastName",
           "phone",
           "photoUrl",
+          "timezone",
+          "demoExpiresAt",
           "createdAt",
           "updatedAt"
         ],
@@ -179,13 +206,28 @@
             "type": "string",
             "minLength": 2,
             "maxLength": 50,
-            "description": "User display name",
-            "example": "John Doe"
+            "description": "User first name",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "description": "User last name",
+            "example": "Doe"
+          },
+          "timezone": {
+            "type": "string",
+            "default": "America/Argentina/Buenos_Aires",
+            "description": "User IANA timezone",
+            "example": "America/Argentina/Buenos_Aires"
           }
         },
         "required": [
           "email",
-          "password"
+          "password",
+          "name",
+          "lastName"
         ],
         "additionalProperties": false
       },
@@ -230,7 +272,7 @@
               "null"
             ],
             "format": "date-time",
-            "description": "Check-out time"
+            "description": "Terminal transition time; null while the session is ACTIVE"
           },
           "hourlyRateCents": {
             "type": "integer",
@@ -239,6 +281,7 @@
           "currency": {
             "type": "string",
             "enum": [
+              "ARS",
               "USD"
             ],
             "description": "Supported currency snapshot",
@@ -249,7 +292,7 @@
               "integer",
               "null"
             ],
-            "description": "Final amount in integer cents; present after checkout"
+            "description": "Final amount in integer cents; null while ACTIVE or after cancellation"
           },
           "status": {
             "type": "string",
@@ -334,7 +377,7 @@
           },
           "plate": {
             "type": "string",
-            "description": "Normalized parking-scoped plate"
+            "description": "Normalized plate identity scoped to this parking"
           },
           "type": {
             "type": "string",
@@ -343,21 +386,21 @@
               "MOTORCYCLE",
               "LARGE"
             ],
-            "description": "Vehicle type"
+            "description": "Stable vehicle type confirmed at check-in"
           },
           "brand": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Vehicle brand"
+            "description": "Stable vehicle brand confirmed at check-in"
           },
           "model": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Vehicle model"
+            "description": "Stable vehicle model confirmed at check-in"
           }
         },
         "required": [
@@ -405,7 +448,7 @@
         "properties": {
           "plate": {
             "type": "string",
-            "description": "Vehicle license plate; normalized to uppercase alphanumeric characters",
+            "description": "Parking-scoped vehicle identity; normalized to uppercase alphanumeric characters",
             "example": "AB123CD"
           },
           "type": {
@@ -415,19 +458,19 @@
               "MOTORCYCLE",
               "LARGE"
             ],
-            "description": "Vehicle type",
+            "description": "Confirmed stable vehicle type; updates returning identity",
             "example": "CAR"
           },
           "brand": {
             "type": "string",
             "maxLength": 50,
-            "description": "Vehicle brand",
+            "description": "Confirmed stable vehicle brand; updates returning identity",
             "example": "Toyota"
           },
           "model": {
             "type": "string",
             "maxLength": 50,
-            "description": "Vehicle model",
+            "description": "Confirmed stable vehicle model; updates returning identity",
             "example": "Corolla"
           }
         },
@@ -492,11 +535,79 @@
               "hasPreviousPage"
             ],
             "additionalProperties": false
+          },
+          "aggregate": {
+            "$ref": "#/components/schemas/ParkingSessionAggregate"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Parking IANA timezone"
           }
         },
         "required": [
           "data",
-          "meta"
+          "meta",
+          "aggregate",
+          "timezone"
+        ],
+        "additionalProperties": false
+      },
+      "ParkingSessionAggregate": {
+        "type": "object",
+        "properties": {
+          "totalSessions": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "All filtered sessions"
+          },
+          "activeSessions": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Filtered active sessions"
+          },
+          "completedSessions": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Filtered completed sessions"
+          },
+          "cancelledSessions": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Filtered cancelled sessions"
+          },
+          "revenueByCurrency": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "currency": {
+                  "type": "string",
+                  "enum": [
+                    "ARS",
+                    "USD"
+                  ],
+                  "description": "Revenue currency"
+                },
+                "revenueCents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Revenue in integer cents"
+                }
+              },
+              "required": [
+                "currency",
+                "revenueCents"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "totalSessions",
+          "activeSessions",
+          "completedSessions",
+          "cancelledSessions",
+          "revenueByCurrency"
         ],
         "additionalProperties": false
       },
@@ -537,6 +648,7 @@
           "currency": {
             "type": "string",
             "enum": [
+              "ARS",
               "USD"
             ],
             "description": "Supported currency code"
@@ -562,6 +674,36 @@
             "format": "uuid",
             "description": "Owner UUID"
           },
+          "neighborhood": {
+            "type": "string",
+            "description": "Neighborhood or area"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone used for local operations"
+          },
+          "is24Hours": {
+            "type": "boolean",
+            "description": "Whether the parking is open all day"
+          },
+          "opensAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Local opening time in HH:mm"
+          },
+          "closesAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Local closing time in HH:mm"
+          },
+          "isListed": {
+            "type": "boolean",
+            "description": "Whether the facility is publicly listed"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time",
@@ -586,6 +728,12 @@
           "lng",
           "isActive",
           "ownerId",
+          "neighborhood",
+          "timezone",
+          "is24Hours",
+          "opensAt",
+          "closesAt",
+          "isListed",
           "createdAt",
           "updatedAt"
         ],
@@ -605,6 +753,13 @@
             "type": "string",
             "maxLength": 500,
             "description": "Optional description of the facility"
+          },
+          "neighborhood": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "description": "Neighborhood or area",
+            "example": "Palermo"
           },
           "address": {
             "type": "string",
@@ -628,6 +783,7 @@
           "currency": {
             "type": "string",
             "enum": [
+              "ARS",
               "USD"
             ],
             "description": "Supported currency code",
@@ -652,10 +808,41 @@
             "maximum": 180,
             "description": "Geographic longitude",
             "example": -58.3816
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone used for local operations"
+          },
+          "is24Hours": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether the parking is open all day"
+          },
+          "opensAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$",
+            "description": "Local opening time in HH:mm"
+          },
+          "closesAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$",
+            "description": "Local closing time in HH:mm"
+          },
+          "isListed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the facility is listed in public discovery"
           }
         },
         "required": [
           "title",
+          "neighborhood",
           "address",
           "hourlyRateCents",
           "currency",
@@ -665,13 +852,13 @@
         ],
         "additionalProperties": false
       },
-      "ParkingListResponse": {
+      "PublicParkingListResponse": {
         "type": "object",
         "properties": {
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ParkingResponse"
+              "$ref": "#/components/schemas/PublicParkingResponse"
             }
           },
           "meta": {
@@ -729,6 +916,149 @@
         ],
         "additionalProperties": false
       },
+      "PublicParkingResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parking UUID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Parking title"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Description"
+          },
+          "image": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Image URL"
+          },
+          "neighborhood": {
+            "type": "string",
+            "description": "Neighborhood or area"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address"
+          },
+          "hourlyRateCents": {
+            "type": "integer",
+            "description": "Hourly rate in integer cents"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "ARS",
+              "USD"
+            ],
+            "description": "Supported currency code"
+          },
+          "capacity": {
+            "type": "integer",
+            "description": "Maximum simultaneous active vehicle stays"
+          },
+          "lat": {
+            "type": "number",
+            "description": "Latitude"
+          },
+          "lng": {
+            "type": "number",
+            "description": "Longitude"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone used for local operations"
+          },
+          "is24Hours": {
+            "type": "boolean",
+            "description": "Whether the parking is open all day"
+          },
+          "opensAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Local opening time in HH:mm"
+          },
+          "closesAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Local closing time in HH:mm"
+          },
+          "isShowcase": {
+            "type": "boolean",
+            "description": "Whether this is fictional showcase data"
+          },
+          "isOpen": {
+            "type": "boolean",
+            "description": "Whether the facility is open now"
+          },
+          "availabilityState": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "LIMITED",
+              "FULL",
+              "CLOSED"
+            ],
+            "description": "Derived public availability state"
+          },
+          "availableSpaces": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Current available spaces"
+          },
+          "occupancyPercent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Current occupancy"
+          },
+          "nextOpeningAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Next opening time as an ISO date-time"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "image",
+          "neighborhood",
+          "address",
+          "hourlyRateCents",
+          "currency",
+          "capacity",
+          "lat",
+          "lng",
+          "timezone",
+          "is24Hours",
+          "opensAt",
+          "closesAt",
+          "isShowcase",
+          "isOpen",
+          "availabilityState",
+          "availableSpaces",
+          "occupancyPercent",
+          "nextOpeningAt"
+        ],
+        "additionalProperties": false
+      },
       "UpdateParkingRequest": {
         "type": "object",
         "properties": {
@@ -743,6 +1073,13 @@
             "type": "string",
             "maxLength": 500,
             "description": "Optional description of the facility"
+          },
+          "neighborhood": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "description": "Neighborhood or area",
+            "example": "Palermo"
           },
           "address": {
             "type": "string",
@@ -766,6 +1103,7 @@
           "currency": {
             "type": "string",
             "enum": [
+              "ARS",
               "USD"
             ],
             "description": "Supported currency code",
@@ -791,9 +1129,37 @@
             "description": "Geographic longitude",
             "example": -58.3816
           },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone used for local operations"
+          },
+          "is24Hours": {
+            "type": "boolean",
+            "description": "Whether the parking is open all day"
+          },
+          "opensAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$",
+            "description": "Local opening time in HH:mm"
+          },
+          "closesAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$",
+            "description": "Local closing time in HH:mm"
+          },
           "isActive": {
             "type": "boolean",
             "description": "Whether the parking accepts check-ins"
+          },
+          "isListed": {
+            "type": "boolean",
+            "description": "Whether the facility is listed in public discovery"
           }
         },
         "additionalProperties": false
@@ -818,15 +1184,12 @@
             "type": "integer",
             "minimum": 0
           },
-          "revenueTodayCents": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "currency": {
-            "type": "string",
-            "enum": [
-              "USD"
-            ]
+          "revenueToday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CurrencyRevenue"
+            },
+            "description": "Completed revenue grouped by currency for today"
           },
           "facilities": {
             "type": "array",
@@ -840,9 +1203,31 @@
           "totalCapacity",
           "occupancyPercent",
           "completedToday",
-          "revenueTodayCents",
-          "currency",
+          "revenueToday",
           "facilities"
+        ],
+        "additionalProperties": false
+      },
+      "CurrencyRevenue": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "enum": [
+              "ARS",
+              "USD"
+            ],
+            "description": "Revenue currency"
+          },
+          "revenueCents": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Revenue in integer cents"
+          }
+        },
+        "required": [
+          "currency",
+          "revenueCents"
         ],
         "additionalProperties": false
       },
@@ -891,6 +1276,7 @@
           "currency": {
             "type": "string",
             "enum": [
+              "ARS",
               "USD"
             ],
             "description": "Revenue currency"
@@ -928,12 +1314,6 @@
               }
             ]
           },
-          "currency": {
-            "type": "string",
-            "enum": [
-              "USD"
-            ]
-          },
           "data": {
             "type": "array",
             "items": {
@@ -943,14 +1323,16 @@
                   "type": "string",
                   "format": "date"
                 },
-                "revenueCents": {
-                  "type": "integer",
-                  "minimum": 0
+                "revenueByCurrency": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CurrencyRevenue"
+                  }
                 }
               },
               "required": [
                 "date",
-                "revenueCents"
+                "revenueByCurrency"
               ],
               "additionalProperties": false
             }
@@ -958,7 +1340,6 @@
         },
         "required": [
           "days",
-          "currency",
           "data"
         ],
         "additionalProperties": false
@@ -1316,7 +1697,7 @@
             }
           },
           "409": {
-            "description": "Conflict (vehicle already inside, parking full, or parking inactive)",
+            "description": "Conflict (vehicle already inside, parking full, parking inactive, or parking closed)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1523,6 +1904,50 @@
           },
           {
             "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "COMPLETED",
+                "CANCELLED"
+              ],
+              "description": "Filter by session status",
+              "example": "COMPLETED"
+            },
+            "required": false,
+            "description": "Filter by session status",
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Normalized plate search term",
+              "example": "AB123CD"
+            },
+            "required": false,
+            "description": "Normalized plate search term",
+            "name": "plate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "7d",
+                "30d"
+              ],
+              "default": "30d",
+              "description": "Parking-local history period",
+              "example": "30d"
+            },
+            "required": false,
+            "description": "Parking-local history period",
+            "name": "period",
+            "in": "query"
+          },
+          {
+            "schema": {
               "type": "integer",
               "exclusiveMinimum": 0,
               "default": 1,
@@ -1547,6 +1972,74 @@
             "description": "Items per page",
             "name": "limit",
             "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated parking sessions with a complete filtered aggregate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParkingSessionListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - not the owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parking not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parkings/{parkingId}/sessions/export.csv": {
+      "get": {
+        "tags": [
+          "Parking Sessions"
+        ],
+        "summary": "Export parking session history as CSV",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Parking UUID"
+            },
+            "required": true,
+            "description": "Parking UUID",
+            "name": "parkingId",
+            "in": "path"
           },
           {
             "schema": {
@@ -1557,7 +2050,7 @@
                 "CANCELLED"
               ],
               "description": "Filter by session status",
-              "example": "ACTIVE"
+              "example": "COMPLETED"
             },
             "required": false,
             "description": "Filter by session status",
@@ -1577,50 +2070,39 @@
           },
           {
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "date"
-                },
-                {
-                  "type": "string",
-                  "format": "date-time"
-                }
+              "type": "string",
+              "enum": [
+                "today",
+                "7d",
+                "30d"
               ],
-              "description": "Include sessions starting on or after this date or time"
+              "default": "30d",
+              "description": "Parking-local history period",
+              "example": "30d"
             },
             "required": false,
-            "description": "Include sessions starting on or after this date or time",
-            "name": "dateFrom",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "date"
-                },
-                {
-                  "type": "string",
-                  "format": "date-time"
-                }
-              ],
-              "description": "Include sessions starting on or before this date or time"
-            },
-            "required": false,
-            "description": "Include sessions starting on or before this date or time",
-            "name": "dateTo",
+            "description": "Parking-local history period",
+            "name": "period",
             "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "description": "Parking sessions",
+            "description": "Complete filtered parking session history CSV",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ParkingSessionListResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -1856,6 +2338,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Forbidden - account cannot own parking facilities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -1897,11 +2389,25 @@
             "schema": {
               "type": "string",
               "minLength": 1,
-              "description": "Search term for title or address"
+              "description": "Search term for title, neighborhood, or address"
             },
             "required": false,
-            "description": "Search term for title or address",
+            "description": "Search term for title, neighborhood, or address",
             "name": "search",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ARS",
+                "USD"
+              ],
+              "description": "Currency context for public price filtering"
+            },
+            "required": false,
+            "description": "Currency context for public price filtering",
+            "name": "currency",
             "in": "query"
           },
           {
@@ -1929,12 +2435,15 @@
           {
             "schema": {
               "type": "string",
-              "format": "uuid",
-              "description": "Filter by owner ID"
+              "enum": [
+                "true",
+                "false"
+              ],
+              "description": "Return only AVAILABLE or LIMITED facilities"
             },
             "required": false,
-            "description": "Filter by owner ID",
-            "name": "ownerId",
+            "description": "Return only AVAILABLE or LIMITED facilities",
+            "name": "availableNow",
             "in": "query"
           }
         ],
@@ -1944,7 +2453,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ParkingListResponse"
+                  "$ref": "#/components/schemas/PublicParkingListResponse"
                 }
               }
             }
@@ -2027,7 +2536,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ParkingResponse"
+                  "$ref": "#/components/schemas/PublicParkingResponse"
                 }
               }
             }
@@ -2121,6 +2630,16 @@
           },
           "404": {
             "description": "Parking not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Capacity cannot be reduced below active sessions",
             "content": {
               "application/json": {
                 "schema": {
@@ -2308,7 +2827,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Get revenue series",
+        "summary": "Get revenue series grouped by currency",
         "parameters": [
           {
             "schema": {
@@ -2325,7 +2844,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Daily revenue series",
+            "description": "Daily revenue series grouped by currency",
             "content": {
               "application/json": {
                 "schema": {

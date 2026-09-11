@@ -7,15 +7,18 @@ import { SessionHistoryRow } from '../../components/domain/session.js';
 import { Button } from '../../components/ui/button.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { Field, Input, Select } from '../../components/ui/field.js';
+import { formatMoney } from '../../lib/format.js';
 import { normalizePlate } from '../../lib/plate.js';
 import { useDebouncedValue } from '../../lib/use-debounced-value.js';
 import {
   getOwnedParkings,
+  getParkingSessionsCsv,
   getParkingSessions,
   type ParkingSession,
 } from '../../lib/api/owner-api.js';
 
 type SessionFilter = 'ALL' | ParkingSession['status'];
+type HistoryPeriod = 'today' | '7d' | '30d';
 
 export function OwnerParkingHistoryRoute() {
   const { language } = useAppearance();
@@ -29,10 +32,20 @@ export function OwnerParkingHistoryRoute() {
     rawStatus === 'ACTIVE' || rawStatus === 'COMPLETED' || rawStatus === 'CANCELLED'
       ? rawStatus
       : 'ALL';
+  const rawPeriod = searchParams.get('period');
+  const period: HistoryPeriod =
+    rawPeriod === 'today' || rawPeriod === '7d' || rawPeriod === '30d' ? rawPeriod : '30d';
   const urlPlate = normalizePlate(searchParams.get('plate') ?? '');
   const [plateInput, setPlateInput] = useState(urlPlate);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState(false);
   const debouncedPlate = useDebouncedValue(normalizePlate(plateInput), 250);
-  const updateSearch = (next: { page?: number; plate?: string; status?: SessionFilter }) => {
+  const updateSearch = (next: {
+    page?: number;
+    plate?: string;
+    status?: SessionFilter;
+    period?: HistoryPeriod;
+  }) => {
     const params = new URLSearchParams(searchParams);
     if (next.status === undefined || next.status === 'ALL') params.delete('status');
     else params.set('status', next.status);
@@ -40,6 +53,8 @@ export function OwnerParkingHistoryRoute() {
     else params.set('page', String(next.page));
     if (next.plate === undefined || next.plate.length === 0) params.delete('plate');
     else params.set('plate', next.plate);
+    if (next.period === undefined || next.period === '30d') params.delete('period');
+    else params.set('period', next.period);
     setSearchParams(params);
   };
 
@@ -55,15 +70,39 @@ export function OwnerParkingHistoryRoute() {
   const parking = parkingsQuery.data?.find((item) => item.id === parkingId);
   const sessionsQuery = useQuery({
     enabled: Boolean(parkingId),
-    queryKey: ['parking-sessions', parkingId, filter, debouncedPlate, page],
+    queryKey: ['parking-sessions', parkingId, filter, period, debouncedPlate, page],
     queryFn: () =>
       getParkingSessions(parkingId ?? '', {
         page,
+        period,
         ...(filter === 'ALL' ? {} : { status: filter }),
         ...(debouncedPlate ? { plate: debouncedPlate } : {}),
       }),
     placeholderData: (previousData) => previousData,
   });
+
+  const exportHistory = async () => {
+    if (!parkingId) return;
+    setExporting(true);
+    setExportError(false);
+    try {
+      const csv = await getParkingSessionsCsv(parkingId, {
+        period,
+        ...(filter === 'ALL' ? {} : { status: filter }),
+        ...(debouncedPlate ? { plate: debouncedPlate } : {}),
+      });
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `${parking?.title ?? 'parking'}-history.csv`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setExportError(true);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   if (parkingsQuery.isLoading || sessionsQuery.isLoading) {
     return <Skeleton className="owner-list-skeleton" />;
@@ -93,6 +132,7 @@ export function OwnerParkingHistoryRoute() {
   }
   const sessions = sessionsQuery.data?.data ?? [];
   const pagination = sessionsQuery.data?.meta;
+  const aggregate = sessionsQuery.data?.aggregate;
 
   return (
     <section className="owner-page space-y-7" aria-labelledby="history-title">
@@ -114,8 +154,11 @@ export function OwnerParkingHistoryRoute() {
         >
           {es ? 'Volver a la cochera' : 'Back to parking'}
         </Link>
+        <Button disabled={exporting} onClick={() => void exportHistory()} variant="outline">
+          {exporting ? (es ? 'Exportando...' : 'Exporting...') : es ? 'Exportar CSV' : 'Export CSV'}
+        </Button>
       </header>
-      <div className="grid gap-4 rounded-[1.5rem] border border-[#121417]/12 bg-[#f5f5f5] p-5 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_12rem_auto] sm:p-6">
+      <div className="grid gap-4 rounded-[1.5rem] border border-[#121417]/12 bg-[#f5f5f5] p-5 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_12rem_12rem_auto] sm:p-6">
         <Field htmlFor="session-plate" label={es ? 'Buscar patente' : 'Search plate'}>
           <Input
             id="session-plate"
@@ -144,6 +187,24 @@ export function OwnerParkingHistoryRoute() {
             <option value="CANCELLED">{es ? 'Canceladas' : 'Cancelled'}</option>
           </Select>
         </Field>
+        <Field htmlFor="session-period" label={es ? 'Período' : 'Period'}>
+          <Select
+            id="session-period"
+            value={period}
+            onChange={(event) => {
+              updateSearch({
+                page: 1,
+                period: event.target.value as HistoryPeriod,
+                plate: debouncedPlate,
+                status: filter,
+              });
+            }}
+          >
+            <option value="today">{es ? 'Hoy' : 'Today'}</option>
+            <option value="7d">{es ? '7 días' : '7 days'}</option>
+            <option value="30d">{es ? '30 días' : '30 days'}</option>
+          </Select>
+        </Field>
         <Button
           className="self-end rounded-full"
           type="button"
@@ -155,6 +216,34 @@ export function OwnerParkingHistoryRoute() {
           {es ? 'Actualizar' : 'Refresh'}
         </Button>
       </div>
+      {exportError ? (
+        <ErrorState onRetry={() => void exportHistory()}>
+          {es ? 'No pudimos exportar el historial.' : 'We could not export this history.'}
+        </ErrorState>
+      ) : null}
+      {aggregate ? (
+        <section className="grid gap-4 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:grid-cols-4 sm:p-6">
+          <HistoryMetric label={es ? 'Total' : 'Total'} value={String(aggregate.totalSessions)} />
+          <HistoryMetric
+            label={es ? 'Finalizadas' : 'Completed'}
+            value={String(aggregate.completedSessions)}
+          />
+          <HistoryMetric
+            label={es ? 'Canceladas' : 'Cancelled'}
+            value={String(aggregate.cancelledSessions)}
+          />
+          <div>
+            <p className="type-label text-foreground-muted">{es ? 'Ingresos' : 'Revenue'}</p>
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-sm font-bold">
+              {aggregate.revenueByCurrency.length > 0
+                ? aggregate.revenueByCurrency.map(({ currency, revenueCents }) => (
+                    <span key={currency}>{formatMoney(revenueCents, currency)}</span>
+                  ))
+                : 'N/A'}
+            </div>
+          </div>
+        </section>
+      ) : null}
       {sessionsQuery.isFetching ? (
         <p className="query-status" role="status">
           {es ? 'Actualizando historial…' : 'Refreshing history…'}
@@ -170,6 +259,7 @@ export function OwnerParkingHistoryRoute() {
             <SessionHistoryRow
               key={session.id}
               session={session}
+              timezone={parking.timezone}
               to={`/app/sessions/${session.id}`}
             />
           ))}
@@ -206,5 +296,14 @@ export function OwnerParkingHistoryRoute() {
         </nav>
       ) : null}
     </section>
+  );
+}
+
+function HistoryMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="type-label text-foreground-muted">{label}</p>
+      <p className="mt-2 type-metric">{value}</p>
+    </div>
   );
 }

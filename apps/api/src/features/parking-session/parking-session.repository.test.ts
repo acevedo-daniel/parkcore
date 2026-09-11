@@ -109,7 +109,7 @@ describe('parking session repository', () => {
     },
   );
 
-  it('filters historical sessions by normalized plate and start date range', async () => {
+  it('filters historical sessions by normalized plate and parking-local period range', async () => {
     mockPrisma.parkingSession.findMany.mockResolvedValue([]);
     mockPrisma.parkingSession.count.mockResolvedValue(0);
 
@@ -118,17 +118,17 @@ describe('parking session repository', () => {
         skip: 0,
         take: 10,
         plate: 'AB123CD',
-        dateFrom: '2026-02-01',
-        dateTo: '2026-02-28',
+        startTimeFrom: new Date('2026-02-01T03:00:00.000Z'),
+        startTimeTo: new Date('2026-02-28T02:59:59.999Z'),
       }),
-    ).resolves.toEqual({ data: [], total: 0 });
+    ).resolves.toEqual({ data: [], total: 0, aggregateRows: [] });
 
     const expectedWhere = {
       parkingId: 'parking-1',
       vehicle: { plate: { contains: 'AB123CD' } },
       startTime: {
-        gte: new Date('2026-02-01'),
-        lte: new Date('2026-02-28T23:59:59.999Z'),
+        gte: new Date('2026-02-01T03:00:00.000Z'),
+        lte: new Date('2026-02-28T02:59:59.999Z'),
       },
     };
     expect(mockPrisma.parkingSession.findMany).toHaveBeenCalledWith(
@@ -169,9 +169,12 @@ describe('parking session repository', () => {
     expect(transactionClient.parkingSession.findUniqueOrThrow).not.toHaveBeenCalled();
   });
 
-  it('cancels with one conditional ACTIVE transition', async () => {
+  it('cancels with one conditional ACTIVE transition and records the terminal time', async () => {
+    vi.useFakeTimers();
+    const endTime = new Date('2026-02-21T10:00:00.000Z');
+    vi.setSystemTime(endTime);
     const cancelledSession = {
-      ...buildParkingSession({ status: 'CANCELLED' }),
+      ...buildParkingSession({ endTime, status: 'CANCELLED', totalAmountCents: null }),
       vehicle: buildVehicle(),
     };
     transactionClient.parkingSession.updateMany.mockResolvedValue({ count: 1 });
@@ -181,7 +184,8 @@ describe('parking session repository', () => {
     expect(cancelledSession.totalAmountCents).toBeNull();
     expect(transactionClient.parkingSession.updateMany).toHaveBeenCalledWith({
       where: { id: 'session-1', status: 'ACTIVE' },
-      data: { status: 'CANCELLED', totalAmountCents: null },
+      data: { endTime, status: 'CANCELLED', totalAmountCents: null },
     });
+    vi.useRealTimers();
   });
 });

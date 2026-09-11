@@ -2,16 +2,17 @@ function locale() {
   return document.documentElement.lang === 'en-US' ? 'en-US' : 'es-AR';
 }
 
-export function formatMoney(cents: number, currency: 'USD' = 'USD') {
+export function formatMoney(cents: number, currency: 'ARS' | 'USD' = 'USD') {
   return new Intl.NumberFormat(locale(), { style: 'currency', currency }).format(cents / 100);
 }
 
-export function formatTimestamp(value: string) {
+export function formatTimestamp(value: string, timezone?: string) {
   return new Intl.DateTimeFormat(locale(), {
     day: '2-digit',
     month: 'short',
     hour: '2-digit',
     minute: '2-digit',
+    ...(timezone ? { timeZone: timezone } : {}),
   }).format(new Date(value));
 }
 

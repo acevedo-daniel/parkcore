@@ -16,28 +16,25 @@ const normalizedPlateSchema = z
 export const vehicleIdentitySchema = z
   .strictObject({
     plate: normalizedPlateSchema.openapi({
-      description: 'Vehicle license plate; normalized to uppercase alphanumeric characters',
+      description:
+        'Parking-scoped vehicle identity; normalized to uppercase alphanumeric characters',
       example: 'AB123CD',
     }),
 
-    type: z
-      .enum(vehicleTypes, { error: 'Invalid type' })
-      .optional()
-      .openapi({ description: 'Vehicle type', example: 'CAR' }),
+    type: z.enum(vehicleTypes, { error: 'Invalid type' }).optional().openapi({
+      description: 'Confirmed stable vehicle type; updates returning identity',
+      example: 'CAR',
+    }),
 
-    brand: z
-      .string()
-      .max(50, { error: 'Max 50 chars' })
-      .trim()
-      .optional()
-      .openapi({ description: 'Vehicle brand', example: 'Toyota' }),
+    brand: z.string().max(50, { error: 'Max 50 chars' }).trim().optional().openapi({
+      description: 'Confirmed stable vehicle brand; updates returning identity',
+      example: 'Toyota',
+    }),
 
-    model: z
-      .string()
-      .max(50, { error: 'Max 50 chars' })
-      .trim()
-      .optional()
-      .openapi({ description: 'Vehicle model', example: 'Corolla' }),
+    model: z.string().max(50, { error: 'Max 50 chars' }).trim().optional().openapi({
+      description: 'Confirmed stable vehicle model; updates returning identity',
+      example: 'Corolla',
+    }),
   })
   .openapi('VehicleIdentityInput');
 

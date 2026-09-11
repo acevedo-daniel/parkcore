@@ -29,6 +29,7 @@ test('operates, completes, and cleans up a real parking session', async ({ page 
 
   await page.getByRole('link', { name: 'New facility' }).click();
   await page.getByLabel('Name').fill('Local real-stack smoke');
+  await page.getByLabel('Neighborhood').fill('Downtown');
   await page.getByLabel('Address').fill('511 Local Smoke Avenue');
   await page.getByLabel('Latitude').fill('-34.61');
   await page.getByLabel('Longitude').fill('-58.38');

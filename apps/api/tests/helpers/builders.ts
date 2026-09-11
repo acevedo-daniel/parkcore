@@ -12,13 +12,17 @@ export const buildRegisterDto = (
     email: string;
     password: string;
     name: string;
+    lastName: string;
+    timezone: string;
   }>,
 ) => {
   return merge(
     {
       email: `user-${randomUUID()}@parkcore.test`,
       password: 'Passw0rd!123',
-      name: 'Test User',
+      name: 'Test',
+      lastName: 'User',
+      timezone: 'America/Argentina/Buenos_Aires',
     },
     overrides,
   );
@@ -47,6 +51,7 @@ export const buildParking = (overrides?: Partial<Parking>): Parking => {
     title: 'Main Parking',
     description: null,
     image: null,
+    neighborhood: 'Downtown',
     address: '123 Test St',
     hourlyRateCents: 200000,
     currency: 'USD',
@@ -54,6 +59,11 @@ export const buildParking = (overrides?: Partial<Parking>): Parking => {
     lat: -34.6037,
     lng: -58.3816,
     isActive: true,
+    isListed: false,
+    timezone: 'America/Argentina/Buenos_Aires',
+    is24Hours: true,
+    opensAt: null,
+    closesAt: null,
     createdAt: now,
     updatedAt: now,
     ownerId: 'owner-1',

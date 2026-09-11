@@ -15,12 +15,21 @@ const sessionSelect = {
   status: true,
   endTime: true,
   totalAmountCents: true,
+  currency: true,
 } as const satisfies Prisma.ParkingSessionSelect;
 
 export type OwnerFacility = Prisma.ParkingGetPayload<{ select: typeof facilitySelect }>;
 export type OwnerAnalyticsSession = Prisma.ParkingSessionGetPayload<{
   select: typeof sessionSelect;
 }>;
+
+export const findOwnerTimezone = async (ownerId: string): Promise<string> => {
+  const owner = await prisma.user.findUniqueOrThrow({
+    where: { id: ownerId },
+    select: { timezone: true },
+  });
+  return owner.timezone;
+};
 
 export const findOwnerFacilities = async (ownerId: string): Promise<OwnerFacility[]> => {
   return await prisma.parking.findMany({

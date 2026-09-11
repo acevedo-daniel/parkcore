@@ -1,6 +1,7 @@
 import type { components } from '@parkcore/api-client';
 
 type Parking = components['schemas']['ParkingResponse'];
+type PublicParking = components['schemas']['PublicParkingResponse'];
 type ParkingSession = components['schemas']['ParkingSessionResponse'];
 type User = components['schemas']['UserResponse'];
 
@@ -13,13 +14,46 @@ export function parkingFixture(overrides: Partial<Parking> = {}): Parking {
     description: 'Covered operational parking.',
     hourlyRateCents: 1550,
     id: 'parking-1',
+    is24Hours: true,
     image: null,
+    isListed: false,
     isActive: true,
     lat: -34.6037,
     lng: -58.3816,
     ownerId: 'owner-1',
+    neighborhood: 'Downtown',
+    opensAt: null,
+    closesAt: null,
+    timezone: 'America/Argentina/Buenos_Aires',
     title: 'Central Parking',
     updatedAt: '2026-08-17T09:00:00.000Z',
+    ...overrides,
+  };
+}
+
+export function publicParkingFixture(overrides: Partial<PublicParking> = {}): PublicParking {
+  return {
+    address: '101 Main Street',
+    availabilityState: 'AVAILABLE',
+    availableSpaces: 12,
+    capacity: 12,
+    closesAt: null,
+    currency: 'USD',
+    description: 'Covered operational parking.',
+    hourlyRateCents: 1550,
+    id: 'parking-1',
+    image: null,
+    is24Hours: true,
+    isOpen: true,
+    isShowcase: false,
+    lat: -34.6037,
+    lng: -58.3816,
+    neighborhood: 'Downtown',
+    nextOpeningAt: null,
+    occupancyPercent: 0,
+    opensAt: null,
+    timezone: 'America/Argentina/Buenos_Aires',
+    title: 'Central Parking',
     ...overrides,
   };
 }
@@ -56,10 +90,13 @@ export function userFixture(overrides: Partial<User> = {}): User {
     createdAt: '2026-08-17T09:00:00.000Z',
     email: 'owner@parkcore.test',
     id: 'owner-1',
+    kind: 'OWNER',
     lastName: null,
     name: 'ParkCore Owner',
     phone: null,
     photoUrl: null,
+    timezone: 'America/Argentina/Buenos_Aires',
+    demoExpiresAt: null,
     updatedAt: '2026-08-17T09:00:00.000Z',
     ...overrides,
   };

@@ -14,6 +14,9 @@ const loginControllerMock = vi.fn((_req: Request, res: Response) => {
 const validBody = {
   email: 'rate-limit@parkcore.test',
   password: 'Passw0rd!123',
+  lastName: 'Limit',
+  name: 'Rate',
+  timezone: 'America/Argentina/Buenos_Aires',
 };
 
 async function createAuthTestApp(maxRequests: number) {

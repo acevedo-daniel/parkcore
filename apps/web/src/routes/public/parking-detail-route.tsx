@@ -94,6 +94,21 @@ export function ParkingDetailRoute() {
   if (!parking) return null;
 
   const mapUrl = `https://www.openstreetmap.org/?mlat=${String(parking.lat)}&mlon=${String(parking.lng)}#map=17/${String(parking.lat)}/${String(parking.lng)}`;
+  const availabilityLabel = {
+    AVAILABLE: es ? 'Disponible' : 'Available',
+    LIMITED: es ? 'Últimos lugares' : 'Limited spaces',
+    FULL: es ? 'Completa' : 'Full',
+    CLOSED: es ? 'Cerrada ahora' : 'Closed now',
+  }[parking.availabilityState];
+  const scheduleLabel = parking.is24Hours
+    ? es
+      ? 'Abierta las 24 horas'
+      : 'Open 24 hours'
+    : parking.opensAt && parking.closesAt
+      ? `${parking.opensAt} - ${parking.closesAt}`
+      : es
+        ? 'Horario no disponible'
+        : 'Schedule unavailable';
 
   return (
     <article className="min-h-full bg-white pb-20 pt-10 sm:pb-28 sm:pt-16">
@@ -108,22 +123,23 @@ export function ParkingDetailRoute() {
 
         <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:items-start">
           <header className="lg:col-span-7">
+            {parking.isShowcase ? (
+              <span className="mb-4 inline-flex rounded-full bg-accent px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-accent-foreground">
+                Demo
+              </span>
+            ) : null}
             <span className="inline-flex items-center gap-2 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-xs font-bold text-[#121417]">
               <span className="size-1.5 rounded-full bg-[#121417]" />
-              {parking.isActive
-                ? es
-                  ? 'Cochera activa'
-                  : 'Facility active'
-                : es
-                  ? 'Consultar antes de ir'
-                  : 'Check before going'}
+              {availabilityLabel}
             </span>
             <h1 className="mt-6 max-w-3xl font-display text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[#1d241f] sm:text-6xl">
               {parking.title}
             </h1>
             <p className="mt-5 flex max-w-xl items-start gap-2 text-base leading-relaxed text-[#3f3f3f] sm:text-lg">
               <MapPin aria-hidden="true" className="mt-1 size-5 shrink-0 text-[#121417]" />
-              {parking.address}
+              <span>
+                {parking.neighborhood} · {parking.address}
+              </span>
             </p>
           </header>
 
@@ -143,10 +159,10 @@ export function ParkingDetailRoute() {
               </div>
               <div>
                 <p className="text-xs font-medium text-[#3f3f3f]">
-                  {es ? 'Capacidad total' : 'Total capacity'}
+                  {es ? 'Espacios libres' : 'Available spaces'}
                 </p>
                 <p className="mt-1 font-display text-2xl font-extrabold text-[#1d241f]">
-                  {parking.capacity}{' '}
+                  {parking.availableSpaces}{' '}
                   <span className="text-sm font-medium">{es ? 'vehículos' : 'vehicles'}</span>
                 </p>
               </div>
@@ -156,6 +172,27 @@ export function ParkingDetailRoute() {
                 ? 'La disponibilidad en el momento se confirma al llegar. Esta ficha muestra la información pública de la cochera.'
                 : 'Availability is confirmed on arrival. This page shows the facility’s public information.'}
             </p>
+            <div className="mt-5 border-t border-[#1d241f]/10 pt-5">
+              <p className="text-xs font-medium text-[#3f3f3f]">{es ? 'Horario' : 'Hours'}</p>
+              <p className="mt-1 text-sm font-bold text-[#1d241f]">{scheduleLabel}</p>
+              {parking.nextOpeningAt ? (
+                <p className="mt-1 text-xs text-[#3f3f3f]">
+                  {es ? 'Próxima apertura' : 'Next opening'}{' '}
+                  {new Intl.DateTimeFormat(es ? 'es-AR' : 'en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: parking.timezone,
+                  }).format(new Date(parking.nextOpeningAt))}
+                </p>
+              ) : null}
+            </div>
+            {parking.isShowcase ? (
+              <p className="mt-5 rounded-2xl bg-accent/20 p-4 text-sm font-medium leading-relaxed text-[#1d241f]">
+                {es
+                  ? 'Cochera ficticia con datos de demostración para explorar ParkCore.'
+                  : 'Fictional parking with demonstration data for exploring ParkCore.'}
+              </p>
+            ) : null}
           </aside>
         </div>
 

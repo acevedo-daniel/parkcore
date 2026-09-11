@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { parkingFixture } from '../../test/fixtures.js';
+import { publicParkingFixture } from '../../test/fixtures.js';
 import { ParkingDetailRoute } from './parking-detail-route.js';
 
 const api = vi.hoisted(() => ({ getPublicParking: vi.fn() }));
@@ -33,7 +33,7 @@ afterEach(() => {
 describe('public parking detail images', () => {
   it('renders a stable, asynchronously decoded primary parking image', async () => {
     api.getPublicParking.mockResolvedValue(
-      parkingFixture({ image: 'https://images.example.test/central-parking.jpg' }),
+      publicParkingFixture({ image: 'https://images.example.test/central-parking.jpg' }),
     );
     renderParkingDetail();
 
@@ -44,7 +44,7 @@ describe('public parking detail images', () => {
 
   it('replaces an unavailable external image with the deliberate fallback', async () => {
     api.getPublicParking.mockResolvedValue(
-      parkingFixture({ image: 'https://images.example.test/missing.jpg' }),
+      publicParkingFixture({ image: 'https://images.example.test/missing.jpg' }),
     );
     renderParkingDetail();
 
@@ -53,9 +53,25 @@ describe('public parking detail images', () => {
   });
 
   it('uses the same fallback when a parking has no image', async () => {
-    api.getPublicParking.mockResolvedValue(parkingFixture());
+    api.getPublicParking.mockResolvedValue(publicParkingFixture());
     renderParkingDetail();
 
     expect(await screen.findByLabelText('Parking image not available')).toBeTruthy();
+  });
+
+  it('renders a configured schedule and handles missing schedule values', async () => {
+    api.getPublicParking.mockResolvedValue(
+      publicParkingFixture({ is24Hours: false, opensAt: '08:00', closesAt: '20:00' }),
+    );
+    renderParkingDetail();
+
+    expect(await screen.findByText('08:00 - 20:00')).toBeTruthy();
+
+    api.getPublicParking.mockResolvedValue(
+      publicParkingFixture({ is24Hours: false, opensAt: null, closesAt: null }),
+    );
+    renderParkingDetail();
+
+    expect(await screen.findByText('Schedule unavailable')).toBeTruthy();
   });
 });

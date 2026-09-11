@@ -7,6 +7,7 @@ vi.mock('./parking-session.repository.js', () => ({
   findActiveByParking: vi.fn(),
   findByParking: vi.fn(),
   cancelIfActive: vi.fn(),
+  findForExport: vi.fn(),
 }));
 vi.mock('../parking/parking.service.js', () => ({ findById: vi.fn() }));
 vi.mock('../vehicle/vehicle.service.js', () => ({ findOrCreateForAuthorizedParking: vi.fn() }));
@@ -31,6 +32,7 @@ import {
   getActiveSessionsByParking,
   getSessionById,
   getSessionsByParking,
+  getParkingSessionsCsv,
 } from './parking-session.service.js';
 
 const checkInDto: CheckIn = {
@@ -127,6 +129,24 @@ describe('parking session service', () => {
       );
     });
 
+    it('rejects check-in while a scheduled parking is closed', async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-09-11T07:00:00.000Z'));
+      vi.mocked(parkingService.findById).mockResolvedValue(
+        buildParking({
+          is24Hours: false,
+          opensAt: '08:00',
+          closesAt: '18:00',
+          timezone: 'America/Argentina/Buenos_Aires',
+        }),
+      );
+
+      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toThrow(
+        'Parking is closed',
+      );
+      expect(vehicleService.findOrCreateForAuthorizedParking).not.toHaveBeenCalled();
+    });
+
     it('rejects a non-owner and persistence conflicts', async () => {
       vi.mocked(parkingService.findById).mockResolvedValue(
         buildParking({ ownerId: 'other-owner' }),
@@ -144,6 +164,13 @@ describe('parking session service', () => {
       vi.mocked(parkingService.findById).mockResolvedValue(buildParking());
       vi.mocked(vehicleService.findOrCreateForAuthorizedParking).mockResolvedValue(buildVehicle());
       vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockRejectedValue(conflict);
+      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toThrow(
+        'Check-in conflict',
+      );
+
+      vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockRejectedValue({
+        cause: { originalCode: '40001' },
+      });
       await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toThrow(
         'Check-in conflict',
       );
@@ -241,12 +268,17 @@ describe('parking session service', () => {
 
     it('cancels only an ACTIVE session', async () => {
       const activeSession = buildSessionWithRelations();
-      const cancelledSession = buildSessionWithRelations({ status: 'CANCELLED' });
+      const cancelledSession = buildSessionWithRelations({
+        endTime: new Date('2026-02-21T10:00:00.000Z'),
+        status: 'CANCELLED',
+        totalAmountCents: null,
+      });
       vi.mocked(parkingSessionRepository.findById).mockResolvedValue(activeSession);
       vi.mocked(parkingSessionRepository.cancelIfActive).mockResolvedValue(cancelledSession);
 
       await expect(cancelSession('owner-1', activeSession.id)).resolves.toMatchObject({
         status: 'CANCELLED',
+        endTime: '2026-02-21T10:00:00.000Z',
         totalAmountCents: null,
       });
       expect(parkingSessionRepository.cancelIfActive).toHaveBeenCalledWith(activeSession.id);
@@ -273,16 +305,20 @@ describe('parking session service', () => {
       sessions.map(toParkingSessionResponse),
     );
 
-    const query: ParkingSessionQuery = { page: 2, limit: 2, status: 'COMPLETED' };
+    const query: ParkingSessionQuery = { page: 2, limit: 2, status: 'COMPLETED', period: '30d' };
     vi.mocked(parkingSessionRepository.findByParking).mockResolvedValue({
       data: sessions,
       total: 5,
+      aggregateRows: [],
     });
     const result = await getSessionsByParking('owner-1', 'parking-1', query);
+    const anyDate = expect.any(Date) as unknown as Date;
     expect(parkingSessionRepository.findByParking).toHaveBeenCalledWith('parking-1', {
       skip: 2,
       take: 2,
       status: 'COMPLETED' satisfies ParkingSessionStatus,
+      startTimeFrom: anyDate,
+      startTimeTo: anyDate,
     });
     expect(result.meta.totalPages).toBe(3);
 
@@ -291,18 +327,21 @@ describe('parking session service', () => {
       limit: 10,
       status: 'COMPLETED',
       plate: 'AB123CD',
-      dateFrom: '2026-02-01T00:00:00.000Z',
-      dateTo: '2026-02-28T23:59:59.000Z',
+      period: '7d',
     };
-    vi.mocked(parkingSessionRepository.findByParking).mockResolvedValue({ data: [], total: 0 });
+    vi.mocked(parkingSessionRepository.findByParking).mockResolvedValue({
+      data: [],
+      total: 0,
+      aggregateRows: [],
+    });
     await getSessionsByParking('owner-1', 'parking-1', filteredQuery);
     expect(parkingSessionRepository.findByParking).toHaveBeenLastCalledWith('parking-1', {
       skip: 0,
       take: 10,
       status: 'COMPLETED',
       plate: 'AB123CD',
-      dateFrom: '2026-02-01T00:00:00.000Z',
-      dateTo: '2026-02-28T23:59:59.000Z',
+      startTimeFrom: anyDate,
+      startTimeTo: anyDate,
     });
 
     vi.mocked(parkingSessionRepository.findActiveByParking).mockResolvedValue(sessions);
@@ -322,5 +361,44 @@ describe('parking session service', () => {
       }),
     );
     await expect(getSessionById('owner-1', 'session-1')).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
+  it('exports the complete filtered history with local offsets and stable columns', async () => {
+    vi.mocked(parkingService.findById).mockResolvedValue(
+      buildParking({ timezone: 'America/Argentina/Buenos_Aires' }),
+    );
+    vi.mocked(parkingSessionRepository.findForExport).mockResolvedValue([
+      {
+        ...buildParkingSession({
+          endTime: new Date('2026-02-21T11:30:00.000Z'),
+          status: 'COMPLETED',
+          totalAmountCents: 1500,
+        }),
+        vehicle: buildVehicle({ brand: 'ACME, "Fleet"' }),
+      },
+      {
+        ...buildParkingSession({
+          id: 'session-2',
+          endTime: new Date('2026-02-21T12:00:00.000Z'),
+          status: 'CANCELLED',
+          totalAmountCents: 999,
+        }),
+        vehicle: buildVehicle({ brand: null }),
+      },
+    ]);
+
+    const csv = await getParkingSessionsCsv('owner-1', 'parking-1', { period: '30d' });
+    const [header, completedRow, cancelledRow] = csv.split('\r\n');
+
+    expect(header).toBe(
+      'plate,vehicleType,brand,model,startTime,endTime,durationMinutes,status,hourlyRate,currency,totalAmount,timezone',
+    );
+    expect(completedRow).toContain('"ACME, ""Fleet"""');
+    expect(completedRow).toContain('2026-02-21T06:00:00.000-03:00');
+    expect(completedRow).toContain('2026-02-21T08:30:00.000-03:00');
+    expect(completedRow).toContain(',1500,USD,1500,America/Argentina/Buenos_Aires');
+    expect(cancelledRow).toMatch(/,CANCELLED,1500,USD,,America\/Argentina\/Buenos_Aires$/);
+    expect(header).not.toContain('customerName');
+    expect(header).not.toContain('customerPhone');
   });
 });

@@ -72,13 +72,36 @@ describe('requireAuth middleware', () => {
     const res = createMockResponse();
     const next = vi.fn<(error?: unknown) => void>();
 
-    vi.mocked(authJwt.verifyAccessToken).mockResolvedValue({ sub: 'user-123' });
+    vi.mocked(authJwt.verifyAccessToken).mockResolvedValue({
+      sub: 'user-123',
+      kind: 'OWNER',
+    });
 
     await requireAuth(req, res, next);
 
     expect(authJwt.verifyAccessToken).toHaveBeenCalledWith('valid-token');
-    expect(req.user).toEqual({ id: 'user-123' });
+    expect(req.user).toEqual({ id: 'user-123', kind: 'OWNER', demoExpiresAt: null });
     expect(next).toHaveBeenCalledTimes(1);
     expect(next).toHaveBeenCalledWith();
+  });
+
+  it('rejects an expired demo token before reaching protected handlers', async () => {
+    const req = createMockRequest({
+      headers: { authorization: 'Bearer expired-demo-token' },
+    });
+    const res = createMockResponse();
+    const next = vi.fn<(error?: unknown) => void>();
+
+    vi.mocked(authJwt.verifyAccessToken).mockResolvedValue({
+      sub: 'demo-123',
+      kind: 'DEMO',
+      demoExpiresAt: '2020-01-01T00:00:00.000Z',
+    });
+
+    await requireAuth(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Demo access has expired' }),
+    );
   });
 });

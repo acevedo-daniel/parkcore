@@ -41,6 +41,7 @@ describe('create parking workflow', () => {
     renderCreateParking();
 
     await user.type(screen.getByLabelText('Name'), 'North Garage');
+    await user.type(screen.getByLabelText('Neighborhood'), 'Downtown');
     await user.type(screen.getByLabelText('Address'), '202 North Street');
     await user.clear(screen.getByLabelText('Latitude'));
     await user.type(screen.getByLabelText('Latitude'), '-34.61');
@@ -56,11 +57,17 @@ describe('create parking workflow', () => {
       expect(api.createParking.mock.calls[0]?.[0]).toEqual({
         address: '202 North Street',
         capacity: 20,
+        closesAt: null,
         currency: 'USD',
         hourlyRateCents: 1850,
+        is24Hours: true,
+        isListed: false,
         lat: -34.61,
         lng: -58.38,
+        neighborhood: 'Downtown',
+        opensAt: null,
         title: 'North Garage',
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
     });
     expect(await screen.findByText('Parking created')).toBeTruthy();

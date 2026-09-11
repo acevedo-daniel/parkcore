@@ -257,7 +257,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description Conflict (vehicle already inside, parking full, or parking inactive) */
+                /** @description Conflict (vehicle already inside, parking full, parking inactive, or parking closed) */
                 409: {
                     headers: {
                         [name: string]: unknown;
@@ -438,18 +438,16 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description Page number */
-                    page?: number;
-                    /** @description Items per page */
-                    limit?: number;
                     /** @description Filter by session status */
                     status?: "ACTIVE" | "COMPLETED" | "CANCELLED";
                     /** @description Normalized plate search term */
                     plate?: string;
-                    /** @description Include sessions starting on or after this date or time */
-                    dateFrom?: string;
-                    /** @description Include sessions starting on or before this date or time */
-                    dateTo?: string;
+                    /** @description Parking-local history period */
+                    period?: "today" | "7d" | "30d";
+                    /** @description Page number */
+                    page?: number;
+                    /** @description Items per page */
+                    limit?: number;
                 };
                 header?: never;
                 path: {
@@ -460,13 +458,95 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Parking sessions */
+                /** @description Paginated parking sessions with a complete filtered aggregate */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
                         "application/json": components["schemas"]["ParkingSessionListResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden - not the owner */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Parking not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/parkings/{parkingId}/sessions/export.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export parking session history as CSV */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Filter by session status */
+                    status?: "ACTIVE" | "COMPLETED" | "CANCELLED";
+                    /** @description Normalized plate search term */
+                    plate?: string;
+                    /** @description Parking-local history period */
+                    period?: "today" | "7d" | "30d";
+                };
+                header?: never;
+                path: {
+                    /** @description Parking UUID */
+                    parkingId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Complete filtered parking session history CSV */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/csv": string;
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -665,14 +745,16 @@ export interface paths {
                     page?: number;
                     /** @description Items per page */
                     limit?: number;
-                    /** @description Search term for title or address */
+                    /** @description Search term for title, neighborhood, or address */
                     search?: string;
+                    /** @description Currency context for public price filtering */
+                    currency?: "ARS" | "USD";
                     /** @description Minimum hourly rate in cents */
                     minHourlyRateCents?: number;
                     /** @description Maximum hourly rate in cents */
                     maxHourlyRateCents?: number;
-                    /** @description Filter by owner ID */
-                    ownerId?: string;
+                    /** @description Return only AVAILABLE or LIMITED facilities */
+                    availableNow?: "true" | "false";
                 };
                 header?: never;
                 path?: never;
@@ -686,7 +768,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ParkingListResponse"];
+                        "application/json": components["schemas"]["PublicParkingListResponse"];
                     };
                 };
                 /** @description Validation error */
@@ -738,6 +820,15 @@ export interface paths {
                 };
                 /** @description Unauthorized - missing or invalid token */
                 401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden - account cannot own parking facilities */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -830,7 +921,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ParkingResponse"];
+                        "application/json": components["schemas"]["PublicParkingResponse"];
                     };
                 };
                 /** @description Parking not found */
@@ -907,6 +998,15 @@ export interface paths {
                 };
                 /** @description Parking not found */
                 404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Capacity cannot be reduced below active sessions */
+                409: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1094,7 +1194,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get revenue series */
+        /** Get revenue series grouped by currency */
         get: {
             parameters: {
                 query?: {
@@ -1107,7 +1207,7 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Daily revenue series */
+                /** @description Daily revenue series grouped by currency */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -1475,10 +1575,15 @@ export interface components {
              */
             id: string;
             /**
+             * @description User identity kind
+             * @enum {string}
+             */
+            kind: "OWNER" | "DEMO" | "SHOWCASE";
+            /**
              * Format: email
              * @description User email address
              */
-            email: string;
+            email: string | null;
             /** @description First name */
             name: string | null;
             /** @description Last name */
@@ -1487,6 +1592,13 @@ export interface components {
             phone: string | null;
             /** @description Profile photo URL */
             photoUrl: string | null;
+            /** @description User IANA timezone */
+            timezone: string;
+            /**
+             * Format: date-time
+             * @description Demo access expiration time
+             */
+            demoExpiresAt: string | null;
             /**
              * Format: date-time
              * @description Creation time
@@ -1515,10 +1627,21 @@ export interface components {
              */
             password: string;
             /**
-             * @description User display name
-             * @example John Doe
+             * @description User first name
+             * @example John
              */
-            name?: string;
+            name: string;
+            /**
+             * @description User last name
+             * @example Doe
+             */
+            lastName: string;
+            /**
+             * @description User IANA timezone
+             * @default America/Argentina/Buenos_Aires
+             * @example America/Argentina/Buenos_Aires
+             */
+            timezone: string;
         };
         LoginRequest: {
             /**
@@ -1545,7 +1668,7 @@ export interface components {
             startTime: string;
             /**
              * Format: date-time
-             * @description Check-out time
+             * @description Terminal transition time; null while the session is ACTIVE
              */
             endTime: string | null;
             /** @description Hourly rate snapshot in integer cents */
@@ -1555,8 +1678,8 @@ export interface components {
              * @example USD
              * @enum {string}
              */
-            currency: "USD";
-            /** @description Final amount in integer cents; present after checkout */
+            currency: "ARS" | "USD";
+            /** @description Final amount in integer cents; null while ACTIVE or after cancellation */
             totalAmountCents: number | null;
             /**
              * @description Parking session status
@@ -1597,16 +1720,16 @@ export interface components {
              * @description Vehicle UUID
              */
             id: string;
-            /** @description Normalized parking-scoped plate */
+            /** @description Normalized plate identity scoped to this parking */
             plate: string;
             /**
-             * @description Vehicle type
+             * @description Stable vehicle type confirmed at check-in
              * @enum {string}
              */
             type: "CAR" | "MOTORCYCLE" | "LARGE";
-            /** @description Vehicle brand */
+            /** @description Stable vehicle brand confirmed at check-in */
             brand: string | null;
-            /** @description Vehicle model */
+            /** @description Stable vehicle model confirmed at check-in */
             model: string | null;
         };
         CheckInRequest: components["schemas"]["VehicleIdentityInput"] & {
@@ -1628,23 +1751,23 @@ export interface components {
         };
         VehicleIdentityInput: {
             /**
-             * @description Vehicle license plate; normalized to uppercase alphanumeric characters
+             * @description Parking-scoped vehicle identity; normalized to uppercase alphanumeric characters
              * @example AB123CD
              */
             plate: string;
             /**
-             * @description Vehicle type
+             * @description Confirmed stable vehicle type; updates returning identity
              * @example CAR
              * @enum {string}
              */
             type?: "CAR" | "MOTORCYCLE" | "LARGE";
             /**
-             * @description Vehicle brand
+             * @description Confirmed stable vehicle brand; updates returning identity
              * @example Toyota
              */
             brand?: string;
             /**
-             * @description Vehicle model
+             * @description Confirmed stable vehicle model; updates returning identity
              * @example Corolla
              */
             model?: string;
@@ -1683,6 +1806,28 @@ export interface components {
                  */
                 hasPreviousPage: boolean;
             };
+            aggregate: components["schemas"]["ParkingSessionAggregate"];
+            /** @description Parking IANA timezone */
+            timezone: string;
+        };
+        ParkingSessionAggregate: {
+            /** @description All filtered sessions */
+            totalSessions: number;
+            /** @description Filtered active sessions */
+            activeSessions: number;
+            /** @description Filtered completed sessions */
+            completedSessions: number;
+            /** @description Filtered cancelled sessions */
+            cancelledSessions: number;
+            revenueByCurrency: {
+                /**
+                 * @description Revenue currency
+                 * @enum {string}
+                 */
+                currency: "ARS" | "USD";
+                /** @description Revenue in integer cents */
+                revenueCents: number;
+            }[];
         };
         ParkingResponse: {
             /**
@@ -1704,7 +1849,7 @@ export interface components {
              * @description Supported currency code
              * @enum {string}
              */
-            currency: "USD";
+            currency: "ARS" | "USD";
             /** @description Maximum simultaneous active vehicle stays */
             capacity: number;
             /** @description Latitude */
@@ -1718,6 +1863,18 @@ export interface components {
              * @description Owner UUID
              */
             ownerId: string;
+            /** @description Neighborhood or area */
+            neighborhood: string;
+            /** @description IANA timezone used for local operations */
+            timezone: string;
+            /** @description Whether the parking is open all day */
+            is24Hours: boolean;
+            /** @description Local opening time in HH:mm */
+            opensAt: string | null;
+            /** @description Local closing time in HH:mm */
+            closesAt: string | null;
+            /** @description Whether the facility is publicly listed */
+            isListed: boolean;
             /**
              * Format: date-time
              * @description Creation time
@@ -1737,6 +1894,11 @@ export interface components {
             title: string;
             /** @description Optional description of the facility */
             description?: string;
+            /**
+             * @description Neighborhood or area
+             * @example Palermo
+             */
+            neighborhood: string;
             /**
              * @description Full street address
              * @example 123 Main Street
@@ -1758,7 +1920,7 @@ export interface components {
              * @example USD
              * @enum {string}
              */
-            currency: "USD";
+            currency: "ARS" | "USD";
             /**
              * @description Maximum simultaneous active vehicle stays
              * @example 100
@@ -1774,9 +1936,25 @@ export interface components {
              * @example -58.3816
              */
             lng: number;
+            /** @description IANA timezone used for local operations */
+            timezone?: string;
+            /**
+             * @description Whether the parking is open all day
+             * @default true
+             */
+            is24Hours: boolean;
+            /** @description Local opening time in HH:mm */
+            opensAt?: string | null;
+            /** @description Local closing time in HH:mm */
+            closesAt?: string | null;
+            /**
+             * @description Whether the facility is listed in public discovery
+             * @default false
+             */
+            isListed: boolean;
         };
-        ParkingListResponse: {
-            data: components["schemas"]["ParkingResponse"][];
+        PublicParkingListResponse: {
+            data: components["schemas"]["PublicParkingResponse"][];
             meta: {
                 /**
                  * @description Current page number
@@ -1810,6 +1988,62 @@ export interface components {
                 hasPreviousPage: boolean;
             };
         };
+        PublicParkingResponse: {
+            /**
+             * Format: uuid
+             * @description Parking UUID
+             */
+            id: string;
+            /** @description Parking title */
+            title: string;
+            /** @description Description */
+            description: string | null;
+            /** @description Image URL */
+            image: string | null;
+            /** @description Neighborhood or area */
+            neighborhood: string;
+            /** @description Address */
+            address: string;
+            /** @description Hourly rate in integer cents */
+            hourlyRateCents: number;
+            /**
+             * @description Supported currency code
+             * @enum {string}
+             */
+            currency: "ARS" | "USD";
+            /** @description Maximum simultaneous active vehicle stays */
+            capacity: number;
+            /** @description Latitude */
+            lat: number;
+            /** @description Longitude */
+            lng: number;
+            /** @description IANA timezone used for local operations */
+            timezone: string;
+            /** @description Whether the parking is open all day */
+            is24Hours: boolean;
+            /** @description Local opening time in HH:mm */
+            opensAt: string | null;
+            /** @description Local closing time in HH:mm */
+            closesAt: string | null;
+            /** @description Whether this is fictional showcase data */
+            isShowcase: boolean;
+            /** @description Whether the facility is open now */
+            isOpen: boolean;
+            /**
+             * @description Derived public availability state
+             * @enum {string}
+             */
+            availabilityState: "AVAILABLE" | "LIMITED" | "FULL" | "CLOSED";
+            /** @description Current available spaces */
+            availableSpaces: number;
+            /** @description Current occupancy */
+            occupancyPercent: number;
+            /**
+             * Format: date-time
+             * @description Next opening time as an ISO date-time
+             */
+            nextOpeningAt: string | null;
+        };
         UpdateParkingRequest: {
             /**
              * @description Business name of the parking facility
@@ -1818,6 +2052,11 @@ export interface components {
             title?: string;
             /** @description Optional description of the facility */
             description?: string;
+            /**
+             * @description Neighborhood or area
+             * @example Palermo
+             */
+            neighborhood?: string;
             /**
              * @description Full street address
              * @example 123 Main Street
@@ -1839,7 +2078,7 @@ export interface components {
              * @example USD
              * @enum {string}
              */
-            currency?: "USD";
+            currency?: "ARS" | "USD";
             /**
              * @description Maximum simultaneous active vehicle stays
              * @example 100
@@ -1855,18 +2094,36 @@ export interface components {
              * @example -58.3816
              */
             lng?: number;
+            /** @description IANA timezone used for local operations */
+            timezone?: string;
+            /** @description Whether the parking is open all day */
+            is24Hours?: boolean;
+            /** @description Local opening time in HH:mm */
+            opensAt?: string | null;
+            /** @description Local closing time in HH:mm */
+            closesAt?: string | null;
             /** @description Whether the parking accepts check-ins */
             isActive?: boolean;
+            /** @description Whether the facility is listed in public discovery */
+            isListed?: boolean;
         };
         AnalyticsSummaryResponse: {
             activeVehicles: number;
             totalCapacity: number;
             occupancyPercent: number;
             completedToday: number;
-            revenueTodayCents: number;
-            /** @enum {string} */
-            currency: "USD";
+            /** @description Completed revenue grouped by currency for today */
+            revenueToday: components["schemas"]["CurrencyRevenue"][];
             facilities: components["schemas"]["FacilityAnalytics"][];
+        };
+        CurrencyRevenue: {
+            /**
+             * @description Revenue currency
+             * @enum {string}
+             */
+            currency: "ARS" | "USD";
+            /** @description Revenue in integer cents */
+            revenueCents: number;
         };
         FacilityAnalytics: {
             /**
@@ -1892,16 +2149,14 @@ export interface components {
              * @description Revenue currency
              * @enum {string}
              */
-            currency: "USD";
+            currency: "ARS" | "USD";
         };
         AnalyticsRevenueResponse: {
             days: 7 | 30;
-            /** @enum {string} */
-            currency: "USD";
             data: {
                 /** Format: date */
                 date: string;
-                revenueCents: number;
+                revenueByCurrency: components["schemas"]["CurrencyRevenue"][];
             }[];
         };
         AnalyticsVolumeResponse: {

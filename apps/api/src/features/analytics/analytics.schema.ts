@@ -3,6 +3,13 @@ import { supportedCurrencies } from '../../utils/currency.js';
 
 const currencySchema = z.enum(supportedCurrencies);
 
+export const currencyRevenueSchema = z
+  .strictObject({
+    currency: currencySchema.openapi({ description: 'Revenue currency' }),
+    revenueCents: z.int().nonnegative().openapi({ description: 'Revenue in integer cents' }),
+  })
+  .openapi('CurrencyRevenue');
+
 export const analyticsQuerySchema = z
   .strictObject({
     days: z.coerce
@@ -46,8 +53,9 @@ export const analyticsSummaryResponseSchema = z
     totalCapacity: z.int().nonnegative(),
     occupancyPercent: z.number().nonnegative().max(100),
     completedToday: z.int().nonnegative(),
-    revenueTodayCents: z.int().nonnegative(),
-    currency: currencySchema,
+    revenueToday: currencyRevenueSchema.array().openapi({
+      description: 'Completed revenue grouped by currency for today',
+    }),
     facilities: z.array(facilityAnalyticsSchema),
   })
   .openapi('AnalyticsSummaryResponse');
@@ -55,11 +63,10 @@ export const analyticsSummaryResponseSchema = z
 export const analyticsRevenueResponseSchema = z
   .strictObject({
     days: z.union([z.literal(7), z.literal(30)]),
-    currency: currencySchema,
     data: z.array(
       z.strictObject({
         date: z.iso.date(),
-        revenueCents: z.int().nonnegative(),
+        revenueByCurrency: currencyRevenueSchema.array(),
       }),
     ),
   })

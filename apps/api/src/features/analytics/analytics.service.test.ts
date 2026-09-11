@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('./analytics.repository.js', () => ({
   findOwnerFacilities: vi.fn(),
   findOwnerSessions: vi.fn(),
+  findOwnerTimezone: vi.fn(),
 }));
 
 import * as analyticsRepository from './analytics.repository.js';
@@ -32,12 +33,18 @@ const session = (overrides: Record<string, unknown> = {}) => ({
   parkingId: facilities[0].id,
   status: 'COMPLETED' as const,
   endTime: new Date('2026-01-15T09:00:00.000Z'),
+  currency: 'USD' as const,
   totalAmountCents: 2400,
   ...overrides,
 });
 
 describe('analytics service', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(analyticsRepository.findOwnerTimezone).mockResolvedValue(
+      'America/Argentina/Buenos_Aires',
+    );
+  });
 
   it('builds an owner summary from active and completed sessions', async () => {
     vi.mocked(analyticsRepository.findOwnerFacilities).mockResolvedValue(facilities);
@@ -53,7 +60,7 @@ describe('analytics service', () => {
       totalCapacity: 15,
       occupancyPercent: 13.3,
       completedToday: 1,
-      revenueTodayCents: 2400,
+      revenueToday: [{ currency: 'USD', revenueCents: 2400 }],
       facilities: [
         {
           parkingId: facilities[0].id,
@@ -75,16 +82,18 @@ describe('analytics service', () => {
     const revenue = await getRevenue('owner-1', { days: 7 }, now);
     const volume = await getVolume('owner-1', { days: 7 }, now);
 
-    expect(revenue).toMatchObject({ days: 7, currency: 'USD' });
+    expect(revenue).toMatchObject({ days: 7 });
     expect(revenue.data).toHaveLength(7);
-    expect(revenue.data.find((point) => point.date === '2026-01-14')?.revenueCents).toBe(2400);
+    expect(revenue.data.find((point) => point.date === '2026-01-14')?.revenueByCurrency).toEqual([
+      { currency: 'USD', revenueCents: 2400 },
+    ]);
     expect(volume.data).toHaveLength(7);
     expect(volume.data.find((point) => point.date === '2026-01-14')?.completedSessions).toBe(1);
     expect(analyticsRepository.findOwnerSessions).toHaveBeenCalledWith(
       'owner-1',
       expect.objectContaining({
         status: 'COMPLETED',
-        endTimeFrom: new Date('2026-01-09T00:00:00.000Z'),
+        endTimeFrom: new Date('2026-01-09T03:00:00.000Z'),
         endTimeTo: now,
       }),
     );
@@ -115,6 +124,37 @@ describe('analytics service', () => {
           revenueCents: 1800,
         },
       ],
+    });
+  });
+
+  it('keeps revenue totals separate when facilities use different currencies', async () => {
+    vi.mocked(analyticsRepository.findOwnerSessions).mockResolvedValue([
+      session({ currency: 'USD', totalAmountCents: 2400 }),
+      session({ currency: 'ARS', totalAmountCents: 180000 }),
+    ]);
+
+    const revenue = await getRevenue('owner-1', { days: 7 }, now);
+    expect(revenue.data.find((point) => point.date === '2026-01-15')?.revenueByCurrency).toEqual([
+      { currency: 'ARS', revenueCents: 180000 },
+      { currency: 'USD', revenueCents: 2400 },
+    ]);
+  });
+
+  it('uses the owner timezone for network day boundaries', async () => {
+    vi.mocked(analyticsRepository.findOwnerTimezone).mockResolvedValue('America/New_York');
+    vi.mocked(analyticsRepository.findOwnerSessions).mockResolvedValue([
+      session({ endTime: new Date('2026-01-15T05:00:00.000Z') }),
+    ]);
+
+    const revenue = await getRevenue('owner-1', { days: 7 }, new Date('2026-01-15T05:00:00.000Z'));
+    expect(revenue.data.at(-1)).toMatchObject({
+      date: '2026-01-15',
+      revenueByCurrency: [{ currency: 'USD', revenueCents: 2400 }],
+    });
+    expect(analyticsRepository.findOwnerSessions).toHaveBeenLastCalledWith('owner-1', {
+      status: 'COMPLETED',
+      endTimeFrom: new Date('2026-01-09T05:00:00.000Z'),
+      endTimeTo: new Date('2026-01-15T05:00:00.000Z'),
     });
   });
 });

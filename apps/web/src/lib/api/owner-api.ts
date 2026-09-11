@@ -12,6 +12,7 @@ export type UpdateProfileRequest =
 export type ParkingSessionQuery = NonNullable<
   paths['/parkings/{parkingId}/sessions']['get']['parameters']['query']
 >;
+export type ParkingSessionFilter = Pick<ParkingSessionQuery, 'status' | 'plate' | 'period'>;
 export interface ActiveSessionQuery {
   plate?: string;
 }
@@ -71,6 +72,18 @@ export async function getParkingSessions(parkingId: string, query: ParkingSessio
   });
   if (data) return data;
   return ownerError(error, response, 'Unable to load parking sessions.');
+}
+
+export async function getParkingSessionsCsv(
+  parkingId: string,
+  query: ParkingSessionFilter = {},
+): Promise<string> {
+  const { data, error, response } = await authenticatedApi.GET(
+    '/parkings/{parkingId}/sessions/export.csv',
+    { params: { path: { parkingId }, query }, parseAs: 'text' },
+  );
+  if (data) return data;
+  return ownerError(error, response, 'Unable to export parking sessions.');
 }
 
 export async function getParkingSession(sessionId: string): Promise<ParkingSession> {

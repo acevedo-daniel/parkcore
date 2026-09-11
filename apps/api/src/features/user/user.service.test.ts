@@ -19,10 +19,13 @@ const buildUser = (overrides?: Partial<User>): User => {
     id: 'user-1',
     email: 'user@parkcore.test',
     passwordHash: 'hashed-secret',
+    kind: 'OWNER',
     name: 'John',
     lastName: 'Doe',
     phone: '1234567890',
     photoUrl: null,
+    timezone: 'America/Argentina/Buenos_Aires',
+    demoExpiresAt: null,
     createdAt: now,
     updatedAt: now,
     ...(overrides ?? {}),
@@ -44,11 +47,14 @@ describe('user.service', () => {
       expect(userRepository.findById).toHaveBeenCalledWith('user-1');
       expect(result).toEqual({
         id: user.id,
+        kind: user.kind,
         email: user.email,
         name: user.name,
         lastName: user.lastName,
         phone: user.phone,
         photoUrl: user.photoUrl,
+        timezone: user.timezone,
+        demoExpiresAt: null,
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
       });
@@ -81,11 +87,14 @@ describe('user.service', () => {
       expect(userRepository.update).toHaveBeenCalledWith('user-1', updateData);
       expect(result).toEqual({
         id: updatedUser.id,
+        kind: updatedUser.kind,
         email: updatedUser.email,
         name: updatedUser.name,
         lastName: updatedUser.lastName,
         phone: updatedUser.phone,
         photoUrl: updatedUser.photoUrl,
+        timezone: updatedUser.timezone,
+        demoExpiresAt: null,
         createdAt: updatedUser.createdAt.toISOString(),
         updatedAt: updatedUser.updatedAt.toISOString(),
       });

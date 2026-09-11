@@ -29,6 +29,9 @@ export const register = async (dto: Register): Promise<AuthResponse> => {
       email: dto.email,
       passwordHash,
       name: dto.name,
+      lastName: dto.lastName,
+      kind: 'OWNER',
+      timezone: dto.timezone,
     });
   } catch (error) {
     if (isUniqueEmailError(error)) {
@@ -37,7 +40,7 @@ export const register = async (dto: Register): Promise<AuthResponse> => {
     throw error;
   }
 
-  const accessToken = await signAccessToken({ sub: user.id });
+  const accessToken = await signAccessToken({ sub: user.id, kind: user.kind });
 
   return {
     user: toUserResponse(user),
@@ -47,7 +50,7 @@ export const register = async (dto: Register): Promise<AuthResponse> => {
 
 export const login = async (dto: Login): Promise<AuthResponse> => {
   const user = await userRepository.findByEmail(dto.email);
-  if (!user) {
+  if (user?.kind !== 'OWNER' || !user.passwordHash) {
     throw new UnauthorizedError('Invalid email or password');
   }
 
@@ -56,7 +59,7 @@ export const login = async (dto: Login): Promise<AuthResponse> => {
     throw new UnauthorizedError('Invalid email or password');
   }
 
-  const accessToken = await signAccessToken({ sub: user.id });
+  const accessToken = await signAccessToken({ sub: user.id, kind: user.kind });
 
   return {
     user: toUserResponse(user),

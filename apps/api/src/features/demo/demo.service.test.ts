@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../auth/auth.jwt.js', () => ({ signAccessToken: vi.fn() }));
-vi.mock('../user/user.repository.js', () => ({ findByEmail: vi.fn(), findById: vi.fn() }));
+vi.mock('../user/user.repository.js', () => ({ findById: vi.fn() }));
 vi.mock('./demo.repository.js', () => ({ restoreDemoOwnerData: vi.fn() }));
 vi.mock('../../lib/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
@@ -17,13 +17,16 @@ import { getStatus, login, reset } from './demo.service.js';
 const demoOwner = (overrides: Partial<User> = {}): User => {
   const now = new Date('2026-01-15T12:00:00.000Z');
   return {
-    id: 'demo-owner-id',
-    email: 'owner@parkcore.dev',
-    passwordHash: 'not-exposed',
+    id: '00000000-0000-4000-8000-000000000010',
+    email: null,
+    passwordHash: null,
+    kind: 'DEMO',
     name: 'Demo',
     lastName: 'Owner',
     phone: null,
     photoUrl: null,
+    timezone: 'America/Argentina/Buenos_Aires',
+    demoExpiresAt: new Date('2099-01-15T12:00:00.000Z'),
     createdAt: now,
     updatedAt: now,
     ...overrides,
@@ -36,27 +39,32 @@ describe('demo.service', () => {
   });
 
   it('reports availability without exposing operator details', async () => {
-    vi.mocked(userRepository.findByEmail).mockResolvedValue(null);
+    vi.mocked(userRepository.findById).mockResolvedValue(null);
 
     await expect(getStatus()).resolves.toEqual({ available: false });
-    expect(userRepository.findByEmail).toHaveBeenCalledWith('owner@parkcore.dev');
+    expect(userRepository.findById).toHaveBeenCalledWith('00000000-0000-4000-8000-000000000010');
   });
 
   it('creates a session for the configured demo owner without a password', async () => {
-    vi.mocked(userRepository.findByEmail).mockResolvedValue(demoOwner());
+    vi.mocked(userRepository.findById).mockResolvedValue(demoOwner());
     vi.mocked(authJwt.signAccessToken).mockResolvedValue('demo-token');
 
     await expect(login()).resolves.toMatchObject({
       accessToken: 'demo-token',
-      user: { email: 'owner@parkcore.dev', id: 'demo-owner-id' },
+      user: { email: null, id: '00000000-0000-4000-8000-000000000010', kind: 'DEMO' },
     });
-    expect(authJwt.signAccessToken).toHaveBeenCalledWith({ sub: 'demo-owner-id' });
+    expect(authJwt.signAccessToken).toHaveBeenCalledWith(
+      {
+        sub: '00000000-0000-4000-8000-000000000010',
+        kind: 'DEMO',
+        demoExpiresAt: '2099-01-15T12:00:00.000Z',
+      },
+      { expiresAt: new Date('2099-01-15T12:00:00.000Z') },
+    );
   });
 
   it('rejects reset attempts from another authenticated account', async () => {
-    vi.mocked(userRepository.findById).mockResolvedValue(
-      demoOwner({ email: 'another-owner@parkcore.dev' }),
-    );
+    vi.mocked(userRepository.findById).mockResolvedValue(demoOwner({ id: 'another-owner-id' }));
 
     await expect(reset('another-owner-id')).rejects.toBeInstanceOf(ForbiddenError);
     expect(demoRepository.restoreDemoOwnerData).not.toHaveBeenCalled();
@@ -66,14 +74,20 @@ describe('demo.service', () => {
     vi.mocked(userRepository.findById).mockResolvedValue(demoOwner());
     vi.mocked(demoRepository.restoreDemoOwnerData).mockResolvedValue(false);
 
-    await expect(reset('demo-owner-id')).rejects.toBeInstanceOf(ConflictError);
+    await expect(reset('00000000-0000-4000-8000-000000000010')).rejects.toBeInstanceOf(
+      ConflictError,
+    );
   });
 
   it('restores canonical data for the demo owner', async () => {
     vi.mocked(userRepository.findById).mockResolvedValue(demoOwner());
     vi.mocked(demoRepository.restoreDemoOwnerData).mockResolvedValue(true);
 
-    await expect(reset('demo-owner-id')).resolves.toEqual({ restored: true });
-    expect(demoRepository.restoreDemoOwnerData).toHaveBeenCalledWith('demo-owner-id');
+    await expect(reset('00000000-0000-4000-8000-000000000010')).resolves.toEqual({
+      restored: true,
+    });
+    expect(demoRepository.restoreDemoOwnerData).toHaveBeenCalledWith(
+      '00000000-0000-4000-8000-000000000010',
+    );
   });
 });

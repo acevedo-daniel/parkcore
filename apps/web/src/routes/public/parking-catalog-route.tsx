@@ -8,7 +8,7 @@ import { ParkingDiscoveryCard } from '../../components/domain/parking-discovery-
 import { Button } from '../../components/ui/button.js';
 import { Sheet } from '../../components/ui/dialog.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
-import { Input } from '../../components/ui/field.js';
+import { Checkbox, Input, Select } from '../../components/ui/field.js';
 import { getPublicParkings, type PublicParkingQuery } from '../../lib/api/public-api.js';
 import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
 
@@ -30,6 +30,11 @@ function getFormText(formData: FormData, name: string) {
   return typeof value === 'string' ? value : '';
 }
 
+function currencyFromSearchParams(searchParams: URLSearchParams): 'ARS' | 'USD' | undefined {
+  const currency = searchParams.get('currency');
+  return currency === 'ARS' || currency === 'USD' ? currency : undefined;
+}
+
 export function ParkingCatalogRoute() {
   const { language } = useAppearance();
   const es = language === 'es';
@@ -37,11 +42,14 @@ export function ParkingCatalogRoute() {
   const [filterError, setFilterError] = useState<string>();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const page = pageFromSearchParams(searchParams);
+  const currency = currencyFromSearchParams(searchParams);
   const query: PublicParkingQuery = {
+    availableNow: searchParams.get('availableNow') === 'true' ? 'true' : undefined,
+    currency,
     limit: 30,
     page,
-    maxHourlyRateCents: rateToCents(searchParams.get('maxRate') ?? ''),
-    minHourlyRateCents: rateToCents(searchParams.get('minRate') ?? ''),
+    maxHourlyRateCents: currency ? rateToCents(searchParams.get('maxRate') ?? '') : undefined,
+    minHourlyRateCents: currency ? rateToCents(searchParams.get('minRate') ?? '') : undefined,
     search: searchParams.get('search') ?? undefined,
   };
 
@@ -64,8 +72,10 @@ export function ParkingCatalogRoute() {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const search = getFormText(formData, 'search').trim();
+    const currency = getFormText(formData, 'currency');
     const minRateText = getFormText(formData, 'minRate');
     const maxRateText = getFormText(formData, 'maxRate');
+    const availableNow = formData.get('availableNow') === 'on';
     const minRate = rateToCents(minRateText);
     const maxRate = rateToCents(maxRateText);
     if (
@@ -83,11 +93,19 @@ export function ParkingCatalogRoute() {
       );
       return;
     }
+    if ((minRate !== undefined || maxRate !== undefined) && !currency) {
+      setFilterError(
+        es ? 'Elegí una moneda para filtrar tarifas.' : 'Choose a currency for rates.',
+      );
+      return;
+    }
     setFilterError(undefined);
     const params = new URLSearchParams();
     if (search) params.set('search', search);
+    if (currency === 'ARS' || currency === 'USD') params.set('currency', currency);
     if (minRate !== undefined) params.set('minRate', minRateText);
     if (maxRate !== undefined) params.set('maxRate', maxRateText);
+    if (availableNow) params.set('availableNow', 'true');
     setSearchParams(params);
     setMobileFiltersOpen(false);
   };
@@ -140,6 +158,7 @@ export function ParkingCatalogRoute() {
             key={searchParams.toString()}
             onSubmit={applyFilters}
             searchParams={searchParams}
+            currency={currency}
           />
         </div>
 
@@ -158,6 +177,7 @@ export function ParkingCatalogRoute() {
               key={`mobile-${searchParams.toString()}`}
               onSubmit={applyFilters}
               searchParams={searchParams}
+              currency={currency}
             />
           </div>
         </Sheet>
@@ -261,11 +281,13 @@ export function ParkingCatalogRoute() {
 }
 
 function CatalogFilters({
+  currency,
   es,
   filterError,
   onSubmit,
   searchParams,
 }: {
+  currency?: 'ARS' | 'USD';
   es: boolean;
   filterError?: string;
   onSubmit: (event: SyntheticEvent<HTMLFormElement>) => void;
@@ -291,9 +313,27 @@ function CatalogFilters({
           />
         </div>
       </div>
+      <div className="lg:col-span-2">
+        <label
+          className="block text-xs font-bold text-foreground"
+          htmlFor="parking-currency-filter"
+        >
+          {es ? 'Moneda' : 'Currency'}
+          <Select
+            className="mt-2 h-12"
+            defaultValue={currency ?? ''}
+            id="parking-currency-filter"
+            name="currency"
+          >
+            <option value="">{es ? 'Todas' : 'All'}</option>
+            <option value="ARS">ARS</option>
+            <option value="USD">USD</option>
+          </Select>
+        </label>
+      </div>
       <div className="grid grid-cols-2 gap-3 lg:col-span-3">
         <label className="block text-xs font-bold text-foreground" htmlFor="min-rate">
-          {es ? 'Mínimo por hora' : 'Min. rate (USD)'}
+          {es ? 'Mínimo por hora' : `Min. rate (${currency ?? 'USD'})`}
           <Input
             className="mt-2 h-12"
             defaultValue={searchParams.get('minRate') ?? ''}
@@ -307,7 +347,7 @@ function CatalogFilters({
           />
         </label>
         <label className="block text-xs font-bold text-foreground" htmlFor="max-rate">
-          {es ? 'Máximo por hora' : 'Max. rate (USD)'}
+          {es ? 'Máximo por hora' : `Max. rate (${currency ?? 'USD'})`}
           <Input
             className="mt-2 h-12"
             defaultValue={searchParams.get('maxRate') ?? ''}
@@ -320,6 +360,14 @@ function CatalogFilters({
             type="number"
           />
         </label>
+      </div>
+      <div className="flex items-center lg:col-span-2">
+        <Checkbox
+          defaultChecked={searchParams.get('availableNow') === 'true'}
+          id="available-now"
+          label={es ? 'Disponible ahora' : 'Available now'}
+          name="availableNow"
+        />
       </div>
       <Button className="rounded-full lg:col-span-3" type="submit">
         <SlidersHorizontal aria-hidden="true" className="size-4" />

@@ -8,7 +8,7 @@ import { normalizePlate } from '../vehicle/plate-normalization.js';
 const parkingSessionStatusSchema = z.enum(['ACTIVE', 'COMPLETED', 'CANCELLED']);
 const currencySchema = z.enum(supportedCurrencies);
 const dateTimeSchema = z.iso.datetime().openapi({ format: 'date-time' });
-const dateFilterSchema = z.union([z.iso.date(), z.iso.datetime()]);
+const parkingSessionPeriodSchema = z.enum(['today', '7d', '30d']);
 
 export const checkInSchema = vehicleIdentitySchema
   .extend({
@@ -41,8 +41,26 @@ export const parkingSessionParamsSchema = z.strictObject({
   sessionId: z.uuid({ error: 'Invalid ID' }).openapi({ description: 'Parking session UUID' }),
 });
 
-export const parkingSessionQuerySchema = z
+export const parkingSessionFilterSchema = z
   .strictObject({
+    status: parkingSessionStatusSchema
+      .optional()
+      .openapi({ description: 'Filter by session status', example: 'COMPLETED' }),
+    plate: z
+      .string()
+      .trim()
+      .transform(normalizePlate)
+      .pipe(z.string().min(1).max(10))
+      .optional()
+      .openapi({ description: 'Normalized plate search term', example: 'AB123CD' }),
+    period: parkingSessionPeriodSchema
+      .default('30d')
+      .openapi({ description: 'Parking-local history period', example: '30d' }),
+  })
+  .openapi('ParkingSessionFilter');
+
+export const parkingSessionQuerySchema = parkingSessionFilterSchema
+  .extend({
     page: z.coerce
       .number()
       .int()
@@ -56,33 +74,7 @@ export const parkingSessionQuerySchema = z
       .max(100)
       .default(10)
       .openapi({ description: 'Items per page', example: 10 }),
-    status: parkingSessionStatusSchema
-      .optional()
-      .openapi({ description: 'Filter by session status', example: 'ACTIVE' }),
-    plate: z
-      .string()
-      .trim()
-      .transform(normalizePlate)
-      .pipe(z.string().min(1).max(10))
-      .optional()
-      .openapi({ description: 'Normalized plate search term', example: 'AB123CD' }),
-    dateFrom: dateFilterSchema
-      .optional()
-      .openapi({ description: 'Include sessions starting on or after this date or time' }),
-    dateTo: dateFilterSchema
-      .optional()
-      .openapi({ description: 'Include sessions starting on or before this date or time' }),
   })
-  .refine(
-    ({ dateFrom, dateTo }) =>
-      dateFrom === undefined ||
-      dateTo === undefined ||
-      new Date(dateFrom).getTime() <= new Date(dateTo).getTime(),
-    {
-      message: 'dateFrom must be less than or equal to dateTo',
-      path: ['dateFrom'],
-    },
-  )
   .openapi('ParkingSessionQuery');
 
 export const parkingSessionActiveQuerySchema = z
@@ -100,10 +92,18 @@ export const parkingSessionActiveQuerySchema = z
 export const vehicleSummarySchema = z
   .strictObject({
     id: z.uuid().openapi({ description: 'Vehicle UUID' }),
-    plate: z.string().openapi({ description: 'Normalized parking-scoped plate' }),
-    type: z.enum(['CAR', 'MOTORCYCLE', 'LARGE']).openapi({ description: 'Vehicle type' }),
-    brand: z.string().nullable().openapi({ description: 'Vehicle brand' }),
-    model: z.string().nullable().openapi({ description: 'Vehicle model' }),
+    plate: z.string().openapi({ description: 'Normalized plate identity scoped to this parking' }),
+    type: z
+      .enum(['CAR', 'MOTORCYCLE', 'LARGE'])
+      .openapi({ description: 'Stable vehicle type confirmed at check-in' }),
+    brand: z
+      .string()
+      .nullable()
+      .openapi({ description: 'Stable vehicle brand confirmed at check-in' }),
+    model: z
+      .string()
+      .nullable()
+      .openapi({ description: 'Stable vehicle model confirmed at check-in' }),
   })
   .openapi('VehicleSummary');
 
@@ -111,16 +111,17 @@ export const parkingSessionResponseSchema = z
   .strictObject({
     id: z.uuid().openapi({ description: 'Parking session UUID' }),
     startTime: dateTimeSchema.openapi({ description: 'Check-in time' }),
-    endTime: dateTimeSchema.nullable().openapi({ description: 'Check-out time' }),
+    endTime: dateTimeSchema
+      .nullable()
+      .openapi({ description: 'Terminal transition time; null while the session is ACTIVE' }),
     hourlyRateCents: z.int().openapi({ description: 'Hourly rate snapshot in integer cents' }),
     currency: currencySchema.openapi({
       description: 'Supported currency snapshot',
       example: 'USD',
     }),
-    totalAmountCents: z
-      .int()
-      .nullable()
-      .openapi({ description: 'Final amount in integer cents; present after checkout' }),
+    totalAmountCents: z.int().nullable().openapi({
+      description: 'Final amount in integer cents; null while ACTIVE or after cancellation',
+    }),
     status: parkingSessionStatusSchema.openapi({ description: 'Parking session status' }),
     parkingId: z.uuid().openapi({ description: 'Parking UUID' }),
     vehicleId: z.uuid().openapi({ description: 'Vehicle UUID' }),
@@ -133,14 +134,42 @@ export const parkingSessionResponseSchema = z
   })
   .openapi('ParkingSessionResponse');
 
+export const parkingSessionAggregateSchema = z
+  .strictObject({
+    totalSessions: z.int().nonnegative().openapi({ description: 'All filtered sessions' }),
+    activeSessions: z.int().nonnegative().openapi({ description: 'Filtered active sessions' }),
+    completedSessions: z
+      .int()
+      .nonnegative()
+      .openapi({ description: 'Filtered completed sessions' }),
+    cancelledSessions: z
+      .int()
+      .nonnegative()
+      .openapi({ description: 'Filtered cancelled sessions' }),
+    revenueByCurrency: z.array(
+      z.strictObject({
+        currency: currencySchema.openapi({ description: 'Revenue currency' }),
+        revenueCents: z.int().nonnegative().openapi({ description: 'Revenue in integer cents' }),
+      }),
+    ),
+  })
+  .openapi('ParkingSessionAggregate');
+
 export const parkingSessionListResponseSchema = z
-  .strictObject({ data: z.array(parkingSessionResponseSchema), meta: paginationMetaSchema })
+  .strictObject({
+    data: z.array(parkingSessionResponseSchema),
+    meta: paginationMetaSchema,
+    aggregate: parkingSessionAggregateSchema,
+    timezone: z.string().openapi({ description: 'Parking IANA timezone' }),
+  })
   .openapi('ParkingSessionListResponse');
 
 export type CheckIn = z.infer<typeof checkInSchema>;
 export type ParkingSessionQuery = z.infer<typeof parkingSessionQuerySchema>;
+export type ParkingSessionFilter = z.infer<typeof parkingSessionFilterSchema>;
 export type ParkingSessionActiveQuery = z.infer<typeof parkingSessionActiveQuerySchema>;
 export type ParkingSessionResponse = z.infer<typeof parkingSessionResponseSchema>;
+export type ParkingSessionAggregate = z.infer<typeof parkingSessionAggregateSchema>;
 export type VisitData = Pick<CheckIn, 'customerName' | 'customerPhone' | 'notes'>;
 
 type ParkingSessionForResponse = Pick<

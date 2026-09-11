@@ -58,7 +58,17 @@ inside a Prisma transaction using PostgreSQL `Serializable` isolation.
 
 A partial unique database index on `(parkingId, vehicleId)` where `status = 'ACTIVE'` provides a second persistence-level guard against duplicate active sessions.
 
-Checkout and cancellation use conditional updates against `status = 'ACTIVE'`, so only one terminal transition can succeed.
+Checkout and cancellation use conditional updates against `status = 'ACTIVE'`, so only one terminal transition can succeed. Both transitions persist `endTime`; cancellation persists no amount.
+
+Vehicle lookup normalizes the plate and scopes the unique identity to `(plate, parkingId)`. Returning check-in updates only supplied stable vehicle metadata. Customer name, phone, and notes are stored on the new session and are not copied from prior visits.
+
+Analytics asks the owner timezone boundary utility for network today and rolling 7-day or 30-day windows. Revenue is grouped by currency in both summaries and series, so ARS and USD are never arithmetically combined. Parking history derives its predefined periods from the parking timezone, calculates aggregates from the complete filtered set, and uses the same filters for its CSV export.
+
+## Public discovery pipeline
+
+Public parking list and detail reads share the same repository visibility predicate: the owner kind must be `OWNER` or `SHOWCASE`, the parking must be listed, and operational state must be active. DEMO-owned facilities are excluded regardless of their stored listing state. Hidden detail requests resolve as not found.
+
+The service loads the eligible candidate set with active-session counts, derives schedule state and availability in the parking timezone, applies text, currency-safe price, and availability filters, orders by `AVAILABLE`, `LIMITED`, `FULL`, and `CLOSED` with a title tie-break, and paginates last. Public DTOs expose only public facility data plus `isShowcase`, `isOpen`, `availabilityState`, `availableSpaces`, `occupancyPercent`, and `nextOpeningAt`; owner IDs and credential data are not part of that representation.
 
 ## Contract flow
 
@@ -91,6 +101,8 @@ Its main state boundaries are:
 
 The web application persists the owner's access token in browser `localStorage` and supplies it to the generated API client. Authorization remains enforced by the API on every protected request.
 
+Access tokens carry the authenticated identity kind. Credential login issues tokens only for `OWNER` identities. `DEMO` tokens are bounded by the demo identity expiration, while `SHOWCASE` tokens may read identity data but are rejected from parking mutation and operation paths.
+
 ## Hosted topology
 
 Production keeps a small, explicit topology:
@@ -111,11 +123,14 @@ Provider-specific SDKs are not part of the application architecture; hosting con
 ## Invariants
 
 - **API authority:** browser state is never trusted as authorization or domain truth.
-- **Parking ownership:** protected parking/session operations are scoped to the authenticated owner.
+- **Identity-aware authorization:** protected parking/session operations accept only authenticated `OWNER` or unexpired `DEMO` identities, and remain scoped to the token subject.
+- **Credential boundary:** only `OWNER` identities have credential login; `DEMO` and `SHOWCASE` responses never expose credentials.
 - **Contract boundary:** the web application consumes the API through the generated client.
 - **Persistence authority:** PostgreSQL constraints and transactions reinforce critical session invariants.
 - **Pricing history:** a session owns the pricing snapshot used to calculate its completed total.
 - **Terminal sessions:** completed or cancelled sessions do not transition again.
+- **Vehicle identity:** normalized plates are unique per parking, while visit-specific contact data belongs only to its session.
+- **Timezone scope:** network analytics use `User.timezone`; parking history, displayed timestamps, and CSV values use `Parking.timezone`.
 
 ## Trade-offs
 

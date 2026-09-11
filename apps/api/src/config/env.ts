@@ -42,7 +42,7 @@ const envSchema = z
       .int()
       .positive()
       .default(15 * 60 * 1000),
-    DEMO_OWNER_EMAIL: z.string().trim().toLowerCase().pipe(z.email()).default('owner@parkcore.dev'),
+    DEMO_USER_ID: z.uuid().default('00000000-0000-4000-8000-000000000010'),
     DEMO_RESET_RATE_LIMIT_MAX: z.coerce
       .number({ error: 'Invalid DEMO_RESET_RATE_LIMIT_MAX' })
       .int()

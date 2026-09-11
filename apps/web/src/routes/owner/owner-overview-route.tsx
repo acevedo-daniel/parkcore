@@ -27,6 +27,7 @@ export function OwnerOverviewRoute() {
   const es = language === 'es';
   const [days, setDays] = useState<7 | 30>(7);
   const [activeBarIndex, setActiveBarIndex] = useState<number | null>(null);
+  const [selectedCurrency, setSelectedCurrency] = useState<'ARS' | 'USD'>('USD');
   const { parkings, parkingsQuery } = useOwnedParkingOperations();
   const summaryQuery = useAnalyticsSummary();
   const revenueQuery = useAnalyticsRevenue(days);
@@ -40,8 +41,18 @@ export function OwnerOverviewRoute() {
   const summary = summaryQuery.data;
   const revenueSeries = revenueQuery.data?.data ?? [];
   const volumeSeries = volumeQuery.data?.data ?? [];
-  const maxRevenue = Math.max(1, ...revenueSeries.map((point) => point.revenueCents));
-  const totalRevenue = revenueSeries.reduce((total, point) => total + point.revenueCents, 0);
+  const revenueCurrencies = [
+    ...new Set(
+      revenueSeries.flatMap((point) => point.revenueByCurrency.map(({ currency }) => currency)),
+    ),
+  ];
+  const displayCurrency = revenueCurrencies.includes(selectedCurrency)
+    ? selectedCurrency
+    : (revenueCurrencies[0] ?? selectedCurrency);
+  const revenueForCurrency = (point: (typeof revenueSeries)[number]) =>
+    point.revenueByCurrency.find(({ currency }) => currency === displayCurrency)?.revenueCents ?? 0;
+  const maxRevenue = Math.max(1, ...revenueSeries.map(revenueForCurrency));
+  const totalRevenue = revenueSeries.reduce((total, point) => total + revenueForCurrency(point), 0);
   const totalStays = volumeSeries.reduce((total, point) => total + point.completedSessions, 0);
   const analyticsError = summaryQuery.isError || revenueQuery.isError || volumeQuery.isError;
 
@@ -249,6 +260,28 @@ export function OwnerOverviewRoute() {
               </button>
             ))}
           </div>
+          {revenueCurrencies.length > 1 ? (
+            <div className="flex flex-wrap gap-2">
+              {revenueCurrencies.map((currency) => (
+                <button
+                  aria-pressed={displayCurrency === currency}
+                  className={cn(
+                    'rounded-full border px-3 py-1 font-mono text-xs font-bold',
+                    displayCurrency === currency
+                      ? 'border-accent bg-accent text-accent-foreground'
+                      : 'border-border-strong text-foreground-secondary',
+                  )}
+                  key={currency}
+                  onClick={() => {
+                    setSelectedCurrency(currency);
+                  }}
+                  type="button"
+                >
+                  {currency}
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         <div className="p-6 sm:p-8">
@@ -283,10 +316,11 @@ export function OwnerOverviewRoute() {
                 {revenueSeries.map((point, index) => {
                   const isActive = activeBarIndex === index;
                   const sessions = volumeSeries[index]?.completedSessions ?? 0;
-                  const height = Math.max(8, Math.round((point.revenueCents / maxRevenue) * 100));
+                  const pointRevenue = revenueForCurrency(point);
+                  const height = Math.max(8, Math.round((pointRevenue / maxRevenue) * 100));
                   return (
                     <button
-                      aria-label={`${formatBarDate(point.date, es)}: ${formatMoney(point.revenueCents, summary?.currency)}, ${String(sessions)} ${es ? 'estadías' : 'stays'}`}
+                      aria-label={`${formatBarDate(point.date, es)}: ${formatMoney(pointRevenue, displayCurrency)}, ${String(sessions)} ${es ? 'estadías' : 'stays'}`}
                       aria-pressed={isActive}
                       className="group relative flex h-full flex-1 items-end focus-visible:outline-none"
                       key={point.date}
@@ -330,7 +364,7 @@ export function OwnerOverviewRoute() {
                     label={
                       es ? `Facturado en ${String(days)} días` : `Revenue in ${String(days)} days`
                     }
-                    value={formatMoney(totalRevenue, summary?.currency)}
+                    value={formatMoney(totalRevenue, displayCurrency)}
                   />
                   <SummaryValue
                     label={es ? `Estadías completadas` : 'Completed stays'}
@@ -344,8 +378,8 @@ export function OwnerOverviewRoute() {
                     </span>
                     <p className="mt-1 font-mono font-bold tabular-nums">
                       {formatMoney(
-                        revenueSeries[activeBarIndex]?.revenueCents ?? 0,
-                        summary?.currency,
+                        revenueForCurrency(revenueSeries[activeBarIndex] ?? revenueSeries[0]),
+                        displayCurrency,
                       )}
                       <span className="font-sans text-xs font-medium text-foreground-muted">
                         {' '}

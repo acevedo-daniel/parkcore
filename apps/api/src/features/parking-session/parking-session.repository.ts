@@ -4,7 +4,7 @@ import {
   type ParkingSessionStatus,
 } from '../../../prisma/generated/client.js';
 import { prisma } from '../../config/prisma.js';
-import type { VisitData } from './parking-session.schema.js';
+import type { ParkingSessionFilter, VisitData } from './parking-session.schema.js';
 
 const vehicleSummarySelect = {
   id: true,
@@ -37,12 +37,11 @@ const parkingSessionWithRelationsSelect = {
   parking: { select: { id: true, title: true, ownerId: true } },
 } as const satisfies Prisma.ParkingSessionSelect;
 
-const parseDateFilter = (value: string, endOfDay = false): Date => {
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return new Date(`${value}T${endOfDay ? '23:59:59.999' : '00:00:00.000'}Z`);
-  }
-  return new Date(value);
-};
+const parkingSessionHistoryAggregateSelect = {
+  status: true,
+  currency: true,
+  totalAmountCents: true,
+} as const satisfies Prisma.ParkingSessionSelect;
 
 export type ParkingSessionWithVehicle = Prisma.ParkingSessionGetPayload<{
   select: typeof parkingSessionWithVehicleSelect;
@@ -50,6 +49,10 @@ export type ParkingSessionWithVehicle = Prisma.ParkingSessionGetPayload<{
 
 export type ParkingSessionWithRelations = Prisma.ParkingSessionGetPayload<{
   select: typeof parkingSessionWithRelationsSelect;
+}>;
+
+export type ParkingSessionHistoryAggregateRow = Prisma.ParkingSessionGetPayload<{
+  select: typeof parkingSessionHistoryAggregateSelect;
 }>;
 
 export type CheckInBlockedReason = 'parking-full' | 'vehicle-active';
@@ -83,24 +86,21 @@ export const findByParking = async (
     take: number;
     status?: ParkingSessionStatus;
     plate?: string;
-    dateFrom?: string;
-    dateTo?: string;
+    startTimeFrom: Date;
+    startTimeTo: Date;
   },
-): Promise<{ data: ParkingSessionWithVehicle[]; total: number }> => {
+): Promise<{
+  data: ParkingSessionWithVehicle[];
+  total: number;
+  aggregateRows: ParkingSessionHistoryAggregateRow[];
+}> => {
   const where: Prisma.ParkingSessionWhereInput = {
     parkingId,
     ...(options.status ? { status: options.status } : {}),
     ...(options.plate ? { vehicle: { plate: { contains: options.plate } } } : {}),
-    ...(options.dateFrom || options.dateTo
-      ? {
-          startTime: {
-            ...(options.dateFrom ? { gte: parseDateFilter(options.dateFrom) } : {}),
-            ...(options.dateTo ? { lte: parseDateFilter(options.dateTo, true) } : {}),
-          },
-        }
-      : {}),
+    startTime: { gte: options.startTimeFrom, lte: options.startTimeTo },
   };
-  const [data, total] = await Promise.all([
+  const [data, total, aggregateRows] = await Promise.all([
     prisma.parkingSession.findMany({
       where,
       skip: options.skip,
@@ -109,8 +109,33 @@ export const findByParking = async (
       select: parkingSessionWithVehicleSelect,
     }),
     prisma.parkingSession.count({ where }),
+    prisma.parkingSession.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      select: parkingSessionHistoryAggregateSelect,
+    }),
   ]);
-  return { data, total };
+  return { data, total, aggregateRows };
+};
+
+export const findForExport = async (
+  parkingId: string,
+  options: Pick<ParkingSessionFilter, 'status' | 'plate'> & {
+    startTimeFrom: Date;
+    startTimeTo: Date;
+  },
+): Promise<ParkingSessionWithVehicle[]> => {
+  const where: Prisma.ParkingSessionWhereInput = {
+    parkingId,
+    ...(options.status ? { status: options.status } : {}),
+    ...(options.plate ? { vehicle: { plate: { contains: options.plate } } } : {}),
+    startTime: { gte: options.startTimeFrom, lte: options.startTimeTo },
+  };
+  return await prisma.parkingSession.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+    select: parkingSessionWithVehicleSelect,
+  });
 };
 
 export const createActiveIfAvailable = async (
@@ -168,9 +193,10 @@ export const completeIfActive = async (
 
 export const cancelIfActive = async (id: string): Promise<ParkingSessionWithVehicle | null> => {
   return await prisma.$transaction(async (tx) => {
+    const endTime = new Date();
     const result = await tx.parkingSession.updateMany({
       where: { id, status: 'ACTIVE' },
-      data: { status: 'CANCELLED', totalAmountCents: null },
+      data: { endTime, status: 'CANCELLED', totalAmountCents: null },
     });
     if (result.count !== 1) return null;
     return await tx.parkingSession.findUniqueOrThrow({

@@ -95,7 +95,9 @@ async function checkAuthFlow(): Promise<void> {
     body: JSON.stringify({
       email,
       password,
-      name: 'Smoke User',
+      name: 'Smoke',
+      lastName: 'User',
+      timezone: 'America/Argentina/Buenos_Aires',
     }),
   });
 

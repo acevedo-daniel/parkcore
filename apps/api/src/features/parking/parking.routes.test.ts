@@ -27,6 +27,7 @@ const parking = { id: parkingId, title: 'Central Parking' };
 
 const createParkingBody = {
   title: 'Central Parking',
+  neighborhood: 'Downtown',
   address: '123 Main Street',
   hourlyRateCents: 1550,
   currency: 'USD',
@@ -47,7 +48,7 @@ function expectErrorContract(body: unknown): void {
 }
 
 async function authorizationHeader(userId = 'owner-1'): Promise<Record<string, string>> {
-  const token = await signAccessToken({ sub: userId });
+  const token = await signAccessToken({ sub: userId, kind: 'OWNER' });
   return { authorization: `Bearer ${token}` };
 }
 
@@ -59,14 +60,25 @@ describe('parking routes', () => {
   it('parses a valid query before calling the service', async () => {
     parkingService.findAll.mockResolvedValue({ data: [], meta: {} });
 
-    const response = await request(app).get('/parkings?page=2&limit=5&minHourlyRateCents=1000');
+    const response = await request(app).get(
+      '/parkings?page=2&limit=5&currency=USD&minHourlyRateCents=1000',
+    );
 
     expect(response.status).toBe(200);
     expect(parkingService.findAll).toHaveBeenCalledWith({
       page: 2,
       limit: 5,
+      currency: 'USD',
       minHourlyRateCents: 1000,
     });
+  });
+
+  it('requires currency context for public price filters', async () => {
+    const response = await request(app).get('/parkings?minHourlyRateCents=1000');
+
+    expect(response.status).toBe(400);
+    expectErrorContract(response.body);
+    expect(parkingService.findAll).not.toHaveBeenCalled();
   });
 
   it('returns the global error contract for an invalid query', async () => {
@@ -124,7 +136,11 @@ describe('parking routes', () => {
       .send(createParkingBody);
 
     expect(response.status).toBe(201);
-    expect(parkingService.create).toHaveBeenCalledWith('owner-1', createParkingBody);
+    expect(parkingService.create).toHaveBeenCalledWith('owner-1', {
+      ...createParkingBody,
+      is24Hours: true,
+      isListed: false,
+    });
   });
 
   it('rejects unsupported currency codes before calling the service', async () => {

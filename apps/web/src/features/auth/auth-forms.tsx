@@ -22,7 +22,8 @@ const loginSchema = z.object({
 });
 
 const registerSchema = loginSchema.extend({
-  name: z.string().trim().min(2, 'Use at least 2 characters.').max(50).optional().or(z.literal('')),
+  name: z.string().trim().min(2, 'Use at least 2 characters.').max(50),
+  lastName: z.string().trim().min(2, 'Use at least 2 characters.').max(50),
 });
 
 type LoginValues = z.infer<typeof loginSchema>;
@@ -190,7 +191,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
   const { language } = useAppearance();
   const es = language === 'es';
   const form = useForm<RegisterValues>({
-    defaultValues: { email: '', name: '', password: '' },
+    defaultValues: { email: '', lastName: '', name: '', password: '' },
     resolver: zodResolver(registerSchema),
   });
 
@@ -198,8 +199,10 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
     try {
       await registerUser({
         email: values.email,
-        ...(values.name ? { name: values.name } : {}),
+        lastName: values.lastName,
+        name: values.name,
         password: values.password,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
       onSuccess();
     } catch (error) {
@@ -218,7 +221,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
       <Field
         error={form.formState.errors.name?.message}
         htmlFor="name"
-        label={es ? 'Nombre (opcional)' : 'Name (optional)'}
+        label={es ? 'Nombre' : 'First name'}
       >
         <Input
           aria-describedby={form.formState.errors.name ? 'name-error' : undefined}
@@ -226,6 +229,19 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
           autoComplete="name"
           id="name"
           {...form.register('name')}
+        />
+      </Field>
+      <Field
+        error={form.formState.errors.lastName?.message}
+        htmlFor="lastName"
+        label={es ? 'Apellido' : 'Last name'}
+      >
+        <Input
+          aria-describedby={form.formState.errors.lastName ? 'lastName-error' : undefined}
+          aria-invalid={Boolean(form.formState.errors.lastName)}
+          autoComplete="family-name"
+          id="lastName"
+          {...form.register('lastName')}
         />
       </Field>
       <Field error={form.formState.errors.email?.message} htmlFor="email" label="Email">

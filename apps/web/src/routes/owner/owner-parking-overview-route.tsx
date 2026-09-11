@@ -296,7 +296,12 @@ export function OwnerParkingOverviewRoute() {
           ) : (
             <div className="grid gap-3">
               {activeSessions?.map((session) => (
-                <SessionRow key={session.id} session={session} to={`/app/sessions/${session.id}`} />
+                <SessionRow
+                  key={session.id}
+                  session={session}
+                  timezone={parking.timezone}
+                  to={`/app/sessions/${session.id}`}
+                />
               ))}
             </div>
           )}

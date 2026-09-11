@@ -35,6 +35,7 @@ const requiredPaths = [
   '/parkings/{id}',
   '/parkings/{parkingId}/sessions/check-in',
   '/parkings/{parkingId}/sessions',
+  '/parkings/{parkingId}/sessions/export.csv',
   '/parkings/{parkingId}/sessions/active',
   '/sessions/{sessionId}',
   '/sessions/{sessionId}/check-out',
@@ -50,7 +51,8 @@ const requiredSchemas = [
   'AuthResponse',
   'UserResponse',
   'ParkingResponse',
-  'ParkingListResponse',
+  'PublicParkingResponse',
+  'PublicParkingListResponse',
   'VehicleSummary',
   'ParkingSessionResponse',
   'ParkingSessionListResponse',
@@ -60,6 +62,7 @@ const requiredSchemas = [
 const dateTimeFields: Record<string, string[]> = {
   UserResponse: ['createdAt', 'updatedAt'],
   ParkingResponse: ['createdAt', 'updatedAt'],
+  PublicParkingResponse: ['nextOpeningAt'],
   ParkingSessionResponse: ['startTime', 'endTime', 'createdAt', 'updatedAt'],
 };
 
