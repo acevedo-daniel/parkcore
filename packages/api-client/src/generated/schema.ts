@@ -257,7 +257,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description Conflict (vehicle already inside, parking full, or parking inactive) */
+                /** @description Conflict (vehicle already inside, parking full, parking inactive, or parking closed) */
                 409: {
                     headers: {
                         [name: string]: unknown;
@@ -745,6 +745,15 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
+                /** @description Forbidden - account cannot own parking facilities */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -907,6 +916,15 @@ export interface paths {
                 };
                 /** @description Parking not found */
                 404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Capacity cannot be reduced below active sessions */
+                409: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1741,6 +1759,18 @@ export interface components {
              * @description Owner UUID
              */
             ownerId: string;
+            /** @description Neighborhood or area */
+            neighborhood: string;
+            /** @description IANA timezone used for local operations */
+            timezone: string;
+            /** @description Whether the parking is open all day */
+            is24Hours: boolean;
+            /** @description Local opening time in HH:mm */
+            opensAt: string | null;
+            /** @description Local closing time in HH:mm */
+            closesAt: string | null;
+            /** @description Whether the facility is publicly listed */
+            isListed: boolean;
             /**
              * Format: date-time
              * @description Creation time
@@ -1760,6 +1790,11 @@ export interface components {
             title: string;
             /** @description Optional description of the facility */
             description?: string;
+            /**
+             * @description Neighborhood or area
+             * @example Palermo
+             */
+            neighborhood: string;
             /**
              * @description Full street address
              * @example 123 Main Street
@@ -1797,6 +1832,22 @@ export interface components {
              * @example -58.3816
              */
             lng: number;
+            /** @description IANA timezone used for local operations */
+            timezone?: string;
+            /**
+             * @description Whether the parking is open all day
+             * @default true
+             */
+            is24Hours: boolean;
+            /** @description Local opening time in HH:mm */
+            opensAt?: string | null;
+            /** @description Local closing time in HH:mm */
+            closesAt?: string | null;
+            /**
+             * @description Whether the facility is listed in public discovery
+             * @default false
+             */
+            isListed: boolean;
         };
         ParkingListResponse: {
             data: components["schemas"]["ParkingResponse"][];
@@ -1842,6 +1893,11 @@ export interface components {
             /** @description Optional description of the facility */
             description?: string;
             /**
+             * @description Neighborhood or area
+             * @example Palermo
+             */
+            neighborhood?: string;
+            /**
              * @description Full street address
              * @example 123 Main Street
              */
@@ -1878,8 +1934,18 @@ export interface components {
              * @example -58.3816
              */
             lng?: number;
+            /** @description IANA timezone used for local operations */
+            timezone?: string;
+            /** @description Whether the parking is open all day */
+            is24Hours?: boolean;
+            /** @description Local opening time in HH:mm */
+            opensAt?: string | null;
+            /** @description Local closing time in HH:mm */
+            closesAt?: string | null;
             /** @description Whether the parking accepts check-ins */
             isActive?: boolean;
+            /** @description Whether the facility is listed in public discovery */
+            isListed?: boolean;
         };
         AnalyticsSummaryResponse: {
             activeVehicles: number;

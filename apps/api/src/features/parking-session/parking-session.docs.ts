@@ -30,7 +30,9 @@ export function registerParkingSessionDocs(registry: OpenAPIRegistry): void {
       401: errorResponse('Unauthorized'),
       403: errorResponse('Forbidden - not the owner'),
       404: errorResponse('Parking not found'),
-      409: errorResponse('Conflict (vehicle already inside, parking full, or parking inactive)'),
+      409: errorResponse(
+        'Conflict (vehicle already inside, parking full, parking inactive, or parking closed)',
+      ),
     },
   });
 

@@ -6,8 +6,10 @@ vi.mock('./parking.repository.js', () => ({
   findActiveById: vi.fn(),
   findByOwner: vi.fn(),
   update: vi.fn(),
+  updateWithCapacityCheck: vi.fn(),
   findAll: vi.fn(),
 }));
+vi.mock('../user/user.repository.js', () => ({ findById: vi.fn() }));
 
 import { buildParking } from '../../../tests/helpers/builders.js';
 import { ForbiddenError, NotFoundError } from '../../errors/index.js';
@@ -18,21 +20,29 @@ import {
   type UpdateParking,
 } from './parking.schema.js';
 import * as parkingRepository from './parking.repository.js';
+import * as userRepository from '../user/user.repository.js';
 import { create, findAll, findById, findOwned, findPublicById, update } from './parking.service.js';
 
 const createDto: CreateParking = {
   title: 'Main Parking',
+  neighborhood: 'Downtown',
   address: '123 Test St',
   hourlyRateCents: 200000,
   currency: 'USD',
   capacity: 20,
   lat: 10,
   lng: 10,
+  is24Hours: true,
+  isListed: false,
 };
 
 describe('parking.service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(userRepository.findById).mockResolvedValue({
+      kind: 'OWNER',
+      timezone: 'America/Argentina/Buenos_Aires',
+    } as never);
   });
 
   it('creates parking connected to owner', async () => {
@@ -42,11 +52,28 @@ describe('parking.service', () => {
     const result = await create('owner-1', createDto);
 
     expect(parkingRepository.create).toHaveBeenCalledWith({
-      neighborhood: 'Unspecified',
       ...createDto,
+      timezone: 'America/Argentina/Buenos_Aires',
+      opensAt: null,
+      closesAt: null,
       owner: { connect: { id: 'owner-1' } },
     });
     expect(result).toEqual(toParkingResponse(created));
+  });
+
+  it('forces demo parking to remain unlisted', async () => {
+    vi.mocked(userRepository.findById).mockResolvedValue({
+      kind: 'DEMO',
+      timezone: 'America/Argentina/Buenos_Aires',
+    } as never);
+    const created = buildParking({ isListed: false });
+    vi.mocked(parkingRepository.create).mockResolvedValue(created);
+
+    await create('demo-1', { ...createDto, isListed: true });
+
+    expect(parkingRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ isListed: false, owner: { connect: { id: 'demo-1' } } }),
+    );
   });
 
   it('findById throws NotFoundError when parking does not exist', async () => {
@@ -101,23 +128,37 @@ describe('parking.service', () => {
     it('updates parking when owner matches', async () => {
       const updatedParking = buildParking({ title: 'Updated Parking' });
       vi.mocked(parkingRepository.findById).mockResolvedValue(buildParking({ ownerId: 'owner-1' }));
-      vi.mocked(parkingRepository.update).mockResolvedValue(updatedParking);
+      vi.mocked(parkingRepository.updateWithCapacityCheck).mockResolvedValue(updatedParking);
 
       const result = await update('owner-1', 'parking-1', dto);
 
-      expect(parkingRepository.update).toHaveBeenCalledWith('parking-1', dto);
+      expect(parkingRepository.updateWithCapacityCheck).toHaveBeenCalledWith('parking-1', dto);
       expect(result).toEqual(toParkingResponse(updatedParking));
     });
 
     it('allows the owner to deactivate a parking', async () => {
       const inactiveParking = buildParking({ isActive: false });
       vi.mocked(parkingRepository.findById).mockResolvedValue(buildParking({ ownerId: 'owner-1' }));
-      vi.mocked(parkingRepository.update).mockResolvedValue(inactiveParking);
+      vi.mocked(parkingRepository.updateWithCapacityCheck).mockResolvedValue(inactiveParking);
 
       const result = await update('owner-1', 'parking-1', { isActive: false });
 
-      expect(parkingRepository.update).toHaveBeenCalledWith('parking-1', { isActive: false });
+      expect(parkingRepository.updateWithCapacityCheck).toHaveBeenCalledWith('parking-1', {
+        isActive: false,
+      });
       expect(result).toEqual(toParkingResponse(inactiveParking));
+    });
+
+    it('returns the active session count when capacity is too low', async () => {
+      vi.mocked(parkingRepository.updateWithCapacityCheck).mockResolvedValue({
+        activeCount: 3,
+        kind: 'capacity-blocked',
+      });
+      vi.mocked(parkingRepository.findById).mockResolvedValue(buildParking({ ownerId: 'owner-1' }));
+
+      await expect(update('owner-1', 'parking-1', { capacity: 2 })).rejects.toThrow(
+        '3 active sessions',
+      );
     });
   });
 

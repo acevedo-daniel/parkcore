@@ -606,6 +606,36 @@
             "format": "uuid",
             "description": "Owner UUID"
           },
+          "neighborhood": {
+            "type": "string",
+            "description": "Neighborhood or area"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone used for local operations"
+          },
+          "is24Hours": {
+            "type": "boolean",
+            "description": "Whether the parking is open all day"
+          },
+          "opensAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Local opening time in HH:mm"
+          },
+          "closesAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Local closing time in HH:mm"
+          },
+          "isListed": {
+            "type": "boolean",
+            "description": "Whether the facility is publicly listed"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time",
@@ -630,6 +660,12 @@
           "lng",
           "isActive",
           "ownerId",
+          "neighborhood",
+          "timezone",
+          "is24Hours",
+          "opensAt",
+          "closesAt",
+          "isListed",
           "createdAt",
           "updatedAt"
         ],
@@ -649,6 +685,13 @@
             "type": "string",
             "maxLength": 500,
             "description": "Optional description of the facility"
+          },
+          "neighborhood": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "description": "Neighborhood or area",
+            "example": "Palermo"
           },
           "address": {
             "type": "string",
@@ -697,10 +740,41 @@
             "maximum": 180,
             "description": "Geographic longitude",
             "example": -58.3816
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone used for local operations"
+          },
+          "is24Hours": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether the parking is open all day"
+          },
+          "opensAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$",
+            "description": "Local opening time in HH:mm"
+          },
+          "closesAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$",
+            "description": "Local closing time in HH:mm"
+          },
+          "isListed": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the facility is listed in public discovery"
           }
         },
         "required": [
           "title",
+          "neighborhood",
           "address",
           "hourlyRateCents",
           "currency",
@@ -789,6 +863,13 @@
             "maxLength": 500,
             "description": "Optional description of the facility"
           },
+          "neighborhood": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "description": "Neighborhood or area",
+            "example": "Palermo"
+          },
           "address": {
             "type": "string",
             "minLength": 5,
@@ -837,9 +918,37 @@
             "description": "Geographic longitude",
             "example": -58.3816
           },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone used for local operations"
+          },
+          "is24Hours": {
+            "type": "boolean",
+            "description": "Whether the parking is open all day"
+          },
+          "opensAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$",
+            "description": "Local opening time in HH:mm"
+          },
+          "closesAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$",
+            "description": "Local closing time in HH:mm"
+          },
           "isActive": {
             "type": "boolean",
             "description": "Whether the parking accepts check-ins"
+          },
+          "isListed": {
+            "type": "boolean",
+            "description": "Whether the facility is listed in public discovery"
           }
         },
         "additionalProperties": false
@@ -1365,7 +1474,7 @@
             }
           },
           "409": {
-            "description": "Conflict (vehicle already inside, parking full, or parking inactive)",
+            "description": "Conflict (vehicle already inside, parking full, parking inactive, or parking closed)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1905,6 +2014,16 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Forbidden - account cannot own parking facilities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       },
@@ -2170,6 +2289,16 @@
           },
           "404": {
             "description": "Parking not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Capacity cannot be reduced below active sessions",
             "content": {
               "application/json": {
                 "schema": {

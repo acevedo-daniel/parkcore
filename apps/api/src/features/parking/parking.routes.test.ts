@@ -27,6 +27,7 @@ const parking = { id: parkingId, title: 'Central Parking' };
 
 const createParkingBody = {
   title: 'Central Parking',
+  neighborhood: 'Downtown',
   address: '123 Main Street',
   hourlyRateCents: 1550,
   currency: 'USD',
@@ -124,7 +125,11 @@ describe('parking routes', () => {
       .send(createParkingBody);
 
     expect(response.status).toBe(201);
-    expect(parkingService.create).toHaveBeenCalledWith('owner-1', createParkingBody);
+    expect(parkingService.create).toHaveBeenCalledWith('owner-1', {
+      ...createParkingBody,
+      is24Hours: true,
+      isListed: false,
+    });
   });
 
   it('rejects unsupported currency codes before calling the service', async () => {

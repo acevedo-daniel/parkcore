@@ -38,6 +38,7 @@ export function registerParkingDocs(registry: OpenAPIRegistry): void {
       },
       400: errorResponse('Validation error'),
       401: errorResponse('Unauthorized - missing or invalid token'),
+      403: errorResponse('Forbidden - account cannot own parking facilities'),
     },
   });
 
@@ -136,6 +137,7 @@ export function registerParkingDocs(registry: OpenAPIRegistry): void {
       401: errorResponse('Unauthorized'),
       403: errorResponse('Forbidden - not the owner'),
       404: errorResponse('Parking not found'),
+      409: errorResponse('Capacity cannot be reduced below active sessions'),
     },
   });
 }

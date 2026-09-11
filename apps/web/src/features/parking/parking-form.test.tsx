@@ -17,6 +17,7 @@ describe('ParkingForm', () => {
     expect(onSubmit).not.toHaveBeenCalled();
 
     await user.type(screen.getByLabelText('Name'), 'Central Parking');
+    await user.type(screen.getByLabelText('Neighborhood'), 'Palermo');
     await user.type(screen.getByLabelText('Address'), '123 Main Street');
     await user.clear(screen.getByLabelText('Latitude'));
     await user.type(screen.getByLabelText('Latitude'), '-34.6037');
@@ -30,11 +31,17 @@ describe('ParkingForm', () => {
       expect(onSubmit).toHaveBeenCalledWith({
         address: '123 Main Street',
         capacity: 1,
+        closesAt: null,
         currency: 'USD',
         hourlyRateCents: 1555,
+        is24Hours: true,
+        isListed: false,
         lat: -34.6037,
         lng: -58.3816,
+        neighborhood: 'Palermo',
+        opensAt: null,
         title: 'Central Parking',
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
     });
   });

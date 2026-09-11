@@ -4,6 +4,7 @@ import { type PaginationResult, createPaginatedResult } from '../../utils/pagina
 import * as parkingService from '../parking/parking.service.js';
 import * as vehicleService from '../vehicle/vehicle.service.js';
 import * as parkingSessionRepository from './parking-session.repository.js';
+import { isParkingOpen } from '../../utils/timezone.js';
 import type {
   CheckIn,
   ParkingSessionActiveQuery,
@@ -22,6 +23,19 @@ export const checkIn = async (
   if (parking.ownerId !== ownerId)
     throw new ForbiddenError("You don't have access to this parking");
   if (!parking.isActive) throw new ConflictError('Parking is inactive');
+  if (
+    !isParkingOpen(
+      {
+        timezone: parking.timezone,
+        is24Hours: parking.is24Hours,
+        opensAt: parking.opensAt,
+        closesAt: parking.closesAt,
+      },
+      new Date(),
+    )
+  ) {
+    throw new ConflictError('Parking is closed');
+  }
 
   const vehicle = await vehicleService.findOrCreateForAuthorizedParking(parkingId, {
     plate: dto.plate,

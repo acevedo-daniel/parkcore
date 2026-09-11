@@ -77,6 +77,7 @@ describe('owner workflow integration', () => {
       .set('Authorization', authorization)
       .send({
         title: `Integration Parking ${suffix}`,
+        neighborhood: 'Downtown',
         address: '123 Integration Street',
         hourlyRateCents: 1500,
         currency: 'USD',
@@ -120,17 +121,42 @@ describe('owner workflow integration', () => {
     expect(checkedIn.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     expect(checkedIn.endTime).toBeNull();
 
+    const secondCheckInResponse = await request(app)
+      .post(`/parkings/${parking.id}/sessions/check-in`)
+      .set('Authorization', authorization)
+      .send({ plate: 'XY-456-ZZ', type: 'CAR' });
+    expect(secondCheckInResponse.status).toBe(201);
+    const secondCheckedIn = secondCheckInResponse.body as unknown as SessionResponse;
+
     const activeResponse = await request(app)
       .get(`/parkings/${parking.id}/sessions/active`)
       .set('Authorization', authorization);
 
     expect(activeResponse.status).toBe(200);
     const activeSessions = activeResponse.body as unknown as SessionResponse[];
-    expect(activeSessions).toHaveLength(1);
-    expect(activeSessions[0]).toMatchObject({
-      id: checkedIn.id,
-      vehicle: { id: checkedIn.vehicle.id },
-    });
+    expect(activeSessions).toHaveLength(2);
+    expect(
+      activeSessions.some(
+        (session) => session.id === checkedIn.id && session.vehicle.id === checkedIn.vehicle.id,
+      ),
+    ).toBe(true);
+    await expect(
+      prisma.parkingSession.count({ where: { parkingId: parking.id, status: 'ACTIVE' } }),
+    ).resolves.toBe(2);
+
+    const capacityResponse = await request(app)
+      .patch(`/parkings/${parking.id}`)
+      .set('Authorization', authorization)
+      .send({ capacity: 0 });
+    expect(capacityResponse.status).toBe(400);
+
+    const blockedCapacityResponse = await request(app)
+      .patch(`/parkings/${parking.id}`)
+      .set('Authorization', authorization)
+      .send({ capacity: 1 });
+    expect(blockedCapacityResponse.status).toBe(409);
+    const blockedCapacityBody = blockedCapacityResponse.body as { message: string };
+    expect(blockedCapacityBody.message).toContain('2 active sessions');
 
     const checkoutResponse = await request(app)
       .post(`/sessions/${checkedIn.id}/check-out`)
@@ -145,6 +171,11 @@ describe('owner workflow integration', () => {
       vehicle: { plate: 'AB123CD' },
     });
     expect(completed.endTime).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+
+    const cancelResponse = await request(app)
+      .patch(`/sessions/${secondCheckedIn.id}/cancel`)
+      .set('Authorization', authorization);
+    expect(cancelResponse.status).toBe(200);
 
     const detailResponse = await request(app)
       .get(`/sessions/${checkedIn.id}`)

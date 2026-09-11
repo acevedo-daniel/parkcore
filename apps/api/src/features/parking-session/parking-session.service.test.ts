@@ -127,6 +127,24 @@ describe('parking session service', () => {
       );
     });
 
+    it('rejects check-in while a scheduled parking is closed', async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-09-11T07:00:00.000Z'));
+      vi.mocked(parkingService.findById).mockResolvedValue(
+        buildParking({
+          is24Hours: false,
+          opensAt: '08:00',
+          closesAt: '18:00',
+          timezone: 'America/Argentina/Buenos_Aires',
+        }),
+      );
+
+      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toThrow(
+        'Parking is closed',
+      );
+      expect(vehicleService.findOrCreateForAuthorizedParking).not.toHaveBeenCalled();
+    });
+
     it('rejects a non-owner and persistence conflicts', async () => {
       vi.mocked(parkingService.findById).mockResolvedValue(
         buildParking({ ownerId: 'other-owner' }),

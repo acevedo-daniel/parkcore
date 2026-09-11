@@ -32,6 +32,38 @@ export const update = async (id: string, data: Prisma.ParkingUpdateInput): Promi
   });
 };
 
+export interface CapacityUpdateBlocked {
+  activeCount: number;
+  kind: 'capacity-blocked';
+}
+
+export const updateWithCapacityCheck = async (
+  id: string,
+  data: Prisma.ParkingUpdateInput,
+): Promise<Parking | CapacityUpdateBlocked | null> => {
+  return await prisma.$transaction(
+    async (tx) => {
+      const current = await tx.parking.findUnique({
+        where: { id },
+        select: { capacity: true },
+      });
+      if (!current) return null;
+
+      const requestedCapacity =
+        typeof data.capacity === 'number' ? data.capacity : current.capacity;
+      if (requestedCapacity < current.capacity) {
+        const activeCount = await tx.parkingSession.count({
+          where: { parkingId: id, status: 'ACTIVE' },
+        });
+        if (requestedCapacity < activeCount) return { activeCount, kind: 'capacity-blocked' };
+      }
+
+      return await tx.parking.update({ where: { id }, data });
+    },
+    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+  );
+};
+
 export const findAll = async (
   skip: number,
   take: number,

@@ -105,10 +105,16 @@ test('signs in, creates a parking, checks in, and completes a parking session', 
         id: 'parking-1',
         image: null,
         isActive: true,
+        is24Hours: true,
+        isListed: false,
         lat: -34.61,
         lng: -58.38,
+        neighborhood: 'Downtown',
+        opensAt: null,
         ownerId: owner.id,
         title: 'North Garage',
+        timezone: 'America/Argentina/Buenos_Aires',
+        closesAt: null,
         updatedAt: '2026-08-17T09:05:00.000Z',
       };
       await respond(parking, 201);
@@ -182,6 +188,7 @@ test('signs in, creates a parking, checks in, and completes a parking session', 
   await page.getByRole('link', { name: 'Create parking' }).click();
 
   await page.getByLabel('Name').fill('North Garage');
+  await page.getByLabel('Neighborhood').fill('Downtown');
   await page.getByLabel('Address').fill('202 North Street');
   await page.getByLabel('Latitude').fill('-34.61');
   await page.getByLabel('Longitude').fill('-58.38');
