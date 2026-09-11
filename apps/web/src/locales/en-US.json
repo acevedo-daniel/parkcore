@@ -10,6 +10,10 @@
     "dismissNotification": "Dismiss notification",
     "tryAgain": "Try again"
   },
+  "dialog": {
+    "close": "Close {{title}}",
+    "eyebrow": "ParkCore / operation"
+  },
   "demo": {
     "live": "Try the example",
     "try": "Try the demo",
@@ -57,7 +61,8 @@
     "errorEyebrow": "Needs attention",
     "errorTitle": "We could not complete that action",
     "retry": "Try again",
-    "dismiss": "Dismiss notification"
+    "dismiss": "Dismiss notification",
+    "toastRegion": "Notifications"
   },
   "theme": {
     "dark": "Dark",

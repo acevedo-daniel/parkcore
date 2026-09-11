@@ -5,7 +5,8 @@ import { z } from 'zod';
 import { useAppearance } from '../../app/appearance-provider.js';
 import type { CreateParkingRequest, Parking } from '../../lib/api/owner-api.js';
 import { Button } from '../../components/ui/button.js';
-import { Checkbox, Field, Input, Select, Textarea } from '../../components/ui/field.js';
+import { Field, Input, Select, Textarea } from '../../components/ui/field.js';
+import { Switch } from '../../components/ui/switch.js';
 
 const parkingFormSchema = z
   .object({
@@ -198,7 +199,12 @@ export function ParkingForm({
         <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
           {es ? 'Horarios' : 'Hours'}
         </legend>
-        <Checkbox
+        <Switch
+          description={
+            es
+              ? 'No hace falta completar horarios de apertura y cierre.'
+              : 'Opening and closing times are not required.'
+          }
           id="parking-24-hours"
           label={es ? 'Abierta las 24 horas' : 'Open 24 hours'}
           {...form.register('is24Hours')}
@@ -265,7 +271,12 @@ export function ParkingForm({
           <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
             {es ? 'Disponibilidad' : 'Availability'}
           </legend>
-          <Checkbox
+          <Switch
+            description={
+              es
+                ? 'La cochera puede aceptar nuevos ingresos mientras esté habilitada.'
+                : 'The parking can accept new check-ins while enabled.'
+            }
             id="parking-active"
             label={es ? 'Aceptar nuevos ingresos' : 'Accept new check-ins'}
             {...form.register('isActive')}
@@ -276,7 +287,12 @@ export function ParkingForm({
         <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
           {es ? 'Publicación' : 'Publication'}
         </legend>
-        <Checkbox
+        <Switch
+          description={
+            es
+              ? 'Aparece en el directorio público cuando está activa.'
+              : 'Appears in the public directory when active.'
+          }
           id="parking-listed"
           label={es ? 'Visible en el directorio' : 'Visible in directory'}
           {...form.register('isListed')}

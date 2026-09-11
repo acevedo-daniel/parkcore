@@ -105,6 +105,8 @@ The web application persists the owner's access token in browser `localStorage` 
 
 The web localization boundary lives in `apps/web/src/lib/localization.ts` and the adjacent `src/locales/` catalogs. The provider exposes the typed `es-AR` or `en-US` locale, translation, and plural helpers to React consumers. Locale-sensitive formatters receive that locale explicitly, so display output does not depend on the document language as an implicit global.
 
+Shared web controls and feedback live under `apps/web/src/components/ui/`. Native inputs, textareas, selects, checkboxes, and switches remain the browser interaction source of truth, while the shared `Field` wrapper owns label, help, and error association. Radix owns dialog, sheet, and toast focus containment and dismissal behavior. These primitives consume semantic theme tokens and typed shared labels so route components compose the interaction layer without recreating its accessibility or theme contract.
+
 Access tokens carry the authenticated identity kind. Credential login issues tokens only for `OWNER` identities. `DEMO` tokens are bounded by the demo identity expiration, while `SHOWCASE` tokens may read identity data but are rejected from parking mutation and operation paths.
 
 Each demo entry creates its own four-hour DEMO owner and canonical scenario inside one transaction. Demo reset regenerates only the authenticated DEMO owner's scenario and preserves its original expiry. Protected requests for expired or deleted DEMO subjects return `code=DEMO_EXPIRED`; the web auth provider clears its token and cached server state. Bounded opportunistic cleanup runs during creation, and the explicit `demo:cleanup` command removes only expired DEMO owners.
