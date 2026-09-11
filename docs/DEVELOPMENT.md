@@ -66,6 +66,10 @@ The local example points `DATABASE_URL` to the PostgreSQL container started by `
 
 Never put secrets in `VITE_*` variables; Vite embeds them into the browser build.
 
+### Client appearance preferences
+
+The web client stores `parkcore-lang` as `es-AR` or `en-US` and `parkcore-theme` as `system`, `light`, or `dark`. Existing `es` and `en` language values are normalized when loaded. The `system` theme listens for operating system changes only while it is selected. The prepaint bootstrap and React provider keep the document language, `data-theme`, `color-scheme`, and `theme-color` metadata aligned before and after React mounts.
+
 ## Run locally
 
 ```bash

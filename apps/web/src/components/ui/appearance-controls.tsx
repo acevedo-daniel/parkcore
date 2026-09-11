@@ -2,7 +2,7 @@ import { useAppearance } from '../../app/appearance-provider.js';
 import { cn } from '../../lib/cn.js';
 
 export function AppearanceControls({ compact = false }: { compact?: boolean }) {
-  const { language, preference, setLanguage, setThemePreference, t } = useAppearance();
+  const { locale, preference, setLanguage, setThemePreference, t } = useAppearance();
 
   return (
     <div className={cn('flex items-center gap-2', compact && 'w-full justify-between')}>
@@ -12,30 +12,32 @@ export function AppearanceControls({ compact = false }: { compact?: boolean }) {
         role="group"
       >
         <button
-          aria-pressed={language === 'es'}
+          aria-label={t('appearance.languageSpanish')}
+          aria-pressed={locale === 'es-AR'}
           className={cn(
             'rounded-full px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] transition-colors',
-            language === 'es'
+            locale === 'es-AR'
               ? 'bg-primary text-primary-foreground'
               : 'text-foreground hover:bg-accent hover:text-accent-foreground',
           )}
           onClick={() => {
-            setLanguage('es');
+            setLanguage('es-AR');
           }}
           type="button"
         >
           ES
         </button>
         <button
-          aria-pressed={language === 'en'}
+          aria-label={t('appearance.languageEnglish')}
+          aria-pressed={locale === 'en-US'}
           className={cn(
             'rounded-full px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] transition-colors',
-            language === 'en'
+            locale === 'en-US'
               ? 'bg-primary text-primary-foreground'
               : 'text-foreground hover:bg-accent hover:text-accent-foreground',
           )}
           onClick={() => {
-            setLanguage('en');
+            setLanguage('en-US');
           }}
           type="button"
         >
