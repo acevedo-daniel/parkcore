@@ -58,4 +58,20 @@ describe('public parking detail images', () => {
 
     expect(await screen.findByLabelText('Parking image not available')).toBeTruthy();
   });
+
+  it('renders a configured schedule and handles missing schedule values', async () => {
+    api.getPublicParking.mockResolvedValue(
+      publicParkingFixture({ is24Hours: false, opensAt: '08:00', closesAt: '20:00' }),
+    );
+    renderParkingDetail();
+
+    expect(await screen.findByText('08:00 - 20:00')).toBeTruthy();
+
+    api.getPublicParking.mockResolvedValue(
+      publicParkingFixture({ is24Hours: false, opensAt: null, closesAt: null }),
+    );
+    renderParkingDetail();
+
+    expect(await screen.findByText('Schedule unavailable')).toBeTruthy();
+  });
 });

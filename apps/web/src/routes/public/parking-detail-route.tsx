@@ -104,7 +104,11 @@ export function ParkingDetailRoute() {
     ? es
       ? 'Abierta las 24 horas'
       : 'Open 24 hours'
-    : `${parking.opensAt} - ${parking.closesAt}`;
+    : parking.opensAt && parking.closesAt
+      ? `${parking.opensAt} - ${parking.closesAt}`
+      : es
+        ? 'Horario no disponible'
+        : 'Schedule unavailable';
 
   return (
     <article className="min-h-full bg-white pb-20 pt-10 sm:pb-28 sm:pt-16">

@@ -47,8 +47,8 @@ export const userResponseSchema = z
     phone: z.string().nullable().openapi({ description: 'Phone number' }),
     photoUrl: z.string().nullable().openapi({ description: 'Profile photo URL' }),
     timezone: z.string().openapi({ description: 'User IANA timezone' }),
-    demoExpiresAt: z
-      .iso.datetime()
+    demoExpiresAt: z.iso
+      .datetime()
       .nullable()
       .openapi({ description: 'Demo access expiration time', format: 'date-time' }),
     createdAt: z.iso.datetime().openapi({ description: 'Creation time', format: 'date-time' }),
