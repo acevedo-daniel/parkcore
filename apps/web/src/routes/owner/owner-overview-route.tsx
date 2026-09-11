@@ -14,16 +14,17 @@ import { OwnerParkingPanel } from '../../features/parking/owner-parking-panel.js
 import { useOwnedParkingOperations } from '../../features/parking/use-owned-parking-operations.js';
 import { cn } from '../../lib/cn.js';
 import { formatMoney } from '../../lib/format.js';
+import type { Locale } from '../../lib/localization.js';
 
-function formatBarDate(date: string, es: boolean): string {
-  return new Intl.DateTimeFormat(es ? 'es-AR' : 'en-US', {
+function formatBarDate(date: string, locale: Locale): string {
+  return new Intl.DateTimeFormat(locale, {
     day: 'numeric',
     month: 'short',
   }).format(new Date(`${date}T00:00:00`));
 }
 
 export function OwnerOverviewRoute() {
-  const { language } = useAppearance();
+  const { language, locale } = useAppearance();
   const es = language === 'es';
   const [days, setDays] = useState<7 | 30>(7);
   const [activeBarIndex, setActiveBarIndex] = useState<number | null>(null);
@@ -320,7 +321,7 @@ export function OwnerOverviewRoute() {
                   const height = Math.max(8, Math.round((pointRevenue / maxRevenue) * 100));
                   return (
                     <button
-                      aria-label={`${formatBarDate(point.date, es)}: ${formatMoney(pointRevenue, displayCurrency)}, ${String(sessions)} ${es ? 'estadías' : 'stays'}`}
+                      aria-label={`${formatBarDate(point.date, locale)}: ${formatMoney(pointRevenue, displayCurrency, locale)}, ${String(sessions)} ${es ? 'estadías' : 'stays'}`}
                       aria-pressed={isActive}
                       className="group relative flex h-full flex-1 items-end focus-visible:outline-none"
                       key={point.date}
@@ -354,7 +355,7 @@ export function OwnerOverviewRoute() {
                   >
                     {days === 30 && index % 4 !== 0 && index !== revenueSeries.length - 1
                       ? ''
-                      : formatBarDate(point.date, es)}
+                      : formatBarDate(point.date, locale)}
                   </span>
                 ))}
               </div>
@@ -364,7 +365,7 @@ export function OwnerOverviewRoute() {
                     label={
                       es ? `Facturado en ${String(days)} días` : `Revenue in ${String(days)} days`
                     }
-                    value={formatMoney(totalRevenue, displayCurrency)}
+                    value={formatMoney(totalRevenue, displayCurrency, locale)}
                   />
                   <SummaryValue
                     label={es ? `Estadías completadas` : 'Completed stays'}
@@ -374,12 +375,13 @@ export function OwnerOverviewRoute() {
                 {activeBarIndex !== null ? (
                   <div className="text-sm text-foreground-secondary">
                     <span className="font-mono text-xs uppercase tracking-wider text-accent-foreground">
-                      {formatBarDate(revenueSeries[activeBarIndex]?.date ?? '', es)}
+                      {formatBarDate(revenueSeries[activeBarIndex]?.date ?? '', locale)}
                     </span>
                     <p className="mt-1 font-mono font-bold tabular-nums">
                       {formatMoney(
                         revenueForCurrency(revenueSeries[activeBarIndex] ?? revenueSeries[0]),
                         displayCurrency,
+                        locale,
                       )}
                       <span className="font-sans text-xs font-medium text-foreground-muted">
                         {' '}

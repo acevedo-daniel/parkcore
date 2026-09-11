@@ -9,10 +9,19 @@ import {
   type ReactNode,
 } from 'react';
 
+import {
+  createPluralTranslator,
+  createTranslator,
+  resolveLocale,
+  type Locale,
+  type PluralTranslator,
+  type Translator,
+} from '../lib/localization.js';
+
 export type Theme = 'dark' | 'light';
 export type ThemePreference = 'dark' | 'light' | 'system';
-export type Locale = 'en-US' | 'es-AR';
 export type Language = 'en' | 'es';
+export type { Locale } from '../lib/localization.js';
 
 const THEME_STORAGE_KEY = 'parkcore-theme';
 const LOCALE_STORAGE_KEY = 'parkcore-lang';
@@ -23,66 +32,14 @@ const THEME_COLOR_BY_THEME: Record<Theme, string> = {
 
 const noop = () => undefined;
 
-const copy = {
-  en: {
-    'demo.live': 'Try the example',
-    'nav.directory': 'Directory',
-    'nav.operations': 'Operations',
-    'nav.overview': 'Overview',
-    'nav.parkings': 'Parkings',
-    'nav.profile': 'Profile',
-    'nav.signOut': 'Sign out',
-    'nav.skipMain': 'Skip to main content',
-    'nav.open': 'Open navigation',
-    'nav.close': 'Close navigation',
-    'nav.public': 'Public navigation',
-    'nav.owner': 'Owner navigation',
-    'nav.ownerMobile': 'Owner navigation, mobile',
-    'appearance.language': 'Select language',
-    'appearance.languageEnglish': 'English',
-    'appearance.languageSpanish': 'Spanish',
-    'appearance.languageTheme': 'Language and theme',
-    'appearance.theme': 'Theme',
-    'route.loading': 'Loading route',
-    'theme.dark': 'Dark',
-    'theme.light': 'Light',
-    'theme.system': 'System',
-  },
-  es: {
-    'demo.live': 'Probá el ejemplo',
-    'nav.directory': 'Directorio',
-    'nav.operations': 'Operaciones',
-    'nav.overview': 'Resumen',
-    'nav.parkings': 'Cocheras',
-    'nav.profile': 'Perfil',
-    'nav.signOut': 'Cerrar sesión',
-    'nav.skipMain': 'Saltar al contenido principal',
-    'nav.open': 'Abrir navegación',
-    'nav.close': 'Cerrar navegación',
-    'nav.public': 'Navegación pública',
-    'nav.owner': 'Navegación de operador',
-    'nav.ownerMobile': 'Navegación de operador, móvil',
-    'appearance.language': 'Seleccionar idioma',
-    'appearance.languageEnglish': 'Inglés',
-    'appearance.languageSpanish': 'Español',
-    'appearance.languageTheme': 'Idioma y tema',
-    'appearance.theme': 'Apariencia',
-    'route.loading': 'Cargando vista',
-    'theme.dark': 'Oscuro',
-    'theme.light': 'Claro',
-    'theme.system': 'Sistema',
-  },
-} as const;
-
-type CopyKey = keyof (typeof copy)['es'];
-
 interface AppearanceContextValue {
   language: Language;
   locale: Locale;
   setLanguage: (language: Language | Locale) => void;
   preference: ThemePreference;
   setThemePreference: (preference: ThemePreference) => void;
-  t: (key: CopyKey) => string;
+  t: Translator;
+  tPlural: PluralTranslator;
   theme: Theme;
 }
 
@@ -92,7 +49,8 @@ const fallbackAppearance: AppearanceContextValue = {
   setLanguage: () => undefined,
   preference: 'system',
   setThemePreference: () => undefined,
-  t: (key) => copy.en[key],
+  t: createTranslator('en-US'),
+  tPlural: createPluralTranslator('en-US'),
   theme: 'light',
 };
 
@@ -116,11 +74,6 @@ function writeStoredValue(key: string, value: string) {
 
 function parseThemePreference(value: string | null | undefined): ThemePreference {
   return value === 'light' || value === 'dark' || value === 'system' ? value : 'system';
-}
-
-function parseLocale(value: string | null | undefined): Locale {
-  if (value === 'en-US' || value === 'en') return 'en-US';
-  return 'es-AR';
 }
 
 function languageForLocale(locale: Locale): Language {
@@ -165,9 +118,11 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   const systemTheme = useSyncExternalStore<Theme>(subscribe, getSnapshot, () => 'light');
   const theme = preference === 'system' ? systemTheme : preference;
   const [locale, setLocale] = useState<Locale>(() =>
-    parseLocale(readStoredValue(LOCALE_STORAGE_KEY)),
+    resolveLocale(readStoredValue(LOCALE_STORAGE_KEY)),
   );
   const language = languageForLocale(locale);
+  const t = useMemo(() => createTranslator(locale), [locale]);
+  const tPlural = useMemo(() => createPluralTranslator(locale), [locale]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -183,7 +138,7 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   }, [locale]);
 
   const setLanguage = useCallback((nextLanguage: Language | Locale) => {
-    setLocale(parseLocale(nextLanguage));
+    setLocale(resolveLocale(nextLanguage));
   }, []);
   const setThemePreference = useCallback((nextPreference: ThemePreference) => {
     setPreference(nextPreference);
@@ -197,10 +152,11 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
       preference,
       setLanguage,
       setThemePreference,
-      t: (key) => copy[language][key],
+      t,
+      tPlural,
       theme,
     }),
-    [language, locale, preference, setLanguage, setThemePreference, theme],
+    [language, locale, preference, setLanguage, setThemePreference, t, tPlural, theme],
   );
 
   return <AppearanceContext.Provider value={value}>{children}</AppearanceContext.Provider>;

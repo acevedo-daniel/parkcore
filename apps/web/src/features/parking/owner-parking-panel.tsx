@@ -18,7 +18,7 @@ export function OwnerParkingPanel({
   occupancyLoading?: boolean;
   parking: Parking;
 }) {
-  const { language } = useAppearance();
+  const { language, locale } = useAppearance();
   const es = language === 'es';
   const occupancy =
     activeSessionCount === undefined || parking.capacity === 0
@@ -105,7 +105,7 @@ export function OwnerParkingPanel({
             {parking.isActive ? (es ? 'En operación' : 'Operating') : es ? 'Pausada' : 'Paused'}
           </span>
           <span className="font-mono text-sm font-bold tabular-nums">
-            {formatMoney(parking.hourlyRateCents, parking.currency)}
+            {formatMoney(parking.hourlyRateCents, parking.currency, locale)}
             <span className="font-sans text-xs font-medium text-foreground-secondary"> / h</span>
           </span>
         </div>

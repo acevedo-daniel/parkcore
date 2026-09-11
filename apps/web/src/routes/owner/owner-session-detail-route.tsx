@@ -24,7 +24,7 @@ import {
 import { formatMoney } from '../../lib/format.js';
 
 export function OwnerSessionDetailRoute() {
-  const { language } = useAppearance();
+  const { language, locale } = useAppearance();
   const es = language === 'es';
   const { sessionId } = useParams();
   const queryClient = useQueryClient();
@@ -211,14 +211,14 @@ export function OwnerSessionDetailRoute() {
               <OperationalTimestamp value={session.startTime} timezone={parking?.timezone} />
             </DetailItem>
             <DetailItem label={es ? 'Tarifa registrada' : 'Rate snapshot'}>
-              {formatMoney(session.hourlyRateCents, session.currency)} / H
+              {formatMoney(session.hourlyRateCents, session.currency, locale)} / H
             </DetailItem>
             <DetailItem label={es ? 'Total' : 'Total'}>
               {session.totalAmountCents === null
                 ? es
                   ? 'Pendiente de cobro'
                   : 'Pending checkout'
-                : formatMoney(session.totalAmountCents, session.currency)}
+                : formatMoney(session.totalAmountCents, session.currency, locale)}
             </DetailItem>
           </dl>
         </section>

@@ -10,6 +10,7 @@ import { Select } from '../../components/ui/field.js';
 import { getPublicParkings, type PublicParking } from '../../lib/api/public-api.js';
 import { cn } from '../../lib/cn.js';
 import { formatMoney } from '../../lib/format.js';
+import type { Locale } from '../../lib/localization.js';
 
 const DURATION_OPTIONS = [
   { hours: 1, labelEs: '1 hora', labelEn: '1 hour' },
@@ -19,7 +20,7 @@ const DURATION_OPTIONS = [
 ];
 
 export function ParkingCalculatorWidget({ className }: { className?: string }) {
-  const { language } = useAppearance();
+  const { language, locale } = useAppearance();
   const es = language === 'es';
   const [selectedId, setSelectedId] = useState('');
   const [selectedHours, setSelectedHours] = useState(2);
@@ -93,6 +94,7 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
         <CalculatorForm
           es={es}
           facilities={availableFacilities}
+          locale={locale}
           onFacilityChange={setSelectedId}
           onHoursChange={setSelectedHours}
           selectedFacility={selectedFacility}
@@ -119,6 +121,7 @@ function CalculatorLoading({ es }: { es: boolean }) {
 
 interface CalculatorFormProps {
   es: boolean;
+  locale: Locale;
   facilities: {
     id: string;
     title: string;
@@ -140,6 +143,7 @@ interface CalculatorFormProps {
 function CalculatorForm({
   es,
   facilities,
+  locale,
   onFacilityChange,
   onHoursChange,
   selectedFacility,
@@ -175,7 +179,7 @@ function CalculatorForm({
           </Select>
           <span className="shrink-0 text-right">
             <span className="font-mono text-xs font-bold tabular-nums text-foreground">
-              {formatMoney(selectedFacility.hourlyRateCents, selectedFacility.currency)}
+              {formatMoney(selectedFacility.hourlyRateCents, selectedFacility.currency, locale)}
             </span>
             <span className="block text-[10px] text-foreground-muted">/ h</span>
           </span>
@@ -224,7 +228,7 @@ function CalculatorForm({
             </span>
           </div>
           <span className="font-display text-3xl font-bold tracking-tight tabular-nums text-foreground">
-            {formatMoney(totalCents, selectedFacility.currency)}
+            {formatMoney(totalCents, selectedFacility.currency, locale)}
           </span>
         </div>
       </div>

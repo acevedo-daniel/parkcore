@@ -1,0 +1,72 @@
+{
+  "appearance": {
+    "language": "Select language",
+    "languageEnglish": "English",
+    "languageSpanish": "Spanish",
+    "languageTheme": "Language and theme",
+    "theme": "Theme"
+  },
+  "common": {
+    "dismissNotification": "Dismiss notification",
+    "tryAgain": "Try again"
+  },
+  "demo": {
+    "live": "Try the example",
+    "try": "Try the demo",
+    "opening": "Opening the demo…",
+    "startError": "We could not open the demo. Please try again.",
+    "restore": "Restore example",
+    "restoreTitle": "Restore the example",
+    "restoreDescription": "This removes changes from the example and takes it back to its starting point.",
+    "restoreHelp": "Use this only if you want to start again with the example information.",
+    "restoring": "Restoring…",
+    "restoreSuccess": "The example is back to its starting point.",
+    "restoreError": "We could not restore the example. Please try again."
+  },
+  "nav": {
+    "directory": "Directory",
+    "operations": "Operations",
+    "overview": "Overview",
+    "parkings": "Parkings",
+    "profile": "Profile",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "preferences": "Preferences",
+    "account": "Account",
+    "skipMain": "Skip to main content",
+    "open": "Open navigation",
+    "close": "Close navigation",
+    "public": "Public navigation",
+    "owner": "Owner navigation",
+    "ownerMobile": "Owner navigation, mobile"
+  },
+  "route": {
+    "loading": "Loading route",
+    "error": {
+      "attention": "Needs attention",
+      "notFoundTitle": "This view is unavailable.",
+      "notFoundDescription": "Return to a familiar place to continue.",
+      "title": "We could not open this view.",
+      "description": "Try again or return to the start of this experience.",
+      "ownerAction": "Go to overview",
+      "publicAction": "Go home"
+    }
+  },
+  "feedback": {
+    "emptyEyebrow": "Nothing here yet",
+    "errorEyebrow": "Needs attention",
+    "errorTitle": "We could not complete that action",
+    "retry": "Try again",
+    "dismiss": "Dismiss notification"
+  },
+  "theme": {
+    "dark": "Dark",
+    "light": "Light",
+    "system": "System"
+  },
+  "session": {
+    "openFor": "Open session for {{plate}}",
+    "hour": "hour",
+    "hours": "hours"
+  }
+}

@@ -12,6 +12,7 @@ interface ToastMessage {
 }
 
 export function ToastProvider({ children }: { children: ReactNode }) {
+  const { t } = useAppearance();
   const [messages, setMessages] = useState<ToastMessage[]>([]);
   const showToast = useCallback((message: string) => {
     setMessages((current) => [...current, { id: Date.now(), message }]);
@@ -35,7 +36,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           >
             <ToastPrimitive.Description>{message.message}</ToastPrimitive.Description>
             <ToastPrimitive.Close asChild>
-              <IconButton aria-label="Dismiss notification">
+              <IconButton aria-label={t('feedback.dismiss')}>
                 <X aria-hidden="true" size={16} />
               </IconButton>
             </ToastPrimitive.Close>
@@ -62,9 +63,8 @@ export function EmptyState({
   children: ReactNode;
   title: string;
 }) {
-  const { language } = useAppearance();
+  const { t } = useAppearance();
   const titleId = useId();
-  const es = language === 'es';
   return (
     <section
       aria-labelledby={titleId}
@@ -76,7 +76,7 @@ export function EmptyState({
         <Inbox aria-hidden="true" className="size-5" />
       </span>
       <p className="mt-5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground-muted">
-        {es ? 'Todavía no hay nada acá' : 'Nothing here yet'}
+        {t('feedback.emptyEyebrow')}
       </p>
       <h2
         className="mt-2 font-display text-2xl font-bold leading-none tracking-[-0.045em]"
@@ -99,11 +99,9 @@ export function ErrorState({
   onRetry?: () => void;
   title?: string;
 }) {
-  const { language } = useAppearance();
+  const { t } = useAppearance();
   const titleId = useId();
-  const es = language === 'es';
-  const resolvedTitle =
-    title ?? (es ? 'No pudimos completar esa acción' : 'We could not complete that action');
+  const resolvedTitle = title ?? t('feedback.errorTitle');
   return (
     <section
       aria-labelledby={titleId}
@@ -114,7 +112,7 @@ export function ErrorState({
         <AlertTriangle aria-hidden="true" className="size-5" />
       </span>
       <p className="mt-5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground-muted">
-        {es ? 'Necesita atención' : 'Needs attention'}
+        {t('feedback.errorEyebrow')}
       </p>
       <h2
         className="mt-2 font-display text-2xl font-bold leading-none tracking-[-0.045em]"
@@ -130,7 +128,7 @@ export function ErrorState({
           type="button"
         >
           <RefreshCw aria-hidden="true" className="size-4" />
-          {es ? 'Reintentar' : 'Try again'}
+          {t('feedback.retry')}
         </button>
       ) : null}
     </section>

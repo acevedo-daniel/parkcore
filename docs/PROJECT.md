@@ -61,6 +61,7 @@ Driver information can be recorded as visit data during check-in, but drivers do
 - Appearance supports `system`, `light`, and `dark` preferences.
 - Language and appearance preferences persist in the browser and apply without changing the current route or form state.
 - The system appearance follows the operating system only while `system` is selected.
+- Shared navigation, appearance, loading, error, and feedback messages use parity-checked Spanish and English catalogs.
 
 ## Out of scope
 

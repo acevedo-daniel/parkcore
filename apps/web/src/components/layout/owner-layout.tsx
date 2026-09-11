@@ -49,7 +49,7 @@ function OwnerLink({
 }
 
 export function OwnerLayout() {
-  const { language, t } = useAppearance();
+  const { locale, t } = useAppearance();
   const { logout, user } = useAuth();
   const navigate = useNavigate();
   const navigation = useNavigation();
@@ -104,20 +104,20 @@ export function OwnerLayout() {
               className="system-clock font-mono text-xs text-foreground-muted tabular-nums"
               dateTime={clock.toISOString()}
             >
-              {new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(
+              {new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(
                 clock,
               )}
             </time>
           </div>
           <section className="rounded-[var(--radius-sm)] border border-border-subtle bg-surface-subtle p-3">
             <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-foreground-muted">
-              {language === 'es' ? 'Preferencias' : 'Preferences'}
+              {t('nav.preferences')}
             </p>
             <AppearanceControls compact />
           </section>
           <section className="border-t border-border-subtle pt-3">
             <p className="mb-1 px-1 text-[10px] font-bold uppercase tracking-[0.12em] text-foreground-muted">
-              {language === 'es' ? 'Cuenta' : 'Account'}
+              {t('nav.account')}
             </p>
             <NavLink
               className={({ isActive }: NavLinkRenderProps) =>

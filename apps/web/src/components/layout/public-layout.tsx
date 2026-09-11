@@ -15,10 +15,10 @@ import { cn } from '../../lib/cn.js';
 import { AppearanceControls } from '../ui/appearance-controls.js';
 
 function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
-  const { language, t } = useAppearance();
+  const { t } = useAppearance();
   const publicLinks = [
     { label: t('nav.parkings'), to: '/parkings' },
-    { label: language === 'es' ? 'Ingresar' : 'Sign in', to: '/login' },
+    { label: t('nav.signIn'), to: '/login' },
   ];
   return (
     <div className="flex items-center gap-1.5">
@@ -44,7 +44,7 @@ function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 function PublicMobileMenu() {
-  const { language, t } = useAppearance();
+  const { t } = useAppearance();
   const navigate = useNavigate();
   return (
     <DialogPrimitive.Root>
@@ -66,7 +66,7 @@ function PublicMobileMenu() {
                 PARKCORE
               </DialogPrimitive.Title>
               <DialogPrimitive.Description className="visually-hidden">
-                Public navigation
+                {t('nav.public')}
               </DialogPrimitive.Description>
               <DialogPrimitive.Close asChild>
                 <button
@@ -93,7 +93,7 @@ function PublicMobileMenu() {
                   className="rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-surface-subtle"
                   to="/login"
                 >
-                  {language === 'es' ? 'Ingresar' : 'Sign in'}
+                  {t('nav.signIn')}
                 </Link>
               </DialogPrimitive.Close>
             </nav>

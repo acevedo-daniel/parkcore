@@ -2,6 +2,7 @@ import { ArrowRight, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import type { PublicParking } from '../../lib/api/public-api.js';
 import { formatMoney } from '../../lib/format.js';
 
@@ -12,6 +13,7 @@ interface ParkingDiscoveryCardProps {
 }
 
 export function ParkingDiscoveryCard({ es, parking, to }: ParkingDiscoveryCardProps) {
+  const { locale } = useAppearance();
   const [imageUnavailable, setImageUnavailable] = useState(false);
   const availabilityLabel = {
     AVAILABLE: es ? 'Disponible' : 'Available',
@@ -85,7 +87,7 @@ export function ParkingDiscoveryCard({ es, parking, to }: ParkingDiscoveryCardPr
               {es ? 'Tarifa por hora' : 'Hourly rate'}
             </span>
             <span className="font-mono text-lg font-bold tabular-nums">
-              {formatMoney(parking.hourlyRateCents, parking.currency)}
+              {formatMoney(parking.hourlyRateCents, parking.currency, locale)}
               <span className="text-xs font-medium"> / h</span>
             </span>
           </span>

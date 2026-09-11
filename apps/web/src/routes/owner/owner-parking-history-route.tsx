@@ -21,7 +21,7 @@ type SessionFilter = 'ALL' | ParkingSession['status'];
 type HistoryPeriod = 'today' | '7d' | '30d';
 
 export function OwnerParkingHistoryRoute() {
-  const { language } = useAppearance();
+  const { language, locale } = useAppearance();
   const es = language === 'es';
   const { parkingId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -237,7 +237,7 @@ export function OwnerParkingHistoryRoute() {
             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-sm font-bold">
               {aggregate.revenueByCurrency.length > 0
                 ? aggregate.revenueByCurrency.map(({ currency, revenueCents }) => (
-                    <span key={currency}>{formatMoney(revenueCents, currency)}</span>
+                    <span key={currency}>{formatMoney(revenueCents, currency, locale)}</span>
                   ))
                 : 'N/A'}
             </div>

@@ -10,8 +10,7 @@ import { Dialog } from '../../components/ui/dialog.js';
 import { useToast } from '../../components/ui/toast-context.js';
 
 export function DemoResetControl() {
-  const { language } = useAppearance();
-  const es = language === 'es';
+  const { t } = useAppearance();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
@@ -24,15 +23,11 @@ export function DemoResetControl() {
     try {
       await resetMutation.mutateAsync();
       await queryClient.invalidateQueries();
-      showToast(
-        es
-          ? 'El ejemplo volvió a su estado inicial.'
-          : 'The example is back to its starting point.',
-      );
+      showToast(t('demo.restoreSuccess'));
       setOpen(false);
       void navigate('/app', { replace: true });
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Unable to reset the demo.');
+      setError(reason instanceof Error ? reason.message : t('demo.restoreError'));
     }
   };
 
@@ -46,24 +41,16 @@ export function DemoResetControl() {
         type="button"
       >
         <RotateCcw aria-hidden="true" className="shrink-0" size={16} />
-        <span>{es ? 'Restaurar ejemplo' : 'Restore example'}</span>
+        <span>{t('demo.restore')}</span>
       </button>
       <Dialog
-        description={
-          es
-            ? 'Esto deshace los cambios del ejemplo y lo devuelve a su punto de partida.'
-            : 'This removes changes from the example and takes it back to its starting point.'
-        }
+        description={t('demo.restoreDescription')}
         onOpenChange={setOpen}
         open={open}
-        title={es ? 'Restaurar el ejemplo' : 'Restore the example'}
+        title={t('demo.restoreTitle')}
       >
         <div className="operation-dialog">
-          <p className="field-help">
-            {es
-              ? 'Usalo solo si querés volver a empezar con la información de ejemplo.'
-              : 'Use this only if you want to start again with the example information.'}
-          </p>
+          <p className="field-help">{t('demo.restoreHelp')}</p>
           {error ? (
             <p className="field-error" role="alert">
               {error}
@@ -71,13 +58,7 @@ export function DemoResetControl() {
           ) : null}
           <Button disabled={resetMutation.isPending} onClick={() => void confirmReset()}>
             <RotateCcw aria-hidden="true" size={16} />
-            {resetMutation.isPending
-              ? es
-                ? 'Restaurando…'
-                : 'Restoring…'
-              : es
-                ? 'Restaurar ejemplo'
-                : 'Restore example'}
+            {resetMutation.isPending ? t('demo.restoring') : t('demo.restore')}
           </Button>
         </div>
       </Dialog>

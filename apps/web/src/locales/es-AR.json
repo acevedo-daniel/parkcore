@@ -1,0 +1,72 @@
+{
+  "appearance": {
+    "language": "Seleccionar idioma",
+    "languageEnglish": "Inglés",
+    "languageSpanish": "Español",
+    "languageTheme": "Idioma y tema",
+    "theme": "Apariencia"
+  },
+  "common": {
+    "dismissNotification": "Cerrar notificación",
+    "tryAgain": "Reintentar"
+  },
+  "demo": {
+    "live": "Probá el ejemplo",
+    "try": "Probar la demo",
+    "opening": "Abriendo la demo…",
+    "startError": "No pudimos abrir la demo. Probá de nuevo.",
+    "restore": "Restaurar ejemplo",
+    "restoreTitle": "Restaurar el ejemplo",
+    "restoreDescription": "Esto deshace los cambios del ejemplo y lo devuelve a su punto de partida.",
+    "restoreHelp": "Usalo solo si querés volver a empezar con la información de ejemplo.",
+    "restoring": "Restaurando…",
+    "restoreSuccess": "El ejemplo volvió a su estado inicial.",
+    "restoreError": "No pudimos restaurar el ejemplo. Probá de nuevo."
+  },
+  "nav": {
+    "directory": "Directorio",
+    "operations": "Operaciones",
+    "overview": "Resumen",
+    "parkings": "Cocheras",
+    "profile": "Perfil",
+    "signIn": "Ingresar",
+    "signOut": "Cerrar sesión",
+    "preferences": "Preferencias",
+    "account": "Cuenta",
+    "skipMain": "Saltar al contenido principal",
+    "open": "Abrir navegación",
+    "close": "Cerrar navegación",
+    "public": "Navegación pública",
+    "owner": "Navegación de operador",
+    "ownerMobile": "Navegación de operador, móvil"
+  },
+  "route": {
+    "loading": "Cargando vista",
+    "error": {
+      "attention": "Necesita atención",
+      "notFoundTitle": "Esta vista no está disponible.",
+      "notFoundDescription": "Volvé a un lugar conocido para seguir.",
+      "title": "No pudimos abrir esta vista.",
+      "description": "Probá de nuevo o volvé al inicio de esta experiencia.",
+      "ownerAction": "Ir al resumen",
+      "publicAction": "Ir al inicio"
+    }
+  },
+  "feedback": {
+    "emptyEyebrow": "Todavía no hay nada acá",
+    "errorEyebrow": "Necesita atención",
+    "errorTitle": "No pudimos completar esa acción",
+    "retry": "Reintentar",
+    "dismiss": "Cerrar notificación"
+  },
+  "theme": {
+    "dark": "Oscuro",
+    "light": "Claro",
+    "system": "Sistema"
+  },
+  "session": {
+    "openFor": "Abrir la sesión de {{plate}}",
+    "hour": "hora",
+    "hours": "horas"
+  }
+}

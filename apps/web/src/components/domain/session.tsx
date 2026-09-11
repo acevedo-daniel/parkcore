@@ -19,17 +19,19 @@ export function OperationalTimestamp({
   value: string;
   timezone?: string;
 }) {
+  const { locale } = useAppearance();
   return (
     <span className="operational-timestamp">
       {label ? <span className="type-label">{label}</span> : null}
       <time className="type-operational" dateTime={value}>
-        {formatTimestamp(value, timezone)}
+        {formatTimestamp(value, timezone, locale)}
       </time>
     </span>
   );
 }
 
 export function ElapsedDuration({ startTime }: { startTime: string }) {
+  const { locale } = useAppearance();
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -41,7 +43,9 @@ export function ElapsedDuration({ startTime }: { startTime: string }) {
     };
   }, []);
 
-  return <span className="type-operational">{formatDuration(startTime, now.toISOString())}</span>;
+  return (
+    <span className="type-operational">{formatDuration(startTime, now.toISOString(), locale)}</span>
+  );
 }
 
 export function SessionRow({
@@ -53,11 +57,11 @@ export function SessionRow({
   to: string;
   timezone?: string;
 }) {
-  const { language } = useAppearance();
+  const { language, locale, t } = useAppearance();
   const es = language === 'es';
   return (
     <Link
-      aria-label={`Open session for ${session.vehicle.plate}`}
+      aria-label={t('session.openFor', { plate: session.vehicle.plate })}
       className="group grid gap-4 border-b border-border-subtle bg-surface py-5 text-foreground transition-colors duration-200 hover:bg-surface-hover lg:grid-cols-[minmax(9rem,1.1fr)_minmax(7rem,0.8fr)_minmax(8rem,1fr)_auto] lg:items-center"
       to={to}
     >
@@ -78,7 +82,7 @@ export function SessionRow({
         <div className="mt-1 text-sm font-semibold">
           {session.endTime ? (
             <span className="type-operational">
-              {formatDuration(session.startTime, session.endTime)}
+              {formatDuration(session.startTime, session.endTime, locale)}
             </span>
           ) : (
             <ElapsedDuration startTime={session.startTime} />
@@ -108,13 +112,14 @@ export function SessionHistoryRow({
   to: string;
   timezone?: string;
 }) {
+  const { locale, t } = useAppearance();
   const total =
     session.totalAmountCents === null
       ? 'N/A'
-      : formatMoney(session.totalAmountCents, session.currency);
+      : formatMoney(session.totalAmountCents, session.currency, locale);
   return (
     <Link
-      aria-label={`Open session for ${session.vehicle.plate}`}
+      aria-label={t('session.openFor', { plate: session.vehicle.plate })}
       className="session-history-row"
       to={to}
     >
@@ -122,7 +127,7 @@ export function SessionHistoryRow({
       <Plate plate={session.vehicle.plate} />
       {session.endTime ? (
         <span className="session-history-duration type-operational">
-          {formatDuration(session.startTime, session.endTime)}
+          {formatDuration(session.startTime, session.endTime, locale)}
         </span>
       ) : (
         <ElapsedDuration startTime={session.startTime} />
@@ -135,7 +140,7 @@ export function SessionHistoryRow({
 }
 
 export function CheckoutSummary({ session, timezone }: { session: Session; timezone?: string }) {
-  const { language } = useAppearance();
+  const { language, locale, tPlural } = useAppearance();
   const es = language === 'es';
   const [now, setNow] = useState(() => new Date());
 
@@ -167,21 +172,21 @@ export function CheckoutSummary({ session, timezone }: { session: Session; timez
             {es ? 'Cálculo actual' : 'Current calculation'}
           </span>
           <time className="type-operational" dateTime={now.toISOString()}>
-            {formatTimestamp(now.toISOString(), timezone)}
+            {formatTimestamp(now.toISOString(), timezone, locale)}
           </time>
         </div>
       ) : null}
       <div className="flex items-center justify-between gap-4 border-b border-border py-3">
         <span className="type-label text-foreground-muted">{es ? 'Tarifa' : 'Rate'}</span>
         <span className="type-operational">
-          {formatMoney(session.hourlyRateCents, session.currency)} / H
+          {formatMoney(session.hourlyRateCents, session.currency, locale)} / H
         </span>
       </div>
       {chargedHours ? (
         <div className="flex items-center justify-between gap-4 border-b border-border py-3">
           <span className="type-label text-foreground-muted">{es ? 'Cobrado' : 'Charged'}</span>
           <span className="type-operational">
-            {chargedHours} {chargedHours === 1 ? (es ? 'hora' : 'hour') : es ? 'horas' : 'hours'}
+            {chargedHours} {tPlural(chargedHours, { one: 'session.hour', other: 'session.hours' })}
           </span>
         </div>
       ) : null}
@@ -196,7 +201,7 @@ export function CheckoutSummary({ session, timezone }: { session: Session; timez
               : 'Estimate'}
         </span>
         <strong className="font-display text-3xl font-bold leading-none tracking-[-0.055em] tabular-nums">
-          {total === undefined ? 'N/A' : formatMoney(total, session.currency)}
+          {total === undefined ? 'N/A' : formatMoney(total, session.currency, locale)}
         </strong>
       </div>
     </section>
@@ -204,7 +209,7 @@ export function CheckoutSummary({ session, timezone }: { session: Session; timez
 }
 
 export function OperationalReceipt({ session, timezone }: { session: Session; timezone?: string }) {
-  const { language } = useAppearance();
+  const { language, locale } = useAppearance();
   const es = language === 'es';
   const total = session.totalAmountCents;
   return (
@@ -230,23 +235,25 @@ export function OperationalReceipt({ session, timezone }: { session: Session; ti
         <ReceiptItem label={es ? 'Patente' : 'Plate'} value={session.vehicle.plate} />
         <ReceiptItem
           label={es ? 'Ingreso' : 'Started'}
-          value={formatTimestamp(session.startTime, timezone)}
+          value={formatTimestamp(session.startTime, timezone, locale)}
         />
         <ReceiptItem
           label={es ? 'Salida' : 'Completed'}
-          value={session.endTime ? formatTimestamp(session.endTime, timezone) : 'N/A'}
+          value={session.endTime ? formatTimestamp(session.endTime, timezone, locale) : 'N/A'}
         />
         <ReceiptItem
           label={es ? 'Duración' : 'Duration'}
-          value={session.endTime ? formatDuration(session.startTime, session.endTime) : 'N/A'}
+          value={
+            session.endTime ? formatDuration(session.startTime, session.endTime, locale) : 'N/A'
+          }
         />
         <ReceiptItem
           label={es ? 'Tarifa registrada' : 'Rate snapshot'}
-          value={`${formatMoney(session.hourlyRateCents, session.currency)} / H`}
+          value={`${formatMoney(session.hourlyRateCents, session.currency, locale)} / H`}
         />
         <ReceiptItem
           label={es ? 'Total cobrado' : 'Charged total'}
-          value={total === null ? 'N/A' : formatMoney(total, session.currency)}
+          value={total === null ? 'N/A' : formatMoney(total, session.currency, locale)}
         />
       </dl>
 
@@ -255,7 +262,7 @@ export function OperationalReceipt({ session, timezone }: { session: Session; ti
           {es ? 'Importe final' : 'Final amount'}
         </span>
         <strong className="font-display text-4xl font-bold leading-none tracking-[-0.055em] tabular-nums">
-          {total === null ? 'N/A' : formatMoney(total, session.currency)}
+          {total === null ? 'N/A' : formatMoney(total, session.currency, locale)}
         </strong>
       </div>
     </section>

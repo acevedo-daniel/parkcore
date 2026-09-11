@@ -16,6 +16,7 @@ Local real-stack browser checks run against disposable services. Deployed real-s
 | ------------------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
 | API tests                 | Domain rules, authorization, validation, error behavior, persistence, rate limiting, and session transitions | Vitest + Supertest in `apps/api/src/**/*.test.ts` and `apps/api/tests` |
 | Web tests                 | Forms, route behavior, loading/error states, and UI interactions                                             | Vitest + Testing Library in `apps/web/src/**/*.test.{ts,tsx}`          |
+| Localization parity       | Detect missing or extra nested keys between supported locale catalogs                                        | `pnpm locales:check`                                                   |
 | Contract check            | Detect drift between the API OpenAPI artifact and generated browser client                                   | `pnpm contract:check`                                                  |
 | Mocked browser workflow   | Verify the owner workflow against contract-shaped mocked responses                                           | Playwright in `apps/web/e2e`                                           |
 | Local real-stack workflow | Exercise the local preview, API, and PostgreSQL persistence boundary                                         | `pnpm --filter @parkcore/web test:e2e:local`                           |
@@ -91,6 +92,7 @@ From the repository root:
 
 ```bash
 pnpm text:check
+pnpm locales:check
 pnpm format:check
 pnpm --filter @parkcore/api-client build
 pnpm lint

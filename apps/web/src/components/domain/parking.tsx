@@ -2,6 +2,7 @@ import type { components } from '@parkcore/api-client';
 import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import { cn } from '../../lib/cn.js';
 import { formatMoney } from '../../lib/format.js';
 import { ParkingStatus } from './status.js';
@@ -30,9 +31,10 @@ export function RateDisplay({
   currency,
   hourlyRateCents,
 }: Pick<Parking, 'currency' | 'hourlyRateCents'>) {
+  const { locale } = useAppearance();
   return (
     <div className="rate-display">
-      <span className="type-operational">{formatMoney(hourlyRateCents, currency)}</span>
+      <span className="type-operational">{formatMoney(hourlyRateCents, currency, locale)}</span>
       <span className="type-label">Per hour</span>
     </div>
   );

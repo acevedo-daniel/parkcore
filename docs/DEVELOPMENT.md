@@ -97,6 +97,7 @@ Typical local URLs:
 | Develop                  | `pnpm dev`                                     | Run API and web in parallel.                                               |
 | Format check             | `pnpm format:check`                            | Verify repository formatting.                                              |
 | Authored text check      | `pnpm text:check`                              | Reject forbidden em dash characters in authored repository text.           |
+| Localization parity      | `pnpm locales:check`                           | Verify the `es-AR` and `en-US` catalog key sets match exactly.             |
 | Design token check       | `pnpm tokens:check`                            | Verify locked light and dark token mappings and readable pairings.         |
 | Lint                     | `pnpm lint`                                    | Run lint checks across API, client, and web workspaces.                    |
 | Typecheck                | `pnpm typecheck`                               | Type-check the TypeScript workspaces.                                      |

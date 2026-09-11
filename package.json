@@ -41,6 +41,7 @@
     "test": "pnpm -r --filter @parkcore/api --filter @parkcore/web test",
     "test:coverage": "pnpm -r --filter @parkcore/api --filter @parkcore/web test:coverage",
     "lint": "pnpm -r --filter @parkcore/api --filter @parkcore/api-client --filter @parkcore/web lint",
+    "locales:check": "node scripts/check-localization-parity.mjs",
     "text:check": "node scripts/check-authored-text.mjs",
     "tokens:check": "node scripts/check-design-tokens.mjs",
     "format:check": "pnpm -r --filter @parkcore/api --filter @parkcore/api-client --filter @parkcore/web format:check && prettier --check README.md docs .github docker-compose.yml package.json pnpm-workspace.yaml render.yaml vercel.json",

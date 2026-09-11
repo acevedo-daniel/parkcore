@@ -9,7 +9,7 @@ import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
 import { formatMoney } from '../../lib/format.js';
 
 export function ParkingDetailRoute() {
-  const { language } = useAppearance();
+  const { language, locale } = useAppearance();
   const es = language === 'es';
   const { parkingId } = useParams();
   const parkingQuery = useQuery({
@@ -153,7 +153,7 @@ export function ParkingDetailRoute() {
                   {es ? 'Tarifa por hora' : 'Hourly rate'}
                 </p>
                 <p className="mt-1 font-mono text-2xl font-bold text-[#1d241f]">
-                  {formatMoney(parking.hourlyRateCents, parking.currency)}{' '}
+                  {formatMoney(parking.hourlyRateCents, parking.currency, locale)}{' '}
                   <span className="text-sm">/ h</span>
                 </p>
               </div>
@@ -178,7 +178,7 @@ export function ParkingDetailRoute() {
               {parking.nextOpeningAt ? (
                 <p className="mt-1 text-xs text-[#3f3f3f]">
                   {es ? 'Próxima apertura' : 'Next opening'}{' '}
-                  {new Intl.DateTimeFormat(es ? 'es-AR' : 'en-US', {
+                  {new Intl.DateTimeFormat(locale, {
                     hour: '2-digit',
                     minute: '2-digit',
                     timeZone: parking.timezone,
