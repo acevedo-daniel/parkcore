@@ -66,6 +66,10 @@ The local example points `DATABASE_URL` to the PostgreSQL container started by `
 
 Never put secrets in `VITE_*` variables; Vite embeds them into the browser build.
 
+### Client appearance preferences
+
+The web client stores `parkcore-lang` as `es-AR` or `en-US` and `parkcore-theme` as `system`, `light`, or `dark`. Existing `es` and `en` language values are normalized when loaded. The `system` theme listens for operating system changes only while it is selected. The prepaint bootstrap and React provider keep the document language, `data-theme`, `color-scheme`, and `theme-color` metadata aligned before and after React mounts.
+
 ## Run locally
 
 ```bash
@@ -93,6 +97,8 @@ Typical local URLs:
 | Develop                  | `pnpm dev`                                     | Run API and web in parallel.                                               |
 | Format check             | `pnpm format:check`                            | Verify repository formatting.                                              |
 | Authored text check      | `pnpm text:check`                              | Reject forbidden em dash characters in authored repository text.           |
+| Localization parity      | `pnpm locales:check`                           | Verify the `es-AR` and `en-US` catalog key sets match exactly.             |
+| Design token check       | `pnpm tokens:check`                            | Verify locked light and dark token mappings and readable pairings.         |
 | Lint                     | `pnpm lint`                                    | Run lint checks across API, client, and web workspaces.                    |
 | Typecheck                | `pnpm typecheck`                               | Type-check the TypeScript workspaces.                                      |
 | Test                     | `pnpm test`                                    | Run API and web test suites.                                               |
@@ -129,7 +135,7 @@ pnpm db:setup
 
 1. Prisma client generation;
 2. committed migration deployment;
-3. canonical OWNER, SHOWCASE, and DEMO seeding.
+3. canonical OWNER and SHOWCASE seeding. DEMO sandboxes are created through the demo-entry endpoint.
 
 Schema changes use committed forward migrations. Use Prisma development commands from the API workspace when creating a new migration, and never edit an already-applied migration to change history.
 

@@ -55,6 +55,15 @@ Driver information can be recorded as visit data during check-in, but drivers do
 - Review history by parking-local today, 7-day, and 30-day periods.
 - Export complete filtered history and view revenue grouped by currency.
 
+### Client preferences
+
+- The web client supports Spanish (`es-AR`) and English (`en-US`), with Spanish as the default.
+- Appearance supports `system`, `light`, and `dark` preferences.
+- Language and appearance preferences persist in the browser and apply without changing the current route or form state.
+- The system appearance follows the operating system only while `system` is selected.
+- Shared navigation, appearance, loading, error, and feedback messages use parity-checked Spanish and English catalogs.
+- Shared authentication, profile, parking, check-in, occupancy, and session workflows use the same catalogs for labels, validation, recovery messages, status announcements, and accessible names. Changing language revalidates visible form feedback without remounting the form or losing entered values.
+
 ## Out of scope
 
 ParkCore 1.0 intentionally does not include:

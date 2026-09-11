@@ -4,12 +4,13 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { Combobox } from '../../components/ui/combobox.js';
 import { Button } from '../../components/ui/button.js';
 import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
-import { Select } from '../../components/ui/field.js';
 import { getPublicParkings, type PublicParking } from '../../lib/api/public-api.js';
 import { cn } from '../../lib/cn.js';
 import { formatMoney } from '../../lib/format.js';
+import type { Locale } from '../../lib/localization.js';
 
 const DURATION_OPTIONS = [
   { hours: 1, labelEs: '1 hora', labelEn: '1 hour' },
@@ -19,7 +20,7 @@ const DURATION_OPTIONS = [
 ];
 
 export function ParkingCalculatorWidget({ className }: { className?: string }) {
-  const { language } = useAppearance();
+  const { language, locale } = useAppearance();
   const es = language === 'es';
   const [selectedId, setSelectedId] = useState('');
   const [selectedHours, setSelectedHours] = useState(2);
@@ -93,6 +94,7 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
         <CalculatorForm
           es={es}
           facilities={availableFacilities}
+          locale={locale}
           onFacilityChange={setSelectedId}
           onHoursChange={setSelectedHours}
           selectedFacility={selectedFacility}
@@ -119,6 +121,7 @@ function CalculatorLoading({ es }: { es: boolean }) {
 
 interface CalculatorFormProps {
   es: boolean;
+  locale: Locale;
   facilities: {
     id: string;
     title: string;
@@ -140,42 +143,36 @@ interface CalculatorFormProps {
 function CalculatorForm({
   es,
   facilities,
+  locale,
   onFacilityChange,
   onHoursChange,
   selectedFacility,
   selectedHours,
   selectedId,
 }: CalculatorFormProps) {
+  const { t } = useAppearance();
   const totalCents = selectedFacility.hourlyRateCents * selectedHours;
 
   return (
     <>
       <div className="rounded-[var(--radius-lg)] border border-border bg-surface-subtle p-4 transition-colors focus-within:border-primary focus-within:bg-surface">
-        <label className="mb-2 block text-xs font-bold text-foreground" htmlFor="estimate-facility">
-          {es ? '¿A qué cochera vas?' : 'Where are you parking?'}
-        </label>
         <div className="flex items-center gap-3">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
             <MapPin aria-hidden="true" className="size-3.5" />
           </span>
-          <Select
-            aria-label={es ? 'Elegir cochera' : 'Choose facility'}
-            className="h-10 min-w-0 flex-1 border-0 bg-transparent px-0 font-display text-base font-bold focus:bg-transparent"
+          <Combobox
+            className="min-w-0 flex-1"
             id="estimate-facility"
-            onChange={(event) => {
-              onFacilityChange(event.target.value);
+            label={t('calculator.facility')}
+            onValueChange={(id) => {
+              onFacilityChange(id);
             }}
+            options={facilities.map((facility) => ({ label: facility.title, value: facility.id }))}
             value={selectedId}
-          >
-            {facilities.map((facility) => (
-              <option key={facility.id} value={facility.id}>
-                {facility.title}
-              </option>
-            ))}
-          </Select>
+          />
           <span className="shrink-0 text-right">
             <span className="font-mono text-xs font-bold tabular-nums text-foreground">
-              {formatMoney(selectedFacility.hourlyRateCents, selectedFacility.currency)}
+              {formatMoney(selectedFacility.hourlyRateCents, selectedFacility.currency, locale)}
             </span>
             <span className="block text-[10px] text-foreground-muted">/ h</span>
           </span>
@@ -224,7 +221,7 @@ function CalculatorForm({
             </span>
           </div>
           <span className="font-display text-3xl font-bold tracking-tight tabular-nums text-foreground">
-            {formatMoney(totalCents, selectedFacility.currency)}
+            {formatMoney(totalCents, selectedFacility.currency, locale)}
           </span>
         </div>
       </div>

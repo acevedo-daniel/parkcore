@@ -2,6 +2,7 @@ import type { components } from '@parkcore/api-client';
 import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import { cn } from '../../lib/cn.js';
 import { formatMoney } from '../../lib/format.js';
 import { ParkingStatus } from './status.js';
@@ -30,10 +31,11 @@ export function RateDisplay({
   currency,
   hourlyRateCents,
 }: Pick<Parking, 'currency' | 'hourlyRateCents'>) {
+  const { locale, t } = useAppearance();
   return (
     <div className="rate-display">
-      <span className="type-operational">{formatMoney(hourlyRateCents, currency)}</span>
-      <span className="type-label">Per hour</span>
+      <span className="type-operational">{formatMoney(hourlyRateCents, currency, locale)}</span>
+      <span className="type-label">{t('parking.perHour')}</span>
     </div>
   );
 }
@@ -47,48 +49,68 @@ export function Metric({ label, value }: { label: string; value: string | number
   );
 }
 
-export function OccupancyMeter({ active, capacity }: { active: number; capacity: number }) {
-  const percentage = capacity === 0 ? 0 : Math.min(100, Math.round((active / capacity) * 100));
+export function OccupancyMeter({
+  active,
+  capacity,
+  compact = false,
+}: {
+  active: number;
+  capacity: number;
+  compact?: boolean;
+}) {
+  const { t, tPlural } = useAppearance();
+  const safeActive = Math.max(0, active);
+  const safeCapacity = Math.max(0, capacity);
+  const percentage =
+    safeCapacity === 0 ? 0 : Math.min(100, Math.round((safeActive / safeCapacity) * 100));
   const threshold =
-    active >= capacity
+    safeActive >= safeCapacity && safeCapacity > 0
       ? 'full'
-      : percentage >= 95
+      : percentage >= 90
         ? 'critical'
-        : percentage >= 90
-          ? 'critical'
-          : percentage >= 70
-            ? 'warning'
-            : 'optimal';
+        : percentage >= 70
+          ? 'warning'
+          : 'optimal';
   const status =
     threshold === 'full'
-      ? 'Intake locked · facility full'
+      ? t('parking.intakeLocked')
       : threshold === 'critical'
         ? percentage >= 95
-          ? 'Nearly full'
-          : 'Critical capacity'
+          ? t('parking.nearlyFull')
+          : t('parking.criticalCapacity')
         : threshold === 'warning'
-          ? 'Elevated occupancy'
-          : 'Optimal capacity';
-  const available = Math.max(0, capacity - active);
+          ? t('parking.elevatedOccupancy')
+          : t('parking.optimalCapacity');
+  const available = Math.max(0, safeCapacity - safeActive);
   return (
     <div
       className={cn(
         'capacity-gauge',
+        compact && 'border-0 bg-transparent p-0 shadow-none',
         `capacity-gauge-${threshold}`,
         `occupancy-${threshold === 'optimal' ? 'neutral' : threshold}`,
       )}
     >
       <div className="capacity-gauge-heading">
-        <span className="type-label">Occupancy gauge</span>
+        <span className="type-label">{t('parking.occupancyGauge')}</span>
         <span className="type-operational">
-          {active} / {capacity} inside
+          {safeActive} / {safeCapacity} {t('parking.inside')}
         </span>
       </div>
       <div
-        aria-label={`${String(active)} of ${String(capacity)} spaces occupied`}
-        aria-valuemax={capacity}
+        aria-label={t('parkingOperation.occupancyLabel', {
+          active: safeActive,
+          capacity: safeCapacity,
+        })}
+        aria-valuemax={safeCapacity}
         aria-valuemin={0}
-        aria-valuenow={active}
+        aria-valuenow={safeActive}
+        aria-valuetext={t('parking.occupancySummary', {
+          active: safeActive,
+          available,
+          capacity: safeCapacity,
+          percent: percentage,
+        })}
         className="capacity-gauge-track"
         role="progressbar"
       >
@@ -96,7 +118,8 @@ export function OccupancyMeter({ active, capacity }: { active: number; capacity:
       </div>
       <p className="capacity-gauge-status">
         <span aria-hidden="true">●</span> {status} · {available}{' '}
-        {available === 1 ? 'spot' : 'spots'} available
+        {tPlural(available, { one: 'parking.spot', other: 'parking.spots' })}{' '}
+        {t('parking.openSpots')}
       </p>
     </div>
   );
@@ -117,10 +140,15 @@ export function ParkingListItem({
   parking,
   to,
 }: ParkingListItemProps) {
+  const { t } = useAppearance();
   const available =
     activeSessions === undefined ? undefined : Math.max(0, parking.capacity - activeSessions);
   return (
-    <Link aria-label={`Open ${parking.title}`} className="parking-list-item" to={to}>
+    <Link
+      aria-label={`${t('parking.open')} ${parking.title}`}
+      className="parking-list-item"
+      to={to}
+    >
       <div>
         <ParkingIdentity identifier={identifier} parking={parking} />
       </div>
@@ -128,12 +156,14 @@ export function ParkingListItem({
         <ParkingStatus isActive={parking.isActive} />
         <RateDisplay currency={parking.currency} hourlyRateCents={parking.hourlyRateCents} />
         {occupancyUnavailable ? (
-          <span className="type-small">Occupancy unavailable</span>
+          <span className="type-small">{t('parkingOperation.occupancyUnavailable')}</span>
         ) : available === undefined ? (
-          <span className="type-small">Capacity {parking.capacity}</span>
+          <span className="type-small">
+            {t('parkingOperation.capacity')} {parking.capacity}
+          </span>
         ) : (
           <span className="type-operational">
-            {activeSessions} / {parking.capacity} occupied
+            {activeSessions} / {parking.capacity} {t('parking.occupied')}
           </span>
         )}
         <ArrowUpRight aria-hidden="true" size={18} />

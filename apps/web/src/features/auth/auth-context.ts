@@ -1,11 +1,12 @@
 import { createContext } from 'react';
 
 import type { LoginRequest, RegisterRequest, User } from '../../lib/api/auth-api.js';
+import type { MessageKey } from '../../lib/localization.js';
 
 export type AuthStatus = 'authenticated' | 'loading' | 'unauthenticated' | 'unavailable';
 
 export interface AuthContextValue {
-  errorMessage?: string;
+  errorKey?: MessageKey;
   login: (input: LoginRequest) => Promise<void>;
   loginDemo: () => Promise<void>;
   logout: () => void;

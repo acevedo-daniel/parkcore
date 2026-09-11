@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { AttentionItem, type AttentionState } from '../../components/domain/attention-item.js';
+import { PageHeader } from '../../components/domain/page-header.js';
 import { Button } from '../../components/ui/button.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import {
@@ -14,16 +16,28 @@ import { OwnerParkingPanel } from '../../features/parking/owner-parking-panel.js
 import { useOwnedParkingOperations } from '../../features/parking/use-owned-parking-operations.js';
 import { cn } from '../../lib/cn.js';
 import { formatMoney } from '../../lib/format.js';
+import type { Locale } from '../../lib/localization.js';
 
-function formatBarDate(date: string, es: boolean): string {
-  return new Intl.DateTimeFormat(es ? 'es-AR' : 'en-US', {
+function formatBarDate(date: string, locale: Locale): string {
+  return new Intl.DateTimeFormat(locale, {
     day: 'numeric',
     month: 'short',
   }).format(new Date(`${date}T00:00:00`));
 }
 
+function attentionRank(state: AttentionState) {
+  return { FULL: 0, LIMITED: 1, LONG_RUNNING: 2, PAUSED: 3 }[state];
+}
+
+interface OverviewAttentionItem {
+  description: string;
+  parkingTitle: string;
+  state: AttentionState;
+  to: string;
+}
+
 export function OwnerOverviewRoute() {
-  const { language } = useAppearance();
+  const { language, locale, t } = useAppearance();
   const es = language === 'es';
   const [days, setDays] = useState<7 | 30>(7);
   const [activeBarIndex, setActiveBarIndex] = useState<number | null>(null);
@@ -55,6 +69,44 @@ export function OwnerOverviewRoute() {
   const totalRevenue = revenueSeries.reduce((total, point) => total + revenueForCurrency(point), 0);
   const totalStays = volumeSeries.reduce((total, point) => total + point.completedSessions, 0);
   const analyticsError = summaryQuery.isError || revenueQuery.isError || volumeQuery.isError;
+  const attentionItems: OverviewAttentionItem[] = parkings
+    .flatMap(({ activeSessionCount, parking }): OverviewAttentionItem[] => {
+      if (!parking.isActive) {
+        return [
+          {
+            description: t('overview.attentionPaused'),
+            parkingTitle: parking.title,
+            state: 'PAUSED',
+            to: `/app/parkings/${parking.id}`,
+          },
+        ];
+      }
+      if (activeSessionCount !== undefined && activeSessionCount >= parking.capacity) {
+        return [
+          {
+            description: t('overview.attentionFull'),
+            parkingTitle: parking.title,
+            state: 'FULL',
+            to: `/app/parkings/${parking.id}`,
+          },
+        ];
+      }
+      if (
+        activeSessionCount !== undefined &&
+        activeSessionCount / Math.max(1, parking.capacity) >= 0.8
+      ) {
+        return [
+          {
+            description: t('overview.attentionLimited'),
+            parkingTitle: parking.title,
+            state: 'LIMITED',
+            to: `/app/parkings/${parking.id}`,
+          },
+        ];
+      }
+      return [];
+    })
+    .sort((left, right) => attentionRank(left.state) - attentionRank(right.state));
 
   const refresh = () => {
     void parkingsQuery.refetch();
@@ -66,11 +118,7 @@ export function OwnerOverviewRoute() {
   if (parkingsQuery.isLoading) return <OwnerOverviewSkeleton />;
   if (parkingsQuery.isError) {
     return (
-      <ErrorState onRetry={() => void parkingsQuery.refetch()}>
-        {es
-          ? 'No pudimos cargar las operaciones de tus cocheras.'
-          : 'We could not load your parking operations.'}
-      </ErrorState>
+      <ErrorState onRetry={() => void parkingsQuery.refetch()}>{t('api.loadParkings')}</ErrorState>
     );
   }
   if (parkings.length === 0) {
@@ -95,25 +143,9 @@ export function OwnerOverviewRoute() {
 
   return (
     <section className="owner-page space-y-10" aria-labelledby="overview-title">
-      <header className="border-b border-border-strong pb-7">
-        <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-          <div className="max-w-2xl">
-            <p className="type-label text-foreground-muted">
-              {es ? 'Operación / hoy' : 'Operations / today'}
-            </p>
-            <h1
-              className="mt-3 font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] sm:text-5xl"
-              id="overview-title"
-            >
-              {es ? 'Todo lo importante, a la vista.' : 'Everything important, in view.'}
-            </h1>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-foreground-secondary">
-              {es
-                ? 'Una lectura simple de la red para tomar decisiones durante el día.'
-                : 'A clear reading of your network for the decisions you make each day.'}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+      <PageHeader
+        actions={
+          <>
             <Button
               aria-label={es ? 'Actualizar datos' : 'Refresh data'}
               disabled={isRefreshing}
@@ -133,9 +165,17 @@ export function OwnerOverviewRoute() {
                 {es ? 'Nueva cochera' : 'New facility'}
               </Link>
             </Button>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+        description={
+          es
+            ? 'Una lectura simple de la red para tomar decisiones durante el día.'
+            : 'A clear reading of your network for the decisions you make each day.'
+        }
+        eyebrow={es ? 'Operación / hoy' : 'Operations / today'}
+        id="overview-title"
+        title={es ? 'Todo lo importante, a la vista.' : 'Everything important, in view.'}
+      />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
         <section
@@ -181,23 +221,21 @@ export function OwnerOverviewRoute() {
             className="mt-4 font-display text-2xl font-bold tracking-[-0.04em]"
             id="attention-title"
           >
-            {parkings.some(({ parking }) => !parking.isActive)
-              ? es
-                ? 'Hay cocheras pausadas.'
-                : 'Some facilities are paused.'
-              : es
-                ? 'Todo funciona con normalidad.'
-                : 'Everything is operating normally.'}
+            {attentionItems.length > 0
+              ? t('overview.attentionNeedsReview')
+              : t('overview.attentionNormal')}
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-foreground-secondary">
-            {parkings.some(({ parking }) => !parking.isActive)
-              ? es
-                ? 'Revisá las cocheras pausadas antes de esperar nuevos ingresos.'
-                : 'Review paused facilities before expecting new arrivals.'
-              : es
-                ? 'No hay alertas operativas para revisar en este momento.'
-                : 'There are no operational alerts to review right now.'}
-          </p>
+          {attentionItems.length > 0 ? (
+            <ul className="mt-5">
+              {attentionItems.map((item) => (
+                <AttentionItem key={`${item.state}-${item.parkingTitle}`} {...item} />
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-sm leading-relaxed text-foreground-secondary">
+              {t('overview.attentionNone')}
+            </p>
+          )}
         </section>
       </div>
       {analyticsError ? (
@@ -286,10 +324,7 @@ export function OwnerOverviewRoute() {
 
         <div className="p-6 sm:p-8">
           {revenueQuery.isLoading || volumeQuery.isLoading ? (
-            <div
-              className="flex h-56 items-end gap-2"
-              aria-label={es ? 'Cargando actividad' : 'Loading activity'}
-            >
+            <div className="flex h-56 items-end gap-2" aria-label={t('api.loadAnalytics')}>
               {Array.from({ length: days === 7 ? 7 : 14 }).map((_, index) => (
                 <div
                   className="flex-1 animate-pulse rounded-t bg-foreground-muted/20"
@@ -300,9 +335,7 @@ export function OwnerOverviewRoute() {
             </div>
           ) : revenueQuery.isError || volumeQuery.isError ? (
             <div className="flex h-56 items-center justify-center text-sm text-foreground-secondary">
-              {es
-                ? 'La actividad analítica no está disponible ahora.'
-                : 'Activity analytics are unavailable right now.'}
+              {t('api.loadAnalytics')}
             </div>
           ) : revenueSeries.length === 0 ? (
             <div className="flex h-56 items-center justify-center text-sm text-foreground-muted">
@@ -320,7 +353,7 @@ export function OwnerOverviewRoute() {
                   const height = Math.max(8, Math.round((pointRevenue / maxRevenue) * 100));
                   return (
                     <button
-                      aria-label={`${formatBarDate(point.date, es)}: ${formatMoney(pointRevenue, displayCurrency)}, ${String(sessions)} ${es ? 'estadías' : 'stays'}`}
+                      aria-label={`${formatBarDate(point.date, locale)}: ${formatMoney(pointRevenue, displayCurrency, locale)}, ${String(sessions)} ${es ? 'estadías' : 'stays'}`}
                       aria-pressed={isActive}
                       className="group relative flex h-full flex-1 items-end focus-visible:outline-none"
                       key={point.date}
@@ -354,7 +387,7 @@ export function OwnerOverviewRoute() {
                   >
                     {days === 30 && index % 4 !== 0 && index !== revenueSeries.length - 1
                       ? ''
-                      : formatBarDate(point.date, es)}
+                      : formatBarDate(point.date, locale)}
                   </span>
                 ))}
               </div>
@@ -364,7 +397,7 @@ export function OwnerOverviewRoute() {
                     label={
                       es ? `Facturado en ${String(days)} días` : `Revenue in ${String(days)} days`
                     }
-                    value={formatMoney(totalRevenue, displayCurrency)}
+                    value={formatMoney(totalRevenue, displayCurrency, locale)}
                   />
                   <SummaryValue
                     label={es ? `Estadías completadas` : 'Completed stays'}
@@ -374,12 +407,13 @@ export function OwnerOverviewRoute() {
                 {activeBarIndex !== null ? (
                   <div className="text-sm text-foreground-secondary">
                     <span className="font-mono text-xs uppercase tracking-wider text-accent-foreground">
-                      {formatBarDate(revenueSeries[activeBarIndex]?.date ?? '', es)}
+                      {formatBarDate(revenueSeries[activeBarIndex]?.date ?? '', locale)}
                     </span>
                     <p className="mt-1 font-mono font-bold tabular-nums">
                       {formatMoney(
                         revenueForCurrency(revenueSeries[activeBarIndex] ?? revenueSeries[0]),
                         displayCurrency,
+                        locale,
                       )}
                       <span className="font-sans text-xs font-medium text-foreground-muted">
                         {' '}
@@ -455,8 +489,9 @@ function SummaryValue({ label, value }: { label: string; value: string }) {
 }
 
 function OwnerOverviewSkeleton() {
+  const { t } = useAppearance();
   return (
-    <div className="space-y-10" aria-label="Loading parking operations">
+    <div className="space-y-10" aria-label={t('api.loadParkings')}>
       <Skeleton className="h-44 rounded-[var(--radius-xl)]" />
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (

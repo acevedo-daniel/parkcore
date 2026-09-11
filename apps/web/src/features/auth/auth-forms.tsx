@@ -1,43 +1,46 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router';
-import type { ReactNode } from 'react';
+import { useEffect, useMemo, type ReactNode } from 'react';
 import { z } from 'zod';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../../components/ui/button.js';
 import { Field, Input } from '../../components/ui/field.js';
-import { ApiError } from '../../lib/api/api-error.js';
+import { localizeApiError } from '../../lib/api/api-error.js';
+import type { Translator } from '../../lib/localization.js';
 import { useAuth } from './use-auth.js';
 
-const emailSchema = z.string().trim().pipe(z.email('Enter a valid email address.'));
-const passwordSchema = z
-  .string()
-  .min(8, 'Use at least 8 characters.')
-  .max(100, 'Use no more than 100 characters.');
-
-const loginSchema = z.object({
-  email: emailSchema,
-  password: passwordSchema,
-});
-
-const registerSchema = loginSchema.extend({
-  name: z.string().trim().min(2, 'Use at least 2 characters.').max(50),
-  lastName: z.string().trim().min(2, 'Use at least 2 characters.').max(50),
-});
-
-type LoginValues = z.infer<typeof loginSchema>;
-type RegisterValues = z.infer<typeof registerSchema>;
-
-function formErrorMessage(error: unknown, action: 'register' | 'sign in') {
-  if (error instanceof ApiError) {
-    if (error.status === 401) return 'Email or password is incorrect.';
-    if (error.status === 409) return 'An account with this email already exists.';
-    if (error.status === 429) return 'Too many attempts. Please wait a moment and try again.';
-    return error.message;
-  }
-  return `Unable to ${action}. Check your connection and try again.`;
+function createLoginSchema(t: Translator) {
+  return z.object({
+    email: z
+      .string()
+      .trim()
+      .pipe(z.email(t('validation.email'))),
+    password: z
+      .string()
+      .min(8, t('validation.passwordMin', { count: 8 }))
+      .max(100, t('validation.passwordMax', { count: 100 })),
+  });
 }
+
+function createRegisterSchema(t: Translator) {
+  return createLoginSchema(t).extend({
+    name: z
+      .string()
+      .trim()
+      .min(2, t('validation.firstNameMin', { count: 2 }))
+      .max(50, t('validation.firstNameMax', { count: 50 })),
+    lastName: z
+      .string()
+      .trim()
+      .min(2, t('validation.lastNameMin', { count: 2 }))
+      .max(50, t('validation.lastNameMax', { count: 50 })),
+  });
+}
+
+type LoginValues = z.infer<ReturnType<typeof createLoginSchema>>;
+type RegisterValues = z.infer<ReturnType<typeof createRegisterSchema>>;
 
 export function AuthFormFrame({
   children,
@@ -50,7 +53,7 @@ export function AuthFormFrame({
   eyebrow: string;
   title: string;
 }) {
-  const { language } = useAppearance();
+  const { t } = useAppearance();
   return (
     <section aria-labelledby="auth-title" className="min-h-full bg-white py-12 sm:py-20">
       <div className="mx-auto grid max-w-5xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:items-stretch lg:px-8">
@@ -69,16 +72,14 @@ export function AuthFormFrame({
               aria-hidden="true"
               className="mt-5 font-display text-4xl font-black leading-[1.02] tracking-[-0.05em]"
             >
-              {language === 'es'
-                ? 'Una operación clara, desde la entrada hasta el cierre.'
-                : 'A clear operation, from arrival through closeout.'}
+              {t('auth.frame.headline')}
             </p>
             <p className="mt-6 max-w-sm text-base leading-relaxed text-[#f5f5f5]">
-              Una entrada directa para volver a la operación, sin configurar nada de más.
+              {t('auth.frame.description')}
             </p>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-[#d4d4d4]">
-            La demo usa datos de ejemplo para recorrer una jornada completa de cochera.
+            {t('auth.frame.footer')}
           </p>
         </div>
         <div className="rounded-[2rem_2rem_4.5rem_2rem] border border-[#121417]/10 bg-white p-6 shadow-[0_10px_0_rgba(18,20,23,0.08)] sm:p-8 lg:p-10">
@@ -112,20 +113,28 @@ export function AuthFormFrame({
 }
 
 export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
+  const { t } = useAppearance();
   const { login } = useAuth();
-  const { language } = useAppearance();
-  const es = language === 'es';
+  const resolver = useMemo(() => zodResolver(createLoginSchema(t)), [t]);
   const form = useForm<LoginValues>({
     defaultValues: { email: '', password: '' },
-    resolver: zodResolver(loginSchema),
+    resolver,
   });
+  useEffect(() => {
+    if (Object.keys(form.formState.errors).length > 0) void form.trigger();
+  }, [form, t]);
 
   const submit = form.handleSubmit(async (values) => {
     try {
       await login(values);
       onSuccess();
     } catch (error) {
-      form.setError('root', { message: formErrorMessage(error, 'sign in') });
+      form.setError('root', {
+        message: localizeApiError(error, t, 'auth.loginError', {
+          401: 'auth.invalidCredentials',
+          429: 'auth.rateLimited',
+        }),
+      });
     }
   });
 
@@ -137,12 +146,14 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         void submit(event);
       }}
     >
-      <Field error={form.formState.errors.email?.message} htmlFor="email" label="Email">
+      <Field
+        error={form.formState.errors.email?.message}
+        htmlFor="email"
+        label={t('auth.fields.email')}
+      >
         <Input
           autoComplete="email"
           autoFocus
-          aria-describedby={form.formState.errors.email ? 'email-error' : undefined}
-          aria-invalid={Boolean(form.formState.errors.email)}
           id="email"
           inputMode="email"
           type="email"
@@ -152,12 +163,10 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
       <Field
         error={form.formState.errors.password?.message}
         htmlFor="password"
-        label={es ? 'Contraseña' : 'Password'}
+        label={t('auth.fields.password')}
       >
         <Input
           autoComplete="current-password"
-          aria-describedby={form.formState.errors.password ? 'password-error' : undefined}
-          aria-invalid={Boolean(form.formState.errors.password)}
           id="password"
           type="password"
           {...form.register('password')}
@@ -174,26 +183,23 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         fullWidth
         type="submit"
       >
-        {form.formState.isSubmitting
-          ? es
-            ? 'Ingresando…'
-            : 'Signing in…'
-          : es
-            ? 'Ingresar'
-            : 'Sign in'}
+        {form.formState.isSubmitting ? t('auth.actions.signingIn') : t('auth.actions.signIn')}
       </Button>
     </form>
   );
 }
 
 export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
+  const { t } = useAppearance();
   const { register: registerUser } = useAuth();
-  const { language } = useAppearance();
-  const es = language === 'es';
+  const resolver = useMemo(() => zodResolver(createRegisterSchema(t)), [t]);
   const form = useForm<RegisterValues>({
     defaultValues: { email: '', lastName: '', name: '', password: '' },
-    resolver: zodResolver(registerSchema),
+    resolver,
   });
+  useEffect(() => {
+    if (Object.keys(form.formState.errors).length > 0) void form.trigger();
+  }, [form, t]);
 
   const submit = form.handleSubmit(async (values) => {
     try {
@@ -206,7 +212,12 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
       });
       onSuccess();
     } catch (error) {
-      form.setError('root', { message: formErrorMessage(error, 'register') });
+      form.setError('root', {
+        message: localizeApiError(error, t, 'auth.registerError', {
+          409: 'auth.emailTaken',
+          429: 'auth.rateLimited',
+        }),
+      });
     }
   });
 
@@ -221,35 +232,24 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
       <Field
         error={form.formState.errors.name?.message}
         htmlFor="name"
-        label={es ? 'Nombre' : 'First name'}
+        label={t('auth.fields.firstName')}
       >
-        <Input
-          aria-describedby={form.formState.errors.name ? 'name-error' : undefined}
-          aria-invalid={Boolean(form.formState.errors.name)}
-          autoComplete="name"
-          id="name"
-          {...form.register('name')}
-        />
+        <Input autoComplete="name" autoFocus id="name" {...form.register('name')} />
       </Field>
       <Field
         error={form.formState.errors.lastName?.message}
         htmlFor="lastName"
-        label={es ? 'Apellido' : 'Last name'}
+        label={t('auth.fields.lastName')}
+      >
+        <Input autoComplete="family-name" id="lastName" {...form.register('lastName')} />
+      </Field>
+      <Field
+        error={form.formState.errors.email?.message}
+        htmlFor="email"
+        label={t('auth.fields.email')}
       >
         <Input
-          aria-describedby={form.formState.errors.lastName ? 'lastName-error' : undefined}
-          aria-invalid={Boolean(form.formState.errors.lastName)}
-          autoComplete="family-name"
-          id="lastName"
-          {...form.register('lastName')}
-        />
-      </Field>
-      <Field error={form.formState.errors.email?.message} htmlFor="email" label="Email">
-        <Input
           autoComplete="email"
-          autoFocus
-          aria-describedby={form.formState.errors.email ? 'email-error' : undefined}
-          aria-invalid={Boolean(form.formState.errors.email)}
           id="email"
           inputMode="email"
           type="email"
@@ -259,12 +259,10 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
       <Field
         error={form.formState.errors.password?.message}
         htmlFor="password"
-        label={es ? 'Contraseña' : 'Password'}
+        label={t('auth.fields.password')}
       >
         <Input
           autoComplete="new-password"
-          aria-describedby={form.formState.errors.password ? 'password-error' : undefined}
-          aria-invalid={Boolean(form.formState.errors.password)}
           id="password"
           type="password"
           {...form.register('password')}
@@ -282,35 +280,23 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         type="submit"
       >
         {form.formState.isSubmitting
-          ? es
-            ? 'Creando cuenta…'
-            : 'Creating account…'
-          : es
-            ? 'Crear cuenta'
-            : 'Create account'}
+          ? t('auth.actions.creatingAccount')
+          : t('auth.actions.createAccount')}
       </Button>
     </form>
   );
 }
 
 export function LoginFooter() {
-  const { language } = useAppearance();
-  return language === 'es' ? (
-    <>El acceso se habilita desde la cochera.</>
-  ) : (
-    <>Access is provisioned by the facility owner.</>
-  );
+  const { t } = useAppearance();
+  return <>{t('auth.footer.login')}</>;
 }
 
 export function RegisterFooter() {
-  const { language } = useAppearance();
-  return language === 'es' ? (
+  const { t } = useAppearance();
+  return (
     <>
-      ¿Ya tenés una cuenta? <Link to="/login">Ingresá</Link>.
-    </>
-  ) : (
-    <>
-      Already have an account? <Link to="/login">Sign in</Link>.
+      {t('auth.footer.registerLead')} <Link to="/login">{t('auth.footer.registerLink')}</Link>.
     </>
   );
 }

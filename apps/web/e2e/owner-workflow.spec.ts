@@ -81,6 +81,57 @@ test('keeps public mobile navigation and main content usable with a keyboard', a
   await expect(menuTrigger).toBeFocused();
 });
 
+test('preserves an unsaved form while language and appearance change', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('parkcore-lang', 'es-AR');
+    localStorage.removeItem('parkcore-theme');
+  });
+  await page.goto('/login');
+
+  const email = page.getByLabel('Email');
+  await email.fill('owner@parkcore.test');
+  await page.getByRole('combobox', { name: 'Apariencia' }).selectOption('dark');
+
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#111310');
+  await expect(email).toHaveValue('owner@parkcore.test');
+  await page.getByRole('button', { name: 'Inglés' }).click();
+
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.getByLabel('Email')).toHaveValue('owner@parkcore.test');
+  await expect(page.getByRole('combobox', { name: 'Theme' })).toHaveValue('dark');
+  await expect(page).toHaveURL(/\/login$/);
+  expect(await page.evaluate(() => localStorage.getItem('parkcore-lang'))).toBe('en-US');
+});
+
+test('follows system appearance only while the system preference is selected', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('parkcore-lang', 'en-US');
+    localStorage.removeItem('parkcore-theme');
+  });
+  await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
+  await page.goto('/login');
+
+  const theme = page.getByRole('combobox', { name: 'Theme' });
+  await expect(theme).toHaveValue('system');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#111310');
+  await expect(page.locator('html')).toHaveCSS('scroll-behavior', 'auto');
+
+  await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#f7f7f4');
+
+  await theme.selectOption('dark');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+  await theme.selectOption('system');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+});
+
 test('signs in, creates a parking, checks in, and completes a parking session', async ({
   page,
 }) => {
@@ -206,6 +257,12 @@ test('signs in, creates a parking, checks in, and completes a parking session', 
   await expect(page).toHaveURL(/\/app\/parkings\/parking-1$/);
 
   await page.getByRole('button', { name: 'Check in', exact: true }).click();
+  const checkInSheet = page.getByRole('dialog', { name: 'Check in vehicle' });
+  await expect(checkInSheet.getByRole('button', { name: 'Close Check in vehicle' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(checkInSheet).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Check in', exact: true })).toBeFocused();
+  await page.getByRole('button', { name: 'Check in', exact: true }).click();
   await page.getByLabel('Plate', { exact: true }).fill('ab-123 cd');
   await page.getByRole('button', { name: 'Start session' }).click();
   await expect(page.getByRole('link', { name: 'Open session for AB123CD' })).toBeVisible();
@@ -213,6 +270,7 @@ test('signs in, creates a parking, checks in, and completes a parking session', 
   await page.getByRole('link', { name: 'Open session for AB123CD' }).click();
   await page.getByRole('button', { name: 'Check out' }).click();
   const checkout = page.getByRole('dialog', { name: 'Complete checkout' });
+  await expect(checkout.getByRole('button', { name: 'Close checkout' })).toBeFocused();
   await expect(checkout.getByLabel('Checkout summary')).toBeVisible();
   await checkout.getByRole('button', { name: 'Complete checkout', exact: true }).click();
   await expect(page.getByText('Session checked out.', { exact: true })).toBeVisible();

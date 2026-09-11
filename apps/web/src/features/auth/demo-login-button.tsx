@@ -1,7 +1,8 @@
 import { useState } from 'react';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../../components/ui/button.js';
-import { ApiError } from '../../lib/api/api-error.js';
+import { localizeApiError } from '../../lib/api/api-error.js';
 import { useAuth } from './use-auth.js';
 
 export function DemoLoginButton({
@@ -15,6 +16,7 @@ export function DemoLoginButton({
   className?: string;
   children?: React.ReactNode;
 }) {
+  const { t } = useAppearance();
   const { loginDemo } = useAuth();
   const [error, setError] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,9 +28,7 @@ export function DemoLoginButton({
       await loginDemo();
       onSuccess();
     } catch (reason) {
-      setError(
-        reason instanceof ApiError ? reason.message : 'Unable to start the demo. Please try again.',
-      );
+      setError(localizeApiError(reason, t, 'demo.startError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -43,7 +43,7 @@ export function DemoLoginButton({
         type="button"
         variant={variant}
       >
-        {isSubmitting ? 'Opening demo…' : (children ?? 'Try the demo')}
+        {isSubmitting ? t('demo.opening') : (children ?? t('demo.try'))}
       </Button>
       {error ? (
         <p className="form-error" role="alert">

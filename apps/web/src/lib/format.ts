@@ -1,13 +1,23 @@
-function locale() {
-  return document.documentElement.lang === 'en-US' ? 'en-US' : 'es-AR';
+import { DEFAULT_LOCALE, type Locale } from './localization.js';
+
+export function formatNumber(
+  value: number,
+  locale: Locale = DEFAULT_LOCALE,
+  options?: Intl.NumberFormatOptions,
+) {
+  return new Intl.NumberFormat(locale, options).format(value);
 }
 
-export function formatMoney(cents: number, currency: 'ARS' | 'USD' = 'USD') {
-  return new Intl.NumberFormat(locale(), { style: 'currency', currency }).format(cents / 100);
+export function formatMoney(
+  cents: number,
+  currency: 'ARS' | 'USD' = 'USD',
+  locale: Locale = DEFAULT_LOCALE,
+) {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(cents / 100);
 }
 
-export function formatTimestamp(value: string, timezone?: string) {
-  return new Intl.DateTimeFormat(locale(), {
+export function formatTimestamp(value: string, timezone?: string, locale: Locale = DEFAULT_LOCALE) {
+  return new Intl.DateTimeFormat(locale, {
     day: '2-digit',
     month: 'short',
     hour: '2-digit',
@@ -16,11 +26,17 @@ export function formatTimestamp(value: string, timezone?: string) {
   }).format(new Date(value));
 }
 
-export function formatDuration(startTime: string, endTime = new Date().toISOString()) {
+export function formatDuration(
+  startTime: string,
+  endTime = new Date().toISOString(),
+  locale: Locale = DEFAULT_LOCALE,
+) {
   const milliseconds = Math.max(0, new Date(endTime).getTime() - new Date(startTime).getTime());
   const hours = Math.floor(milliseconds / 3_600_000);
   const minutes = Math.floor((milliseconds % 3_600_000) / 60_000);
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  const formatPart = (value: number) =>
+    formatNumber(value, locale, { minimumIntegerDigits: 2, useGrouping: false });
+  return `${formatPart(hours)}:${formatPart(minutes)}`;
 }
 
 export function checkoutPreview(startTime: string, hourlyRateCents: number) {

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { PageHeader } from '../../components/domain/page-header.js';
 import { SessionHistoryRow } from '../../components/domain/session.js';
 import { Button } from '../../components/ui/button.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
@@ -21,7 +22,7 @@ type SessionFilter = 'ALL' | ParkingSession['status'];
 type HistoryPeriod = 'today' | '7d' | '30d';
 
 export function OwnerParkingHistoryRoute() {
-  const { language } = useAppearance();
+  const { language, locale, t } = useAppearance();
   const es = language === 'es';
   const { parkingId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -115,18 +116,14 @@ export function OwnerParkingHistoryRoute() {
           void sessionsQuery.refetch();
         }}
       >
-        {es
-          ? 'No pudimos cargar el historial de esta cochera.'
-          : 'We could not load this parking history.'}
+        {t('api.loadParkingHistory')}
       </ErrorState>
     );
   }
   if (!parking) {
     return (
-      <ErrorState title={es ? 'Cochera no disponible' : 'Parking unavailable'}>
-        {es
-          ? 'Esta cochera no está disponible en tu cuenta.'
-          : 'This parking is not available in your account.'}
+      <ErrorState title={t('parkingOperation.unavailableTitle')}>
+        {t('api.parkingUnavailable')}
       </ErrorState>
     );
   }
@@ -136,28 +133,30 @@ export function OwnerParkingHistoryRoute() {
 
   return (
     <section className="owner-page space-y-7" aria-labelledby="history-title">
-      <header className="flex flex-col gap-5 border-b border-[#121417] pb-7 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#6d695f]">
-            {parking.title}
-          </p>
-          <h1
-            className="mt-3 font-display text-4xl font-bold tracking-[-0.055em] text-[#121417] sm:text-5xl"
-            id="history-title"
+      <PageHeader
+        actions={
+          <Button disabled={exporting} onClick={() => void exportHistory()} variant="outline">
+            {exporting
+              ? es
+                ? 'Exportando...'
+                : 'Exporting...'
+              : es
+                ? 'Exportar CSV'
+                : 'Export CSV'}
+          </Button>
+        }
+        backAction={
+          <Link
+            className="inline-flex items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
+            to={`/app/parkings/${parking.id}`}
           >
-            {es ? 'Historial de estadías' : 'Session history'}
-          </h1>
-        </div>
-        <Link
-          className="inline-flex min-h-10 items-center justify-center rounded-full border border-[#121417]/15 bg-white px-4 py-2 text-sm font-bold text-[#121417] transition-colors hover:bg-[#ffcc00]"
-          to={`/app/parkings/${parking.id}`}
-        >
-          {es ? 'Volver a la cochera' : 'Back to parking'}
-        </Link>
-        <Button disabled={exporting} onClick={() => void exportHistory()} variant="outline">
-          {exporting ? (es ? 'Exportando...' : 'Exporting...') : es ? 'Exportar CSV' : 'Export CSV'}
-        </Button>
-      </header>
+            {es ? 'Volver a la cochera' : 'Back to parking'}
+          </Link>
+        }
+        eyebrow={parking.title}
+        id="history-title"
+        title={es ? 'Historial de estadías' : 'Session history'}
+      />
       <div className="grid gap-4 rounded-[1.5rem] border border-[#121417]/12 bg-[#f5f5f5] p-5 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_12rem_12rem_auto] sm:p-6">
         <Field htmlFor="session-plate" label={es ? 'Buscar patente' : 'Search plate'}>
           <Input
@@ -217,9 +216,7 @@ export function OwnerParkingHistoryRoute() {
         </Button>
       </div>
       {exportError ? (
-        <ErrorState onRetry={() => void exportHistory()}>
-          {es ? 'No pudimos exportar el historial.' : 'We could not export this history.'}
-        </ErrorState>
+        <ErrorState onRetry={() => void exportHistory()}>{t('api.exportHistory')}</ErrorState>
       ) : null}
       {aggregate ? (
         <section className="grid gap-4 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:grid-cols-4 sm:p-6">
@@ -237,7 +234,7 @@ export function OwnerParkingHistoryRoute() {
             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-sm font-bold">
               {aggregate.revenueByCurrency.length > 0
                 ? aggregate.revenueByCurrency.map(({ currency, revenueCents }) => (
-                    <span key={currency}>{formatMoney(revenueCents, currency)}</span>
+                    <span key={currency}>{formatMoney(revenueCents, currency, locale)}</span>
                   ))
                 : 'N/A'}
             </div>

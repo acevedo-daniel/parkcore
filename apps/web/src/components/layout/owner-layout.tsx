@@ -49,7 +49,7 @@ function OwnerLink({
 }
 
 export function OwnerLayout() {
-  const { language, t } = useAppearance();
+  const { locale, t } = useAppearance();
   const { logout, user } = useAuth();
   const navigate = useNavigate();
   const navigation = useNavigation();
@@ -67,9 +67,9 @@ export function OwnerLayout() {
     };
   }, []);
   useDocumentMeta({
-    description: 'Operate ParkCore parking facilities with active sessions, capacity and rates.',
+    description: t('shell.ownerMetaDescription'),
     noIndex: true,
-    title: 'ParkCore | Operations',
+    title: t('shell.ownerMetaTitle'),
   });
 
   const signOut = () => {
@@ -85,7 +85,7 @@ export function OwnerLayout() {
         <div className="flex flex-col gap-6">
           <div className="owner-brand-block border-b border-border-strong pb-5">
             <Link
-              aria-label="ParkCore operations"
+              aria-label={t('shell.ownerHome')}
               className="brand-mark font-display text-lg font-bold tracking-[-0.035em] text-foreground transition-colors hover:text-foreground-secondary"
               to="/app"
             >
@@ -104,20 +104,20 @@ export function OwnerLayout() {
               className="system-clock font-mono text-xs text-foreground-muted tabular-nums"
               dateTime={clock.toISOString()}
             >
-              {new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(
+              {new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(
                 clock,
               )}
             </time>
           </div>
           <section className="rounded-[var(--radius-sm)] border border-border-subtle bg-surface-subtle p-3">
             <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-foreground-muted">
-              {language === 'es' ? 'Preferencias' : 'Preferences'}
+              {t('nav.preferences')}
             </p>
             <AppearanceControls compact />
           </section>
           <section className="border-t border-border-subtle pt-3">
             <p className="mb-1 px-1 text-[10px] font-bold uppercase tracking-[0.12em] text-foreground-muted">
-              {language === 'es' ? 'Cuenta' : 'Account'}
+              {t('nav.account')}
             </p>
             <NavLink
               className={({ isActive }: NavLinkRenderProps) =>

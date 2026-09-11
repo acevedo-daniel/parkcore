@@ -15,7 +15,8 @@ Local real-stack browser checks run against disposable services. Deployed real-s
 | Layer                     | Purpose                                                                                                      | Tool / location                                                        |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
 | API tests                 | Domain rules, authorization, validation, error behavior, persistence, rate limiting, and session transitions | Vitest + Supertest in `apps/api/src/**/*.test.ts` and `apps/api/tests` |
-| Web tests                 | Forms, route behavior, loading/error states, and UI interactions                                             | Vitest + Testing Library in `apps/web/src/**/*.test.{ts,tsx}`          |
+| Web tests                 | Forms, route behavior, loading/error states, UI interactions, and Spanish/English shared-workflow parity     | Vitest + Testing Library in `apps/web/src/**/*.test.{ts,tsx}`          |
+| Localization parity       | Detect missing or extra nested keys between supported locale catalogs                                        | `pnpm locales:check`                                                   |
 | Contract check            | Detect drift between the API OpenAPI artifact and generated browser client                                   | `pnpm contract:check`                                                  |
 | Mocked browser workflow   | Verify the owner workflow against contract-shaped mocked responses                                           | Playwright in `apps/web/e2e`                                           |
 | Local real-stack workflow | Exercise the local preview, API, and PostgreSQL persistence boundary                                         | `pnpm --filter @parkcore/web test:e2e:local`                           |
@@ -84,6 +85,10 @@ The test strategy protects the rules that define the parking workflow:
 - showcase refresh preserves canonical facility and asset identities while rebasing time-dependent records;
 - expired cleanup removes only DEMO owners and remains bounded;
 - the generated web client remains synchronized with the API contract.
+- shared auth, parking, and check-in forms render localized labels and validation in both locales;
+- API failures are mapped to catalog messages instead of exposing backend response text;
+- localized form errors, loading states, success feedback, and ARIA names remain queryable in the selected locale.
+- shared domain primitives preserve visible status meaning, localized display values, and combobox keyboard, option, outside-click, and focus behavior.
 
 ## Run tests
 
@@ -91,6 +96,7 @@ From the repository root:
 
 ```bash
 pnpm text:check
+pnpm locales:check
 pnpm format:check
 pnpm --filter @parkcore/api-client build
 pnpm lint
@@ -140,7 +146,7 @@ This turns API/client synchronization into an explicit CI check rather than a ma
 pnpm --filter @parkcore/web test:e2e
 ```
 
-This is the deterministic mocked owner workflow used for fast UI-level feedback.
+This is the deterministic mocked owner workflow used for fast UI-level feedback. It covers language switching, explicit and system appearance changes, form-state preservation, reduced-motion behavior, keyboard navigation, dialog and sheet focus restoration, and the representative owner success path.
 
 ### Local real-stack workflow
 

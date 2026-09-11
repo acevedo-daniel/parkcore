@@ -14,6 +14,7 @@ import { Button } from '../../components/ui/button.js';
 import { Dialog } from '../../components/ui/dialog.js';
 import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { useToast } from '../../components/ui/toast-context.js';
+import { localizeApiError } from '../../lib/api/api-error.js';
 import {
   cancelParkingSession,
   checkOut,
@@ -24,7 +25,7 @@ import {
 import { formatMoney } from '../../lib/format.js';
 
 export function OwnerSessionDetailRoute() {
-  const { language } = useAppearance();
+  const { language, locale, t } = useAppearance();
   const es = language === 'es';
   const { sessionId } = useParams();
   const queryClient = useQueryClient();
@@ -51,12 +52,16 @@ export function OwnerSessionDetailRoute() {
           void parkingsQuery.refetch();
         }}
       >
-        {es ? 'No pudimos cargar esta estadía.' : 'We could not load this session.'}
+        {t('api.loadSession')}
       </ErrorState>
     );
   }
   const session = resolvedSession ?? sessionQuery.data;
-  if (!session) return null;
+  if (!session) {
+    return (
+      <ErrorState title={t('api.sessionUnavailable')}>{t('api.sessionUnavailable')}</ErrorState>
+    );
+  }
   const parking = parkingsQuery.data?.find((item) => item.id === session.parkingId);
   const canOperate = session.status === 'ACTIVE';
 
@@ -71,12 +76,10 @@ export function OwnerSessionDetailRoute() {
       const completedSession = await checkoutMutation.mutateAsync();
       setResolvedSession(completedSession);
       await refreshOperation();
-      showToast(es ? 'La estadía se cerró.' : 'Session checked out.');
+      showToast(t('session.checkedOut'));
       setCheckoutOpen(false);
     } catch (reason) {
-      setActionError(
-        reason instanceof Error ? reason.message : 'Unable to check out this session.',
-      );
+      setActionError(localizeApiError(reason, t, 'api.checkoutSession'));
     }
   };
   const cancelSession = async () => {
@@ -85,10 +88,10 @@ export function OwnerSessionDetailRoute() {
       const cancelledSession = await cancelMutation.mutateAsync();
       setResolvedSession(cancelledSession);
       await refreshOperation();
-      showToast(es ? 'La estadía se canceló.' : 'Session cancelled.');
+      showToast(t('session.cancelled'));
       setCancelOpen(false);
     } catch (reason) {
-      setActionError(reason instanceof Error ? reason.message : 'Unable to cancel this session.');
+      setActionError(localizeApiError(reason, t, 'api.cancelSession'));
     }
   };
 
@@ -149,8 +152,7 @@ export function OwnerSessionDetailRoute() {
                   setCheckoutOpen(true);
                 }}
               >
-                <Check aria-hidden="true" className="size-4" />{' '}
-                {es ? 'Cobrar y cerrar' : 'Check out'}
+                <Check aria-hidden="true" className="size-4" /> {t('session.checkOut')}
               </Button>
               <Button
                 onClick={() => {
@@ -159,8 +161,7 @@ export function OwnerSessionDetailRoute() {
                 }}
                 variant="danger"
               >
-                <Ban aria-hidden="true" className="size-4" />{' '}
-                {es ? 'Cancelar estadía' : 'Cancel session'}
+                <Ban aria-hidden="true" className="size-4" /> {t('session.cancel')}
               </Button>
             </div>
           ) : null}
@@ -211,21 +212,27 @@ export function OwnerSessionDetailRoute() {
               <OperationalTimestamp value={session.startTime} timezone={parking?.timezone} />
             </DetailItem>
             <DetailItem label={es ? 'Tarifa registrada' : 'Rate snapshot'}>
-              {formatMoney(session.hourlyRateCents, session.currency)} / H
+              {formatMoney(session.hourlyRateCents, session.currency, locale)} / H
             </DetailItem>
             <DetailItem label={es ? 'Total' : 'Total'}>
               {session.totalAmountCents === null
                 ? es
                   ? 'Pendiente de cobro'
                   : 'Pending checkout'
-                : formatMoney(session.totalAmountCents, session.currency)}
+                : formatMoney(session.totalAmountCents, session.currency, locale)}
             </DetailItem>
           </dl>
         </section>
       </div>
 
       {session.status === 'COMPLETED' ? (
-        <OperationalReceipt session={session} timezone={parking?.timezone} />
+        <OperationalReceipt
+          historyHref={parking ? `/app/parkings/${parking.id}/sessions` : undefined}
+          parkingHref={parking ? `/app/parkings/${parking.id}` : undefined}
+          parkingTitle={parking?.title}
+          session={session}
+          timezone={parking?.timezone}
+        />
       ) : null}
       {session.status === 'CANCELLED' ? (
         <section
@@ -245,15 +252,11 @@ export function OwnerSessionDetailRoute() {
       ) : null}
 
       <Dialog
-        closeLabel={es ? 'Cerrar cobro' : 'Close checkout'}
-        description={
-          es
-            ? 'Revisá el cálculo antes de cerrar la estadía. El importe final se confirma al completar el cobro.'
-            : 'Review the current calculation before completing this session. The final amount is confirmed at checkout.'
-        }
+        closeLabel={t('session.checkoutClose')}
+        description={t('session.checkoutDescription')}
         onOpenChange={setCheckoutOpen}
         open={checkoutOpen}
-        title={es ? 'Cobrar y cerrar estadía' : 'Complete checkout'}
+        title={t('session.checkoutTitle')}
       >
         <div className="space-y-5 pt-6">
           <div className="flex items-center justify-between gap-4">
@@ -276,34 +279,22 @@ export function OwnerSessionDetailRoute() {
             fullWidth
             onClick={() => void completeCheckout()}
           >
-            {checkoutMutation.isPending
-              ? es
-                ? 'Cobrando…'
-                : 'Completing…'
-              : es
-                ? 'Cobrar y cerrar estadía'
-                : 'Complete checkout'}
+            {checkoutMutation.isPending ? t('session.completing') : t('session.completeCheckout')}
           </Button>
         </div>
       </Dialog>
 
       <Dialog
-        closeLabel={es ? 'Cerrar cancelación' : 'Close cancellation'}
-        description={
-          es
-            ? `Cancelar ${session.vehicle.plate} finaliza esta estadía sin cobrar. No se puede deshacer.`
-            : `Cancelling ${session.vehicle.plate} ends this active session without a checkout. This cannot be undone.`
-        }
+        closeLabel={t('session.cancelClose')}
+        description={t('session.cancelDescription', { plate: session.vehicle.plate })}
         onOpenChange={setCancelOpen}
         open={cancelOpen}
-        title={es ? 'Cancelar estadía activa' : 'Cancel active session'}
+        title={t('session.cancelTitle')}
       >
         <div className="space-y-5 pt-6">
           <Plate plate={session.vehicle.plate} />
           <p className="border-l-4 border-accent pl-4 text-sm leading-relaxed text-foreground-secondary">
-            {es
-              ? 'La cochera quedará disponible para registrar un nuevo ingreso.'
-              : 'The parking will be available for a new check-in after cancellation.'}
+            {t('session.availableAfterCancel')}
           </p>
           {actionError ? (
             <p
@@ -318,13 +309,7 @@ export function OwnerSessionDetailRoute() {
             fullWidth
             onClick={() => void cancelSession()}
           >
-            {cancelMutation.isPending
-              ? es
-                ? 'Cancelando…'
-                : 'Cancelling…'
-              : es
-                ? 'Cancelar estadía'
-                : 'Cancel session'}
+            {cancelMutation.isPending ? t('session.cancelling') : t('session.cancel')}
           </Button>
         </div>
       </Dialog>
@@ -357,8 +342,9 @@ function DetailItem({ children, label }: { children: React.ReactNode; label: str
 }
 
 function SessionDetailSkeleton() {
+  const { t } = useAppearance();
   return (
-    <div className="space-y-8" aria-label="Loading parking session">
+    <div className="space-y-8" aria-label={t('api.loadSession')}>
       <Skeleton className="h-56 rounded-[var(--radius-xl)]" />
       <div className="grid gap-4 lg:grid-cols-3">
         <Skeleton className="h-64 rounded-[var(--radius-lg)]" />

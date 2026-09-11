@@ -6,8 +6,8 @@ import { AppearanceProvider, useAppearance } from './appearance-provider.js';
 import { AppearanceControls } from '../components/ui/appearance-controls.js';
 
 function AppearanceProbe() {
-  const { preference, theme } = useAppearance();
-  return <output data-testid="appearance">{`${preference}:${theme}`}</output>;
+  const { locale, preference, theme } = useAppearance();
+  return <output data-testid="appearance">{`${preference}:${theme}:${locale}`}</output>;
 }
 
 function renderAppearance() {
@@ -22,11 +22,13 @@ function renderAppearance() {
 describe('AppearanceProvider', () => {
   let originalMatchMedia: typeof window.matchMedia | undefined;
   let setSystemTheme: (matches: boolean) => void;
+  let getListenerCount: () => number;
 
   beforeEach(() => {
     const browser = window as Omit<Window, 'matchMedia'> & {
       matchMedia?: typeof window.matchMedia;
     };
+    getListenerCount = () => listeners.size;
     originalMatchMedia = browser.matchMedia?.bind(window);
     let matches = false;
     const listeners = new Set<(event: MediaQueryListEvent) => void>();
@@ -76,7 +78,7 @@ describe('AppearanceProvider', () => {
     setSystemTheme(true);
     renderAppearance();
 
-    expect(screen.getByTestId('appearance').textContent).toBe('system:dark');
+    expect(screen.getByTestId('appearance').textContent).toBe('system:dark:es-AR');
     expect(document.documentElement.dataset.theme).toBe('dark');
     expect(document.documentElement.style.colorScheme).toBe('dark');
     expect(window.localStorage.getItem('parkcore-theme')).toBeNull();
@@ -84,7 +86,7 @@ describe('AppearanceProvider', () => {
     setSystemTheme(false);
 
     await waitFor(() => {
-      expect(screen.getByTestId('appearance').textContent).toBe('system:light');
+      expect(screen.getByTestId('appearance').textContent).toBe('system:light:es-AR');
       expect(document.documentElement.dataset.theme).toBe('light');
     });
   });
@@ -96,12 +98,13 @@ describe('AppearanceProvider', () => {
 
     await user.selectOptions(control, 'dark');
 
-    expect(screen.getByTestId('appearance').textContent).toBe('dark:dark');
+    expect(screen.getByTestId('appearance').textContent).toBe('dark:dark:es-AR');
     expect(window.localStorage.getItem('parkcore-theme')).toBe('dark');
+    expect(getListenerCount()).toBe(0);
 
     setSystemTheme(false);
 
-    expect(screen.getByTestId('appearance').textContent).toBe('dark:dark');
+    expect(screen.getByTestId('appearance').textContent).toBe('dark:dark:es-AR');
   });
 
   it('restores an explicit choice and returns to system mode without persisting its result', async () => {
@@ -110,10 +113,52 @@ describe('AppearanceProvider', () => {
     renderAppearance();
     const control = screen.getByRole('combobox', { name: 'Apariencia' });
 
-    expect(screen.getByTestId('appearance').textContent).toBe('light:light');
+    expect(screen.getByTestId('appearance').textContent).toBe('light:light:es-AR');
     await user.selectOptions(control, 'system');
 
     expect(window.localStorage.getItem('parkcore-theme')).toBe('system');
-    expect(screen.getByTestId('appearance').textContent).toBe('system:light');
+    expect(screen.getByTestId('appearance').textContent).toBe('system:light:es-AR');
+  });
+
+  it('normalizes legacy locale values and exposes accessible language state', async () => {
+    window.localStorage.setItem('parkcore-theme', 'unexpected');
+    window.localStorage.setItem('parkcore-lang', 'en');
+    renderAppearance();
+
+    expect(screen.getByTestId('appearance').textContent).toBe('system:light:en-US');
+    expect(screen.getByRole('button', { name: 'English' }).getAttribute('aria-pressed')).toBe(
+      'true',
+    );
+    expect(screen.getByRole('button', { name: 'Spanish' }).getAttribute('aria-pressed')).toBe(
+      'false',
+    );
+
+    await waitFor(() => {
+      expect(document.documentElement.lang).toBe('en-US');
+      expect(window.localStorage.getItem('parkcore-lang')).toBe('en-US');
+    });
+  });
+
+  it('refreshes the operating system value when returning to system mode', async () => {
+    setSystemTheme(true);
+    const user = userEvent.setup();
+    renderAppearance();
+    const control = screen.getByRole('combobox', { name: 'Apariencia' });
+
+    await user.selectOptions(control, 'light');
+    setSystemTheme(false);
+    await user.selectOptions(control, 'system');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('appearance').textContent).toBe('system:light:es-AR');
+    });
+  });
+
+  it('removes the system listener when the provider unmounts', () => {
+    const { unmount } = renderAppearance();
+
+    expect(getListenerCount()).toBe(1);
+    unmount();
+    expect(getListenerCount()).toBe(0);
   });
 });

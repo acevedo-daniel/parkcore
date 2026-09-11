@@ -12,8 +12,7 @@ export function OwnerRouteErrorBoundary() {
 }
 
 function RouteErrorBoundary({ tone }: { tone: 'owner' | 'public' }) {
-  const { language } = useAppearance();
-  const es = language === 'es';
+  const { t } = useAppearance();
   const error = useRouteError();
   const notFound = isRouteErrorResponse(error) && error.status === 404;
   const owner = tone === 'owner';
@@ -34,31 +33,19 @@ function RouteErrorBoundary({ tone }: { tone: 'owner' | 'public' }) {
         }
       >
         <p className="font-mono text-xs font-bold tracking-[0.16em] text-[#121417] uppercase">
-          {notFound ? '404' : es ? 'Necesita atención' : 'Needs attention'}
+          {notFound ? '404' : t('route.error.attention')}
         </p>
         <h1 className="mt-5 max-w-3xl font-display text-4xl font-bold leading-[0.95] tracking-[-0.055em] text-[#121417] sm:text-6xl">
-          {notFound
-            ? es
-              ? 'Esta vista no está disponible.'
-              : 'This view is unavailable.'
-            : es
-              ? 'No pudimos abrir esta vista.'
-              : 'We could not open this view.'}
+          {t(notFound ? 'route.error.notFoundTitle' : 'route.error.title')}
         </h1>
         <p className="mt-5 max-w-xl text-base leading-relaxed text-[#34342f]">
-          {notFound
-            ? es
-              ? 'Volvé a un lugar conocido para seguir.'
-              : 'Return to a familiar place to continue.'
-            : es
-              ? 'Probá de nuevo o volvé al inicio de esta experiencia.'
-              : 'Try again or return to the start of this experience.'}
+          {t(notFound ? 'route.error.notFoundDescription' : 'route.error.description')}
         </p>
         <Link
           className="mt-7 inline-flex min-h-11 items-center justify-center rounded-full bg-[#121417] px-5 py-2 text-sm font-bold text-white transition-colors hover:bg-white hover:text-[#121417]"
           to={owner ? '/app' : '/'}
         >
-          {owner ? (es ? 'Ir al resumen' : 'Go to overview') : es ? 'Ir al inicio' : 'Go home'}
+          {t(owner ? 'route.error.ownerAction' : 'route.error.publicAction')}
         </Link>
       </div>
     </section>

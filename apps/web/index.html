@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="es-AR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,7 +8,7 @@
       content="Find active parking facilities or operate your own parking with clear sessions, capacity and rates."
     />
     <meta name="application-name" content="ParkCore" />
-    <meta name="theme-color" content="#f7f7f5" />
+    <meta name="theme-color" content="#f7f7f4" />
     <meta property="og:site_name" content="ParkCore" />
     <meta property="og:title" content="ParkCore | Parking Operations" />
     <meta
@@ -23,19 +23,39 @@
     <title>ParkCore | Parking Operations</title>
     <script>
       (() => {
+        const themeStorageKey = 'parkcore-theme';
+        const localeStorageKey = 'parkcore-lang';
+        const readStoredValue = (key) => {
+          try {
+            return localStorage.getItem(key);
+          } catch {
+            return null;
+          }
+        };
+
         try {
-          const stored = localStorage.getItem('parkcore-theme');
-          const preference = ['system', 'light', 'dark'].includes(stored ?? '') ? stored : 'system';
+          const storedTheme = readStoredValue(themeStorageKey);
+          const preference = ['system', 'light', 'dark'].includes(storedTheme ?? '')
+            ? storedTheme
+            : 'system';
+          const storedLocale = readStoredValue(localeStorageKey);
+          const locale = storedLocale === 'en' || storedLocale === 'en-US' ? 'en-US' : 'es-AR';
+          const systemIsDark =
+            typeof window.matchMedia === 'function' &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches;
           const theme =
-            preference === 'dark' ||
-            (preference === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
-              ? 'dark'
-              : 'light';
+            preference === 'dark' || (preference === 'system' && systemIsDark) ? 'dark' : 'light';
           document.documentElement.dataset.theme = theme;
           document.documentElement.style.colorScheme = theme;
+          document.documentElement.lang = locale;
+          document
+            .querySelector('meta[name="theme-color"]')
+            ?.setAttribute('content', theme === 'dark' ? '#111310' : '#f7f7f4');
         } catch {
           document.documentElement.dataset.theme = 'light';
           document.documentElement.style.colorScheme = 'light';
+          document.documentElement.lang = 'es-AR';
+          document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#f7f7f4');
         }
       })();
     </script>

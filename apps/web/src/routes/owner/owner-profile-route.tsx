@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { LogOut, Mail, UserRound } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 import { z } from 'zod';
@@ -10,32 +11,35 @@ import { Button } from '../../components/ui/button.js';
 import { Field, Input } from '../../components/ui/field.js';
 import { useToast } from '../../components/ui/toast-context.js';
 import { useAuth } from '../../features/auth/use-auth.js';
+import { localizeApiError } from '../../lib/api/api-error.js';
 import { updateProfile } from '../../lib/api/owner-api.js';
+import type { Translator } from '../../lib/localization.js';
 
-function createProfileSchema(es: boolean) {
+function createProfileSchema(t: Translator) {
   return z.object({
     name: z
       .string()
       .trim()
-      .min(2, es ? 'Usá al menos 2 caracteres.' : 'Use at least 2 characters.')
-      .max(50, es ? 'Usá hasta 50 caracteres.' : 'Use up to 50 characters.'),
+      .min(2, t('validation.profileNameMin', { count: 2 }))
+      .max(50, t('validation.profileNameMax', { count: 50 })),
   });
 }
 
-interface ProfileValues {
-  name: string;
-}
+type ProfileValues = z.infer<ReturnType<typeof createProfileSchema>>;
 
 export function OwnerProfileRoute() {
-  const { language } = useAppearance();
-  const es = language === 'es';
+  const { t } = useAppearance();
   const navigate = useNavigate();
   const { logout, updateUser, user } = useAuth();
   const { showToast } = useToast();
+  const schema = useMemo(() => createProfileSchema(t), [t]);
   const form = useForm<ProfileValues>({
     defaultValues: { name: user?.name ?? '' },
-    resolver: zodResolver(createProfileSchema(es)),
+    resolver: zodResolver(schema),
   });
+  useEffect(() => {
+    if (Object.keys(form.formState.errors).length > 0) void form.trigger();
+  }, [form, t]);
   const mutation = useMutation({ mutationFn: updateProfile });
   if (!user) return null;
 
@@ -43,15 +47,10 @@ export function OwnerProfileRoute() {
     try {
       const updated = await mutation.mutateAsync({ name: values.name });
       updateUser(updated);
-      showToast(es ? 'Tus datos se actualizaron.' : 'Your profile was updated.');
+      showToast(t('profile.updated'));
     } catch (reason) {
       form.setError('root', {
-        message:
-          reason instanceof Error
-            ? reason.message
-            : es
-              ? 'No pudimos actualizar tus datos.'
-              : 'Unable to update your profile.',
+        message: localizeApiError(reason, t, 'api.updateProfile'),
       });
     }
   });
@@ -65,18 +64,16 @@ export function OwnerProfileRoute() {
     <section className="owner-page space-y-8" aria-labelledby="profile-title">
       <header className="border-b border-[#121417] pb-7">
         <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#6d695f]">
-          {es ? 'Tu cuenta' : 'Your account'}
+          {t('profile.account')}
         </p>
         <h1
           className="mt-3 font-display text-4xl font-bold tracking-[-0.055em] text-[#121417] sm:text-5xl"
           id="profile-title"
         >
-          {es ? 'Perfil' : 'Profile'}
+          {t('profile.title')}
         </h1>
         <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#45423c] sm:text-base">
-          {es
-            ? 'Mantené al día cómo te mostramos dentro de la operación.'
-            : 'Keep the details we show across your operation up to date.'}
+          {t('profile.description')}
         </p>
       </header>
 
@@ -94,22 +91,20 @@ export function OwnerProfileRoute() {
             </span>
             <div>
               <h2 className="font-display text-xl font-bold tracking-[-0.035em] text-[#121417]">
-                {es ? 'Datos personales' : 'Personal details'}
+                {t('profile.details')}
               </h2>
-              <p className="mt-1 text-sm text-[#6d695f]">
-                {es ? 'Lo esencial, sin más vueltas.' : 'Only the details that matter.'}
-              </p>
+              <p className="mt-1 text-sm text-[#6d695f]">{t('profile.detailsDescription')}</p>
             </div>
           </div>
           <div className="mt-6 grid gap-5">
             <Field
               error={form.formState.errors.name?.message}
               htmlFor="profile-name"
-              label={es ? 'Nombre' : 'Name'}
+              label={t('profile.name')}
             >
               <Input id="profile-name" {...form.register('name')} />
             </Field>
-            <Field htmlFor="profile-email" label={es ? 'Correo electrónico' : 'Email'}>
+            <Field htmlFor="profile-email" label={t('profile.email')}>
               <Input disabled id="profile-email" type="email" value={user.email ?? ''} />
             </Field>
           </div>
@@ -122,13 +117,7 @@ export function OwnerProfileRoute() {
             </p>
           ) : null}
           <Button className="mt-6 rounded-full px-6" disabled={mutation.isPending} type="submit">
-            {mutation.isPending
-              ? es
-                ? 'Guardando…'
-                : 'Saving…'
-              : es
-                ? 'Guardar cambios'
-                : 'Save changes'}
+            {mutation.isPending ? t('profile.saving') : t('profile.save')}
           </Button>
         </form>
 
@@ -136,12 +125,10 @@ export function OwnerProfileRoute() {
           <section className="rounded-[1.5rem] border border-[#121417]/12 bg-[#f5f5f5] p-5 sm:p-6">
             <Mail aria-hidden="true" className="size-5 text-[#121417]" />
             <h2 className="mt-5 font-display text-xl font-bold tracking-[-0.035em] text-[#121417]">
-              {es ? 'Inicio de sesión' : 'Sign-in'}
+              {t('profile.signIn')}
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-[#45423c]">
-              {es
-                ? 'Tu correo identifica la cuenta con la que administrás las cocheras.'
-                : 'Your email identifies the account you use to manage facilities.'}
+              {t('profile.emailDescription')}
             </p>
             <p className="mt-4 break-all font-mono text-xs font-bold text-[#121417]">
               {user.email}
@@ -150,15 +137,13 @@ export function OwnerProfileRoute() {
 
           <section className="rounded-[1.5rem] border border-[#121417] bg-white p-5 sm:p-6">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-              {es ? 'Sesión' : 'Session'}
+              {t('profile.session')}
             </p>
             <h2 className="mt-3 font-display text-xl font-bold tracking-[-0.035em] text-[#121417]">
-              {es ? '¿Terminaste por hoy?' : 'Finished for today?'}
+              {t('profile.finished')}
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-[#45423c]">
-              {es
-                ? 'Podés salir de la cuenta desde acá.'
-                : 'You can sign out of this account here.'}
+              {t('profile.signOutDescription')}
             </p>
             <Button
               className="mt-5 rounded-full"
@@ -167,7 +152,7 @@ export function OwnerProfileRoute() {
               variant="secondary"
             >
               <LogOut aria-hidden="true" className="size-4" />
-              {es ? 'Cerrar sesión' : 'Sign out'}
+              {t('profile.signOut')}
             </Button>
           </section>
         </aside>

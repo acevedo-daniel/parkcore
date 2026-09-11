@@ -5,7 +5,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn.js';
 
 const buttonVariants = cva(
-  'parkcore-pressable inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-sm)] text-sm font-semibold disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*="size-"])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none select-none cursor-pointer',
+  'parkcore-pressable inline-flex cursor-pointer select-none items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-sm)] text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*="size-"])]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
@@ -56,6 +56,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, fullWidth, className }))}
+        data-slot="button"
         ref={ref}
         {...props}
       />
@@ -66,7 +67,16 @@ Button.displayName = 'Button';
 
 export const IconButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, size = 'icon', variant = 'secondary', ...props }, ref) => {
-    return <Button variant={variant} size={size} className={className} ref={ref} {...props} />;
+    return (
+      <Button
+        data-slot="icon-button"
+        variant={variant}
+        size={size}
+        className={className}
+        ref={ref}
+        {...props}
+      />
+    );
   },
 );
 IconButton.displayName = 'IconButton';

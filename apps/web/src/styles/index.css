@@ -1,12 +1,52 @@
 @import 'tailwindcss';
 
 @theme inline {
-  --font-sans:
-    'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    Roboto, sans-serif;
-  --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono:
-    'JetBrains Mono', ui-monospace, 'Cascadia Code', 'SFMono-Regular', Menlo, Consolas, monospace;
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+
+  --text-xs: var(--text-xs);
+  --text-sm: var(--text-sm);
+  --text-base: var(--text-base);
+  --text-lg: var(--text-lg);
+  --text-xl: var(--text-xl);
+  --text-2xl: var(--text-2xl);
+  --text-3xl: var(--text-3xl);
+  --text-4xl: var(--text-4xl);
+  --text-hero: var(--text-hero);
+
+  --leading-tight: var(--leading-tight);
+  --leading-heading: var(--leading-heading);
+  --leading-normal: var(--leading-normal);
+  --leading-relaxed: var(--leading-relaxed);
+
+  --font-weight-normal: var(--font-weight-normal);
+  --font-weight-medium: var(--font-weight-medium);
+  --font-weight-semibold: var(--font-weight-semibold);
+  --font-weight-bold: var(--font-weight-bold);
+  --font-weight-extrabold: var(--font-weight-extrabold);
+
+  --spacing-1: var(--spacing-1);
+  --spacing-2: var(--spacing-2);
+  --spacing-3: var(--spacing-3);
+  --spacing-4: var(--spacing-4);
+  --spacing-5: var(--spacing-5);
+  --spacing-6: var(--spacing-6);
+  --spacing-8: var(--spacing-8);
+  --spacing-10: var(--spacing-10);
+  --spacing-12: var(--spacing-12);
+  --spacing-16: var(--spacing-16);
+  --spacing-20: var(--spacing-20);
+  --spacing-24: var(--spacing-24);
+  --spacing-28: var(--spacing-28);
+  --spacing-32: var(--spacing-32);
+
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-pill: var(--radius-pill);
 
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
@@ -38,6 +78,7 @@
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-active: var(--accent-active);
+  --color-accent-strong: var(--accent-strong);
   --color-accent-soft: var(--accent-soft);
   --color-accent-foreground: var(--accent-foreground);
 
@@ -71,6 +112,14 @@
   --color-info-foreground: var(--info-foreground);
   --color-info-text: var(--info-text);
 
+  --color-chart-primary: var(--chart-primary);
+  --color-chart-secondary: var(--chart-secondary);
+  --color-chart-accent: var(--chart-accent);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-axis: var(--chart-axis);
+  --color-chart-tooltip: var(--chart-tooltip);
+  --color-chart-tooltip-foreground: var(--chart-tooltip-foreground);
+
   --color-brand-yellow: var(--brand-yellow);
   --color-brand-yellow-hover: var(--brand-yellow-hover);
   --color-brand-yellow-subtle: var(--brand-yellow-subtle);
@@ -82,8 +131,10 @@
 
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
+  --shadow-control: var(--shadow-control);
   --shadow-hover: var(--shadow-hover);
   --shadow-raised: var(--shadow-raised);
+  --shadow-popover: var(--shadow-popover);
   --shadow-dialog: var(--shadow-dialog);
 }
 
@@ -95,14 +146,15 @@
   --surface: #ffffff;
   --surface-subtle: #f1f1ec;
   --surface-raised: #ffffff;
+  --surface-hover: #f1f1ec;
   --surface-emphasis: #ecece6;
   --surface-inverse: #121417;
 
   --foreground: #121417;
   --foreground-secondary: #454b46;
   --foreground-muted: #626862;
-  --foreground-inverse: #121417;
   --foreground-on-inverse: #ffffff;
+  --foreground-inverse: var(--foreground-on-inverse);
 
   --border-subtle: #e3e4de;
   --border: #c7cac3;
@@ -120,39 +172,40 @@
   --accent: #ffcc00;
   --accent-hover: #f2c200;
   --accent-active: #e3b600;
+  --accent-strong: var(--accent-active);
   --accent-soft: #fff4bf;
   --accent-foreground: #121417;
 
   --success: #1f7a4d;
-  --success-surface: #e9f6ef;
   --success-soft: #e9f6ef;
   --success-foreground: #145236;
-  --success-text: #145236;
+  --success-surface: var(--success-soft);
+  --success-text: var(--success-foreground);
 
   --warning: #b85f0b;
-  --warning-surface: #fff1df;
   --warning-soft: #fff1df;
   --warning-foreground: #743a06;
-  --warning-text: #743a06;
+  --warning-surface: var(--warning-soft);
+  --warning-text: var(--warning-foreground);
 
   --danger: #b8322a;
-  --danger-on-solid: #ffffff;
-  --danger-surface: #fcebea;
   --danger-soft: #fcebea;
   --danger-foreground: #84221d;
-  --danger-text: #84221d;
+  --danger-surface: var(--danger-soft);
+  --danger-text: var(--danger-foreground);
+  --danger-on-solid: var(--foreground-on-inverse);
 
   --info: #2867b2;
-  --info-surface: #eaf2fb;
   --info-soft: #eaf2fb;
   --info-foreground: #1f4f86;
-  --info-text: #1f4f86;
+  --info-surface: var(--info-soft);
+  --info-text: var(--info-foreground);
 
   --focus-ring: #1f6feb;
   --focus-ring-offset: #ffffff;
   --disabled-surface: #ecece7;
   --disabled-foreground: #787d77;
-  --overlay-backdrop: rgb(18 20 23 / 48%);
+  --overlay-backdrop: rgb(18 20 23 / 0.48);
 
   --chart-primary: #121417;
   --chart-secondary: #7b817a;
@@ -170,14 +223,15 @@
   --surface: #171a16;
   --surface-subtle: #20231e;
   --surface-raised: #252823;
+  --surface-hover: #2a2e28;
   --surface-emphasis: #2d312b;
   --surface-inverse: #f4f5ef;
 
   --foreground: #f4f5ef;
   --foreground-secondary: #c9cdc5;
   --foreground-muted: #a7ada4;
-  --foreground-inverse: #111310;
   --foreground-on-inverse: #111310;
+  --foreground-inverse: var(--foreground-on-inverse);
 
   --border-subtle: #30342e;
   --border: #454b43;
@@ -195,39 +249,40 @@
   --accent: #ffd528;
   --accent-hover: #ffe052;
   --accent-active: #edc51e;
+  --accent-strong: var(--accent-active);
   --accent-soft: #342d0d;
   --accent-foreground: #111310;
 
   --success: #6bc395;
-  --success-surface: #173427;
   --success-soft: #173427;
   --success-foreground: #b8efd0;
-  --success-text: #b8efd0;
+  --success-surface: var(--success-soft);
+  --success-text: var(--success-foreground);
 
   --warning: #f1a453;
-  --warning-surface: #3c2914;
   --warning-soft: #3c2914;
   --warning-foreground: #ffd7aa;
-  --warning-text: #ffd7aa;
+  --warning-surface: var(--warning-soft);
+  --warning-text: var(--warning-foreground);
 
   --danger: #ef817a;
-  --danger-on-solid: #111310;
-  --danger-surface: #3b1d1b;
   --danger-soft: #3b1d1b;
   --danger-foreground: #ffc6c2;
-  --danger-text: #ffc6c2;
+  --danger-surface: var(--danger-soft);
+  --danger-text: var(--danger-foreground);
+  --danger-on-solid: var(--foreground-on-inverse);
 
   --info: #7fb4ff;
-  --info-surface: #172b45;
   --info-soft: #172b45;
   --info-foreground: #c6ddff;
-  --info-text: #c6ddff;
+  --info-surface: var(--info-soft);
+  --info-text: var(--info-foreground);
 
   --focus-ring: #7fb4ff;
   --focus-ring-offset: #111310;
   --disabled-surface: #252823;
   --disabled-foreground: #7f857c;
-  --overlay-backdrop: rgb(0 0 0 / 68%);
+  --overlay-backdrop: rgb(0 0 0 / 0.68);
 
   --chart-primary: #f4f5ef;
   --chart-secondary: #9da49a;
@@ -238,8 +293,48 @@
   --chart-tooltip-foreground: #f4f5ef;
 }
 
-/* Compatibility aliases for the current component surface. */
+/* Canonical shared tokens and compatibility aliases for the current component surface. */
 :root {
+  --font-sans: 'Plus Jakarta Sans', Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sans);
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --text-4xl: 3rem;
+  --text-hero: clamp(2.75rem, 6vw, 5rem);
+
+  --leading-tight: 1.05;
+  --leading-heading: 1.15;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+  --spacing-28: 7rem;
+  --spacing-32: 8rem;
+
   --brand-yellow: var(--accent);
   --brand-yellow-hover: var(--accent-hover);
   --brand-yellow-subtle: var(--accent-soft);
@@ -260,23 +355,6 @@
   --control-height-lg: 3rem;
   --touch-target-min: 44px;
   --drawer-width: 28rem;
-  --max-width-public: 80rem;
-  --max-width-owner: 90rem;
-
-  --spacing-1: 0.25rem;
-  --spacing-2: 0.5rem;
-  --spacing-3: 0.75rem;
-  --spacing-4: 1rem;
-  --spacing-5: 1.25rem;
-  --spacing-6: 1.5rem;
-  --spacing-8: 2rem;
-  --spacing-10: 2.5rem;
-  --spacing-12: 3rem;
-  --spacing-16: 4rem;
-  --spacing-20: 5rem;
-  --spacing-24: 6rem;
-  --spacing-28: 7rem;
-  --spacing-32: 8rem;
 
   --gutter-compact: 1.25rem;
   --gutter-medium: 2rem;
@@ -285,26 +363,23 @@
   --owner-max-width: 90rem;
   --owner-sidebar-width: 15rem;
 
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.375rem;
-  --text-2xl: 1.75rem;
-  --text-3xl: 2.25rem;
-  --text-4xl: 3rem;
-  --text-hero: clamp(2.75rem, 6vw, 5rem);
+  --motion-fast: 140ms;
+  --motion-normal: 180ms;
+  --motion-overlay: 220ms;
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
-  --shadow-xs: 0 1px 1px rgb(18 20 23 / 5%);
-  --shadow-sm: 0 1px 2px rgb(18 20 23 / 8%);
-  --shadow-control: 0 1px 2px rgb(18 20 23 / 8%);
-  --shadow-hover: 0 3px 8px rgb(18 20 23 / 9%);
-  --shadow-raised: 0 12px 32px rgb(18 20 23 / 20%);
-  --shadow-dialog: 0 24px 64px rgb(18 20 23 / 28%);
+  --shadow-xs: 0 1px 1px rgb(18 20 23 / 0.05);
+  --shadow-control: 0 1px 2px rgb(18 20 23 / 0.08);
+  --shadow-hover: 0 3px 8px rgb(18 20 23 / 0.09);
+  --shadow-popover: 0 12px 32px rgb(0 0 0 / 0.2);
+  --shadow-dialog: 0 24px 64px rgb(0 0 0 / 0.28);
 
-  --motion-fast: 140ms cubic-bezier(0.16, 1, 0.3, 1);
-  --motion-normal: 180ms cubic-bezier(0.16, 1, 0.3, 1);
-  --motion-slow: 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  /* Legacy names remain aliases until their consumers are migrated. */
+  --max-width-public: var(--public-max-width);
+  --max-width-owner: var(--owner-max-width);
+  --shadow-sm: var(--shadow-control);
+  --shadow-raised: var(--shadow-popover);
+  --motion-slow: var(--motion-overlay);
 
   --space-1: var(--spacing-1);
   --space-2: var(--spacing-2);
@@ -328,7 +403,7 @@
   html {
     min-width: 320px;
     background: var(--canvas);
-    line-height: 1.5;
+    line-height: var(--leading-normal);
     scroll-behavior: smooth;
     scroll-padding-top: 1.5rem;
   }
@@ -341,7 +416,7 @@
     color: var(--foreground);
     font-family: var(--font-sans);
     font-size: 0.9375rem;
-    line-height: 1.5;
+    line-height: var(--leading-normal);
     letter-spacing: -0.011em;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -394,9 +469,9 @@
 @layer components {
   /* Micro-interactions */
   .parkcore-pressable {
-    transition-duration: 120ms;
+    transition-duration: var(--motion-fast);
     transition-property: background-color, border-color, box-shadow, color, opacity, transform;
-    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    transition-timing-function: var(--motion-ease-out);
   }
 
   @media (hover: hover) {
@@ -423,11 +498,47 @@
     box-shadow: var(--shadow-xs);
   }
 
+  .parkcore-toast-viewport {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 100;
+    display: flex;
+    width: min(calc(100vw - 2rem), 24rem);
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    pointer-events: none;
+    outline: none;
+  }
+
+  .parkcore-toast {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    background: var(--surface-raised);
+    color: var(--foreground);
+    padding: 0.75rem 0.75rem 0.75rem 1rem;
+    box-shadow: var(--shadow-dialog);
+    pointer-events: auto;
+  }
+
+  .parkcore-skeleton {
+    min-height: 1rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--surface-emphasis);
+  }
+
   .parkcore-field {
     box-shadow: var(--shadow-xs);
-    transition-duration: 120ms;
+    transition-duration: var(--motion-fast);
     transition-property: background-color, border-color, box-shadow, color;
-    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    transition-timing-function: var(--motion-ease-out);
   }
 
   @keyframes parkcore-reveal {
@@ -442,7 +553,7 @@
   }
 
   .parkcore-reveal {
-    animation: parkcore-reveal var(--motion-fast) both;
+    animation: parkcore-reveal var(--motion-fast) var(--motion-ease-out) both;
   }
 
   /* Accessibility & layout primitives */
@@ -480,14 +591,14 @@
     font-size: clamp(2.5rem, 6vw, 4.25rem);
     font-weight: 700;
     letter-spacing: -0.05em;
-    line-height: 1.05;
+    line-height: var(--leading-tight);
   }
 
   .type-page-title {
     font-size: clamp(1.75rem, 4vw, 2.5rem);
     font-weight: 700;
     letter-spacing: -0.035em;
-    line-height: 1.15;
+    line-height: var(--leading-heading);
   }
 
   .type-section-title {
@@ -502,7 +613,7 @@
     font-size: 0.725rem;
     font-weight: 600;
     letter-spacing: 0.08em;
-    line-height: 1.2;
+    line-height: var(--leading-tight);
     text-transform: uppercase;
   }
 
@@ -533,7 +644,7 @@
     padding: 0 16px;
     border: 1px solid transparent;
     cursor: pointer;
-    transition: all var(--motion-fast);
+    transition: all var(--motion-fast) var(--motion-ease-out);
   }
   .button:disabled {
     pointer-events: none;
@@ -592,7 +703,7 @@
     background: var(--surface-raised);
     color: var(--foreground);
     cursor: pointer;
-    transition: all var(--motion-fast);
+    transition: all var(--motion-fast) var(--motion-ease-out);
   }
   .icon-button:hover:not(:disabled) {
     background: var(--surface-hover);
@@ -603,7 +714,7 @@
     .owner-sidebar .owner-nav-link {
       transition-property: background-color, color, transform;
       transition-duration: var(--motion-fast);
-      transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+      transition-timing-function: var(--motion-ease-out);
     }
 
     .owner-sidebar .owner-nav-link:hover {
@@ -670,7 +781,7 @@
     height: 100%;
     border-radius: var(--radius-pill);
     background: var(--success);
-    transition: width var(--motion-slow);
+    transition: width var(--motion-overlay) var(--motion-ease-out);
   }
   .capacity-gauge-warning .capacity-gauge-fill {
     background: var(--warning);

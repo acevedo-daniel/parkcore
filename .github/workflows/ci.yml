@@ -40,6 +40,9 @@ jobs:
       - name: Verify authored text
         run: pnpm text:check
 
+      - name: Verify localization parity
+        run: pnpm locales:check
+
       - name: Verify formatting
         run: pnpm format:check
 
