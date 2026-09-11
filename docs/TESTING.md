@@ -48,6 +48,12 @@ pnpm --filter @parkcore/api test:coverage
 
 This verifies that committed migrations and the seed can bootstrap a fresh database before the API coverage tests run. Repository-wide lint and typecheck belong to the separate `Quality` job, while deployable builds belong to `Production`.
 
+The canonical seed provisions the stable SHOWCASE identity and its fictional public scenario. DEMO identities are created only through `POST /demo/login`, so lifecycle integration tests create multiple sandboxes, exercise owner-scoped reset and expiry recovery, and verify bounded cleanup leaves OWNER and SHOWCASE data untouched. The explicit maintenance smoke command is:
+
+```bash
+pnpm --filter @parkcore/api demo:cleanup
+```
+
 ### Web
 
 The default Playwright suite runs against a local production preview and intercepts API requests with contract-shaped responses. It therefore tests browser workflow independently from a live API/database.
@@ -73,6 +79,10 @@ The test strategy protects the rules that define the parking workflow:
 - capacity and duplicate-active-vehicle checks remain safe during concurrent check-ins;
 - a session transitions from `ACTIVE` to only `COMPLETED` or `CANCELLED`;
 - checkout uses the session's immutable pricing snapshot;
+- concurrent DEMO creation and reset remain owner-scoped, and expired DEMO access returns a recoverable authentication error;
+- public discovery includes the stable SHOWCASE scenario, marks it as fictional demonstration data, and excludes DEMO facilities;
+- showcase refresh preserves canonical facility and asset identities while rebasing time-dependent records;
+- expired cleanup removes only DEMO owners and remains bounded;
 - the generated web client remains synchronized with the API contract.
 
 ## Run tests
