@@ -33,6 +33,7 @@ Driver information can be recorded as visit data during check-in, but drivers do
 - Search and filter the catalog by address and hourly rate.
 - View public parking details.
 - Estimate an advisory stay cost from a facility's current hourly rate.
+- Open Google Maps directions from a facility's public coordinates.
 - Navigate paginated catalog results.
 - Receive a public not-found state for unavailable facilities.
 

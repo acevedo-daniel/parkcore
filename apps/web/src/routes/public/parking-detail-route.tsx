@@ -5,6 +5,8 @@ import { Link, useParams } from 'react-router';
 import { useAppearance } from '../../app/appearance-provider.js';
 import { AvailabilityIndicator } from '../../components/domain/availability-indicator.js';
 import { PublicParkingImage } from '../../components/domain/public-parking-image.js';
+import { Button } from '../../components/ui/button.js';
+import { ParkingCalculatorWidget } from '../../features/parking/parking-calculator-widget.js';
 import { getPublicParking, PublicApiError } from '../../lib/api/public-api.js';
 import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
 import { formatMoney } from '../../lib/format.js';
@@ -25,7 +27,9 @@ export function ParkingDetailRoute() {
       : t('public.detail.metaDescriptionFallback'),
     noIndex: parkingQuery.isError,
     publicUrl: parking ? publicUrl(`/parkings/${parking.id}`) : undefined,
-    title: parking ? `${parking.title} | ParkCore` : t('public.detail.metaTitle'),
+    title: parking
+      ? t('public.detail.metaTitleWithTitle', { title: parking.title })
+      : t('public.detail.metaTitle'),
   });
 
   if (parkingQuery.isLoading) return <ParkingDetailSkeleton />;
@@ -47,22 +51,18 @@ export function ParkingDetailRoute() {
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             {!notFound ? (
-              <button
-                className="rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground hover:bg-primary-hover"
+              <Button
                 onClick={() => {
                   void parkingQuery.refetch();
                 }}
-                type="button"
+                variant="primary"
               >
                 {t('public.detail.retry')}
-              </button>
+              </Button>
             ) : null}
-            <Link
-              className="rounded-full border border-border px-5 py-3 text-sm font-bold text-foreground hover:bg-accent hover:text-accent-foreground"
-              to="/parkings"
-            >
-              {t('public.detail.back')}
-            </Link>
+            <Button asChild variant="secondary">
+              <Link to="/parkings">{t('public.detail.back')}</Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -70,18 +70,21 @@ export function ParkingDetailRoute() {
   }
   if (!parking) return null;
 
-  const mapUrl = `https://www.openstreetmap.org/?mlat=${String(parking.lat)}&mlon=${String(parking.lng)}#map=17/${String(parking.lat)}/${String(parking.lng)}`;
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${String(parking.lat)},${String(parking.lng)}`;
   const scheduleLabel = parking.is24Hours
     ? t('public.detail.schedule24')
     : parking.opensAt && parking.closesAt
-      ? `${parking.opensAt} - ${parking.closesAt}`
+      ? t('public.detail.scheduleRange', {
+          closesAt: parking.closesAt,
+          opensAt: parking.opensAt,
+        })
       : t('public.detail.scheduleUnavailable');
 
   return (
     <article className="min-h-full bg-canvas pb-20 pt-10 text-foreground sm:pb-28 sm:pt-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link
-          className="inline-flex items-center gap-2 text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4"
+          className="inline-flex items-center gap-2 rounded-sm text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset"
           to="/parkings"
         >
           <ArrowLeft aria-hidden="true" className="size-4" />
@@ -95,14 +98,15 @@ export function ParkingDetailRoute() {
                 {t('parking.demo')}
               </span>
             ) : null}
+            <h1 className="mt-2 max-w-3xl font-display text-5xl font-black leading-[0.98] tracking-[-0.055em] text-foreground sm:text-6xl">
+              {parking.title}
+            </h1>
             <AvailabilityIndicator
+              className="mt-5"
               nextOpeningAt={parking.nextOpeningAt}
               state={parking.availabilityState}
               timezone={parking.timezone}
             />
-            <h1 className="mt-6 max-w-3xl font-display text-5xl font-black leading-[0.98] tracking-[-0.055em] text-foreground sm:text-6xl">
-              {parking.title}
-            </h1>
             <p className="mt-5 flex max-w-xl items-start gap-2 text-base leading-relaxed text-foreground-secondary sm:text-lg">
               <MapPin aria-hidden="true" className="mt-1 size-5 shrink-0 text-foreground" />
               <span>
@@ -120,7 +124,7 @@ export function ParkingDetailRoute() {
                 </p>
                 <p className="mt-1 font-mono text-2xl font-bold text-foreground">
                   {formatMoney(parking.hourlyRateCents, parking.currency, locale)}{' '}
-                  <span className="text-sm">/ h</span>
+                  <span className="text-sm">{t('public.detail.perHour')}</span>
                 </p>
               </div>
               <div>
@@ -152,6 +156,22 @@ export function ParkingDetailRoute() {
                 </p>
               ) : null}
             </div>
+            <div className="mt-6 border-t border-border-subtle pt-5">
+              <p className="type-label text-foreground-muted">{t('public.detail.location')}</p>
+              <p className="mt-3 text-sm leading-relaxed text-foreground-secondary">
+                {t('public.detail.directionsDescription')}
+              </p>
+              <a
+                aria-label={t('public.detail.directionsAction', { title: parking.title })}
+                className="mt-5 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-bold text-accent-foreground outline-none transition-colors hover:bg-accent-hover focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset"
+                href={directionsUrl}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {t('public.detail.directionsAction', { title: parking.title })}
+                <ArrowUpRight aria-hidden="true" className="size-4" />
+              </a>
+            </div>
             {parking.isShowcase ? (
               <p className="mt-5 rounded-2xl bg-accent-soft p-4 text-sm font-medium leading-relaxed text-accent-foreground">
                 {t('public.detail.showcaseDisclosure')}
@@ -160,8 +180,8 @@ export function ParkingDetailRoute() {
           </aside>
         </div>
 
-        <div className="mt-12 grid gap-8 lg:grid-cols-12">
-          <div className="aspect-[16/10] overflow-hidden rounded-[2.5rem_2.5rem_5rem_2.5rem] border border-border bg-surface-emphasis lg:col-span-7">
+        <div className="mt-12 grid gap-8 md:grid-cols-12">
+          <div className="aspect-[16/10] overflow-hidden rounded-[2.5rem_2.5rem_5rem_2.5rem] border border-border bg-surface-emphasis md:col-span-7">
             <PublicParkingImage
               alt={t('parking.discoveryImageAlt', { title: parking.title })}
               fetchPriority="high"
@@ -172,28 +192,14 @@ export function ParkingDetailRoute() {
             />
           </div>
 
-          <div className="grid gap-6 lg:col-span-4 lg:col-start-9">
+          <div className="grid gap-6 md:col-span-5 md:col-start-8 xl:col-span-4 xl:col-start-9">
             <section className="rounded-[2rem] border border-border bg-surface p-6 sm:p-7">
               <p className="type-label text-foreground-muted">{t('public.detail.about')}</p>
               <p className="mt-4 text-base leading-relaxed text-foreground-secondary">
                 {parking.description ?? t('public.detail.missingDescription')}
               </p>
             </section>
-            <section className="rounded-[2rem] bg-surface-inverse p-6 text-foreground-on-inverse sm:p-7">
-              <p className="type-label text-accent">{t('public.detail.location')}</p>
-              <p className="mt-4 text-sm leading-relaxed text-foreground-on-inverse/75">
-                {t('public.detail.directionsDescription')}
-              </p>
-              <a
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-bold text-accent-foreground hover:bg-accent-hover"
-                href={mapUrl}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                {t('public.detail.directionsAction', { title: parking.title })}
-                <ArrowUpRight aria-hidden="true" className="size-4" />
-              </a>
-            </section>
+            <ParkingCalculatorWidget className="max-w-none" parking={parking} />
           </div>
         </div>
       </div>
@@ -212,9 +218,9 @@ function ParkingDetailSkeleton() {
         <div className="h-5 w-36 rounded bg-surface-emphasis" />
         <div className="mt-10 h-16 max-w-2xl rounded bg-surface-emphasis" />
         <div className="mt-5 h-6 max-w-lg rounded bg-surface-emphasis" />
-        <div className="mt-12 grid gap-8 lg:grid-cols-12">
-          <div className="aspect-[16/10] rounded-[2.5rem] bg-surface-emphasis lg:col-span-7" />
-          <div className="min-h-64 rounded-[2rem] bg-surface-emphasis lg:col-span-4 lg:col-start-9" />
+        <div className="mt-12 grid gap-8 md:grid-cols-12">
+          <div className="aspect-[16/10] rounded-[2.5rem] bg-surface-emphasis md:col-span-7" />
+          <div className="min-h-64 rounded-[2rem] bg-surface-emphasis md:col-span-5 md:col-start-8 xl:col-span-4 xl:col-start-9" />
         </div>
       </div>
     </div>

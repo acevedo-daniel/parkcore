@@ -28,20 +28,31 @@ const DURATION_OPTIONS = [
 
 type DurationOptionId = (typeof DURATION_OPTIONS)[number]['id'];
 
-export function ParkingCalculatorWidget({ className }: { className?: string }) {
+interface ParkingCalculatorWidgetProps {
+  className?: string;
+  parking?: PublicParking;
+}
+
+export function ParkingCalculatorWidget({ className, parking }: ParkingCalculatorWidgetProps) {
   const { locale, t } = useAppearance();
   const [selectedId, setSelectedId] = useState('');
   const [selectedDuration, setSelectedDuration] = useState<DurationOptionId>('two-hours');
 
   const parkingsQuery = useQuery({
+    enabled: !parking,
     queryKey: ['public-parkings-widget'],
     queryFn: () => getPublicParkings({ limit: 10 }),
     staleTime: 60_000,
   });
 
-  const availableFacilities = useMemo(() => parkingsQuery.data?.data ?? [], [parkingsQuery.data]);
+  const availableFacilities = useMemo(
+    () => (parking ? [parking] : (parkingsQuery.data?.data ?? [])),
+    [parking, parkingsQuery.data],
+  );
   const selectedFacility =
-    availableFacilities.find((facility) => facility.id === selectedId) ?? availableFacilities[0];
+    parking ??
+    availableFacilities.find((facility) => facility.id === selectedId) ??
+    availableFacilities[0];
 
   return (
     <div
@@ -98,7 +109,7 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
           onDurationChange={setSelectedDuration}
           selectedFacility={selectedFacility}
           selectedDuration={selectedDuration}
-          selectedId={selectedFacility.id}
+          selectedId={parking?.id ?? selectedFacility.id}
         />
       )}
     </div>
