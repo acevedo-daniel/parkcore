@@ -1,6 +1,13 @@
 import { Building2, LayoutDashboard, LogOut, UserRound } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, NavLink, Outlet, useNavigate, useNavigation } from 'react-router';
+import {
+  Link,
+  NavLink,
+  Outlet,
+  type NavLinkRenderProps,
+  useNavigate,
+  useNavigation,
+} from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { DemoResetControl } from '../../features/auth/demo-reset-control.js';
@@ -23,7 +30,7 @@ function OwnerLink({
   return (
     <NavLink
       end={to === '/app'}
-      className={({ isActive }) =>
+      className={({ isActive }: NavLinkRenderProps) =>
         cn(
           compact
             ? 'owner-nav-link flex min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-medium transition-colors'
@@ -114,7 +121,7 @@ export function OwnerLayout() {
               {language === 'es' ? 'Cuenta' : 'Account'}
             </p>
             <NavLink
-              className={({ isActive }) =>
+              className={({ isActive }: NavLinkRenderProps) =>
                 cn(
                   'owner-nav-link flex items-center gap-3 px-3.5 py-2 rounded-[var(--radius-sm)] text-sm font-medium transition-colors',
                   isActive
@@ -184,7 +191,7 @@ export function OwnerLayout() {
           <OwnerLink compact key={link.to} {...link} />
         ))}
         <NavLink
-          className={({ isActive }) =>
+          className={({ isActive }: NavLinkRenderProps) =>
             cn(
               'owner-nav-link flex min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-medium transition-colors',
               isActive

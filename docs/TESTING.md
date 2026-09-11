@@ -166,10 +166,10 @@ The browser-QA command runs the real-stack workflow across Chromium, Firefox, an
 `.github/workflows/ci.yml` separates verification into six conceptual jobs and one final gate:
 
 1. **Quality**: authored text, formatting, lint, and typecheck;
-2. **API Tests and Integration**: PostgreSQL bootstrap and API coverage tests;
-3. **Web Tests**: browser-facing unit and component tests;
+2. **Tests / API**: PostgreSQL bootstrap and API coverage tests;
+3. **Tests / Web**: browser-facing unit and component tests;
 4. **Contract**: generated API/client drift detection;
-5. **Real stack E2E**: local real-stack Playwright browser workflow with PostgreSQL and failure diagnostics;
+5. **E2E**: local real-stack Playwright browser workflow with PostgreSQL and failure diagnostics;
 6. **Production**: deployable API, client, and web builds;
 7. **CI Gate**: the stable required check that fails when any verification job fails, is cancelled, or is skipped.
 

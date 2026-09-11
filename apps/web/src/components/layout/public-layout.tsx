@@ -1,7 +1,14 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Menu, X } from 'lucide-react';
 import { useEffect } from 'react';
-import { Link, NavLink, Outlet, useNavigate, useNavigation } from 'react-router';
+import {
+  Link,
+  NavLink,
+  Outlet,
+  type NavLinkRenderProps,
+  useNavigate,
+  useNavigation,
+} from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { DemoLoginButton } from '../../features/auth/demo-login-button.js';
@@ -19,7 +26,7 @@ function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
       {publicLinks.map((link) => (
         <NavLink
           key={link.to}
-          className={({ isActive }) =>
+          className={({ isActive }: NavLinkRenderProps) =>
             cn(
               'public-nav-link rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px',
               isActive
