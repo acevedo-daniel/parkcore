@@ -1,5 +1,4 @@
 import { Prisma, type User } from '../../../prisma/generated/client.js';
-import { env } from '../../config/env.js';
 import { ConflictError, ForbiddenError } from '../../errors/index.js';
 import { logger } from '../../lib/logger.js';
 import { signAccessToken } from '../auth/auth.jwt.js';
@@ -11,16 +10,12 @@ import type { DemoLoginResponse, DemoResetResponse, DemoStatusResponse } from '.
 const isActiveDemo = (user: User | null): user is User =>
   user?.kind === 'DEMO' && user.demoExpiresAt !== null && user.demoExpiresAt.getTime() > Date.now();
 
-export async function getStatus(): Promise<DemoStatusResponse> {
-  const user = await userRepository.findById(env.DEMO_USER_ID);
-  return { available: isActiveDemo(user) };
+export function getStatus(): DemoStatusResponse {
+  return { available: true };
 }
 
 export async function login(): Promise<DemoLoginResponse> {
-  const user = await userRepository.findById(env.DEMO_USER_ID);
-  if (!isActiveDemo(user)) {
-    throw new ConflictError('Demo access is temporarily unavailable');
-  }
+  const user = await demoRepository.createDemoSandbox();
   const demoExpiresAt = user.demoExpiresAt;
   if (!demoExpiresAt) {
     throw new ConflictError('Demo access is temporarily unavailable');
@@ -41,7 +36,7 @@ export async function login(): Promise<DemoLoginResponse> {
 
 export async function reset(userId: string): Promise<DemoResetResponse> {
   const user = await userRepository.findById(userId);
-  if (user?.id !== env.DEMO_USER_ID || !isActiveDemo(user)) {
+  if (!isActiveDemo(user)) {
     logger.warn({ userId }, 'Rejected demo reset request');
     throw new ForbiddenError('Demo reset is not available for this account');
   }

@@ -31,6 +31,15 @@ afterEach(() => {
 });
 
 describe('public parking detail images', () => {
+  it('discloses fictional data for showcase facilities', async () => {
+    api.getPublicParking.mockResolvedValue(publicParkingFixture({ isShowcase: true }));
+    renderParkingDetail();
+
+    expect(
+      await screen.findByText('Fictional parking with demonstration data for exploring ParkCore.'),
+    ).toBeTruthy();
+  });
+
   it('renders a stable, asynchronously decoded primary parking image', async () => {
     api.getPublicParking.mockResolvedValue(
       publicParkingFixture({ image: 'https://images.example.test/central-parking.jpg' }),

@@ -10,10 +10,11 @@ const loginControllerMock = vi.fn((_req: Request, res: Response) => {
   res.status(200).json({ ok: true });
 });
 
-async function createDemoTestApp(maxRequests: number) {
+async function createDemoTestApp(demoCreationMax: number, resetMax = demoCreationMax) {
   vi.resetModules();
-  process.env.AUTH_RATE_LIMIT_MAX = String(maxRequests);
-  process.env.DEMO_RESET_RATE_LIMIT_MAX = String(maxRequests);
+  process.env.AUTH_RATE_LIMIT_MAX = '1';
+  process.env.DEMO_CREATION_RATE_LIMIT_MAX = String(demoCreationMax);
+  process.env.DEMO_RESET_RATE_LIMIT_MAX = String(resetMax);
   process.env.DEMO_RESET_RATE_LIMIT_WINDOW_MS = '60000';
 
   vi.doMock('../../middlewares/auth.middleware.js', () => ({
@@ -43,7 +44,7 @@ describe('demo reset rate limit', () => {
   });
 
   it('returns 429 after exceeding the configured reset limit', async () => {
-    const app = await createDemoTestApp(1);
+    const app = await createDemoTestApp(1, 1);
 
     const first = await request(app).post('/demo/reset');
     const second = await request(app).post('/demo/reset');
@@ -54,14 +55,16 @@ describe('demo reset rate limit', () => {
     expect(resetControllerMock).toHaveBeenCalledOnce();
   });
 
-  it('rate-limits public demo login independently from reset', async () => {
-    const app = await createDemoTestApp(1);
+  it('rate-limits demo creation independently from normal auth', async () => {
+    const app = await createDemoTestApp(2, 1);
 
     const first = await request(app).post('/demo/login');
     const second = await request(app).post('/demo/login');
+    const third = await request(app).post('/demo/login');
 
     expect(first.status).toBe(200);
-    expect(second.status).toBe(429);
-    expect(loginControllerMock).toHaveBeenCalledOnce();
+    expect(second.status).toBe(200);
+    expect(third.status).toBe(429);
+    expect(loginControllerMock).toHaveBeenCalledTimes(2);
   });
 });

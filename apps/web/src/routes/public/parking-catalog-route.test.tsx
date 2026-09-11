@@ -58,10 +58,13 @@ describe('public parking catalog', () => {
   });
 
   it('renders active parkings returned by the typed API boundary', async () => {
-    api.getPublicParkings.mockResolvedValue(listFixture([publicParkingFixture()]));
+    api.getPublicParkings.mockResolvedValue(
+      listFixture([publicParkingFixture({ isShowcase: true })]),
+    );
     renderCatalog();
 
     expect(await screen.findByRole('link', { name: 'Open Central Parking' })).toBeTruthy();
+    expect(screen.getByText('Demo', { exact: true })).toBeTruthy();
     expect(document.title).toBe('Parkings | ParkCore');
     expect(document.head.querySelector('meta[name="description"]')?.getAttribute('content')).toBe(
       'Browse active ParkCore parking facilities by address and hourly rate.',

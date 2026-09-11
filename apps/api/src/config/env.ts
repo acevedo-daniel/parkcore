@@ -42,7 +42,21 @@ const envSchema = z
       .int()
       .positive()
       .default(15 * 60 * 1000),
-    DEMO_USER_ID: z.uuid().default('00000000-0000-4000-8000-000000000010'),
+    DEMO_CREATION_RATE_LIMIT_MAX: z.coerce
+      .number({ error: 'Invalid DEMO_CREATION_RATE_LIMIT_MAX' })
+      .int()
+      .positive()
+      .default(5),
+    DEMO_CREATION_RATE_LIMIT_WINDOW_MS: z.coerce
+      .number({ error: 'Invalid DEMO_CREATION_RATE_LIMIT_WINDOW_MS' })
+      .int()
+      .positive()
+      .default(15 * 60 * 1000),
+    DEMO_CLEANUP_BATCH_SIZE: z.coerce
+      .number({ error: 'Invalid DEMO_CLEANUP_BATCH_SIZE' })
+      .int()
+      .positive()
+      .default(10),
     DEMO_RESET_RATE_LIMIT_MAX: z.coerce
       .number({ error: 'Invalid DEMO_RESET_RATE_LIMIT_MAX' })
       .int()

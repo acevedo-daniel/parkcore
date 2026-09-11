@@ -10,13 +10,13 @@ const queryClient = new QueryClient();
 export function AppProviders({ router }: Pick<RouterProviderProps, 'router'>) {
   return (
     <AppearanceProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ToastProvider>
             <RouterProvider router={router} />
-          </QueryClientProvider>
-        </ToastProvider>
-      </AuthProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </AppearanceProvider>
   );
 }

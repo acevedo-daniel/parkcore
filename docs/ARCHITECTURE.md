@@ -70,6 +70,8 @@ Public parking list and detail reads share the same repository visibility predic
 
 The service loads the eligible candidate set with active-session counts, derives schedule state and availability in the parking timezone, applies text, currency-safe price, and availability filters, orders by `AVAILABLE`, `LIMITED`, `FULL`, and `CLOSED` with a title tie-break, and paginates last. Public DTOs expose only public facility data plus `isShowcase`, `isOpen`, `availabilityState`, `availableSpaces`, `occupancyPercent`, and `nextOpeningAt`; owner IDs and credential data are not part of that representation.
 
+The canonical SHOWCASE identity has a stable ID and no credentials. Database setup provisions its six-facility fictional Buenos Aires scenario. The `showcase:refresh` maintenance command accepts an optional reference time and runs the canonical replacement inside one PostgreSQL transaction, preserving facility and asset IDs while rebasing sessions. It targets only the SHOWCASE owner, so normal OWNER and DEMO data are not changed.
+
 ## Contract flow
 
 The API's OpenAPI registrations generate the artifact consumed by the browser client:
@@ -102,6 +104,8 @@ Its main state boundaries are:
 The web application persists the owner's access token in browser `localStorage` and supplies it to the generated API client. Authorization remains enforced by the API on every protected request.
 
 Access tokens carry the authenticated identity kind. Credential login issues tokens only for `OWNER` identities. `DEMO` tokens are bounded by the demo identity expiration, while `SHOWCASE` tokens may read identity data but are rejected from parking mutation and operation paths.
+
+Each demo entry creates its own four-hour DEMO owner and canonical scenario inside one transaction. Demo reset regenerates only the authenticated DEMO owner's scenario and preserves its original expiry. Protected requests for expired or deleted DEMO subjects return `code=DEMO_EXPIRED`; the web auth provider clears its token and cached server state. Bounded opportunistic cleanup runs during creation, and the explicit `demo:cleanup` command removes only expired DEMO owners.
 
 ## Hosted topology
 

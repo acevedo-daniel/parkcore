@@ -2,7 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../auth/auth.jwt.js', () => ({ signAccessToken: vi.fn() }));
 vi.mock('../user/user.repository.js', () => ({ findById: vi.fn() }));
-vi.mock('./demo.repository.js', () => ({ restoreDemoOwnerData: vi.fn() }));
+vi.mock('./demo.repository.js', () => ({
+  createDemoSandbox: vi.fn(),
+  restoreDemoOwnerData: vi.fn(),
+}));
 vi.mock('../../lib/logger.js', () => ({
   logger: { error: vi.fn(), info: vi.fn(), warn: vi.fn() },
 }));
@@ -38,15 +41,12 @@ describe('demo.service', () => {
     vi.clearAllMocks();
   });
 
-  it('reports availability without exposing operator details', async () => {
-    vi.mocked(userRepository.findById).mockResolvedValue(null);
-
-    await expect(getStatus()).resolves.toEqual({ available: false });
-    expect(userRepository.findById).toHaveBeenCalledWith('00000000-0000-4000-8000-000000000010');
+  it('reports availability without exposing operator details', () => {
+    expect(getStatus()).toEqual({ available: true });
   });
 
-  it('creates a session for the configured demo owner without a password', async () => {
-    vi.mocked(userRepository.findById).mockResolvedValue(demoOwner());
+  it('creates a session for a new demo sandbox without a password', async () => {
+    vi.mocked(demoRepository.createDemoSandbox).mockResolvedValue(demoOwner());
     vi.mocked(authJwt.signAccessToken).mockResolvedValue('demo-token');
 
     await expect(login()).resolves.toMatchObject({
@@ -61,10 +61,13 @@ describe('demo.service', () => {
       },
       { expiresAt: new Date('2099-01-15T12:00:00.000Z') },
     );
+    expect(demoRepository.createDemoSandbox).toHaveBeenCalledOnce();
   });
 
   it('rejects reset attempts from another authenticated account', async () => {
-    vi.mocked(userRepository.findById).mockResolvedValue(demoOwner({ id: 'another-owner-id' }));
+    vi.mocked(userRepository.findById).mockResolvedValue(
+      demoOwner({ id: 'another-owner-id', kind: 'OWNER' }),
+    );
 
     await expect(reset('another-owner-id')).rejects.toBeInstanceOf(ForbiddenError);
     expect(demoRepository.restoreDemoOwnerData).not.toHaveBeenCalled();
@@ -77,6 +80,17 @@ describe('demo.service', () => {
     await expect(reset('00000000-0000-4000-8000-000000000010')).rejects.toBeInstanceOf(
       ConflictError,
     );
+  });
+
+  it('rejects reset for an expired demo sandbox', async () => {
+    vi.mocked(userRepository.findById).mockResolvedValue(
+      demoOwner({ demoExpiresAt: new Date('2020-01-01T00:00:00.000Z') }),
+    );
+
+    await expect(reset('00000000-0000-4000-8000-000000000010')).rejects.toBeInstanceOf(
+      ForbiddenError,
+    );
+    expect(demoRepository.restoreDemoOwnerData).not.toHaveBeenCalled();
   });
 
   it('restores canonical data for the demo owner', async () => {

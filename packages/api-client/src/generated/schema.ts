@@ -1416,8 +1416,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Start a demo operator session
-         * @description Creates a session only for the configured demo operator. No credentials are accepted or returned.
+         * Create an isolated demo sandbox
+         * @description Creates a new isolated four-hour DEMO sandbox and canonical operational scenario. No credentials are accepted or returned. Expired DEMO owners may be cleaned up in a bounded batch during creation.
          */
         post: {
             parameters: {
@@ -1483,7 +1483,7 @@ export interface paths {
         put?: never;
         /**
          * Restore canonical demo data
-         * @description Requires the configured demo operator session. Concurrent resets conflict and requests are rate-limited.
+         * @description Requires the current active DEMO sandbox session. Concurrent resets conflict and requests are rate-limited.
          */
         post: {
             parameters: {
@@ -1503,7 +1503,7 @@ export interface paths {
                         "application/json": components["schemas"]["DemoResetResponse"];
                     };
                 };
-                /** @description Missing or invalid access token */
+                /** @description Missing, invalid, or expired demo access token */
                 401: {
                     headers: {
                         [name: string]: unknown;
@@ -1614,6 +1614,7 @@ export interface components {
             /** @enum {boolean} */
             error: true;
             message: string;
+            code?: string;
         };
         RegisterRequest: {
             /**
@@ -2172,7 +2173,7 @@ export interface components {
             data: components["schemas"]["FacilityAnalytics"][];
         };
         DemoStatusResponse: {
-            /** @description Whether the configured demo operator is available for one-click access */
+            /** @description Whether one-click isolated demo sandbox creation is currently available */
             available: boolean;
         };
         DemoResetResponse: {
