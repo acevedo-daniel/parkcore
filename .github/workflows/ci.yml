@@ -18,6 +18,8 @@ jobs:
     name: Quality
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql://parkcore:parkcore@localhost:5432/parkcore-ci
 
     steps:
       - name: Checkout
@@ -40,6 +42,9 @@ jobs:
 
       - name: Verify formatting
         run: pnpm format:check
+
+      - name: Generate Prisma client
+        run: pnpm --filter @parkcore/api prisma:generate
 
       - name: Run lint
         run: pnpm lint
@@ -111,6 +116,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build API client
+        run: pnpm --filter @parkcore/api-client build
+
       - name: Run web tests
         run: pnpm --filter @parkcore/web test
 
@@ -176,6 +184,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build API client
+        run: pnpm --filter @parkcore/api-client build
+
       - name: Install Playwright Chromium
         run: pnpm --filter @parkcore/web exec playwright install --with-deps chromium
 
@@ -197,6 +208,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
+      DATABASE_URL: postgresql://parkcore:parkcore@localhost:5432/parkcore-build
       VITE_API_URL: https://api.example.invalid
 
     steps:
