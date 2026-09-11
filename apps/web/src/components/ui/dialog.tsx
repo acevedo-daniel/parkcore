@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef, type ReactNode } from 'react';
 
 interface DialogProps {
   children: ReactNode;
+  closeLabel?: string;
   description?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -28,7 +29,11 @@ function useFocusRestoration(open: boolean) {
   };
 }
 
-function DialogHeader({ description, title }: Pick<DialogProps, 'description' | 'title'>) {
+function DialogHeader({
+  closeLabel,
+  description,
+  title,
+}: Pick<DialogProps, 'closeLabel' | 'description' | 'title'>) {
   return (
     <header className="flex items-start justify-between gap-5 border-b border-border-strong pb-5">
       <div>
@@ -46,7 +51,7 @@ function DialogHeader({ description, title }: Pick<DialogProps, 'description' | 
       </div>
       <DialogPrimitive.Close asChild>
         <button
-          aria-label={`Close ${title}`}
+          aria-label={closeLabel ?? `Close ${title}`}
           className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border-strong bg-surface text-foreground transition-colors hover:bg-surface-hover"
           type="button"
         >
@@ -57,7 +62,14 @@ function DialogHeader({ description, title }: Pick<DialogProps, 'description' | 
   );
 }
 
-export function Dialog({ children, description, onOpenChange, open, title }: DialogProps) {
+export function Dialog({
+  children,
+  closeLabel,
+  description,
+  onOpenChange,
+  open,
+  title,
+}: DialogProps) {
   const restoreFocus = useFocusRestoration(open);
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
@@ -67,7 +79,7 @@ export function Dialog({ children, description, onOpenChange, open, title }: Dia
           className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[var(--radius-xl)] border border-border-strong bg-surface-raised p-6 text-foreground shadow-dialog sm:p-8"
           onCloseAutoFocus={restoreFocus}
         >
-          <DialogHeader description={description} title={title} />
+          <DialogHeader closeLabel={closeLabel} description={description} title={title} />
           {children}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
@@ -75,7 +87,14 @@ export function Dialog({ children, description, onOpenChange, open, title }: Dia
   );
 }
 
-export function Sheet({ children, description, onOpenChange, open, title }: DialogProps) {
+export function Sheet({
+  children,
+  closeLabel,
+  description,
+  onOpenChange,
+  open,
+  title,
+}: DialogProps) {
   const restoreFocus = useFocusRestoration(open);
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
@@ -85,7 +104,7 @@ export function Sheet({ children, description, onOpenChange, open, title }: Dial
           className="fixed inset-y-0 right-0 z-50 w-full max-w-2xl overflow-y-auto border-l border-border-strong bg-surface-raised p-6 text-foreground shadow-dialog sm:p-8"
           onCloseAutoFocus={restoreFocus}
         >
-          <DialogHeader description={description} title={title} />
+          <DialogHeader closeLabel={closeLabel} description={description} title={title} />
           {children}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

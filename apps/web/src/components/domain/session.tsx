@@ -162,12 +162,88 @@ export function CheckoutSummary({ session }: { session: Session }) {
         </div>
       ) : null}
       <div className="flex items-end justify-between gap-4 pt-5">
-        <span className="type-label text-foreground-muted">Total</span>
+        <span className="type-label text-foreground-muted">
+          {session.endTime
+            ? es
+              ? 'Total confirmado'
+              : 'Confirmed total'
+            : es
+              ? 'Estimación'
+              : 'Estimate'}
+        </span>
         <strong className="font-display text-3xl font-bold leading-none tracking-[-0.055em] tabular-nums">
           {total === undefined ? 'N/A' : formatMoney(total, session.currency)}
         </strong>
       </div>
     </section>
+  );
+}
+
+export function OperationalReceipt({ session }: { session: Session }) {
+  const { language } = useAppearance();
+  const es = language === 'es';
+  const total = session.totalAmountCents;
+  return (
+    <section
+      aria-label={es ? 'Comprobante operativo' : 'Operational receipt'}
+      className="rounded-[var(--radius-xl)] border border-success-foreground bg-success-surface p-6 text-foreground sm:p-8"
+    >
+      <div className="flex flex-col justify-between gap-5 border-b border-success-foreground/30 pb-5 sm:flex-row sm:items-start">
+        <div>
+          <p className="type-label text-success-text">
+            {es ? 'Cobro confirmado por el servidor' : 'Server-confirmed checkout'}
+          </p>
+          <h2 className="mt-3 font-display text-3xl font-bold tracking-[-0.045em]">
+            {es ? 'Comprobante operativo' : 'Operational receipt'}
+          </h2>
+        </div>
+        <span className="rounded-full border border-success-foreground px-3 py-1.5 text-xs font-bold text-success-text">
+          {es ? 'Cerrada' : 'Completed'}
+        </span>
+      </div>
+
+      <dl className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+        <ReceiptItem label={es ? 'Patente' : 'Plate'} value={session.vehicle.plate} />
+        <ReceiptItem
+          label={es ? 'Ingreso' : 'Started'}
+          value={formatTimestamp(session.startTime)}
+        />
+        <ReceiptItem
+          label={es ? 'Salida' : 'Completed'}
+          value={session.endTime ? formatTimestamp(session.endTime) : 'N/A'}
+        />
+        <ReceiptItem
+          label={es ? 'Duración' : 'Duration'}
+          value={session.endTime ? formatDuration(session.startTime, session.endTime) : 'N/A'}
+        />
+        <ReceiptItem
+          label={es ? 'Tarifa registrada' : 'Rate snapshot'}
+          value={`${formatMoney(session.hourlyRateCents, session.currency)} / H`}
+        />
+        <ReceiptItem
+          label={es ? 'Total cobrado' : 'Charged total'}
+          value={total === null ? 'N/A' : formatMoney(total, session.currency)}
+        />
+      </dl>
+
+      <div className="mt-7 flex items-end justify-between gap-4 border-t border-success-foreground/30 pt-5">
+        <span className="type-label text-success-text">
+          {es ? 'Importe final' : 'Final amount'}
+        </span>
+        <strong className="font-display text-4xl font-bold leading-none tracking-[-0.055em] tabular-nums">
+          {total === null ? 'N/A' : formatMoney(total, session.currency)}
+        </strong>
+      </div>
+    </section>
+  );
+}
+
+function ReceiptItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="type-label text-foreground-muted">{label}</dt>
+      <dd className="mt-1 text-sm font-semibold leading-relaxed">{value}</dd>
+    </div>
   );
 }
 

@@ -5,7 +5,11 @@ import { Link, useParams } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Plate } from '../../components/domain/plate.js';
-import { CheckoutSummary, OperationalTimestamp } from '../../components/domain/session.js';
+import {
+  CheckoutSummary,
+  OperationalReceipt,
+  OperationalTimestamp,
+} from '../../components/domain/session.js';
 import { Button } from '../../components/ui/button.js';
 import { Dialog } from '../../components/ui/dialog.js';
 import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
@@ -15,6 +19,7 @@ import {
   checkOut,
   getOwnedParkings,
   getParkingSession,
+  type ParkingSession,
 } from '../../lib/api/owner-api.js';
 import { formatMoney } from '../../lib/format.js';
 
@@ -27,6 +32,7 @@ export function OwnerSessionDetailRoute() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [actionError, setActionError] = useState<string>();
+  const [resolvedSession, setResolvedSession] = useState<ParkingSession>();
   const sessionQuery = useQuery({
     enabled: Boolean(sessionId),
     queryKey: ['parking-session', sessionId],
@@ -49,7 +55,7 @@ export function OwnerSessionDetailRoute() {
       </ErrorState>
     );
   }
-  const session = sessionQuery.data;
+  const session = resolvedSession ?? sessionQuery.data;
   if (!session) return null;
   const parking = parkingsQuery.data?.find((item) => item.id === session.parkingId);
   const canOperate = session.status === 'ACTIVE';
@@ -62,7 +68,8 @@ export function OwnerSessionDetailRoute() {
   const completeCheckout = async () => {
     setActionError(undefined);
     try {
-      await checkoutMutation.mutateAsync();
+      const completedSession = await checkoutMutation.mutateAsync();
+      setResolvedSession(completedSession);
       await refreshOperation();
       showToast(es ? 'La estadía se cerró.' : 'Session checked out.');
       setCheckoutOpen(false);
@@ -75,7 +82,8 @@ export function OwnerSessionDetailRoute() {
   const cancelSession = async () => {
     setActionError(undefined);
     try {
-      await cancelMutation.mutateAsync();
+      const cancelledSession = await cancelMutation.mutateAsync();
+      setResolvedSession(cancelledSession);
       await refreshOperation();
       showToast(es ? 'La estadía se canceló.' : 'Session cancelled.');
       setCancelOpen(false);
@@ -86,9 +94,9 @@ export function OwnerSessionDetailRoute() {
 
   return (
     <section className="owner-page space-y-9" aria-labelledby="session-detail-title">
-      <header className="border-b border-[#121417] pb-7">
+      <header className="border-b border-border-strong pb-7">
         <Link
-          className="inline-flex items-center gap-1 text-sm font-bold text-[#121417] underline decoration-[#ffcc00] decoration-4 underline-offset-4"
+          className="inline-flex items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
           to={`/app/parkings/${session.parkingId}`}
         >
           <ChevronLeft aria-hidden="true" className="size-4" />{' '}
@@ -96,24 +104,37 @@ export function OwnerSessionDetailRoute() {
         </Link>
         <div className="mt-7 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-[#6d695f]">
-              {canOperate
+            <p className="type-label text-foreground-muted">
+              {session.status === 'ACTIVE'
                 ? es
                   ? 'Estadía activa'
                   : 'Active session'
-                : es
-                  ? 'Estadía finalizada'
-                  : 'Completed session'}
+                : session.status === 'COMPLETED'
+                  ? es
+                    ? 'Estadía finalizada'
+                    : 'Completed session'
+                  : es
+                    ? 'Estadía cancelada'
+                    : 'Cancelled session'}
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-4">
               <Plate plate={session.vehicle.plate} />
-              <span className="rounded-full border border-[#121417] px-3 py-1.5 text-xs font-bold">
-                {session.status[0]}
-                {session.status.slice(1).toLowerCase()}
+              <span className="rounded-full border border-border-strong px-3 py-1.5 text-xs font-bold">
+                {session.status === 'ACTIVE'
+                  ? es
+                    ? 'Activa'
+                    : 'Active'
+                  : session.status === 'COMPLETED'
+                    ? es
+                      ? 'Completada'
+                      : 'Completed'
+                    : es
+                      ? 'Cancelada'
+                      : 'Cancelled'}
               </span>
             </div>
             <h1
-              className="mt-5 font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] text-[#121417] sm:text-5xl"
+              className="mt-5 font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] sm:text-5xl"
               id="session-detail-title"
             >
               {session.vehicle.type.replaceAll('_', ' ')}
@@ -122,20 +143,21 @@ export function OwnerSessionDetailRoute() {
           {canOperate ? (
             <div className="flex flex-wrap gap-2">
               <Button
-                className="border-[#ffcc00] bg-[#ffcc00] text-[#121417] hover:bg-[#ffe066]"
+                variant="primary"
                 onClick={() => {
+                  setActionError(undefined);
                   setCheckoutOpen(true);
                 }}
               >
                 <Check aria-hidden="true" className="size-4" />{' '}
-                {es ? 'Cobrar y salir' : 'Check out'}
+                {es ? 'Cobrar y cerrar' : 'Check out'}
               </Button>
               <Button
-                className="border-[#121417] bg-white text-[#121417] hover:bg-[#f1eee7]"
                 onClick={() => {
+                  setActionError(undefined);
                   setCancelOpen(true);
                 }}
-                variant="outline"
+                variant="danger"
               >
                 <Ban aria-hidden="true" className="size-4" />{' '}
                 {es ? 'Cancelar estadía' : 'Cancel session'}
@@ -144,15 +166,6 @@ export function OwnerSessionDetailRoute() {
           ) : null}
         </div>
       </header>
-
-      {actionError ? (
-        <p
-          className="border border-[#121417] bg-[#ffcc00] p-4 text-sm font-semibold text-[#121417]"
-          role="alert"
-        >
-          {actionError}
-        </p>
-      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-3">
         <DetailCard
@@ -171,15 +184,13 @@ export function OwnerSessionDetailRoute() {
           ]}
           title={es ? 'Visita' : 'Visit'}
         />
-        <section className="rounded-[1.35rem] border border-[#121417] bg-white p-5 text-[#121417]">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-            {es ? 'Cochera' : 'Parking'}
-          </p>
+        <section className="rounded-[var(--radius-lg)] border border-border bg-surface p-5">
+          <p className="type-label text-foreground-muted">{es ? 'Cochera' : 'Parking'}</p>
           <dl className="mt-5 space-y-4">
             <DetailItem label={es ? 'Cochera' : 'Facility'}>
               {parking ? (
                 <Link
-                  className="font-bold underline decoration-[#ffcc00] decoration-4 underline-offset-4"
+                  className="font-bold underline decoration-accent decoration-4 underline-offset-4"
                   to={`/app/parkings/${parking.id}`}
                 >
                   {parking.title}
@@ -213,7 +224,26 @@ export function OwnerSessionDetailRoute() {
         </section>
       </div>
 
+      {session.status === 'COMPLETED' ? <OperationalReceipt session={session} /> : null}
+      {session.status === 'CANCELLED' ? (
+        <section
+          aria-label={es ? 'Estadía cancelada' : 'Cancelled session'}
+          className="rounded-[var(--radius-lg)] border border-warning-foreground bg-warning-surface p-6 text-warning-text"
+        >
+          <p className="type-label">{es ? 'Estado terminal' : 'Terminal state'}</p>
+          <h2 className="mt-3 font-display text-2xl font-bold">
+            {es ? 'Esta estadía fue cancelada.' : 'This session was cancelled.'}
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed">
+            {es
+              ? 'No se cobró esta estadía y no se puede volver a modificar.'
+              : 'This session was not charged and cannot be changed again.'}
+          </p>
+        </section>
+      ) : null}
+
       <Dialog
+        closeLabel={es ? 'Cerrar cobro' : 'Close checkout'}
         description={
           es
             ? 'Revisá el cálculo antes de cerrar la estadía. El importe final se confirma al completar el cobro.'
@@ -226,13 +256,20 @@ export function OwnerSessionDetailRoute() {
         <div className="space-y-5 pt-6">
           <div className="flex items-center justify-between gap-4">
             <Plate plate={session.vehicle.plate} />
-            <span className="text-sm font-semibold text-[#45423c]">
+            <span className="text-sm font-semibold text-foreground-secondary">
               {session.vehicle.type.replaceAll('_', ' ')}
             </span>
           </div>
           <CheckoutSummary session={session} />
+          {actionError ? (
+            <p
+              className="rounded-[var(--radius-md)] border border-danger-foreground bg-danger-surface p-3 text-sm font-semibold text-danger-text"
+              role="alert"
+            >
+              {actionError}
+            </p>
+          ) : null}
           <Button
-            className="border-[#121417] bg-[#121417] text-white hover:bg-[#30312d]"
             disabled={checkoutMutation.isPending}
             fullWidth
             onClick={() => void completeCheckout()}
@@ -249,6 +286,7 @@ export function OwnerSessionDetailRoute() {
       </Dialog>
 
       <Dialog
+        closeLabel={es ? 'Cerrar cancelación' : 'Close cancellation'}
         description={
           es
             ? `Cancelar ${session.vehicle.plate} finaliza esta estadía sin cobrar. No se puede deshacer.`
@@ -260,13 +298,20 @@ export function OwnerSessionDetailRoute() {
       >
         <div className="space-y-5 pt-6">
           <Plate plate={session.vehicle.plate} />
-          <p className="border-l-4 border-[#ffcc00] pl-4 text-sm leading-relaxed text-[#45423c]">
+          <p className="border-l-4 border-accent pl-4 text-sm leading-relaxed text-foreground-secondary">
             {es
               ? 'La cochera quedará disponible para registrar un nuevo ingreso.'
               : 'The parking will be available for a new check-in after cancellation.'}
           </p>
+          {actionError ? (
+            <p
+              className="rounded-[var(--radius-md)] border border-danger-foreground bg-danger-surface p-3 text-sm font-semibold text-danger-text"
+              role="alert"
+            >
+              {actionError}
+            </p>
+          ) : null}
           <Button
-            className="border-[#121417] bg-[#121417] text-white hover:bg-[#30312d]"
             disabled={cancelMutation.isPending}
             fullWidth
             onClick={() => void cancelSession()}
@@ -287,10 +332,8 @@ export function OwnerSessionDetailRoute() {
 
 function DetailCard({ entries, title }: { entries: [string, string][]; title: string }) {
   return (
-    <section className="rounded-[1.35rem] border border-[#121417] bg-white p-5 text-[#121417]">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-        {title}
-      </p>
+    <section className="rounded-[var(--radius-lg)] border border-border bg-surface p-5">
+      <p className="type-label text-foreground-muted">{title}</p>
       <dl className="mt-5 space-y-4">
         {entries.map(([label, value]) => (
           <DetailItem key={label} label={label}>
@@ -305,10 +348,8 @@ function DetailCard({ entries, title }: { entries: [string, string][]; title: st
 function DetailItem({ children, label }: { children: React.ReactNode; label: string }) {
   return (
     <div>
-      <dt className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
-        {label}
-      </dt>
-      <dd className="mt-1 text-sm font-semibold leading-relaxed text-[#121417]">{children}</dd>
+      <dt className="type-label text-foreground-muted">{label}</dt>
+      <dd className="mt-1 text-sm font-semibold leading-relaxed">{children}</dd>
     </div>
   );
 }
@@ -316,11 +357,11 @@ function DetailItem({ children, label }: { children: React.ReactNode; label: str
 function SessionDetailSkeleton() {
   return (
     <div className="space-y-8" aria-label="Loading parking session">
-      <Skeleton className="h-56 rounded-[1.75rem]" />
+      <Skeleton className="h-56 rounded-[var(--radius-xl)]" />
       <div className="grid gap-4 lg:grid-cols-3">
-        <Skeleton className="h-64 rounded-[1.35rem]" />
-        <Skeleton className="h-64 rounded-[1.35rem]" />
-        <Skeleton className="h-64 rounded-[1.35rem]" />
+        <Skeleton className="h-64 rounded-[var(--radius-lg)]" />
+        <Skeleton className="h-64 rounded-[var(--radius-lg)]" />
+        <Skeleton className="h-64 rounded-[var(--radius-lg)]" />
       </div>
     </div>
   );

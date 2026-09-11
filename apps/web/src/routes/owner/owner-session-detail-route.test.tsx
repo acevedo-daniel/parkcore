@@ -69,6 +69,7 @@ describe('parking session completion', () => {
       expect(api.checkOut.mock.calls[0]?.[0]).toBe('session-1');
     });
     expect(screen.getByText('Session checked out.')).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Operational receipt' })).toBeTruthy();
   });
 
   it('requires an explicit destructive cancellation action for an active session', async () => {
@@ -89,5 +90,6 @@ describe('parking session completion', () => {
       expect(api.cancelParkingSession.mock.calls[0]?.[0]).toBe('session-1');
     });
     expect(screen.getByText('Session cancelled.')).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Cancelled session' })).toBeTruthy();
   });
 });
