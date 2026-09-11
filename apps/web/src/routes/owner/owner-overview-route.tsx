@@ -43,7 +43,7 @@ export function OwnerOverviewRoute() {
   const maxRevenue = Math.max(1, ...revenueSeries.map((point) => point.revenueCents));
   const totalRevenue = revenueSeries.reduce((total, point) => total + point.revenueCents, 0);
   const totalStays = volumeSeries.reduce((total, point) => total + point.completedSessions, 0);
-  const occupancy = Math.min(100, summary?.occupancyPercent ?? 0);
+  const analyticsError = summaryQuery.isError || revenueQuery.isError || volumeQuery.isError;
 
   const refresh = () => {
     void parkingsQuery.refetch();
@@ -84,19 +84,19 @@ export function OwnerOverviewRoute() {
 
   return (
     <section className="owner-page space-y-10" aria-labelledby="overview-title">
-      <header className="border-b border-[#121417] pb-7">
+      <header className="border-b border-border-strong pb-7">
         <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div className="max-w-2xl">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-[#6d695f]">
+            <p className="type-label text-foreground-muted">
               {es ? 'Operación / hoy' : 'Operations / today'}
             </p>
             <h1
-              className="mt-3 font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] text-[#121417] sm:text-5xl"
+              className="mt-3 font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] sm:text-5xl"
               id="overview-title"
             >
               {es ? 'Todo lo importante, a la vista.' : 'Everything important, in view.'}
             </h1>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-[#45423c]">
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-foreground-secondary">
               {es
                 ? 'Una lectura simple de la red para tomar decisiones durante el día.'
                 : 'A clear reading of your network for the decisions you make each day.'}
@@ -105,7 +105,6 @@ export function OwnerOverviewRoute() {
           <div className="flex flex-wrap gap-2">
             <Button
               aria-label={es ? 'Actualizar datos' : 'Refresh data'}
-              className="border-[#121417] bg-white text-[#121417] hover:bg-[#f1eee7]"
               disabled={isRefreshing}
               onClick={refresh}
               size="sm"
@@ -117,11 +116,7 @@ export function OwnerOverviewRoute() {
               />
               {es ? 'Actualizar' : 'Refresh'}
             </Button>
-            <Button
-              asChild
-              className="border-[#121417] bg-[#121417] text-white hover:bg-[#30312d]"
-              size="sm"
-            >
+            <Button asChild size="sm">
               <Link to="/app/parkings/new">
                 <Plus aria-hidden="true" className="size-4" />
                 {es ? 'Nueva cochera' : 'New facility'}
@@ -131,49 +126,95 @@ export function OwnerOverviewRoute() {
         </div>
       </header>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
-          detail={
-            summary
-              ? `${String(summary.totalCapacity)} ${es ? 'plazas en total' : 'spots in total'}`
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
+        <section
+          className="rounded-[var(--radius-xl)] border border-border bg-surface p-6 shadow-xs sm:p-8"
+          aria-labelledby="network-now-title"
+        >
+          <p className="type-label text-foreground-muted">{es ? 'Red ahora' : 'Network now'}</p>
+          <h2
+            className="mt-4 max-w-xl font-display text-3xl font-bold leading-tight tracking-[-0.045em]"
+            id="network-now-title"
+          >
+            {summary
+              ? es
+                ? `${String(summary.activeVehicles)} ${summary.activeVehicles === 1 ? 'vehículo está' : 'vehículos están'} estacionados ahora.`
+                : `${String(summary.activeVehicles)} ${summary.activeVehicles === 1 ? 'vehicle is' : 'vehicles are'} parked right now.`
               : es
-                ? 'Cargando capacidad'
-                : 'Loading capacity'
-          }
-          label={es ? 'Vehículos ahora' : 'Vehicles now'}
-          value={summary ? String(summary.activeVehicles) : 'N/A'}
-        />
-        <MetricCard
-          detail={es ? 'Ocupación de toda la red' : 'Across your network'}
-          label={es ? 'Ocupación' : 'Occupancy'}
-          progress={occupancy}
-          value={summary ? `${String(summary.occupancyPercent)}%` : 'N/A'}
-        />
-        <MetricCard
-          detail={es ? 'Egresos registrados hoy' : 'Check-outs recorded today'}
-          label={es ? 'Rotación de hoy' : 'Today’s turnover'}
-          value={summary ? String(summary.completedToday) : 'N/A'}
-        />
-        <MetricCard
-          detail={es ? 'Ingresos de la jornada' : 'Revenue collected today'}
-          label={es ? 'Facturación de hoy' : 'Today’s revenue'}
-          value={summary ? formatMoney(summary.revenueTodayCents, summary.currency) : 'N/A'}
-        />
+                ? 'Estamos preparando la lectura de tu red.'
+                : 'We are preparing your network reading.'}
+          </h2>
+          <div className="mt-8 grid gap-5 border-t border-border-subtle pt-5 sm:grid-cols-3">
+            <SummaryMetric
+              label={es ? 'Capacidad' : 'Capacity'}
+              value={summary ? String(summary.totalCapacity) : 'N/A'}
+            />
+            <SummaryMetric
+              label={es ? 'Ocupación' : 'Occupancy'}
+              value={summary ? `${String(summary.occupancyPercent)}%` : 'N/A'}
+            />
+            <SummaryMetric
+              label={es ? 'Cierres hoy' : 'Completed today'}
+              value={summary ? String(summary.completedToday) : 'N/A'}
+            />
+          </div>
+        </section>
+        <section
+          className="rounded-[var(--radius-xl)] border border-border bg-surface-subtle p-6 sm:p-8"
+          aria-labelledby="attention-title"
+        >
+          <p className="type-label text-foreground-muted">
+            {es ? 'Requiere atención' : 'Needs attention'}
+          </p>
+          <h2
+            className="mt-4 font-display text-2xl font-bold tracking-[-0.04em]"
+            id="attention-title"
+          >
+            {parkings.some(({ parking }) => !parking.isActive)
+              ? es
+                ? 'Hay cocheras pausadas.'
+                : 'Some facilities are paused.'
+              : es
+                ? 'Todo funciona con normalidad.'
+                : 'Everything is operating normally.'}
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-foreground-secondary">
+            {parkings.some(({ parking }) => !parking.isActive)
+              ? es
+                ? 'Revisá las cocheras pausadas antes de esperar nuevos ingresos.'
+                : 'Review paused facilities before expecting new arrivals.'
+              : es
+                ? 'No hay alertas operativas para revisar en este momento.'
+                : 'There are no operational alerts to review right now.'}
+          </p>
+        </section>
       </div>
-
+      {analyticsError ? (
+        <div
+          className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+          role="alert"
+        >
+          <p className="text-sm font-semibold">
+            {es
+              ? 'Algunos datos de analítica no están disponibles ahora. La operación sigue visible.'
+              : 'Some analytics are unavailable right now. Your operations remain visible.'}
+          </p>
+          <Button onClick={refresh} size="sm" variant="secondary">
+            {es ? 'Reintentar analítica' : 'Retry analytics'}
+          </Button>
+        </div>
+      ) : null}
       <section
-        className="overflow-hidden rounded-[1.75rem] bg-[#121417] text-white"
+        className="overflow-hidden rounded-[var(--radius-xl)] border border-border bg-surface-emphasis text-foreground"
         aria-labelledby="activity-title"
       >
-        <div className="flex flex-col justify-between gap-5 border-b border-white/20 p-6 sm:flex-row sm:items-start sm:p-8">
+        <div className="flex flex-col justify-between gap-5 border-b border-border p-6 sm:flex-row sm:items-start sm:p-8">
           <div>
             <div className="flex items-center gap-2">
-              <span className="flex size-7 items-center justify-center rounded-full bg-[#ffcc00] text-[#121417]">
+              <span className="flex size-7 items-center justify-center rounded-full bg-accent text-accent-foreground">
                 <BarChart3 aria-hidden="true" className="size-4" />
               </span>
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#ffcc00]">
-                {es ? 'Actividad' : 'Activity'}
-              </p>
+              <p className="type-label text-foreground-muted">{es ? 'Actividad' : 'Activity'}</p>
             </div>
             <h2
               className="mt-4 font-display text-3xl font-bold leading-none tracking-[-0.055em]"
@@ -181,21 +222,21 @@ export function OwnerOverviewRoute() {
             >
               {es ? 'Ingresos y rotación' : 'Revenue and turnover'}
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-white/65">
+            <p className="mt-2 text-sm leading-relaxed text-foreground-secondary">
               {es
                 ? 'Elegí una barra para ver el detalle de ese día.'
                 : 'Select a bar to see that day in detail.'}
             </p>
           </div>
-          <div className="flex rounded-full border border-white/25 p-1">
+          <div className="flex rounded-full border border-border-strong p-1">
             {([7, 30] as const).map((period) => (
               <button
                 aria-pressed={days === period}
                 className={cn(
                   'rounded-full px-4 py-2 font-mono text-xs font-bold transition-colors',
                   days === period
-                    ? 'bg-[#ffcc00] text-[#121417]'
-                    : 'text-white/70 hover:text-white',
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-foreground-secondary hover:text-foreground',
                 )}
                 key={period}
                 onClick={() => {
@@ -218,21 +259,27 @@ export function OwnerOverviewRoute() {
             >
               {Array.from({ length: days === 7 ? 7 : 14 }).map((_, index) => (
                 <div
-                  className="flex-1 animate-pulse rounded-t bg-white/15"
+                  className="flex-1 animate-pulse rounded-t bg-foreground-muted/20"
                   key={index}
                   style={{ height: `${String(20 + (index % 5) * 15)}%` }}
                 />
               ))}
             </div>
+          ) : revenueQuery.isError || volumeQuery.isError ? (
+            <div className="flex h-56 items-center justify-center text-sm text-foreground-secondary">
+              {es
+                ? 'La actividad analítica no está disponible ahora.'
+                : 'Activity analytics are unavailable right now.'}
+            </div>
           ) : revenueSeries.length === 0 ? (
-            <div className="flex h-56 items-center justify-center text-sm text-white/60">
+            <div className="flex h-56 items-center justify-center text-sm text-foreground-muted">
               {es
                 ? 'Todavía no hay datos para este período.'
                 : 'There is no data for this period yet.'}
             </div>
           ) : (
             <>
-              <div className="flex h-56 items-end gap-1.5 border-b border-white/20 pb-3 sm:gap-3">
+              <div className="flex h-56 items-end gap-1.5 border-b border-border pb-3 sm:gap-3">
                 {revenueSeries.map((point, index) => {
                   const isActive = activeBarIndex === index;
                   const sessions = volumeSeries[index]?.completedSessions ?? 0;
@@ -257,7 +304,7 @@ export function OwnerOverviewRoute() {
                       <span
                         className={cn(
                           'w-full rounded-t-sm transition-all duration-200',
-                          isActive ? 'bg-white' : 'bg-[#ffcc00] group-hover:bg-white',
+                          isActive ? 'bg-foreground' : 'bg-accent group-hover:bg-foreground',
                         )}
                         style={{ height: `${String(height)}%` }}
                       />
@@ -268,7 +315,7 @@ export function OwnerOverviewRoute() {
               <div className="mt-2 flex gap-1.5 sm:gap-3">
                 {revenueSeries.map((point, index) => (
                   <span
-                    className="flex-1 truncate text-center font-mono text-[10px] text-white/50"
+                    className="flex-1 truncate text-center font-mono text-[10px] text-foreground-muted"
                     key={point.date}
                   >
                     {days === 30 && index % 4 !== 0 && index !== revenueSeries.length - 1
@@ -277,7 +324,7 @@ export function OwnerOverviewRoute() {
                   </span>
                 ))}
               </div>
-              <div className="mt-7 flex flex-col justify-between gap-5 border-t border-white/20 pt-5 sm:flex-row sm:items-end">
+              <div className="mt-7 flex flex-col justify-between gap-5 border-t border-border pt-5 sm:flex-row sm:items-end">
                 <div className="flex flex-wrap gap-x-8 gap-y-4">
                   <SummaryValue
                     label={
@@ -291,8 +338,8 @@ export function OwnerOverviewRoute() {
                   />
                 </div>
                 {activeBarIndex !== null ? (
-                  <div className="text-sm text-white/80">
-                    <span className="font-mono text-xs uppercase tracking-wider text-[#ffcc00]">
+                  <div className="text-sm text-foreground-secondary">
+                    <span className="font-mono text-xs uppercase tracking-wider text-accent-foreground">
                       {formatBarDate(revenueSeries[activeBarIndex]?.date ?? '', es)}
                     </span>
                     <p className="mt-1 font-mono font-bold tabular-nums">
@@ -300,7 +347,7 @@ export function OwnerOverviewRoute() {
                         revenueSeries[activeBarIndex]?.revenueCents ?? 0,
                         summary?.currency,
                       )}
-                      <span className="font-sans text-xs font-medium text-white/60">
+                      <span className="font-sans text-xs font-medium text-foreground-muted">
                         {' '}
                         · {volumeSeries[activeBarIndex]?.completedSessions ?? 0}{' '}
                         {es ? 'estadías' : 'stays'}
@@ -315,20 +362,18 @@ export function OwnerOverviewRoute() {
       </section>
 
       <section aria-labelledby="facilities-title">
-        <div className="mb-5 flex items-end justify-between gap-4 border-b border-[#121417] pb-4">
+        <div className="mb-5 flex items-end justify-between gap-4 border-b border-border-strong pb-4">
           <div>
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#6d695f]">
-              {es ? 'Tu red' : 'Your network'}
-            </p>
+            <p className="type-label text-foreground-muted">{es ? 'Tu red' : 'Your network'}</p>
             <h2
-              className="mt-2 font-display text-3xl font-bold leading-none tracking-[-0.055em] text-[#121417]"
+              className="mt-2 font-display text-3xl font-bold leading-none tracking-[-0.055em]"
               id="facilities-title"
             >
               {es ? 'Cocheras en operación' : 'Operating facilities'}
             </h2>
           </div>
           <Link
-            className="group flex shrink-0 items-center gap-1 text-sm font-bold text-[#121417] underline decoration-[#ffcc00] decoration-4 underline-offset-4"
+            className="group flex shrink-0 items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
             to="/app/parkings"
           >
             {es ? 'Ver todas' : 'View all'}
@@ -357,52 +402,20 @@ export function OwnerOverviewRoute() {
   );
 }
 
-function MetricCard({
-  detail,
-  label,
-  progress,
-  value,
-}: {
-  detail: string;
-  label: string;
-  progress?: number;
-  value: string;
-}) {
+function SummaryMetric({ label, value }: { label: string; value: string }) {
   return (
-    <article className="rounded-[1.35rem] border border-[#121417] bg-white p-5 text-[#121417]">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-        {label}
-      </p>
-      <p className="mt-5 font-display text-4xl font-bold leading-none tracking-[-0.06em] tabular-nums">
-        {value}
-      </p>
-      {progress !== undefined ? (
-        <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#e7e4dd]">
-          <div
-            className="h-full rounded-full bg-[#ffcc00]"
-            style={{ width: `${String(progress)}%` }}
-          />
-        </div>
-      ) : null}
-      <p
-        className={cn(
-          'text-sm leading-snug text-[#45423c]',
-          progress === undefined ? 'mt-6' : 'mt-3',
-        )}
-      >
-        {detail}
-      </p>
-    </article>
+    <div>
+      <p className="type-label text-foreground-muted">{label}</p>
+      <p className="mt-2 type-metric">{value}</p>
+    </div>
   );
 }
 
 function SummaryValue({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-white/50">
-        {label}
-      </p>
-      <p className="mt-1 font-mono text-lg font-bold tabular-nums text-white">{value}</p>
+      <p className="type-label text-foreground-muted">{label}</p>
+      <p className="mt-1 font-mono text-lg font-bold tabular-nums">{value}</p>
     </div>
   );
 }
@@ -410,13 +423,13 @@ function SummaryValue({ label, value }: { label: string; value: string }) {
 function OwnerOverviewSkeleton() {
   return (
     <div className="space-y-10" aria-label="Loading parking operations">
-      <Skeleton className="h-44 rounded-[1.75rem]" />
+      <Skeleton className="h-44 rounded-[var(--radius-xl)]" />
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
-          <Skeleton className="h-48 rounded-[1.35rem]" key={index} />
+          <Skeleton className="h-48 rounded-[var(--radius-lg)]" key={index} />
         ))}
       </div>
-      <Skeleton className="h-[28rem] rounded-[1.75rem]" />
+      <Skeleton className="h-[28rem] rounded-[var(--radius-xl)]" />
     </div>
   );
 }

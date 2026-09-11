@@ -31,12 +31,12 @@ export function OwnerParkingPanel({
       aria-label={
         es ? `Abrir operaciones de ${parking.title}` : `Open operations for ${parking.title}`
       }
-      className="owner-parking-panel group flex min-h-72 flex-col justify-between rounded-[1.5rem] border border-[#121417] bg-white p-5 text-[#121417] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ffcc00] hover:shadow-[0_7px_0_rgba(18,20,23,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#121417] focus-visible:ring-offset-4"
+      className="owner-parking-panel group flex min-h-72 flex-col justify-between rounded-[var(--radius-xl)] border border-border bg-surface p-5 text-foreground shadow-xs transition-[transform,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-surface-hover hover:shadow-hover focus-visible:outline-none"
       to={`/app/parkings/${parking.id}`}
     >
       <div>
         <div className="flex items-center justify-between gap-3">
-          <span className="rounded-full border border-[#121417] px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em]">
+          <span className="rounded-full border border-border-strong px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em]">
             {es ? 'Cochera' : 'Facility'} {String(identifier).padStart(2, '0')}
           </span>
           <span className="flex items-center gap-1 text-xs font-bold">
@@ -51,15 +51,15 @@ export function OwnerParkingPanel({
         <h3 className="mt-7 font-display text-2xl font-bold leading-[0.95] tracking-[-0.055em]">
           {parking.title}
         </h3>
-        <p className="mt-3 flex items-start gap-2 text-sm leading-snug text-[#45423c]">
+        <p className="mt-3 flex items-start gap-2 text-sm leading-snug text-foreground-secondary">
           <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
           <span>{parking.address}</span>
         </p>
       </div>
 
-      <div className="mt-8 border-t border-[#121417]/20 pt-4">
+      <div className="mt-8 border-t border-border-subtle pt-4">
         {occupancyError ? (
-          <p className="text-sm text-[#45423c]" role="status">
+          <p className="text-sm text-foreground-secondary" role="status">
             {es ? 'La ocupación no está disponible ahora.' : 'Occupancy is unavailable right now.'}
           </p>
         ) : occupancyLoading || activeSessionCount === undefined ? (
@@ -67,8 +67,8 @@ export function OwnerParkingPanel({
             className="animate-pulse space-y-2"
             aria-label={es ? 'Cargando ocupación' : 'Loading occupancy'}
           >
-            <div className="h-3 w-28 rounded-full bg-[#e7e4dd]" />
-            <div className="h-2 w-full rounded-full bg-[#e7e4dd]" />
+            <div className="h-3 w-28 rounded-full bg-surface-emphasis" />
+            <div className="h-2 w-full rounded-full bg-surface-emphasis" />
           </div>
         ) : (
           <div>
@@ -76,7 +76,7 @@ export function OwnerParkingPanel({
               <p className="font-mono text-sm font-bold tabular-nums">
                 {activeSessionCount} / {parking.capacity}
               </p>
-              <p className="text-xs font-semibold text-[#45423c]">
+              <p className="text-xs font-semibold text-foreground-secondary">
                 {available} {es ? 'libres' : 'open'} · {occupancy}%
               </p>
             </div>
@@ -89,11 +89,11 @@ export function OwnerParkingPanel({
               aria-valuemax={parking.capacity}
               aria-valuemin={0}
               aria-valuenow={activeSessionCount}
-              className="mt-3 h-2 overflow-hidden rounded-full bg-[#e7e4dd]"
+              className="mt-3 h-2 overflow-hidden rounded-full bg-surface-emphasis"
               role="progressbar"
             >
               <div
-                className="h-full rounded-full bg-[#121417]"
+                className="h-full rounded-full bg-primary"
                 style={{ width: `${String(occupancy)}%` }}
               />
             </div>
@@ -101,12 +101,12 @@ export function OwnerParkingPanel({
         )}
 
         <div className="mt-5 flex items-center justify-between gap-3">
-          <span className="text-xs font-semibold text-[#45423c]">
+          <span className="text-xs font-semibold text-foreground-secondary">
             {parking.isActive ? (es ? 'En operación' : 'Operating') : es ? 'Pausada' : 'Paused'}
           </span>
           <span className="font-mono text-sm font-bold tabular-nums">
             {formatMoney(parking.hourlyRateCents, parking.currency)}
-            <span className="font-sans text-xs font-medium text-[#45423c]"> / h</span>
+            <span className="font-sans text-xs font-medium text-foreground-secondary"> / h</span>
           </span>
         </div>
       </div>

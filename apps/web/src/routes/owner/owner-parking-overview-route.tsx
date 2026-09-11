@@ -93,9 +93,9 @@ export function OwnerParkingOverviewRoute() {
 
   return (
     <section className="owner-page space-y-9" aria-labelledby="parking-overview-title">
-      <header className="border-b border-[#121417] pb-7">
+      <header className="border-b border-border-strong pb-7">
         <Link
-          className="inline-flex items-center gap-1 text-sm font-bold text-[#121417] underline decoration-[#ffcc00] decoration-4 underline-offset-4"
+          className="inline-flex items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
           to="/app/parkings"
         >
           <ChevronLeft aria-hidden="true" className="size-4" />
@@ -103,30 +103,25 @@ export function OwnerParkingOverviewRoute() {
         </Link>
         <div className="mt-7 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div className="max-w-2xl">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-[#6d695f]">
+            <p className="type-label text-foreground-muted">
               {es ? 'Operación de cochera' : 'Facility operation'}
             </p>
             <h1
-              className="mt-3 font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] text-[#121417] sm:text-5xl"
+              className="mt-3 font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] sm:text-5xl"
               id="parking-overview-title"
             >
               {parking.title}
             </h1>
-            <p className="mt-4 flex items-start gap-2 text-base leading-relaxed text-[#45423c]">
+            <p className="mt-4 flex items-start gap-2 text-base leading-relaxed text-foreground-secondary">
               <MapPin aria-hidden="true" className="mt-1 size-4 shrink-0" />
               {parking.address}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-[#121417] px-3 py-2 text-xs font-bold text-[#121417]">
+            <span className="rounded-full border border-border-strong px-3 py-2 text-xs font-bold">
               {parking.isActive ? (es ? 'En operación' : 'Operating') : es ? 'Pausada' : 'Paused'}
             </span>
-            <Button
-              asChild
-              className="border-[#121417] bg-white text-[#121417] hover:bg-[#f1eee7]"
-              size="sm"
-              variant="outline"
-            >
+            <Button asChild size="sm" variant="outline">
               <Link
                 aria-label={es ? `Editar ${parking.title}` : `Edit ${parking.title}`}
                 to={`/app/parkings/${parking.id}/edit`}
@@ -140,12 +135,10 @@ export function OwnerParkingOverviewRoute() {
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
         <section
-          className="rounded-[1.75rem] bg-[#121417] p-6 text-white sm:p-8"
+          className="rounded-[var(--radius-xl)] border border-border bg-surface-emphasis p-6 text-foreground sm:p-8"
           aria-labelledby="check-in-title"
         >
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#ffcc00]">
-            {es ? 'Ingresos' : 'Arrivals'}
-          </p>
+          <p className="type-label text-foreground-muted">{es ? 'Ingresos' : 'Arrivals'}</p>
           <div className="mt-6 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <div>
               <h2
@@ -154,28 +147,24 @@ export function OwnerParkingOverviewRoute() {
               >
                 {es ? 'Listo para el próximo vehículo.' : 'Ready for the next vehicle.'}
               </h2>
-              <p className="mt-3 max-w-md text-sm leading-relaxed text-white/65">
+              <p className="mt-3 max-w-md text-sm leading-relaxed text-foreground-secondary">
                 {es
                   ? 'Registrá primero la patente. Los datos del vehículo y visitante son opcionales y se pueden sumar en el mismo paso.'
                   : 'Record a plate first. Vehicle and visitor details are optional and can be added in the same step.'}
               </p>
             </div>
-            <Button
-              className="shrink-0 border-[#ffcc00] bg-[#ffcc00] text-[#121417] hover:bg-[#ffe066]"
-              disabled={!parking.isActive}
-              onClick={openCheckIn}
-            >
+            <Button disabled={!parking.isActive} onClick={openCheckIn}>
               <Plus aria-hidden="true" className="size-4" /> {es ? 'Ingresar' : 'Check in'}{' '}
               <kbd
                 aria-hidden="true"
-                className="ml-1 rounded border border-[#121417]/30 px-1.5 py-0.5 font-mono text-[10px]"
+                className="ml-1 rounded border border-border-strong px-1.5 py-0.5 font-mono text-[10px]"
               >
                 N
               </kbd>
             </Button>
           </div>
           {!parking.isActive ? (
-            <p className="mt-6 border-t border-white/20 pt-4 text-sm text-white/70">
+            <p className="mt-6 border-t border-border pt-4 text-sm text-foreground-secondary">
               {es
                 ? 'Reactivá esta cochera antes de aceptar nuevos ingresos.'
                 : 'Reactivate this parking before accepting new check-ins.'}
@@ -184,14 +173,12 @@ export function OwnerParkingOverviewRoute() {
         </section>
 
         <section
-          className="rounded-[1.75rem] border border-[#121417] bg-white p-6 text-[#121417] sm:p-8"
+          className="rounded-[var(--radius-xl)] border border-border bg-surface p-6 sm:p-8"
           aria-labelledby="capacity-title"
         >
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#6d695f]">
-                {es ? 'Capacidad' : 'Capacity'}
-              </p>
+              <p className="type-label text-foreground-muted">{es ? 'Capacidad' : 'Capacity'}</p>
               <h2
                 className="mt-3 font-display text-4xl font-bold leading-none tracking-[-0.06em] tabular-nums"
                 id="capacity-title"
@@ -204,7 +191,7 @@ export function OwnerParkingOverviewRoute() {
             <span className="font-mono text-sm font-bold tabular-nums">{occupancyPercent}%</span>
           </div>
           {occupancyQuery.isError ? (
-            <p className="mt-8 text-sm text-[#45423c]">
+            <p className="mt-8 text-sm text-foreground-secondary">
               {es
                 ? 'La ocupación no está disponible ahora.'
                 : 'Occupancy is unavailable right now.'}
@@ -216,15 +203,15 @@ export function OwnerParkingOverviewRoute() {
                 aria-valuemax={parking.capacity}
                 aria-valuemin={0}
                 aria-valuenow={occupancy}
-                className="mt-8 h-3 overflow-hidden rounded-full bg-[#e7e4dd]"
+                className="mt-8 h-3 overflow-hidden rounded-full bg-surface-emphasis"
                 role="progressbar"
               >
                 <div
-                  className="h-full rounded-full bg-[#121417]"
+                  className="h-full rounded-full bg-primary"
                   style={{ width: `${String(occupancyPercent)}%` }}
                 />
               </div>
-              <p className="mt-4 text-sm text-[#45423c]">
+              <p className="mt-4 text-sm text-foreground-secondary">
                 {occupancyQuery.isLoading
                   ? 'Loading current capacity…'
                   : `${String(available)} spaces available`}
@@ -235,24 +222,17 @@ export function OwnerParkingOverviewRoute() {
       </div>
 
       <section aria-labelledby="active-sessions-title">
-        <div className="flex flex-col justify-between gap-5 border-b border-[#121417] pb-5 sm:flex-row sm:items-end">
+        <div className="flex flex-col justify-between gap-5 border-b border-border-strong pb-5 sm:flex-row sm:items-end">
           <div>
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#6d695f]">
-              {es ? 'En la cochera' : 'On site'}
-            </p>
+            <p className="type-label text-foreground-muted">{es ? 'En la cochera' : 'On site'}</p>
             <h2
-              className="mt-2 font-display text-3xl font-bold leading-none tracking-[-0.055em] text-[#121417]"
+              className="mt-2 font-display text-3xl font-bold leading-none tracking-[-0.055em]"
               id="active-sessions-title"
             >
               {es ? 'Estadías activas' : 'Active sessions'}
             </h2>
           </div>
-          <Button
-            asChild
-            className="self-start border-[#121417] bg-white text-[#121417] hover:bg-[#f1eee7] sm:self-auto"
-            size="sm"
-            variant="outline"
-          >
+          <Button asChild className="self-start sm:self-auto" size="sm" variant="outline">
             <Link to={`/app/parkings/${parking.id}/sessions`}>
               <History aria-hidden="true" className="size-3.5" /> {es ? 'Historial' : 'History'}
             </Link>
@@ -263,10 +243,10 @@ export function OwnerParkingOverviewRoute() {
           <span className="visually-hidden">{es ? 'Buscar patente' : 'Search plate'}</span>
           <Search
             aria-hidden="true"
-            className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#6d695f]"
+            className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-foreground-muted"
           />
           <input
-            className="h-12 w-full rounded-full border border-[#121417] bg-white pl-11 pr-4 text-sm font-semibold text-[#121417] outline-none placeholder:text-[#6d695f] focus:ring-2 focus:ring-[#ffcc00]"
+            className="h-12 w-full rounded-full border border-border bg-surface-subtle pl-11 pr-4 text-sm font-semibold text-foreground outline-none placeholder:text-foreground-muted focus:border-primary focus:ring-2 focus:ring-focus-ring"
             id="active-session-plate"
             onChange={(event) => {
               setPlateSearch(event.target.value);
@@ -277,10 +257,7 @@ export function OwnerParkingOverviewRoute() {
         </label>
 
         {activeSessionsQuery.isFetching && !activeSessionsQuery.isLoading ? (
-          <p
-            className="mt-3 font-mono text-xs font-semibold uppercase tracking-wider text-[#6d695f]"
-            role="status"
-          >
+          <p className="mt-3 type-label text-foreground-muted" role="status">
             Refreshing active sessions…
           </p>
         ) : null}
@@ -288,8 +265,8 @@ export function OwnerParkingOverviewRoute() {
         <div className="mt-5">
           {activeSessionsQuery.isLoading ? (
             <div className="grid gap-3">
-              <Skeleton className="h-28 rounded-[1.35rem]" />
-              <Skeleton className="h-28 rounded-[1.35rem]" />
+              <Skeleton className="h-28 rounded-[var(--radius-lg)]" />
+              <Skeleton className="h-28 rounded-[var(--radius-lg)]" />
             </div>
           ) : activeSessionsQuery.isError ? (
             <ErrorState
@@ -378,12 +355,12 @@ export function OwnerParkingOverviewRoute() {
 function OwnerParkingOperationSkeleton() {
   return (
     <div className="space-y-8" aria-label="Loading parking operation">
-      <Skeleton className="h-48 rounded-[1.75rem]" />
+      <Skeleton className="h-48 rounded-[var(--radius-xl)]" />
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
-        <Skeleton className="h-64 rounded-[1.75rem]" />
-        <Skeleton className="h-64 rounded-[1.75rem]" />
+        <Skeleton className="h-64 rounded-[var(--radius-xl)]" />
+        <Skeleton className="h-64 rounded-[var(--radius-xl)]" />
       </div>
-      <Skeleton className="h-72 rounded-[1.75rem]" />
+      <Skeleton className="h-72 rounded-[var(--radius-xl)]" />
     </div>
   );
 }

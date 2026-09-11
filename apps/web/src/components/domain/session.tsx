@@ -42,27 +42,23 @@ export function SessionRow({ session, to }: { session: Session; to: string }) {
   return (
     <Link
       aria-label={`Open session for ${session.vehicle.plate}`}
-      className="group grid gap-4 rounded-[1.35rem] border border-[#121417] bg-white p-5 text-[#121417] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#ffcc00] hover:shadow-[0_6px_0_rgba(18,20,23,0.12)] sm:grid-cols-[minmax(9rem,1.1fr)_minmax(7rem,0.8fr)_minmax(8rem,1fr)_auto] sm:items-center"
+      className="group grid gap-4 border-b border-border-subtle bg-surface py-5 text-foreground transition-colors duration-200 hover:bg-surface-hover sm:grid-cols-[minmax(9rem,1.1fr)_minmax(7rem,0.8fr)_minmax(8rem,1fr)_auto] sm:items-center"
       to={to}
     >
       <div className="flex items-center gap-3">
         <Plate plate={session.vehicle.plate} />
-        <span className="text-xs font-semibold text-[#45423c]">
+        <span className="text-xs font-semibold text-foreground-secondary">
           {session.vehicle.type.replaceAll('_', ' ')}
         </span>
       </div>
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
-          {es ? 'Ingreso' : 'Arrived'}
-        </p>
+        <p className="type-label text-foreground-muted">{es ? 'Ingreso' : 'Arrived'}</p>
         <div className="mt-1 text-sm font-semibold">
           <OperationalTimestamp value={session.startTime} />
         </div>
       </div>
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
-          {es ? 'Transcurrido' : 'Elapsed'}
-        </p>
+        <p className="type-label text-foreground-muted">{es ? 'Transcurrido' : 'Elapsed'}</p>
         <div className="mt-1 text-sm font-semibold">
           {session.endTime ? (
             <span className="type-operational">
@@ -74,7 +70,7 @@ export function SessionRow({ session, to }: { session: Session; to: string }) {
         </div>
       </div>
       <div className="flex items-center justify-between gap-4 sm:justify-end">
-        <span className="rounded-full border border-[#121417] px-2.5 py-1 text-xs font-bold">
+        <span className="rounded-full border border-border-strong px-2.5 py-1 text-xs font-bold">
           {session.status[0]}
           {session.status.slice(1).toLowerCase()}
         </span>
@@ -135,17 +131,15 @@ export function CheckoutSummary({ session }: { session: Session }) {
   return (
     <section
       aria-label="Checkout summary"
-      className="rounded-[1.35rem] border border-[#121417] bg-[#f1eee7] p-5 text-[#121417]"
+      className="rounded-[var(--radius-lg)] border border-border bg-surface-emphasis p-5 text-foreground"
     >
-      <div className="flex items-center justify-between gap-4 border-b border-[#121417]/20 pb-3">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
-          {es ? 'Ingreso' : 'Started'}
-        </span>
+      <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
+        <span className="type-label text-foreground-muted">{es ? 'Ingreso' : 'Started'}</span>
         <OperationalTimestamp value={session.startTime} />
       </div>
       {!session.endTime ? (
-        <div className="flex items-center justify-between gap-4 border-b border-[#121417]/20 py-3">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
+        <div className="flex items-center justify-between gap-4 border-b border-border py-3">
+          <span className="type-label text-foreground-muted">
             {es ? 'Cálculo actual' : 'Current calculation'}
           </span>
           <time className="type-operational" dateTime={now.toISOString()}>
@@ -153,28 +147,22 @@ export function CheckoutSummary({ session }: { session: Session }) {
           </time>
         </div>
       ) : null}
-      <div className="flex items-center justify-between gap-4 border-b border-[#121417]/20 py-3">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
-          {es ? 'Tarifa' : 'Rate'}
-        </span>
+      <div className="flex items-center justify-between gap-4 border-b border-border py-3">
+        <span className="type-label text-foreground-muted">{es ? 'Tarifa' : 'Rate'}</span>
         <span className="type-operational">
           {formatMoney(session.hourlyRateCents, session.currency)} / H
         </span>
       </div>
       {chargedHours ? (
-        <div className="flex items-center justify-between gap-4 border-b border-[#121417]/20 py-3">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
-            {es ? 'Cobrado' : 'Charged'}
-          </span>
+        <div className="flex items-center justify-between gap-4 border-b border-border py-3">
+          <span className="type-label text-foreground-muted">{es ? 'Cobrado' : 'Charged'}</span>
           <span className="type-operational">
             {chargedHours} {chargedHours === 1 ? (es ? 'hora' : 'hour') : es ? 'horas' : 'hours'}
           </span>
         </div>
       ) : null}
       <div className="flex items-end justify-between gap-4 pt-5">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-[#6d695f]">
-          Total
-        </span>
+        <span className="type-label text-foreground-muted">Total</span>
         <strong className="font-display text-3xl font-bold leading-none tracking-[-0.055em] tabular-nums">
           {total === undefined ? 'N/A' : formatMoney(total, session.currency)}
         </strong>
