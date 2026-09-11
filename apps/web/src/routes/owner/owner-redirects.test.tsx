@@ -6,25 +6,9 @@ import {
   OwnerParkingEditRedirect,
   OwnerParkingHistoryRedirect,
   OwnerParkingRedirect,
-  RegisterRedirect,
 } from './owner-redirects.js';
 
 describe('Owner backward-compatibility redirects', () => {
-  it('redirects legacy registration to login while preserving the return target', async () => {
-    const router = createMemoryRouter(
-      [
-        { path: '/register', element: <RegisterRedirect /> },
-        { path: '/login', element: <div>Login view</div> },
-      ],
-      { initialEntries: ['/register?returnTo=%2Fapp%2Fparkings'] },
-    );
-
-    render(<RouterProvider router={router} />);
-    expect(await screen.findByText('Login view')).toBeTruthy();
-    expect(router.state.location.pathname).toBe('/login');
-    expect(router.state.location.search).toBe('?returnTo=%2Fapp%2Fparkings');
-  });
-
   it('redirects /owner/parkings/:parkingId to /app/parkings/:parkingId', async () => {
     const router = createMemoryRouter(
       [

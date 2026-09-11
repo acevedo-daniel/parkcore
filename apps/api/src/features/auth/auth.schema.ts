@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { userResponseSchema } from '../user/user.schema.js';
-import { DEFAULT_TIMEZONE, isValidIanaTimezone } from '../../utils/timezone.js';
+import { isValidIanaTimezone } from '../../utils/timezone.js';
 
 export const registerSchema = z
   .strictObject({
@@ -36,8 +36,7 @@ export const registerSchema = z
       .trim()
       .refine(isValidIanaTimezone, { error: 'Invalid IANA timezone' })
       .optional()
-      .default(DEFAULT_TIMEZONE)
-      .openapi({ description: 'User IANA timezone', example: DEFAULT_TIMEZONE }),
+      .openapi({ description: 'User IANA timezone', example: 'America/Argentina/Buenos_Aires' }),
   })
   .openapi('RegisterRequest');
 

@@ -5,7 +5,7 @@ import { useAppearance } from '../../app/appearance-provider.js';
 import { AuthFormFrame, LoginFooter, LoginForm } from '../../features/auth/auth-forms.js';
 import { DemoLoginButton } from '../../features/auth/demo-login-button.js';
 import { useDocumentMeta } from '../../lib/document-meta.js';
-import { getReturnTo } from './auth-redirect.js';
+import { getAuthPath, getReturnTo } from './auth-redirect.js';
 import { RedirectAuthenticated } from './auth-guard.js';
 
 export function LoginRoute() {
@@ -17,12 +17,13 @@ export function LoginRoute() {
   });
   const navigate = useNavigate();
   const location = useLocation();
+  const returnTo = getReturnTo(location.search);
 
   return (
     <RedirectAuthenticated>
       <AuthFormFrame
         eyebrow={t('auth.login.eyebrow')}
-        footer={<LoginFooter />}
+        footer={<LoginFooter registerHref={getAuthPath('/register', returnTo)} />}
         title={t('auth.login.title')}
       >
         <div className="rounded-[1.75rem] bg-accent p-5 text-accent-foreground shadow-hover">
@@ -51,7 +52,7 @@ export function LoginRoute() {
         </div>
         <LoginForm
           onSuccess={() => {
-            void navigate(getReturnTo(location.search), { replace: true });
+            void navigate(returnTo, { replace: true });
           }}
         />
       </AuthFormFrame>

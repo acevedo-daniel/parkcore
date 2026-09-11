@@ -45,14 +45,18 @@
       "firstName": "Nombre",
       "lastName": "Apellido"
     },
+    "passwordHelp": "Usá entre 8 y 100 caracteres.",
     "actions": {
       "signIn": "Ingresar",
       "signingIn": "Ingresando…",
       "createAccount": "Crear cuenta",
-      "creatingAccount": "Creando cuenta…"
+      "creatingAccount": "Creando cuenta…",
+      "showPassword": "Mostrar contraseña",
+      "hidePassword": "Ocultar contraseña"
     },
     "footer": {
-      "login": "El acceso se habilita desde la cochera.",
+      "login": "¿Todavía no tenés cuenta?",
+      "loginLink": "Creá una cuenta de operador",
       "registerLead": "¿Ya tenés una cuenta?",
       "registerLink": "Ingresá"
     },
@@ -523,6 +527,8 @@
   "route": {
     "loading": "Cargando vista",
     "error": {
+      "metaTitle": "Vista no disponible | ParkCore",
+      "metaDescription": "Esta vista de ParkCore no está disponible. Volvé a un lugar conocido para seguir.",
       "attention": "Necesita atención",
       "notFoundTitle": "Esta vista no está disponible.",
       "notFoundDescription": "Volvé a un lugar conocido para seguir.",

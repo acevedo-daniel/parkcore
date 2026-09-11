@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, type UseFormRegisterReturn } from 'react-hook-form';
 import { Link } from 'react-router';
-import { useEffect, useMemo, type ReactNode } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { z } from 'zod';
 
 import { useAppearance } from '../../app/appearance-provider.js';
@@ -160,18 +161,14 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           {...form.register('email')}
         />
       </Field>
-      <Field
+      <PasswordField
+        autoComplete="current-password"
         error={form.formState.errors.password?.message}
         htmlFor="password"
         label={t('auth.fields.password')}
-      >
-        <Input
-          autoComplete="current-password"
-          id="password"
-          type="password"
-          {...form.register('password')}
-        />
-      </Field>
+        registration={form.register('password')}
+        t={t}
+      />
       {form.formState.errors.root?.message ? (
         <p className="form-error" role="alert">
           {form.formState.errors.root.message}
@@ -203,12 +200,13 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
 
   const submit = form.handleSubmit(async (values) => {
     try {
+      const timezone = getBrowserTimezone();
       await registerUser({
         email: values.email,
         lastName: values.lastName,
         name: values.name,
         password: values.password,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        ...(timezone ? { timezone } : {}),
       });
       onSuccess();
     } catch (error) {
@@ -256,18 +254,15 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
           {...form.register('email')}
         />
       </Field>
-      <Field
+      <PasswordField
+        autoComplete="new-password"
         error={form.formState.errors.password?.message}
+        help={t('auth.passwordHelp')}
         htmlFor="password"
         label={t('auth.fields.password')}
-      >
-        <Input
-          autoComplete="new-password"
-          id="password"
-          type="password"
-          {...form.register('password')}
-        />
-      </Field>
+        registration={form.register('password')}
+        t={t}
+      />
       {form.formState.errors.root?.message ? (
         <p className="form-error" role="alert">
           {form.formState.errors.root.message}
@@ -287,16 +282,97 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
   );
 }
 
-export function LoginFooter() {
-  const { t } = useAppearance();
-  return <>{t('auth.footer.login')}</>;
-}
-
-export function RegisterFooter() {
+export function LoginFooter({ registerHref = '/register' }: { registerHref?: string } = {}) {
   const { t } = useAppearance();
   return (
     <>
-      {t('auth.footer.registerLead')} <Link to="/login">{t('auth.footer.registerLink')}</Link>.
+      {t('auth.footer.login')}{' '}
+      <Link
+        className="font-bold text-foreground underline decoration-accent underline-offset-4"
+        to={registerHref}
+      >
+        {t('auth.footer.loginLink')}
+      </Link>
     </>
   );
+}
+
+export function RegisterFooter({ loginHref = '/login' }: { loginHref?: string } = {}) {
+  const { t } = useAppearance();
+  return (
+    <>
+      {t('auth.footer.registerLead')}{' '}
+      <Link
+        className="font-bold text-foreground underline decoration-accent underline-offset-4"
+        to={loginHref}
+      >
+        {t('auth.footer.registerLink')}
+      </Link>
+    </>
+  );
+}
+
+interface PasswordFieldProps {
+  autoComplete: string;
+  error?: string;
+  help?: string;
+  htmlFor: string;
+  label: string;
+  registration: UseFormRegisterReturn;
+  t: Translator;
+}
+
+function PasswordField({
+  autoComplete,
+  error,
+  help,
+  htmlFor,
+  label,
+  registration,
+  t,
+}: PasswordFieldProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const describedBy = error ? `${htmlFor}-error` : help ? `${htmlFor}-help` : undefined;
+
+  return (
+    <Field error={error} help={help} htmlFor={htmlFor} label={label}>
+      <div className="relative">
+        <Input
+          {...registration}
+          aria-describedby={describedBy}
+          aria-invalid={error ? true : undefined}
+          autoComplete={autoComplete}
+          className="pr-14"
+          id={htmlFor}
+          type={isVisible ? 'text' : 'password'}
+        />
+        <button
+          aria-label={t(isVisible ? 'auth.actions.hidePassword' : 'auth.actions.showPassword')}
+          aria-pressed={isVisible}
+          className="absolute inset-y-0 right-0 inline-flex size-11 items-center justify-center rounded-[var(--radius-sm)] text-foreground-secondary transition-colors hover:bg-surface-hover hover:text-foreground focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-1 focus-visible:ring-offset-focus-ring-offset"
+          onClick={() => {
+            setIsVisible((current) => !current);
+          }}
+          type="button"
+        >
+          {isVisible ? (
+            <EyeOff aria-hidden="true" className="size-4" />
+          ) : (
+            <Eye aria-hidden="true" className="size-4" />
+          )}
+        </button>
+      </div>
+    </Field>
+  );
+}
+
+function getBrowserTimezone() {
+  try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (!timezone) return undefined;
+    new Intl.DateTimeFormat('en-US', { timeZone: timezone }).format();
+    return timezone;
+  } catch {
+    return undefined;
+  }
 }

@@ -45,14 +45,18 @@
       "firstName": "First name",
       "lastName": "Last name"
     },
+    "passwordHelp": "Use 8 to 100 characters.",
     "actions": {
       "signIn": "Sign in",
       "signingIn": "Signing in…",
       "createAccount": "Create account",
-      "creatingAccount": "Creating account…"
+      "creatingAccount": "Creating account…",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
     },
     "footer": {
-      "login": "Access is provisioned by the facility owner.",
+      "login": "New to ParkCore?",
+      "loginLink": "Create an owner account",
       "registerLead": "Already have an account?",
       "registerLink": "Sign in"
     },
@@ -523,6 +527,8 @@
   "route": {
     "loading": "Loading route",
     "error": {
+      "metaTitle": "View unavailable | ParkCore",
+      "metaDescription": "This ParkCore view is unavailable. Return to a familiar place to continue.",
       "attention": "Needs attention",
       "notFoundTitle": "This view is unavailable.",
       "notFoundDescription": "Return to a familiar place to continue.",

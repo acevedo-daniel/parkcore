@@ -221,7 +221,6 @@
           },
           "timezone": {
             "type": "string",
-            "default": "America/Argentina/Buenos_Aires",
             "description": "User IANA timezone",
             "example": "America/Argentina/Buenos_Aires"
           }
