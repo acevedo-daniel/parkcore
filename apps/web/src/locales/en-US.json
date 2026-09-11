@@ -289,7 +289,9 @@
       "applyFilters": "Apply filters",
       "invalidRate": "Rates must be greater than 0.",
       "invalidRange": "Minimum rate cannot exceed maximum rate.",
-      "currencyRequired": "Choose a currency for rates."
+      "currencyRequired": "Choose a currency for rates.",
+      "resultCountOne": "{{count}} parking found",
+      "resultCountOther": "{{count}} parkings found"
     },
     "detail": {
       "metaDescription": "{{title}} is an active ParkCore parking facility at {{address}}.",

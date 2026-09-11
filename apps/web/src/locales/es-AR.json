@@ -289,7 +289,9 @@
       "applyFilters": "Aplicar filtros",
       "invalidRate": "Las tarifas deben ser mayores que 0.",
       "invalidRange": "La tarifa mínima no puede superar la máxima.",
-      "currencyRequired": "Elegí una moneda para filtrar tarifas."
+      "currencyRequired": "Elegí una moneda para filtrar tarifas.",
+      "resultCountOne": "{{count}} cochera encontrada",
+      "resultCountOther": "{{count}} cocheras encontradas"
     },
     "detail": {
       "metaDescription": "{{title}}, cochera activa en {{address}}.",

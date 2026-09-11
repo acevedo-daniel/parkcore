@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
-import { useState, type SyntheticEvent } from 'react';
+import { useEffect, useState, type SyntheticEvent } from 'react';
 import { useSearchParams } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
@@ -12,45 +12,43 @@ import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.j
 import { Input } from '../../components/ui/field.js';
 import { getPublicParkings, type PublicParkingQuery } from '../../lib/api/public-api.js';
 import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
-
-function rateToCents(value: string) {
-  const normalized = value.trim();
-  if (!normalized) return undefined;
-  const parsed = Number(normalized);
-  const cents = Math.round(parsed * 100);
-  return Number.isFinite(parsed) && cents > 0 ? cents : undefined;
-}
-
-function pageFromSearchParams(searchParams: URLSearchParams) {
-  const page = Number(searchParams.get('page'));
-  return Number.isInteger(page) && page > 0 ? page : 1;
-}
+import {
+  PARKING_CATALOG_PAGE_SIZE,
+  parseCatalogRate,
+  parseParkingCatalogUrlState,
+  parkingCatalogSearchParamsFromState,
+} from './parking-catalog-query.js';
 
 function getFormText(formData: FormData, name: string) {
   const value = formData.get(name);
   return typeof value === 'string' ? value : '';
 }
 
-function currencyFromSearchParams(searchParams: URLSearchParams): 'ARS' | 'USD' | undefined {
-  const currency = searchParams.get('currency');
-  return currency === 'ARS' || currency === 'USD' ? currency : undefined;
-}
-
 export function ParkingCatalogRoute() {
-  const { t } = useAppearance();
+  const { t, tPlural } = useAppearance();
   const [searchParams, setSearchParams] = useSearchParams();
   const [filterError, setFilterError] = useState<string>();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const page = pageFromSearchParams(searchParams);
-  const currency = currencyFromSearchParams(searchParams);
+  const catalogState = parseParkingCatalogUrlState(searchParams);
+  const currency = catalogState.currency;
+  const canonicalSearchParams = parkingCatalogSearchParamsFromState(catalogState);
+  const rawSearch = searchParams.toString();
+  const canonicalSearch = canonicalSearchParams.toString();
+
+  useEffect(() => {
+    if (rawSearch !== canonicalSearch) {
+      setSearchParams(canonicalSearch, { replace: true });
+    }
+  }, [canonicalSearch, rawSearch, setSearchParams]);
+
   const query: PublicParkingQuery = {
-    availableNow: searchParams.get('availableNow') === 'true' ? 'true' : undefined,
-    currency,
-    limit: 30,
-    page,
-    maxHourlyRateCents: currency ? rateToCents(searchParams.get('maxRate') ?? '') : undefined,
-    minHourlyRateCents: currency ? rateToCents(searchParams.get('minRate') ?? '') : undefined,
-    search: searchParams.get('search') ?? undefined,
+    availableNow: catalogState.availableNow ? 'true' : undefined,
+    currency: catalogState.currency,
+    limit: PARKING_CATALOG_PAGE_SIZE,
+    maxHourlyRateCents: catalogState.maxRate?.cents,
+    minHourlyRateCents: catalogState.minRate?.cents,
+    page: catalogState.page,
+    search: catalogState.search,
   };
 
   useDocumentMeta({
@@ -64,7 +62,13 @@ export function ParkingCatalogRoute() {
     queryFn: () => getPublicParkings(query),
     placeholderData: (previousData) => previousData,
   });
-  const hasFilters = [...searchParams.keys()].some((key) => key !== 'page');
+  const hasFilters = Boolean(
+    catalogState.currency ??
+    catalogState.maxRate ??
+    catalogState.minRate ??
+    catalogState.search ??
+    (catalogState.availableNow ? true : undefined),
+  );
 
   const applyFilters = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -74,8 +78,8 @@ export function ParkingCatalogRoute() {
     const minRateText = getFormText(formData, 'minRate');
     const maxRateText = getFormText(formData, 'maxRate');
     const availableNow = formData.get('availableNow') === 'on';
-    const minRate = rateToCents(minRateText);
-    const maxRate = rateToCents(maxRateText);
+    const minRate = parseCatalogRate(minRateText);
+    const maxRate = parseCatalogRate(maxRateText);
     if (
       (minRateText.trim() && minRate === undefined) ||
       (maxRateText.trim() && maxRate === undefined)
@@ -83,40 +87,43 @@ export function ParkingCatalogRoute() {
       setFilterError(t('public.catalog.invalidRate'));
       return;
     }
-    if (minRate !== undefined && maxRate !== undefined && minRate > maxRate) {
+    if (minRate && maxRate && minRate.cents > maxRate.cents) {
       setFilterError(t('public.catalog.invalidRange'));
       return;
     }
-    if ((minRate !== undefined || maxRate !== undefined) && !currency) {
+    if ((minRate || maxRate) && currency !== 'ARS' && currency !== 'USD') {
       setFilterError(t('public.catalog.currencyRequired'));
       return;
     }
     setFilterError(undefined);
-    const params = new URLSearchParams();
-    if (search) params.set('search', search);
-    if (currency === 'ARS' || currency === 'USD') params.set('currency', currency);
-    if (minRate !== undefined) params.set('minRate', minRateText);
-    if (maxRate !== undefined) params.set('maxRate', maxRateText);
-    if (availableNow) params.set('availableNow', 'true');
+    const params = parkingCatalogSearchParamsFromState({
+      availableNow,
+      currency: currency === 'ARS' || currency === 'USD' ? currency : undefined,
+      maxRate,
+      minRate,
+      page: 1,
+      search,
+    });
     setSearchParams(params);
     setMobileFiltersOpen(false);
   };
 
   const changePage = (nextPage: number) => {
-    const params = new URLSearchParams(searchParams);
-    if (nextPage <= 1) params.delete('page');
-    else params.set('page', String(nextPage));
-    setSearchParams(params);
+    setFilterError(undefined);
+    setSearchParams(parkingCatalogSearchParamsFromState({ ...catalogState, page: nextPage }));
   };
 
   const clearMonetaryFilters = () => {
-    const params = new URLSearchParams(searchParams);
-    params.delete('currency');
-    params.delete('minRate');
-    params.delete('maxRate');
-    params.delete('page');
     setFilterError(undefined);
-    setSearchParams(params);
+    setSearchParams(
+      parkingCatalogSearchParamsFromState({
+        ...catalogState,
+        currency: undefined,
+        maxRate: undefined,
+        minRate: undefined,
+        page: 1,
+      }),
+    );
   };
 
   return (
@@ -151,10 +158,10 @@ export function ParkingCatalogRoute() {
           <CatalogFilters
             filterError={filterError}
             idPrefix="catalog-desktop"
-            key={searchParams.toString()}
+            key={canonicalSearch}
             onClear={clearMonetaryFilters}
             onSubmit={applyFilters}
-            searchParams={searchParams}
+            searchParams={canonicalSearchParams}
             currency={currency}
           />
         </div>
@@ -169,10 +176,10 @@ export function ParkingCatalogRoute() {
             <CatalogFilters
               filterError={filterError}
               idPrefix="catalog-mobile"
-              key={`mobile-${searchParams.toString()}`}
+              key={`mobile-${canonicalSearch}`}
               onClear={clearMonetaryFilters}
               onSubmit={applyFilters}
-              searchParams={searchParams}
+              searchParams={canonicalSearchParams}
               currency={currency}
             />
           </div>
@@ -219,6 +226,14 @@ export function ParkingCatalogRoute() {
               {t('public.catalog.emptyDescription')}
             </EmptyState>
           </div>
+        ) : null}
+        {parkingQuery.data && !parkingQuery.isError ? (
+          <p className="mt-8 text-sm font-semibold text-foreground-secondary" role="status">
+            {tPlural(parkingQuery.data.meta.total, {
+              one: 'public.catalog.resultCountOne',
+              other: 'public.catalog.resultCountOther',
+            })}
+          </p>
         ) : null}
         {!parkingQuery.isLoading && !parkingQuery.isError && parkingQuery.data?.data.length ? (
           <div
@@ -290,11 +305,11 @@ function CatalogFilters({
   const { t } = useAppearance();
   return (
     <form
-      className="grid gap-4 rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-xs lg:grid-cols-12 lg:items-end lg:p-6"
+      className="grid gap-4 rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-xs md:grid-cols-2 md:items-end lg:grid-cols-12 lg:p-6"
       noValidate
       onSubmit={onSubmit}
     >
-      <div className="lg:col-span-6">
+      <div className="md:col-span-2 lg:col-span-5">
         <label
           className="mb-2 block text-xs font-bold text-foreground"
           htmlFor={`${idPrefix}-search`}
@@ -313,14 +328,14 @@ function CatalogFilters({
         </div>
       </div>
       <MonetaryFilterGroup
-        className="lg:col-span-5"
+        className="md:col-span-2 lg:col-span-5"
         currency={currency}
         defaultMax={searchParams.get('maxRate') ?? ''}
         defaultMin={searchParams.get('minRate') ?? ''}
         idPrefix={idPrefix}
         onClear={onClear}
       />
-      <div className="flex items-center lg:col-span-2">
+      <div className="flex items-center md:col-span-1 lg:col-span-2">
         <label className="flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-surface-subtle px-3.5 py-3 text-sm font-semibold text-foreground">
           <input
             className="size-4 rounded border-border accent-primary focus-visible:ring-2 focus-visible:ring-focus-ring"
@@ -332,7 +347,7 @@ function CatalogFilters({
           <span>{t('public.catalog.availableNow')}</span>
         </label>
       </div>
-      <Button className="rounded-full lg:col-span-3" type="submit">
+      <Button className="rounded-full md:col-span-1 lg:col-span-full lg:w-fit" type="submit">
         <SlidersHorizontal aria-hidden="true" className="size-4" />
         {t('public.catalog.applyFilters')}
       </Button>
