@@ -88,7 +88,10 @@ pnpm test
 pnpm test:coverage
 pnpm --filter @parkcore/web test:e2e
 pnpm contract:check
+pnpm build
 ```
+
+These commands are the local equivalents of the required CI boundaries. The API coverage command needs the documented PostgreSQL setup, the local real-stack command needs the isolated E2E database lifecycle, and `pnpm build` needs `VITE_API_URL`.
 
 ## Coverage thresholds
 

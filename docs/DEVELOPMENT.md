@@ -17,7 +17,7 @@ From the repository root:
 ```powershell
 Copy-Item apps/api/.env.example apps/api/.env
 Copy-Item apps/web/.env.example apps/web/.env
-pnpm install
+pnpm install --frozen-lockfile
 pnpm docker:up
 pnpm db:setup
 pnpm dev
@@ -97,7 +97,7 @@ Typical local URLs:
 | Build                    | `pnpm build`                                 | Generate the contract and build API, client, and web.             |
 | Release checks           | `pnpm release:readiness`                     | Run lint, types, coverage, contract, build, and E2E checks.       |
 
-A production-style web build requires `VITE_API_URL`.
+A production-style web build requires `VITE_API_URL`. For a reproducible verification checkout, use `pnpm install --frozen-lockfile`; CI uses the locked form in every job that installs dependencies.
 
 ## Workspace workflow
 
@@ -127,6 +127,12 @@ pnpm db:setup
 Schema changes use committed forward migrations. Use Prisma development commands from the API workspace when creating a new migration, and never edit an already-applied migration to change history.
 
 `pnpm docker:reset` deletes the local PostgreSQL volume. Use it only for disposable local data.
+
+## Verification troubleshooting
+
+- If the local real-stack browser workflow cannot connect to PostgreSQL, start the isolated service with `pnpm e2e:local:db:up` and confirm Docker Desktop is running. Stop it with `pnpm e2e:local:db:down` after the run.
+- If a production-style web build fails because the API URL is missing, set `VITE_API_URL` to the API base URL before running `pnpm build`. This value is browser-visible and must not contain secrets.
+- If dependency installation reports a lockfile mismatch, do not update dependencies as part of a verification run. Reconcile the manifest and lockfile in a separate change, then rerun `pnpm install --frozen-lockfile`.
 
 ## Demo seed
 
