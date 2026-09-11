@@ -56,7 +56,7 @@ jobs:
         run: pnpm typecheck
 
   api_tests_integration:
-    name: API Tests and Integration
+    name: Tests / API
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -99,7 +99,7 @@ jobs:
         run: pnpm --filter @parkcore/api test:coverage
 
   web_tests:
-    name: Web Tests
+    name: Tests / Web
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -150,7 +150,7 @@ jobs:
         run: pnpm contract:check
 
   real_stack_e2e:
-    name: Real stack E2E
+    name: E2E
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
