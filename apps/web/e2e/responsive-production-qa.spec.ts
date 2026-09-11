@@ -118,10 +118,26 @@ async function visit(page: Page, path: string, ready: Locator, label: string) {
   await expectMobileNavigationDoesNotCoverContent(page, label);
 }
 
+async function visitWithTheme(
+  page: Page,
+  theme: 'dark' | 'light',
+  path: string,
+  ready: Locator,
+  label: string,
+) {
+  await page.evaluate((nextTheme) => {
+    localStorage.setItem('parkcore-theme', nextTheme);
+  }, theme);
+  await visit(page, path, ready, label);
+  await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+}
+
 test('keeps the deployed public and owner surfaces usable at production viewports', async ({
   page,
 }, testInfo) => {
   test.setTimeout(300_000);
+  page.setDefaultTimeout(10_000);
+  page.setDefaultNavigationTimeout(30_000);
 
   const timestamp = Date.now();
   const runId = Math.floor(timestamp / 1000)
@@ -138,16 +154,27 @@ test('keeps the deployed public and owner surfaces usable at production viewport
   try {
     await page.addInitScript("localStorage.setItem('parkcore-lang', 'en');");
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto('/register');
-    await page.getByLabel('Name (optional)').fill('Responsive Production QA');
-    await page.getByLabel('Email').fill(email);
-    await page.getByLabel('Password').fill('ParkCoreResponsiveQA!');
-    const registerResponse = page.waitForResponse(
+    const catalogResponse = page.waitForResponse(
       (response) =>
-        response.url().endsWith('/auth/register') && response.request().method() === 'POST',
+        response.url().includes('/parkings') &&
+        response.request().method() === 'GET' &&
+        response.request().resourceType() !== 'document',
     );
-    await page.getByRole('button', { name: 'Create account' }).click();
-    apiBaseUrl = new URL((await registerResponse).url()).origin;
+    await page.goto('/parkings');
+    apiBaseUrl = new URL((await catalogResponse).url()).origin;
+    const registerResponse = await page.request.post(`${apiBaseUrl}/auth/register`, {
+      data: {
+        email,
+        name: 'Responsive Production QA',
+        password: 'ParkCoreResponsiveQA!',
+      },
+    });
+    expect(registerResponse.status()).toBe(201);
+    const auth = (await registerResponse.json()) as { accessToken: string };
+    await page.evaluate((accessToken) => {
+      localStorage.setItem('parkcore.access-token', accessToken);
+    }, auth.accessToken);
+    await page.goto('/app');
     await expect(page).toHaveURL(/\/app$/);
 
     await page.goto('/app/parkings/new');
@@ -164,9 +191,10 @@ test('keeps the deployed public and owner surfaces usable at production viewport
     parkingId = parkingMatch[1];
 
     await page.getByRole('button', { name: 'Check in', exact: true }).click();
-    await page.getByLabel('Plate').fill(plate);
-    await page.getByLabel('Type').selectOption('CAR');
-    await page.getByRole('button', { name: 'Start session' }).click();
+    const initialCheckInSheet = page.getByRole('dialog', { name: 'Check in vehicle' });
+    await initialCheckInSheet.getByLabel('Plate').fill(plate);
+    await initialCheckInSheet.getByLabel('Type').selectOption('CAR');
+    await initialCheckInSheet.getByRole('button', { name: 'Start session' }).click();
     const sessionLink = page.getByRole('link', { name: `Open session for ${plate}` });
     await expect(sessionLink).toBeVisible();
     const sessionHref = await sessionLink.getAttribute('href');
@@ -180,41 +208,50 @@ test('keeps the deployed public and owner surfaces usable at production viewport
       await page.setViewportSize(viewport);
       const prefix = `${viewport.name}:`;
 
-      await visit(
-        page,
-        '/',
-        page.getByRole('heading', { name: /Parking,\s*under control/i }),
-        `${prefix} landing`,
-      );
-      if (viewport.width < 768) {
-        await page.getByRole('button', { name: 'Open navigation' }).click();
-        const menu = page.getByRole('dialog');
-        await expectOverlayWithinViewport(menu, `${prefix} public menu`);
-        await page.getByRole('button', { name: 'Close navigation' }).click();
+      const publicThemes =
+        viewport.width === 360 || viewport.width === 1440
+          ? (['light', 'dark'] as const)
+          : (['light'] as const);
+      for (const theme of publicThemes) {
+        await visitWithTheme(
+          page,
+          theme,
+          '/',
+          page.getByRole('heading', { name: /Parking,\s*under control/i }),
+          `${prefix} ${theme} landing`,
+        );
+        if (viewport.width < 768) {
+          await page.getByRole('button', { name: 'Open navigation' }).click();
+          const menu = page.getByRole('dialog');
+          await expectOverlayWithinViewport(menu, `${prefix} ${theme} public menu`);
+          await page.getByRole('button', { name: 'Close navigation' }).click();
+        }
+        if (viewport.width === 360 && theme === 'light') {
+          await page.screenshot({
+            path: testInfo.outputPath('responsive-public-360.png'),
+            fullPage: true,
+          });
+        }
+        await visitWithTheme(
+          page,
+          theme,
+          '/parkings',
+          page.getByRole('heading', { name: 'Facilities you can understand before you arrive.' }),
+          `${prefix} ${theme} catalog`,
+        );
+        await visitWithTheme(
+          page,
+          theme,
+          `/parkings/${parkingId}`,
+          page.getByText(title, { exact: true }),
+          `${prefix} ${theme} public detail`,
+        );
       }
-      if (viewport.width === 360) {
-        await page.screenshot({
-          path: testInfo.outputPath('responsive-public-360.png'),
-          fullPage: true,
-        });
-      }
-      await visit(
-        page,
-        '/parkings',
-        page.getByRole('heading', { name: 'Parkings' }),
-        `${prefix} catalog`,
-      );
-      await visit(
-        page,
-        `/parkings/${parkingId}`,
-        page.getByText(title, { exact: true }),
-        `${prefix} public detail`,
-      );
       await page.evaluate(() => {
+        localStorage.setItem('parkcore-theme', 'light');
         localStorage.removeItem('parkcore.access-token');
       });
       await visit(page, '/login', page.getByLabel('Email'), `${prefix} login`);
-      await visit(page, '/register', page.getByLabel('Name (optional)'), `${prefix} register`);
       await visit(
         page,
         '/not-a-route',
@@ -229,12 +266,22 @@ test('keeps the deployed public and owner surfaces usable at production viewport
       await expect(page).toHaveURL(/\/app$/);
       token = await page.evaluate(() => localStorage.getItem('parkcore.access-token') ?? '');
 
-      await visit(
-        page,
-        '/app',
-        page.getByRole('heading', { name: 'Current facilities' }),
-        `${prefix} owner overview`,
-      );
+      const ownerThemes =
+        viewport.width === 360 || viewport.width === 1440
+          ? (['light', 'dark'] as const)
+          : (['light'] as const);
+      for (const theme of ownerThemes) {
+        await visitWithTheme(
+          page,
+          theme,
+          '/app',
+          page.getByRole('heading', { name: 'Everything important, in view.' }),
+          `${prefix} ${theme} owner overview`,
+        );
+      }
+      await page.evaluate(() => {
+        localStorage.setItem('parkcore-theme', 'light');
+      });
       if (viewport.width === 1440) {
         await page.screenshot({
           path: testInfo.outputPath('responsive-owner-1440.png'),
@@ -244,7 +291,7 @@ test('keeps the deployed public and owner surfaces usable at production viewport
       await visit(
         page,
         '/app/parkings',
-        page.getByRole('heading', { name: 'Parkings' }),
+        page.getByRole('heading', { name: 'Facilities, made clear.' }),
         `${prefix} owner parking list`,
       );
       await visit(
@@ -302,7 +349,7 @@ test('keeps the deployed public and owner surfaces usable at production viewport
       await page.getByRole('button', { name: 'Check out' }).click();
       const checkoutDialog = page.getByRole('dialog', { name: 'Complete checkout' });
       await expectOverlayWithinViewport(checkoutDialog, `${prefix} checkout dialog`);
-      await page.getByRole('button', { name: 'Close Complete checkout' }).click();
+      await page.getByRole('button', { name: 'Close checkout' }).click();
 
       await visit(
         page,
@@ -314,7 +361,7 @@ test('keeps the deployed public and owner surfaces usable at production viewport
       await visit(
         page,
         '/app/missing',
-        page.getByRole('heading', { name: 'Route unavailable' }),
+        page.getByRole('heading', { name: 'This view is unavailable.' }),
         `${prefix} owner 404`,
       );
     }

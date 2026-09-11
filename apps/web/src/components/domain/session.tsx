@@ -42,7 +42,7 @@ export function SessionRow({ session, to }: { session: Session; to: string }) {
   return (
     <Link
       aria-label={`Open session for ${session.vehicle.plate}`}
-      className="group grid gap-4 border-b border-border-subtle bg-surface py-5 text-foreground transition-colors duration-200 hover:bg-surface-hover sm:grid-cols-[minmax(9rem,1.1fr)_minmax(7rem,0.8fr)_minmax(8rem,1fr)_auto] sm:items-center"
+      className="group grid gap-4 border-b border-border-subtle bg-surface py-5 text-foreground transition-colors duration-200 hover:bg-surface-hover lg:grid-cols-[minmax(9rem,1.1fr)_minmax(7rem,0.8fr)_minmax(8rem,1fr)_auto] lg:items-center"
       to={to}
     >
       <div className="flex items-center gap-3">
@@ -69,7 +69,7 @@ export function SessionRow({ session, to }: { session: Session; to: string }) {
           )}
         </div>
       </div>
-      <div className="flex items-center justify-between gap-4 sm:justify-end">
+      <div className="flex items-center justify-between gap-4 lg:justify-end">
         <span className="rounded-full border border-border-strong px-2.5 py-1 text-xs font-bold">
           {session.status[0]}
           {session.status.slice(1).toLowerCase()}
