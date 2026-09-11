@@ -1,6 +1,21 @@
 import { prisma } from '../../config/prisma.js';
 import { Parking, Prisma } from '../../../prisma/generated/client.js';
 
+const publicParkingInclude = {
+  owner: { select: { kind: true } },
+  parkingSessions: { where: { status: 'ACTIVE' }, select: { id: true } },
+} satisfies Prisma.ParkingInclude;
+
+export type PublicParkingRecord = Prisma.ParkingGetPayload<{
+  include: typeof publicParkingInclude;
+}>;
+
+const publicVisibilityWhere: Prisma.ParkingWhereInput = {
+  isActive: true,
+  isListed: true,
+  owner: { kind: { in: ['OWNER', 'SHOWCASE'] } },
+};
+
 export const create = async (data: Prisma.ParkingCreateInput): Promise<Parking> => {
   return await prisma.parking.create({
     data: data,
@@ -13,9 +28,10 @@ export const findById = async (id: string): Promise<Parking | null> => {
   });
 };
 
-export const findActiveById = async (id: string): Promise<Parking | null> => {
+export const findPublicById = async (id: string): Promise<PublicParkingRecord | null> => {
   return await prisma.parking.findFirst({
-    where: { id, isActive: true },
+    where: { AND: [publicVisibilityWhere, { id }] },
+    include: publicParkingInclude,
   });
 };
 
@@ -64,20 +80,11 @@ export const updateWithCapacityCheck = async (
   );
 };
 
-export const findAll = async (
-  skip: number,
-  take: number,
+export const findPublicCandidates = async (
   where: Prisma.ParkingWhereInput,
-): Promise<{ data: Parking[]; total: number }> => {
-  const [data, total] = await Promise.all([
-    prisma.parking.findMany({
-      where,
-      skip,
-      take,
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.parking.count({ where }),
-  ]);
-
-  return { data, total };
+): Promise<PublicParkingRecord[]> => {
+  return await prisma.parking.findMany({
+    where: { AND: [publicVisibilityWhere, where] },
+    include: publicParkingInclude,
+  });
 };

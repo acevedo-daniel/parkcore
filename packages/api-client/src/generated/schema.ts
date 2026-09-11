@@ -665,14 +665,16 @@ export interface paths {
                     page?: number;
                     /** @description Items per page */
                     limit?: number;
-                    /** @description Search term for title or address */
+                    /** @description Search term for title, neighborhood, or address */
                     search?: string;
+                    /** @description Currency context for public price filtering */
+                    currency?: "ARS" | "USD";
                     /** @description Minimum hourly rate in cents */
                     minHourlyRateCents?: number;
                     /** @description Maximum hourly rate in cents */
                     maxHourlyRateCents?: number;
-                    /** @description Filter by owner ID */
-                    ownerId?: string;
+                    /** @description Return only AVAILABLE or LIMITED facilities */
+                    availableNow?: "true" | "false";
                 };
                 header?: never;
                 path?: never;
@@ -686,7 +688,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ParkingListResponse"];
+                        "application/json": components["schemas"]["PublicParkingListResponse"];
                     };
                 };
                 /** @description Validation error */
@@ -839,7 +841,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ParkingResponse"];
+                        "application/json": components["schemas"]["PublicParkingResponse"];
                     };
                 };
                 /** @description Parking not found */
@@ -1849,8 +1851,8 @@ export interface components {
              */
             isListed: boolean;
         };
-        ParkingListResponse: {
-            data: components["schemas"]["ParkingResponse"][];
+        PublicParkingListResponse: {
+            data: components["schemas"]["PublicParkingResponse"][];
             meta: {
                 /**
                  * @description Current page number
@@ -1883,6 +1885,62 @@ export interface components {
                  */
                 hasPreviousPage: boolean;
             };
+        };
+        PublicParkingResponse: {
+            /**
+             * Format: uuid
+             * @description Parking UUID
+             */
+            id: string;
+            /** @description Parking title */
+            title: string;
+            /** @description Description */
+            description: string | null;
+            /** @description Image URL */
+            image: string | null;
+            /** @description Neighborhood or area */
+            neighborhood: string;
+            /** @description Address */
+            address: string;
+            /** @description Hourly rate in integer cents */
+            hourlyRateCents: number;
+            /**
+             * @description Supported currency code
+             * @enum {string}
+             */
+            currency: "ARS" | "USD";
+            /** @description Maximum simultaneous active vehicle stays */
+            capacity: number;
+            /** @description Latitude */
+            lat: number;
+            /** @description Longitude */
+            lng: number;
+            /** @description IANA timezone used for local operations */
+            timezone: string;
+            /** @description Whether the parking is open all day */
+            is24Hours: boolean;
+            /** @description Local opening time in HH:mm */
+            opensAt: string | null;
+            /** @description Local closing time in HH:mm */
+            closesAt: string | null;
+            /** @description Whether this is fictional showcase data */
+            isShowcase: boolean;
+            /** @description Whether the facility is open now */
+            isOpen: boolean;
+            /**
+             * @description Derived public availability state
+             * @enum {string}
+             */
+            availabilityState: "AVAILABLE" | "LIMITED" | "FULL" | "CLOSED";
+            /** @description Current available spaces */
+            availableSpaces: number;
+            /** @description Current occupancy */
+            occupancyPercent: number;
+            /**
+             * Format: date-time
+             * @description Next opening time as an ISO date-time
+             */
+            nextOpeningAt: string | null;
         };
         UpdateParkingRequest: {
             /**

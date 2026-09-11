@@ -6,7 +6,8 @@ import {
   parkingParamsSchema,
   parkingQuerySchema,
   parkingResponseSchema,
-  parkingListResponseSchema,
+  publicParkingResponseSchema,
+  publicParkingListResponseSchema,
 } from './parking.schema.js';
 
 export function registerParkingDocs(registry: OpenAPIRegistry): void {
@@ -56,7 +57,7 @@ export function registerParkingDocs(registry: OpenAPIRegistry): void {
         description: 'Paginated list of parking facilities',
         content: {
           'application/json': {
-            schema: parkingListResponseSchema,
+            schema: publicParkingListResponseSchema,
           },
         },
       },
@@ -98,7 +99,7 @@ export function registerParkingDocs(registry: OpenAPIRegistry): void {
         description: 'Parking facility details',
         content: {
           'application/json': {
-            schema: parkingResponseSchema,
+            schema: publicParkingResponseSchema,
           },
         },
       },

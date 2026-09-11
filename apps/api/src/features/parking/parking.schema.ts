@@ -174,7 +174,11 @@ export const parkingQuerySchema = z
       .trim()
       .min(1, { error: 'Search must not be empty' })
       .optional()
-      .openapi({ description: 'Search term for title or address' }),
+      .openapi({ description: 'Search term for title, neighborhood, or address' }),
+    currency: z
+      .enum(supportedCurrencies)
+      .optional()
+      .openapi({ description: 'Currency context for public price filtering' }),
     minHourlyRateCents: z.coerce
       .number()
       .int()
@@ -187,18 +191,35 @@ export const parkingQuerySchema = z
       .positive()
       .optional()
       .openapi({ description: 'Maximum hourly rate in cents' }),
-    ownerId: z.uuid().optional().openapi({ description: 'Filter by owner ID' }),
+    availableNow: z
+      .enum(['true', 'false'])
+      .transform((value) => value === 'true')
+      .optional()
+      .openapi({ description: 'Return only AVAILABLE or LIMITED facilities' }),
   })
-  .refine(
-    ({ minHourlyRateCents, maxHourlyRateCents }) =>
-      minHourlyRateCents === undefined ||
-      maxHourlyRateCents === undefined ||
-      minHourlyRateCents <= maxHourlyRateCents,
-    {
-      message: 'minHourlyRateCents must be less than or equal to maxHourlyRateCents',
-      path: ['minHourlyRateCents'],
-    },
-  )
+  .superRefine((query, ctx) => {
+    if (
+      (query.minHourlyRateCents !== undefined || query.maxHourlyRateCents !== undefined) &&
+      query.currency === undefined
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['currency'],
+        message: 'Currency is required when filtering by price',
+      });
+    }
+    if (
+      query.minHourlyRateCents !== undefined &&
+      query.maxHourlyRateCents !== undefined &&
+      query.minHourlyRateCents > query.maxHourlyRateCents
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['minHourlyRateCents'],
+        message: 'minHourlyRateCents must be less than or equal to maxHourlyRateCents',
+      });
+    }
+  })
   .openapi('ParkingQuery');
 
 export const parkingResponseSchema = z
@@ -226,18 +247,54 @@ export const parkingResponseSchema = z
   })
   .openapi('ParkingResponse');
 
-export const parkingListResponseSchema = z
+export const publicParkingResponseSchema = z
   .strictObject({
-    data: z.array(parkingResponseSchema),
+    id: z.uuid().openapi({ description: 'Parking UUID' }),
+    title: z.string().openapi({ description: 'Parking title' }),
+    description: z.string().nullable().openapi({ description: 'Description' }),
+    image: z.string().nullable().openapi({ description: 'Image URL' }),
+    neighborhood: z.string().openapi({ description: 'Neighborhood or area' }),
+    address: z.string().openapi({ description: 'Address' }),
+    hourlyRateCents: z.int().openapi({ description: 'Hourly rate in integer cents' }),
+    currency: z.enum(supportedCurrencies).openapi({ description: 'Supported currency code' }),
+    capacity: z.int().openapi({ description: 'Maximum simultaneous active vehicle stays' }),
+    lat: z.number().openapi({ description: 'Latitude' }),
+    lng: z.number().openapi({ description: 'Longitude' }),
+    timezone: z.string().openapi({ description: 'IANA timezone used for local operations' }),
+    is24Hours: z.boolean().openapi({ description: 'Whether the parking is open all day' }),
+    opensAt: z.string().nullable().openapi({ description: 'Local opening time in HH:mm' }),
+    closesAt: z.string().nullable().openapi({ description: 'Local closing time in HH:mm' }),
+    isShowcase: z.boolean().openapi({ description: 'Whether this is fictional showcase data' }),
+    isOpen: z.boolean().openapi({ description: 'Whether the facility is open now' }),
+    availabilityState: z
+      .enum(['AVAILABLE', 'LIMITED', 'FULL', 'CLOSED'])
+      .openapi({ description: 'Derived public availability state' }),
+    availableSpaces: z.int().nonnegative().openapi({ description: 'Current available spaces' }),
+    occupancyPercent: z
+      .number()
+      .nonnegative()
+      .max(100)
+      .openapi({ description: 'Current occupancy' }),
+    nextOpeningAt: z.iso
+      .datetime()
+      .nullable()
+      .openapi({ description: 'Next opening time as an ISO date-time' }),
+  })
+  .openapi('PublicParkingResponse');
+
+export const publicParkingListResponseSchema = z
+  .strictObject({
+    data: z.array(publicParkingResponseSchema),
     meta: paginationMetaSchema,
   })
-  .openapi('ParkingListResponse');
+  .openapi('PublicParkingListResponse');
 
 export type CreateParking = z.infer<typeof createParkingSchema>;
 export type UpdateParking = z.infer<typeof updateParkingSchema>;
 export type ParkingQuery = z.infer<typeof parkingQuerySchema>;
 export type ParkingResponse = z.infer<typeof parkingResponseSchema>;
-export type ParkingListResponse = z.infer<typeof parkingListResponseSchema>;
+export type PublicParkingResponse = z.infer<typeof publicParkingResponseSchema>;
+export type PublicParkingListResponse = z.infer<typeof publicParkingListResponseSchema>;
 
 export const toParkingResponse = (parking: Parking): ParkingResponse => ({
   id: parking.id,

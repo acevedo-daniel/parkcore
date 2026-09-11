@@ -60,14 +60,25 @@ describe('parking routes', () => {
   it('parses a valid query before calling the service', async () => {
     parkingService.findAll.mockResolvedValue({ data: [], meta: {} });
 
-    const response = await request(app).get('/parkings?page=2&limit=5&minHourlyRateCents=1000');
+    const response = await request(app).get(
+      '/parkings?page=2&limit=5&currency=USD&minHourlyRateCents=1000',
+    );
 
     expect(response.status).toBe(200);
     expect(parkingService.findAll).toHaveBeenCalledWith({
       page: 2,
       limit: 5,
+      currency: 'USD',
       minHourlyRateCents: 1000,
     });
+  });
+
+  it('requires currency context for public price filters', async () => {
+    const response = await request(app).get('/parkings?minHourlyRateCents=1000');
+
+    expect(response.status).toBe(400);
+    expectErrorContract(response.body);
+    expect(parkingService.findAll).not.toHaveBeenCalled();
   });
 
   it('returns the global error contract for an invalid query', async () => {

@@ -1,4 +1,4 @@
-import { PaginationResult, createPaginatedResult } from '../../utils/pagination.js';
+import { createPaginatedResult } from '../../utils/pagination.js';
 import {
   BadRequestError,
   NotFoundError,
@@ -8,12 +8,14 @@ import {
 import * as parkingRepository from './parking.repository.js';
 import { Parking, Prisma } from '../../../prisma/generated/client.js';
 import * as userRepository from '../user/user.repository.js';
-import { validateDailySchedule } from '../../utils/timezone.js';
+import { getScheduleState, validateDailySchedule } from '../../utils/timezone.js';
 import {
   CreateParking,
   UpdateParking,
   ParkingQuery,
   ParkingResponse,
+  PublicParkingListResponse,
+  PublicParkingResponse,
   toParkingResponse,
 } from './parking.schema.js';
 
@@ -46,10 +48,10 @@ export const findById = async (id: string): Promise<Parking> => {
   return parking;
 };
 
-export const findPublicById = async (id: string): Promise<ParkingResponse> => {
-  const parking = await parkingRepository.findActiveById(id);
+export const findPublicById = async (id: string): Promise<PublicParkingResponse> => {
+  const parking = await parkingRepository.findPublicById(id);
   if (!parking) throw new NotFoundError('Parking not found');
-  return toParkingResponse(parking);
+  return toPublicParkingResponse(parking);
 };
 
 export const findOwned = async (ownerId: string): Promise<ParkingResponse[]> => {
@@ -91,18 +93,73 @@ export const update = async (
   return toParkingResponse(updated);
 };
 
-export const findAll = async (query: ParkingQuery): Promise<PaginationResult<ParkingResponse>> => {
-  const { page, limit, search, minHourlyRateCents, maxHourlyRateCents, ownerId } = query;
-  const skip = (page - 1) * limit;
+const availabilityRank: Record<PublicParkingResponse['availabilityState'], number> = {
+  AVAILABLE: 0,
+  LIMITED: 1,
+  FULL: 2,
+  CLOSED: 3,
+};
 
-  const where: Prisma.ParkingWhereInput = { isActive: true };
+export const toPublicParkingResponse = (
+  parking: parkingRepository.PublicParkingRecord,
+): PublicParkingResponse => {
+  const activeSessionCount = parking.parkingSessions.length;
+  const schedule = getScheduleState({
+    timezone: parking.timezone,
+    is24Hours: parking.is24Hours,
+    opensAt: parking.opensAt,
+    closesAt: parking.closesAt,
+  });
+  const availableSpaces = Math.max(0, parking.capacity - activeSessionCount);
+  const occupancyPercent = (activeSessionCount / parking.capacity) * 100;
+  const availabilityState = !schedule.isOpen
+    ? 'CLOSED'
+    : availableSpaces === 0
+      ? 'FULL'
+      : occupancyPercent >= 80
+        ? 'LIMITED'
+        : 'AVAILABLE';
+
+  return {
+    id: parking.id,
+    title: parking.title,
+    description: parking.description,
+    image: parking.image,
+    neighborhood: parking.neighborhood,
+    address: parking.address,
+    hourlyRateCents: parking.hourlyRateCents,
+    currency: parking.currency,
+    capacity: parking.capacity,
+    lat: parking.lat,
+    lng: parking.lng,
+    timezone: parking.timezone,
+    is24Hours: parking.is24Hours,
+    opensAt: parking.opensAt,
+    closesAt: parking.closesAt,
+    isShowcase: parking.owner.kind === 'SHOWCASE',
+    isOpen: schedule.isOpen,
+    availabilityState,
+    availableSpaces,
+    occupancyPercent,
+    nextOpeningAt: schedule.nextOpeningAt?.toISOString() ?? null,
+  };
+};
+
+export const findAll = async (query: ParkingQuery): Promise<PublicParkingListResponse> => {
+  const { page, limit, search, currency, minHourlyRateCents, maxHourlyRateCents, availableNow } =
+    query;
+
+  const where: Prisma.ParkingWhereInput = {};
 
   if (search) {
     where.OR = [
       { title: { contains: search, mode: 'insensitive' } },
+      { neighborhood: { contains: search, mode: 'insensitive' } },
       { address: { contains: search, mode: 'insensitive' } },
     ];
   }
+
+  if (currency) where.currency = currency;
 
   if (minHourlyRateCents !== undefined || maxHourlyRateCents !== undefined) {
     where.hourlyRateCents = {
@@ -111,11 +168,22 @@ export const findAll = async (query: ParkingQuery): Promise<PaginationResult<Par
     };
   }
 
-  if (ownerId) {
-    where.ownerId = ownerId;
-  }
+  const candidates = await parkingRepository.findPublicCandidates(where);
+  const publicParkings = candidates.map(toPublicParkingResponse);
+  const filtered = availableNow
+    ? publicParkings.filter(
+        (parking) =>
+          parking.availabilityState === 'AVAILABLE' || parking.availabilityState === 'LIMITED',
+      )
+    : publicParkings;
 
-  const { data, total } = await parkingRepository.findAll(skip, limit, where);
+  filtered.sort(
+    (left, right) =>
+      availabilityRank[left.availabilityState] - availabilityRank[right.availabilityState] ||
+      left.title.localeCompare(right.title) ||
+      left.id.localeCompare(right.id),
+  );
 
-  return createPaginatedResult(data.map(toParkingResponse), total, page, limit);
+  const skip = (page - 1) * limit;
+  return createPaginatedResult(filtered.slice(skip, skip + limit), filtered.length, page, limit);
 };

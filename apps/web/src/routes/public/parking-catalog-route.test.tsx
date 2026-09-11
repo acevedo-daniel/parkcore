@@ -5,14 +5,14 @@ import { MemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { components } from '@parkcore/api-client';
-import { parkingFixture } from '../../test/fixtures.js';
+import { publicParkingFixture } from '../../test/fixtures.js';
 import { ParkingCatalogRoute } from './parking-catalog-route.js';
 
 const api = vi.hoisted(() => ({ getPublicParkings: vi.fn() }));
 
 vi.mock('../../lib/api/public-api.js', () => ({ getPublicParkings: api.getPublicParkings }));
 
-type ParkingList = components['schemas']['ParkingListResponse'];
+type ParkingList = components['schemas']['PublicParkingListResponse'];
 
 function listFixture(
   data: ParkingList['data'],
@@ -58,7 +58,7 @@ describe('public parking catalog', () => {
   });
 
   it('renders active parkings returned by the typed API boundary', async () => {
-    api.getPublicParkings.mockResolvedValue(listFixture([parkingFixture()]));
+    api.getPublicParkings.mockResolvedValue(listFixture([publicParkingFixture()]));
     renderCatalog();
 
     expect(await screen.findByRole('link', { name: 'Open Central Parking' })).toBeTruthy();
@@ -91,15 +91,17 @@ describe('public parking catalog', () => {
   it('keeps filters in the URL while moving through public parking pages', async () => {
     const user = userEvent.setup();
     api.getPublicParkings
-      .mockResolvedValueOnce(listFixture([parkingFixture()], { hasNextPage: true, totalPages: 2 }))
       .mockResolvedValueOnce(
-        listFixture([parkingFixture({ id: 'parking-2', title: 'North Garage' })], {
+        listFixture([publicParkingFixture()], { hasNextPage: true, totalPages: 2 }),
+      )
+      .mockResolvedValueOnce(
+        listFixture([publicParkingFixture({ id: 'parking-2', title: 'North Garage' })], {
           hasPreviousPage: true,
           page: 2,
           totalPages: 2,
         }),
       );
-    renderCatalog('/parkings?search=central&minRate=10&maxRate=20');
+    renderCatalog('/parkings?search=central&currency=USD&minRate=10&maxRate=20');
 
     await screen.findByRole('link', { name: 'Open Central Parking' });
     await user.click(screen.getByRole('button', { name: 'Next' }));
@@ -107,6 +109,8 @@ describe('public parking catalog', () => {
     expect(await screen.findByRole('link', { name: 'Open North Garage' })).toBeTruthy();
     expect(api.getPublicParkings).toHaveBeenLastCalledWith({
       limit: 30,
+      availableNow: undefined,
+      currency: 'USD',
       maxHourlyRateCents: 2000,
       minHourlyRateCents: 1000,
       page: 2,

@@ -50,7 +50,8 @@ const requiredSchemas = [
   'AuthResponse',
   'UserResponse',
   'ParkingResponse',
-  'ParkingListResponse',
+  'PublicParkingResponse',
+  'PublicParkingListResponse',
   'VehicleSummary',
   'ParkingSessionResponse',
   'ParkingSessionListResponse',
@@ -60,6 +61,7 @@ const requiredSchemas = [
 const dateTimeFields: Record<string, string[]> = {
   UserResponse: ['createdAt', 'updatedAt'],
   ParkingResponse: ['createdAt', 'updatedAt'],
+  PublicParkingResponse: ['nextOpeningAt'],
   ParkingSessionResponse: ['startTime', 'endTime', 'createdAt', 'updatedAt'],
 };
 

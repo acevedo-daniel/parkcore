@@ -13,6 +13,18 @@ interface ParkingDiscoveryCardProps {
 
 export function ParkingDiscoveryCard({ es, parking, to }: ParkingDiscoveryCardProps) {
   const [imageUnavailable, setImageUnavailable] = useState(false);
+  const availabilityLabel = {
+    AVAILABLE: es ? 'Disponible' : 'Available',
+    LIMITED: es ? 'Últimos lugares' : 'Limited spaces',
+    FULL: es ? 'Completa' : 'Full',
+    CLOSED: es ? 'Cerrada ahora' : 'Closed now',
+  }[parking.availabilityState];
+  const availabilityDotClass = {
+    AVAILABLE: 'bg-success',
+    LIMITED: 'bg-warning',
+    FULL: 'bg-danger',
+    CLOSED: 'bg-foreground-muted',
+  }[parking.availabilityState];
 
   return (
     <Link
@@ -43,8 +55,8 @@ export function ParkingDiscoveryCard({ es, parking, to }: ParkingDiscoveryCardPr
           </div>
         )}
         <span className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-surface/95 px-3 py-1.5 text-xs font-bold text-foreground shadow-xs backdrop-blur-sm">
-          <span aria-hidden="true" className="size-1.5 rounded-full bg-success" />
-          {es ? 'Disponible ahora' : 'Available now'}
+          <span aria-hidden="true" className={`size-1.5 rounded-full ${availabilityDotClass}`} />
+          {availabilityLabel}
         </span>
       </div>
 
@@ -53,6 +65,14 @@ export function ParkingDiscoveryCard({ es, parking, to }: ParkingDiscoveryCardPr
           <h2 className="font-display text-2xl font-bold leading-tight tracking-[-0.03em]">
             {parking.title}
           </h2>
+          {parking.isShowcase ? (
+            <span className="mt-2 inline-flex rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-accent-foreground">
+              {es ? 'Demo' : 'Demo'}
+            </span>
+          ) : null}
+          <p className="mt-2 text-sm font-semibold text-foreground-secondary">
+            {parking.neighborhood}
+          </p>
           <p className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-foreground-secondary">
             <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-foreground" />
             {parking.address}
@@ -68,6 +88,9 @@ export function ParkingDiscoveryCard({ es, parking, to }: ParkingDiscoveryCardPr
               {formatMoney(parking.hourlyRateCents, parking.currency)}
               <span className="text-xs font-medium"> / h</span>
             </span>
+          </span>
+          <span className="text-right text-xs font-semibold text-foreground-secondary">
+            {parking.availableSpaces} / {parking.capacity} {es ? 'libres' : 'open'}
           </span>
           <span className="inline-flex items-center gap-1 text-xs font-bold">
             {es ? 'Ver detalles' : 'View details'}

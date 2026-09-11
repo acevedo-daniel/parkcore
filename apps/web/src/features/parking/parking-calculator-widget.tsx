@@ -30,10 +30,7 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
     staleTime: 60_000,
   });
 
-  const availableFacilities = useMemo(
-    () => (parkingsQuery.data?.data ?? []).filter((parking) => parking.isActive),
-    [parkingsQuery.data],
-  );
+  const availableFacilities = useMemo(() => parkingsQuery.data?.data ?? [], [parkingsQuery.data]);
   const selectedFacility =
     availableFacilities.find((facility) => facility.id === selectedId) ?? availableFacilities[0];
 

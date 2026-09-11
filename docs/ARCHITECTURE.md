@@ -60,6 +60,12 @@ A partial unique database index on `(parkingId, vehicleId)` where `status = 'ACT
 
 Checkout and cancellation use conditional updates against `status = 'ACTIVE'`, so only one terminal transition can succeed.
 
+## Public discovery pipeline
+
+Public parking list and detail reads share the same repository visibility predicate: the owner kind must be `OWNER` or `SHOWCASE`, the parking must be listed, and operational state must be active. DEMO-owned facilities are excluded regardless of their stored listing state. Hidden detail requests resolve as not found.
+
+The service loads the eligible candidate set with active-session counts, derives schedule state and availability in the parking timezone, applies text, currency-safe price, and availability filters, orders by `AVAILABLE`, `LIMITED`, `FULL`, and `CLOSED` with a title tie-break, and paginates last. Public DTOs expose only public facility data plus `isShowcase`, `isOpen`, `availabilityState`, `availableSpaces`, `occupancyPercent`, and `nextOpeningAt`; owner IDs and credential data are not part of that representation.
+
 ## Contract flow
 
 The API's OpenAPI registrations generate the artifact consumed by the browser client:

@@ -7,14 +7,17 @@ const { mockPrisma, transactionClient } = vi.hoisted(() => {
   };
   return {
     transactionClient: tx,
-    mockPrisma: { $transaction: vi.fn() },
+    mockPrisma: {
+      $transaction: vi.fn(),
+      parking: { findFirst: vi.fn(), findMany: vi.fn() },
+    },
   };
 });
 
 vi.mock('../../config/prisma.js', () => ({ prisma: mockPrisma }));
 
 import { buildParking } from '../../../tests/helpers/builders.js';
-import { updateWithCapacityCheck } from './parking.repository.js';
+import { findPublicCandidates, updateWithCapacityCheck } from './parking.repository.js';
 
 describe('parking repository capacity updates', () => {
   beforeEach(() => {
@@ -50,5 +53,25 @@ describe('parking repository capacity updates', () => {
       where: { id: 'parking-1' },
       data: { capacity: 4 },
     });
+  });
+
+  it('applies public visibility before returning discovery candidates', async () => {
+    mockPrisma.parking.findMany.mockResolvedValue([]);
+
+    await expect(findPublicCandidates({ currency: 'ARS' })).resolves.toEqual([]);
+    expect(mockPrisma.parking.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          AND: [
+            {
+              isActive: true,
+              isListed: true,
+              owner: { kind: { in: ['OWNER', 'SHOWCASE'] } },
+            },
+            { currency: 'ARS' },
+          ],
+        },
+      }),
+    );
   });
 });

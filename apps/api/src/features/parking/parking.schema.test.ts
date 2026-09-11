@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createParkingSchema } from './parking.schema.js';
+import { createParkingSchema, parkingQuerySchema } from './parking.schema.js';
 
 const baseParking = {
   address: '123 Main Street',
@@ -48,5 +48,27 @@ describe('parking configuration schema', () => {
         opensAt: '10:00',
       }),
     ).toThrow('Opening and closing times cannot be equal');
+  });
+
+  it('requires currency context for public price filters', () => {
+    expect(() => parkingQuerySchema.parse({ minHourlyRateCents: '1000' })).toThrow(
+      'Currency is required when filtering by price',
+    );
+  });
+
+  it('parses currency and availability filters together', () => {
+    expect(
+      parkingQuerySchema.parse({
+        availableNow: 'true',
+        currency: 'ARS',
+        maxHourlyRateCents: '2500',
+        minHourlyRateCents: '1000',
+      }),
+    ).toMatchObject({
+      availableNow: true,
+      currency: 'ARS',
+      maxHourlyRateCents: 2500,
+      minHourlyRateCents: 1000,
+    });
   });
 });

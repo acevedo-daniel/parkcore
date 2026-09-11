@@ -4,7 +4,7 @@
 
 ## Product
 
-ParkCore is a parking-operations system for independent parking owners. Owners use it to manage facilities and the vehicle sessions taking place inside them; public visitors can browse active facilities through a read-only catalog.
+ParkCore is a parking-operations system for independent parking owners. Owners use it to manage facilities and the vehicle sessions taking place inside them; public visitors can browse explicitly listed, eligible facilities through a read-only catalog.
 
 The product focuses on the operational state of a parking facility: whether it is open for intake, how much capacity remains, which vehicles are currently inside, and how an individual stay is completed or cancelled.
 
@@ -16,9 +16,9 @@ ParkCore keeps those facts together in one workflow without expanding into reser
 
 ## Actors
 
-| Actor          | Capabilities                                                                 |
-| -------------- | ---------------------------------------------------------------------------- |
-| Public visitor | Browse, search, filter, and view active parking facilities.                  |
+| Actor          | Capabilities                                                                                                                           |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Public visitor | Browse, search, filter, and view eligible parking facilities.                                                                          |
 | Owner/operator | Register with first name, last name, email, password, and timezone; manage a profile and owned parkings; and operate parking sessions. |
 
 The API also distinguishes non-credentialed `DEMO` and `SHOWCASE` identities. Demo access is time-bounded; showcase identities cannot operate or edit parking data.
@@ -74,8 +74,10 @@ ParkCore 1.0 intentionally does not include:
 
 `Parking.isActive` controls operational availability:
 
-- active parkings appear in the public catalog and may accept new check-ins;
+- active parkings may accept new check-ins and can appear publicly when listed and owned by an eligible identity;
 - inactive parkings remain visible to their owner but are hidden from public discovery and reject new check-ins.
+
+`Parking.isListed` is independent publication state. Public discovery includes only parking owned by `OWNER` or `SHOWCASE` identities when `isListed=true` and `isActive=true`. DEMO-owned parking is never public. Public responses expose a restrained showcase marker, derived availability, available spaces, occupancy, and next opening without exposing owner identity or credentials.
 
 A parking also owns its configured capacity, hourly rate, currency, location, and the vehicles and sessions associated with that facility.
 
@@ -115,7 +117,7 @@ ACTIVE --cancel----> CANCELLED
 
 Capacity is the maximum number of simultaneous `ACTIVE` sessions in a parking. ParkCore does not model individual physical spaces.
 
-Money is stored in integer cents. ParkCore 1.0 supports `USD`.
+Money is stored in integer cents. ParkCore 1.0 supports `ARS` and `USD` without exchange-rate conversion.
 
 At check-in, the session snapshots the parking's hourly rate and currency. Checkout therefore uses the terms that applied when the stay began, even if the parking configuration changes later.
 
@@ -129,7 +131,8 @@ totalAmountCents = chargedHours * hourlyRateCents
 
 ## Business rules
 
-- Only active parkings are exposed through public parking reads.
+- Public parking reads use one eligibility pipeline: eligible owner kind, listed state, active state, text search across title, neighborhood, and address, currency-safe price filtering, derived availability filtering and ordering, then pagination.
+- Public availability is ordered as `AVAILABLE`, `LIMITED`, `FULL`, and `CLOSED`; a public price range requires an explicit currency context.
 - Credential login is available only to `OWNER` identities.
 - Only an authenticated `OWNER` or unexpired `DEMO` identity may modify a parking or operate its sessions.
 - `SHOWCASE` identities cannot reach owner mutation or operation paths.

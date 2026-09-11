@@ -784,13 +784,13 @@
         ],
         "additionalProperties": false
       },
-      "ParkingListResponse": {
+      "PublicParkingListResponse": {
         "type": "object",
         "properties": {
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ParkingResponse"
+              "$ref": "#/components/schemas/PublicParkingResponse"
             }
           },
           "meta": {
@@ -845,6 +845,149 @@
         "required": [
           "data",
           "meta"
+        ],
+        "additionalProperties": false
+      },
+      "PublicParkingResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parking UUID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Parking title"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Description"
+          },
+          "image": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Image URL"
+          },
+          "neighborhood": {
+            "type": "string",
+            "description": "Neighborhood or area"
+          },
+          "address": {
+            "type": "string",
+            "description": "Address"
+          },
+          "hourlyRateCents": {
+            "type": "integer",
+            "description": "Hourly rate in integer cents"
+          },
+          "currency": {
+            "type": "string",
+            "enum": [
+              "ARS",
+              "USD"
+            ],
+            "description": "Supported currency code"
+          },
+          "capacity": {
+            "type": "integer",
+            "description": "Maximum simultaneous active vehicle stays"
+          },
+          "lat": {
+            "type": "number",
+            "description": "Latitude"
+          },
+          "lng": {
+            "type": "number",
+            "description": "Longitude"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone used for local operations"
+          },
+          "is24Hours": {
+            "type": "boolean",
+            "description": "Whether the parking is open all day"
+          },
+          "opensAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Local opening time in HH:mm"
+          },
+          "closesAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Local closing time in HH:mm"
+          },
+          "isShowcase": {
+            "type": "boolean",
+            "description": "Whether this is fictional showcase data"
+          },
+          "isOpen": {
+            "type": "boolean",
+            "description": "Whether the facility is open now"
+          },
+          "availabilityState": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "LIMITED",
+              "FULL",
+              "CLOSED"
+            ],
+            "description": "Derived public availability state"
+          },
+          "availableSpaces": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Current available spaces"
+          },
+          "occupancyPercent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Current occupancy"
+          },
+          "nextOpeningAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Next opening time as an ISO date-time"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "image",
+          "neighborhood",
+          "address",
+          "hourlyRateCents",
+          "currency",
+          "capacity",
+          "lat",
+          "lng",
+          "timezone",
+          "is24Hours",
+          "opensAt",
+          "closesAt",
+          "isShowcase",
+          "isOpen",
+          "availabilityState",
+          "availableSpaces",
+          "occupancyPercent",
+          "nextOpeningAt"
         ],
         "additionalProperties": false
       },
@@ -2065,11 +2208,25 @@
             "schema": {
               "type": "string",
               "minLength": 1,
-              "description": "Search term for title or address"
+              "description": "Search term for title, neighborhood, or address"
             },
             "required": false,
-            "description": "Search term for title or address",
+            "description": "Search term for title, neighborhood, or address",
             "name": "search",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ARS",
+                "USD"
+              ],
+              "description": "Currency context for public price filtering"
+            },
+            "required": false,
+            "description": "Currency context for public price filtering",
+            "name": "currency",
             "in": "query"
           },
           {
@@ -2097,12 +2254,15 @@
           {
             "schema": {
               "type": "string",
-              "format": "uuid",
-              "description": "Filter by owner ID"
+              "enum": [
+                "true",
+                "false"
+              ],
+              "description": "Return only AVAILABLE or LIMITED facilities"
             },
             "required": false,
-            "description": "Filter by owner ID",
-            "name": "ownerId",
+            "description": "Return only AVAILABLE or LIMITED facilities",
+            "name": "availableNow",
             "in": "query"
           }
         ],
@@ -2112,7 +2272,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ParkingListResponse"
+                  "$ref": "#/components/schemas/PublicParkingListResponse"
                 }
               }
             }
@@ -2195,7 +2355,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ParkingResponse"
+                  "$ref": "#/components/schemas/PublicParkingResponse"
                 }
               }
             }
