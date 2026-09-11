@@ -58,7 +58,9 @@ inside a Prisma transaction using PostgreSQL `Serializable` isolation.
 
 A partial unique database index on `(parkingId, vehicleId)` where `status = 'ACTIVE'` provides a second persistence-level guard against duplicate active sessions.
 
-Checkout and cancellation use conditional updates against `status = 'ACTIVE'`, so only one terminal transition can succeed.
+Checkout and cancellation use conditional updates against `status = 'ACTIVE'`, so only one terminal transition can succeed. Both transitions persist `endTime`; cancellation persists no amount.
+
+Vehicle lookup normalizes the plate and scopes the unique identity to `(plate, parkingId)`. Returning check-in updates only supplied stable vehicle metadata. Customer name, phone, and notes are stored on the new session and are not copied from prior visits.
 
 ## Public discovery pipeline
 
@@ -125,6 +127,7 @@ Provider-specific SDKs are not part of the application architecture; hosting con
 - **Persistence authority:** PostgreSQL constraints and transactions reinforce critical session invariants.
 - **Pricing history:** a session owns the pricing snapshot used to calculate its completed total.
 - **Terminal sessions:** completed or cancelled sessions do not transition again.
+- **Vehicle identity:** normalized plates are unique per parking, while visit-specific contact data belongs only to its session.
 
 ## Trade-offs
 

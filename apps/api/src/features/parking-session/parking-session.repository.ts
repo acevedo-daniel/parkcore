@@ -168,9 +168,10 @@ export const completeIfActive = async (
 
 export const cancelIfActive = async (id: string): Promise<ParkingSessionWithVehicle | null> => {
   return await prisma.$transaction(async (tx) => {
+    const endTime = new Date();
     const result = await tx.parkingSession.updateMany({
       where: { id, status: 'ACTIVE' },
-      data: { status: 'CANCELLED', totalAmountCents: null },
+      data: { endTime, status: 'CANCELLED', totalAmountCents: null },
     });
     if (result.count !== 1) return null;
     return await tx.parkingSession.findUniqueOrThrow({

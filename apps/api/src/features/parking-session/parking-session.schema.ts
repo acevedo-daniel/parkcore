@@ -100,10 +100,18 @@ export const parkingSessionActiveQuerySchema = z
 export const vehicleSummarySchema = z
   .strictObject({
     id: z.uuid().openapi({ description: 'Vehicle UUID' }),
-    plate: z.string().openapi({ description: 'Normalized parking-scoped plate' }),
-    type: z.enum(['CAR', 'MOTORCYCLE', 'LARGE']).openapi({ description: 'Vehicle type' }),
-    brand: z.string().nullable().openapi({ description: 'Vehicle brand' }),
-    model: z.string().nullable().openapi({ description: 'Vehicle model' }),
+    plate: z.string().openapi({ description: 'Normalized plate identity scoped to this parking' }),
+    type: z
+      .enum(['CAR', 'MOTORCYCLE', 'LARGE'])
+      .openapi({ description: 'Stable vehicle type confirmed at check-in' }),
+    brand: z
+      .string()
+      .nullable()
+      .openapi({ description: 'Stable vehicle brand confirmed at check-in' }),
+    model: z
+      .string()
+      .nullable()
+      .openapi({ description: 'Stable vehicle model confirmed at check-in' }),
   })
   .openapi('VehicleSummary');
 
@@ -111,16 +119,17 @@ export const parkingSessionResponseSchema = z
   .strictObject({
     id: z.uuid().openapi({ description: 'Parking session UUID' }),
     startTime: dateTimeSchema.openapi({ description: 'Check-in time' }),
-    endTime: dateTimeSchema.nullable().openapi({ description: 'Check-out time' }),
+    endTime: dateTimeSchema
+      .nullable()
+      .openapi({ description: 'Terminal transition time; null while the session is ACTIVE' }),
     hourlyRateCents: z.int().openapi({ description: 'Hourly rate snapshot in integer cents' }),
     currency: currencySchema.openapi({
       description: 'Supported currency snapshot',
       example: 'USD',
     }),
-    totalAmountCents: z
-      .int()
-      .nullable()
-      .openapi({ description: 'Final amount in integer cents; present after checkout' }),
+    totalAmountCents: z.int().nullable().openapi({
+      description: 'Final amount in integer cents; null while ACTIVE or after cancellation',
+    }),
     status: parkingSessionStatusSchema.openapi({ description: 'Parking session status' }),
     parkingId: z.uuid().openapi({ description: 'Parking UUID' }),
     vehicleId: z.uuid().openapi({ description: 'Vehicle UUID' }),

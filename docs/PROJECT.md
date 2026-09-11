@@ -85,7 +85,7 @@ A parking also owns its configured capacity, hourly rate, currency, location, an
 
 `Vehicle` represents stable vehicle identity within one parking.
 
-Its identity is parking-scoped: the same normalized plate may exist independently in different parking facilities. Plate normalization trims the input, uppercases it, and removes non-alphanumeric characters before identity lookup.
+Its identity is parking-scoped: the same normalized plate may exist independently in different parking facilities. Plate normalization trims the input, uppercases it, and removes non-alphanumeric characters before identity lookup. A returning check-in reuses the vehicle only within that parking and may update type, brand, or model from the values confirmed for the visit. Customer name, phone, and notes remain visit-specific and are never copied from an earlier session.
 
 Stable vehicle metadata includes type, brand, and model. A returning vehicle can reuse that identity on a later check-in.
 
@@ -112,6 +112,8 @@ ACTIVE --cancel----> CANCELLED
 ```
 
 `COMPLETED` and `CANCELLED` are terminal states.
+
+An `ACTIVE` session has no `endTime`. Both terminal transitions record the time they occur; cancellation leaves `totalAmountCents` null.
 
 ## Capacity and pricing
 
@@ -143,6 +145,7 @@ totalAmountCents = chargedHours * hourlyRateCents
 - Check-in performs capacity and duplicate-active-session validation in a serializable transaction.
 - A database-level partial unique index reinforces the one-active-session invariant for a parking/vehicle pair.
 - Checkout and cancellation transition only an `ACTIVE` session.
+- Terminal sessions retain their terminal `endTime`; cancelled sessions retain a null amount.
 - Checkout calculates from the session's stored pricing snapshot.
 - Vehicle identity is managed through the check-in workflow; there is no standalone vehicle CRUD surface.
 

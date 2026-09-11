@@ -14,6 +14,18 @@ import type {
 } from './parking-session.schema.js';
 import { toParkingSessionResponse } from './parking-session.schema.js';
 
+const isSerializationConflict = (error: unknown): boolean => {
+  if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034') {
+    return true;
+  }
+
+  if (typeof error !== 'object' || error === null || !('cause' in error)) return false;
+  const cause = error.cause;
+  return typeof cause === 'object' && cause !== null && 'originalCode' in cause
+    ? cause.originalCode === '40001'
+    : false;
+};
+
 export const checkIn = async (
   ownerId: string,
   parkingId: string,
@@ -65,7 +77,7 @@ export const checkIn = async (
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       throw new ConflictError('Vehicle is already in the parking');
     }
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034') {
+    if (isSerializationConflict(error)) {
       throw new ConflictError('Check-in conflict, try again');
     }
     throw error;

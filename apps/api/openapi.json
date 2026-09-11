@@ -272,7 +272,7 @@
               "null"
             ],
             "format": "date-time",
-            "description": "Check-out time"
+            "description": "Terminal transition time; null while the session is ACTIVE"
           },
           "hourlyRateCents": {
             "type": "integer",
@@ -292,7 +292,7 @@
               "integer",
               "null"
             ],
-            "description": "Final amount in integer cents; present after checkout"
+            "description": "Final amount in integer cents; null while ACTIVE or after cancellation"
           },
           "status": {
             "type": "string",
@@ -377,7 +377,7 @@
           },
           "plate": {
             "type": "string",
-            "description": "Normalized parking-scoped plate"
+            "description": "Normalized plate identity scoped to this parking"
           },
           "type": {
             "type": "string",
@@ -386,21 +386,21 @@
               "MOTORCYCLE",
               "LARGE"
             ],
-            "description": "Vehicle type"
+            "description": "Stable vehicle type confirmed at check-in"
           },
           "brand": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Vehicle brand"
+            "description": "Stable vehicle brand confirmed at check-in"
           },
           "model": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Vehicle model"
+            "description": "Stable vehicle model confirmed at check-in"
           }
         },
         "required": [
@@ -448,7 +448,7 @@
         "properties": {
           "plate": {
             "type": "string",
-            "description": "Vehicle license plate; normalized to uppercase alphanumeric characters",
+            "description": "Parking-scoped vehicle identity; normalized to uppercase alphanumeric characters",
             "example": "AB123CD"
           },
           "type": {
@@ -458,19 +458,19 @@
               "MOTORCYCLE",
               "LARGE"
             ],
-            "description": "Vehicle type",
+            "description": "Confirmed stable vehicle type; updates returning identity",
             "example": "CAR"
           },
           "brand": {
             "type": "string",
             "maxLength": 50,
-            "description": "Vehicle brand",
+            "description": "Confirmed stable vehicle brand; updates returning identity",
             "example": "Toyota"
           },
           "model": {
             "type": "string",
             "maxLength": 50,
-            "description": "Vehicle model",
+            "description": "Confirmed stable vehicle model; updates returning identity",
             "example": "Corolla"
           }
         },

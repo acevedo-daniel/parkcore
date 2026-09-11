@@ -166,6 +166,13 @@ describe('parking session service', () => {
         'Check-in conflict',
       );
 
+      vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockRejectedValue({
+        cause: { originalCode: '40001' },
+      });
+      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toThrow(
+        'Check-in conflict',
+      );
+
       const duplicateActiveSession = Object.assign(
         Object.create(Prisma.PrismaClientKnownRequestError.prototype),
         { code: 'P2002' },
@@ -259,12 +266,17 @@ describe('parking session service', () => {
 
     it('cancels only an ACTIVE session', async () => {
       const activeSession = buildSessionWithRelations();
-      const cancelledSession = buildSessionWithRelations({ status: 'CANCELLED' });
+      const cancelledSession = buildSessionWithRelations({
+        endTime: new Date('2026-02-21T10:00:00.000Z'),
+        status: 'CANCELLED',
+        totalAmountCents: null,
+      });
       vi.mocked(parkingSessionRepository.findById).mockResolvedValue(activeSession);
       vi.mocked(parkingSessionRepository.cancelIfActive).mockResolvedValue(cancelledSession);
 
       await expect(cancelSession('owner-1', activeSession.id)).resolves.toMatchObject({
         status: 'CANCELLED',
+        endTime: '2026-02-21T10:00:00.000Z',
         totalAmountCents: null,
       });
       expect(parkingSessionRepository.cancelIfActive).toHaveBeenCalledWith(activeSession.id);

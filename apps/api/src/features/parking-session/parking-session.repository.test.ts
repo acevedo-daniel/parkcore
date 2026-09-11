@@ -169,9 +169,12 @@ describe('parking session repository', () => {
     expect(transactionClient.parkingSession.findUniqueOrThrow).not.toHaveBeenCalled();
   });
 
-  it('cancels with one conditional ACTIVE transition', async () => {
+  it('cancels with one conditional ACTIVE transition and records the terminal time', async () => {
+    vi.useFakeTimers();
+    const endTime = new Date('2026-02-21T10:00:00.000Z');
+    vi.setSystemTime(endTime);
     const cancelledSession = {
-      ...buildParkingSession({ status: 'CANCELLED' }),
+      ...buildParkingSession({ endTime, status: 'CANCELLED', totalAmountCents: null }),
       vehicle: buildVehicle(),
     };
     transactionClient.parkingSession.updateMany.mockResolvedValue({ count: 1 });
@@ -181,7 +184,8 @@ describe('parking session repository', () => {
     expect(cancelledSession.totalAmountCents).toBeNull();
     expect(transactionClient.parkingSession.updateMany).toHaveBeenCalledWith({
       where: { id: 'session-1', status: 'ACTIVE' },
-      data: { status: 'CANCELLED', totalAmountCents: null },
+      data: { endTime, status: 'CANCELLED', totalAmountCents: null },
     });
+    vi.useRealTimers();
   });
 });

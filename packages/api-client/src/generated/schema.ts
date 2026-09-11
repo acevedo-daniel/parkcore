@@ -1588,7 +1588,7 @@ export interface components {
             startTime: string;
             /**
              * Format: date-time
-             * @description Check-out time
+             * @description Terminal transition time; null while the session is ACTIVE
              */
             endTime: string | null;
             /** @description Hourly rate snapshot in integer cents */
@@ -1599,7 +1599,7 @@ export interface components {
              * @enum {string}
              */
             currency: "ARS" | "USD";
-            /** @description Final amount in integer cents; present after checkout */
+            /** @description Final amount in integer cents; null while ACTIVE or after cancellation */
             totalAmountCents: number | null;
             /**
              * @description Parking session status
@@ -1640,16 +1640,16 @@ export interface components {
              * @description Vehicle UUID
              */
             id: string;
-            /** @description Normalized parking-scoped plate */
+            /** @description Normalized plate identity scoped to this parking */
             plate: string;
             /**
-             * @description Vehicle type
+             * @description Stable vehicle type confirmed at check-in
              * @enum {string}
              */
             type: "CAR" | "MOTORCYCLE" | "LARGE";
-            /** @description Vehicle brand */
+            /** @description Stable vehicle brand confirmed at check-in */
             brand: string | null;
-            /** @description Vehicle model */
+            /** @description Stable vehicle model confirmed at check-in */
             model: string | null;
         };
         CheckInRequest: components["schemas"]["VehicleIdentityInput"] & {
@@ -1671,23 +1671,23 @@ export interface components {
         };
         VehicleIdentityInput: {
             /**
-             * @description Vehicle license plate; normalized to uppercase alphanumeric characters
+             * @description Parking-scoped vehicle identity; normalized to uppercase alphanumeric characters
              * @example AB123CD
              */
             plate: string;
             /**
-             * @description Vehicle type
+             * @description Confirmed stable vehicle type; updates returning identity
              * @example CAR
              * @enum {string}
              */
             type?: "CAR" | "MOTORCYCLE" | "LARGE";
             /**
-             * @description Vehicle brand
+             * @description Confirmed stable vehicle brand; updates returning identity
              * @example Toyota
              */
             brand?: string;
             /**
-             * @description Vehicle model
+             * @description Confirmed stable vehicle model; updates returning identity
              * @example Corolla
              */
             model?: string;

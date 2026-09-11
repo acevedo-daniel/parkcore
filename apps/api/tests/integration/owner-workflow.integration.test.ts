@@ -172,10 +172,54 @@ describe('owner workflow integration', () => {
     });
     expect(completed.endTime).toMatch(/^\d{4}-\d{2}-\d{2}T/);
 
+    const returningCheckInResponse = await request(app)
+      .post(`/parkings/${parking.id}/sessions/check-in`)
+      .set('Authorization', authorization)
+      .send({
+        plate: 'AB 123 CD',
+        brand: 'Honda',
+        model: 'Civic',
+      });
+    expect(returningCheckInResponse.status).toBe(201);
+    const returningCheckIn = returningCheckInResponse.body as unknown as SessionResponse;
+    expect(returningCheckIn).toMatchObject({
+      status: 'ACTIVE',
+      customerName: null,
+      customerPhone: null,
+      notes: null,
+      vehicle: {
+        id: checkedIn.vehicle.id,
+        plate: 'AB123CD',
+        type: 'CAR',
+        brand: 'Honda',
+        model: 'Civic',
+      },
+    });
+
+    const returningCancelResponse = await request(app)
+      .patch(`/sessions/${returningCheckIn.id}/cancel`)
+      .set('Authorization', authorization);
+    expect(returningCancelResponse.status).toBe(200);
+    expect(returningCancelResponse.body).toMatchObject({
+      status: 'CANCELLED',
+      totalAmountCents: null,
+    });
+    expect(returningCancelResponse.body.endTime).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+
+    const repeatedCancelResponse = await request(app)
+      .patch(`/sessions/${returningCheckIn.id}/cancel`)
+      .set('Authorization', authorization);
+    expect(repeatedCancelResponse.status).toBe(409);
+
     const cancelResponse = await request(app)
       .patch(`/sessions/${secondCheckedIn.id}/cancel`)
       .set('Authorization', authorization);
     expect(cancelResponse.status).toBe(200);
+    expect(cancelResponse.body).toMatchObject({
+      status: 'CANCELLED',
+      totalAmountCents: null,
+    });
+    expect(cancelResponse.body.endTime).toMatch(/^\d{4}-\d{2}-\d{2}T/);
 
     const detailResponse = await request(app)
       .get(`/sessions/${checkedIn.id}`)
@@ -195,6 +239,111 @@ describe('owner workflow integration', () => {
       totalAmountCents: 1500,
       vehicle: { plate: 'AB123CD' },
     });
+  });
+
+  it('keeps returning vehicle identity scoped to its parking', async () => {
+    const suffix = randomUUID();
+    const registerResponse = await request(app)
+      .post('/auth/register')
+      .send({
+        email: `vehicle-scope-${suffix}@parkcore.test`,
+        password: 'Passw0rd!123',
+        name: 'Vehicle',
+        lastName: 'Scope',
+        timezone: 'America/Argentina/Buenos_Aires',
+      });
+    expect(registerResponse.status).toBe(201);
+    const auth = registerResponse.body as unknown as AuthResponse;
+    ownerId = auth.user.id;
+    const authorization = `Bearer ${auth.accessToken}`;
+
+    const createParking = async (title: string) => {
+      const response = await request(app)
+        .post('/parkings')
+        .set('Authorization', authorization)
+        .send({
+          title: `${title} ${suffix}`,
+          neighborhood: 'Downtown',
+          address: '123 Integration Street',
+          hourlyRateCents: 1500,
+          currency: 'USD',
+          capacity: 2,
+          lat: -34.6037,
+          lng: -58.3816,
+        });
+      expect(response.status).toBe(201);
+      return response.body as unknown as ParkingResponse;
+    };
+
+    const firstParking = await createParking('First Scope Parking');
+    const secondParking = await createParking('Second Scope Parking');
+    const firstCheckInResponse = await request(app)
+      .post(`/parkings/${firstParking.id}/sessions/check-in`)
+      .set('Authorization', authorization)
+      .send({ plate: 'ab-123-cd', brand: 'Toyota', model: 'Corolla' });
+    const secondCheckInResponse = await request(app)
+      .post(`/parkings/${secondParking.id}/sessions/check-in`)
+      .set('Authorization', authorization)
+      .send({ plate: 'AB 123 CD', brand: 'Honda', model: 'Civic' });
+
+    expect(firstCheckInResponse.status).toBe(201);
+    expect(secondCheckInResponse.status).toBe(201);
+    const firstSession = firstCheckInResponse.body as unknown as SessionResponse;
+    const secondSession = secondCheckInResponse.body as unknown as SessionResponse;
+    expect(firstSession.vehicle).toMatchObject({ plate: 'AB123CD', brand: 'Toyota' });
+    expect(secondSession.vehicle).toMatchObject({ plate: 'AB123CD', brand: 'Honda' });
+    expect(secondSession.vehicle.id).not.toBe(firstSession.vehicle.id);
+  });
+
+  it('preserves capacity when concurrent check-ins race for the last space', async () => {
+    const suffix = randomUUID();
+    const registerResponse = await request(app)
+      .post('/auth/register')
+      .send({
+        email: `concurrency-${suffix}@parkcore.test`,
+        password: 'Passw0rd!123',
+        name: 'Concurrency',
+        lastName: 'Owner',
+        timezone: 'America/Argentina/Buenos_Aires',
+      });
+    expect(registerResponse.status).toBe(201);
+    const auth = registerResponse.body as unknown as AuthResponse;
+    ownerId = auth.user.id;
+    const authorization = `Bearer ${auth.accessToken}`;
+
+    const parkingResponse = await request(app)
+      .post('/parkings')
+      .set('Authorization', authorization)
+      .send({
+        title: `Concurrency Parking ${suffix}`,
+        neighborhood: 'Downtown',
+        address: '123 Integration Street',
+        hourlyRateCents: 1500,
+        currency: 'USD',
+        capacity: 1,
+        lat: -34.6037,
+        lng: -58.3816,
+      });
+    expect(parkingResponse.status).toBe(201);
+    const parking = parkingResponse.body as unknown as ParkingResponse;
+
+    const responses = await Promise.all([
+      request(app)
+        .post(`/parkings/${parking.id}/sessions/check-in`)
+        .set('Authorization', authorization)
+        .send({ plate: 'AA-111-AA', type: 'CAR' }),
+      request(app)
+        .post(`/parkings/${parking.id}/sessions/check-in`)
+        .set('Authorization', authorization)
+        .send({ plate: 'BB-222-BB', type: 'CAR' }),
+    ]);
+
+    expect(responses.map(({ status }) => status).sort((left, right) => left - right)).toEqual([
+      201, 409,
+    ]);
+    await expect(
+      prisma.parkingSession.count({ where: { parkingId: parking.id, status: 'ACTIVE' } }),
+    ).resolves.toBe(1);
   });
 
   it('allows owner and active demo operations but blocks showcase mutations', async () => {
