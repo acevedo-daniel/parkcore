@@ -46,6 +46,9 @@ jobs:
       - name: Generate Prisma client
         run: pnpm --filter @parkcore/api prisma:generate
 
+      - name: Build API client
+        run: pnpm --filter @parkcore/api-client build
+
       - name: Run lint
         run: pnpm lint
 

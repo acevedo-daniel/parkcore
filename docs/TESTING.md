@@ -82,9 +82,9 @@ From the repository root:
 ```bash
 pnpm text:check
 pnpm format:check
+pnpm --filter @parkcore/api-client build
 pnpm lint
 pnpm typecheck
-pnpm --filter @parkcore/api-client build
 pnpm test
 pnpm test:coverage
 pnpm --filter @parkcore/web test:e2e
