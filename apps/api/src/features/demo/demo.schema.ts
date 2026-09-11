@@ -5,7 +5,7 @@ import { authResponseSchema } from '../auth/auth.schema.js';
 export const demoStatusResponseSchema = z
   .strictObject({
     available: z.boolean().openapi({
-      description: 'Whether the configured demo operator is available for one-click access',
+      description: 'Whether one-click isolated demo sandbox creation is currently available',
     }),
   })
   .openapi('DemoStatusResponse');

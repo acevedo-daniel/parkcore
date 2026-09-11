@@ -35,19 +35,24 @@ Real `.env` files are ignored by Git. Copy the examples and keep non-development
 
 `apps/api/.env` contains the local API runtime configuration.
 
-| Variable                    | Required locally | Purpose                                                                  |
-| --------------------------- | :--------------: | ------------------------------------------------------------------------ |
-| `NODE_ENV`                  |        No        | Runtime mode; local example uses `development`.                          |
-| `PORT`                      |        No        | API port; defaults to `3000`.                                            |
-| `CORS_ORIGINS`              |        No        | Allowed browser origins; local example permits the Vite origin.          |
-| `JWT_SECRET`                |       Yes        | Access-token signing secret. Use the example only for local development. |
-| `JWT_EXPIRES_IN`            |        No        | Access-token lifetime; default is `24h`.                                 |
-| `AUTH_RATE_LIMIT_MAX`       |        No        | Maximum authentication requests per rate-limit window.                   |
-| `AUTH_RATE_LIMIT_WINDOW_MS` |        No        | Authentication rate-limit window duration.                               |
-| `LOG_LEVEL`                 |        No        | Pino log level.                                                          |
-| `LOG_PRETTY`                |        No        | Enables readable local logging.                                          |
-| `ENABLE_API_DOCS`           |        No        | Controls the API reference outside the normal development behavior.      |
-| `DATABASE_URL`              |       Yes        | PostgreSQL connection used by Prisma and the API.                        |
+| Variable                             | Required locally | Purpose                                                                  |
+| ------------------------------------ | :--------------: | ------------------------------------------------------------------------ |
+| `NODE_ENV`                           |        No        | Runtime mode; local example uses `development`.                          |
+| `PORT`                               |        No        | API port; defaults to `3000`.                                            |
+| `CORS_ORIGINS`                       |        No        | Allowed browser origins; local example permits the Vite origin.          |
+| `JWT_SECRET`                         |       Yes        | Access-token signing secret. Use the example only for local development. |
+| `JWT_EXPIRES_IN`                     |        No        | Access-token lifetime; default is `24h`.                                 |
+| `AUTH_RATE_LIMIT_MAX`                |        No        | Maximum authentication requests per rate-limit window.                   |
+| `AUTH_RATE_LIMIT_WINDOW_MS`          |        No        | Authentication rate-limit window duration.                               |
+| `DEMO_CREATION_RATE_LIMIT_MAX`       |        No        | Maximum isolated demo sandbox creations per rate-limit window.           |
+| `DEMO_CREATION_RATE_LIMIT_WINDOW_MS` |        No        | Isolated demo creation rate-limit window duration.                       |
+| `DEMO_CLEANUP_BATCH_SIZE`            |        No        | Maximum expired DEMO owners removed during one demo creation.            |
+| `DEMO_RESET_RATE_LIMIT_MAX`          |        No        | Maximum demo resets per rate-limit window.                               |
+| `DEMO_RESET_RATE_LIMIT_WINDOW_MS`    |        No        | Demo reset rate-limit window duration.                                   |
+| `LOG_LEVEL`                          |        No        | Pino log level.                                                          |
+| `LOG_PRETTY`                         |        No        | Enables readable local logging.                                          |
+| `ENABLE_API_DOCS`                    |        No        | Controls the API reference outside the normal development behavior.      |
+| `DATABASE_URL`                       |       Yes        | PostgreSQL connection used by Prisma and the API.                        |
 
 The local example points `DATABASE_URL` to the PostgreSQL container started by `pnpm docker:up`.
 
@@ -75,28 +80,28 @@ Typical local URLs:
 
 ## Root commands
 
-| Task                     | Command                                        | Purpose                                                               |
-| ------------------------ | ---------------------------------------------- | --------------------------------------------------------------------- |
-| Start database           | `pnpm docker:up`                               | Start local PostgreSQL.                                               |
-| Stop database            | `pnpm docker:down`                             | Stop local PostgreSQL without deleting its volume.                    |
-| Reset database container | `pnpm docker:reset`                            | Remove the local volume and start a clean database. Destructive.      |
-| Start isolated E2E DB    | `pnpm e2e:local:db:up`                         | Start the disposable PostgreSQL service for local real-stack E2E.     |
-| Stop isolated E2E DB     | `pnpm e2e:local:db:down`                       | Remove the disposable PostgreSQL service and its data.                |
-| Prepare database         | `pnpm db:setup`                                | Generate Prisma, apply committed migrations, and seed demo data.      |
-| Refresh public showcase  | `pnpm --filter @parkcore/api showcase:refresh` | Rebase canonical SHOWCASE activity around an optional reference time. |
-| Develop                  | `pnpm dev`                                     | Run API and web in parallel.                                          |
-| Format check             | `pnpm format:check`                            | Verify repository formatting.                                         |
-| Authored text check      | `pnpm text:check`                              | Reject forbidden em dash characters in authored repository text.      |
-| Lint                     | `pnpm lint`                                    | Run lint checks across API, client, and web workspaces.               |
-| Typecheck                | `pnpm typecheck`                               | Type-check the TypeScript workspaces.                                 |
-| Test                     | `pnpm test`                                    | Run API and web test suites.                                          |
-| Coverage                 | `pnpm test:coverage`                           | Run coverage-enforced API and web tests.                              |
-| E2E                      | `pnpm --filter @parkcore/web test:e2e`         | Run the default mocked browser workflow.                              |
-| Local real-stack E2E     | `pnpm --filter @parkcore/web test:e2e:local`   | Run the owner workflow against local API and PostgreSQL.              |
-| Generate contract        | `pnpm contract:generate`                       | Regenerate OpenAPI and the TypeScript API client.                     |
-| Verify contract          | `pnpm contract:check`                          | Fail if regenerated contract artifacts differ from Git.               |
-| Build                    | `pnpm build`                                   | Generate the contract and build API, client, and web.                 |
-| Release checks           | `pnpm release:readiness`                       | Run lint, types, coverage, contract, build, and E2E checks.           |
+| Task                     | Command                                        | Purpose                                                                    |
+| ------------------------ | ---------------------------------------------- | -------------------------------------------------------------------------- |
+| Start database           | `pnpm docker:up`                               | Start local PostgreSQL.                                                    |
+| Stop database            | `pnpm docker:down`                             | Stop local PostgreSQL without deleting its volume.                         |
+| Reset database container | `pnpm docker:reset`                            | Remove the local volume and start a clean database. Destructive.           |
+| Start isolated E2E DB    | `pnpm e2e:local:db:up`                         | Start the disposable PostgreSQL service for local real-stack E2E.          |
+| Stop isolated E2E DB     | `pnpm e2e:local:db:down`                       | Remove the disposable PostgreSQL service and its data.                     |
+| Prepare database         | `pnpm db:setup`                                | Generate Prisma, apply committed migrations, and seed OWNER/SHOWCASE data. |
+| Refresh public showcase  | `pnpm --filter @parkcore/api showcase:refresh` | Rebase canonical SHOWCASE activity around an optional reference time.      |
+| Develop                  | `pnpm dev`                                     | Run API and web in parallel.                                               |
+| Format check             | `pnpm format:check`                            | Verify repository formatting.                                              |
+| Authored text check      | `pnpm text:check`                              | Reject forbidden em dash characters in authored repository text.           |
+| Lint                     | `pnpm lint`                                    | Run lint checks across API, client, and web workspaces.                    |
+| Typecheck                | `pnpm typecheck`                               | Type-check the TypeScript workspaces.                                      |
+| Test                     | `pnpm test`                                    | Run API and web test suites.                                               |
+| Coverage                 | `pnpm test:coverage`                           | Run coverage-enforced API and web tests.                                   |
+| E2E                      | `pnpm --filter @parkcore/web test:e2e`         | Run the default mocked browser workflow.                                   |
+| Local real-stack E2E     | `pnpm --filter @parkcore/web test:e2e:local`   | Run the owner workflow against local API and PostgreSQL.                   |
+| Generate contract        | `pnpm contract:generate`                       | Regenerate OpenAPI and the TypeScript API client.                          |
+| Verify contract          | `pnpm contract:check`                          | Fail if regenerated contract artifacts differ from Git.                    |
+| Build                    | `pnpm build`                                   | Generate the contract and build API, client, and web.                      |
+| Release checks           | `pnpm release:readiness`                       | Run lint, types, coverage, contract, build, and E2E checks.                |
 
 A production-style web build requires `VITE_API_URL`. For a reproducible verification checkout, use `pnpm install --frozen-lockfile`; CI uses the locked form in every job that installs dependencies.
 
@@ -137,11 +142,11 @@ Schema changes use committed forward migrations. Use Prisma development commands
 
 ## Canonical data
 
-The seed creates a named credentialed OWNER, the stable non-credentialed SHOWCASE identity, and the configured DEMO identity. Each receives the deterministic six-facility scenario with active, completed, and cancelled sessions, pricing snapshots, returning vehicles, and canonical Buenos Aires ARS data. SHOWCASE owns five listed active facilities and one paused unlisted facility; OWNER and DEMO facilities remain unlisted.
+The seed creates a named credentialed OWNER and the stable non-credentialed SHOWCASE identity. Both use the deterministic six-facility scenario with active, completed, and cancelled sessions, pricing snapshots, returning vehicles, and canonical Buenos Aires ARS data. SHOWCASE owns five listed active facilities and one paused unlisted facility; OWNER facilities remain unlisted.
 
-The seed is designed for development/demo use, not production data. It is safe to rerun for the same identities.
+The seed is designed for development/demo use, not production data. It is safe to rerun for the same identities. DEMO owners are created only by `POST /demo/login` and receive their own scenario inside the creation transaction.
 
-An optional `SEED_REFERENCE_TIME` can be used when reproducible session timestamps are needed. Run `pnpm --filter @parkcore/api showcase:refresh` to rebase only the canonical SHOWCASE records around the current time. Pass an ISO-8601 timestamp after `--`, or set `SHOWCASE_REFERENCE_TIME`, when a fixed reference time is required.
+An optional `SEED_REFERENCE_TIME` can be used when reproducible session timestamps are needed. Run `pnpm --filter @parkcore/api showcase:refresh` to rebase only the canonical SHOWCASE records around the current time. Pass an ISO-8601 timestamp after `--`, or set `SHOWCASE_REFERENCE_TIME`, when a fixed reference time is required. Demo creation uses a four-hour TTL and the bounded cleanup limit configured by `DEMO_CLEANUP_BATCH_SIZE`.
 
 ## Dependency note
 

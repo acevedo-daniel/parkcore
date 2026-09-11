@@ -24,9 +24,9 @@ export function registerDemoDocs(registry: OpenAPIRegistry): void {
     method: 'post',
     path: '/demo/login',
     tags: ['Demo'],
-    summary: 'Start a demo operator session',
+    summary: 'Create an isolated demo sandbox',
     description:
-      'Creates a session only for the configured demo operator. No credentials are accepted or returned.',
+      'Creates a new isolated four-hour DEMO sandbox and canonical operational scenario. No credentials are accepted or returned. Expired DEMO owners may be cleaned up in a bounded batch during creation.',
     responses: {
       200: {
         description: 'Demo session created',
@@ -44,7 +44,7 @@ export function registerDemoDocs(registry: OpenAPIRegistry): void {
     tags: ['Demo'],
     summary: 'Restore canonical demo data',
     description:
-      'Requires the configured demo operator session. Concurrent resets conflict and requests are rate-limited.',
+      'Requires the current active DEMO sandbox session. Concurrent resets conflict and requests are rate-limited.',
     security: [{ bearerAuth: [] }],
     responses: {
       200: {

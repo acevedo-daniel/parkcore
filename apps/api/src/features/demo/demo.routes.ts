@@ -1,11 +1,14 @@
 import { Router } from 'express';
 
-import { createAuthRateLimiter, createDemoResetRateLimiter } from '../../config/rate-limit.js';
+import {
+  createDemoCreationRateLimiter,
+  createDemoResetRateLimiter,
+} from '../../config/rate-limit.js';
 import { requireAuth, requireDemo } from '../../middlewares/auth.middleware.js';
 import * as demoController from './demo.controller.js';
 
 const demoRouter = Router();
-const demoLoginLimiter = createAuthRateLimiter('login');
+const demoLoginLimiter = createDemoCreationRateLimiter();
 
 demoRouter.get('/status', demoController.getStatus);
 demoRouter.post('/login', demoLoginLimiter, demoController.login);

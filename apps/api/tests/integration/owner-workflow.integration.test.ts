@@ -50,11 +50,16 @@ interface SessionListResponse {
 
 describe('owner workflow integration', () => {
   let ownerId: string | undefined;
+  const demoIds: string[] = [];
 
   afterEach(async () => {
     if (ownerId) {
       await prisma.user.delete({ where: { id: ownerId } });
       ownerId = undefined;
+    }
+    if (demoIds.length > 0) {
+      await prisma.user.deleteMany({ where: { id: { in: demoIds } } });
+      demoIds.length = 0;
     }
   });
 
@@ -456,23 +461,57 @@ describe('owner workflow integration', () => {
   });
 
   it('issues demo access without credentials and bounds its token to demo expiry', async () => {
-    const response = await request(app).post('/demo/login');
+    const [firstResponse, secondResponse] = await Promise.all([
+      request(app).post('/demo/login'),
+      request(app).post('/demo/login'),
+    ]);
 
-    expect(response.status).toBe(200);
-    const demo = response.body as {
+    expect(firstResponse.status).toBe(200);
+    expect(secondResponse.status).toBe(200);
+    const firstDemo = firstResponse.body as {
       accessToken: string;
       user: { demoExpiresAt: string | null; email: string | null; id: string; kind: string };
     };
-    expect(demo.user).toMatchObject({
+    const secondDemo = secondResponse.body as typeof firstDemo;
+    demoIds.push(firstDemo.user.id, secondDemo.user.id);
+    expect(firstDemo.user.id).not.toBe(secondDemo.user.id);
+    expect(firstDemo.user).toMatchObject({
       email: null,
       kind: 'DEMO',
     });
-    expect(typeof demo.user.demoExpiresAt).toBe('string');
+    expect(secondDemo.user).toMatchObject({ email: null, kind: 'DEMO' });
+    expect(typeof firstDemo.user.demoExpiresAt).toBe('string');
+    expect(typeof secondDemo.user.demoExpiresAt).toBe('string');
 
-    const payload = await verifyAccessToken(demo.accessToken);
-    expect(payload.kind).toBe('DEMO');
-    expect(payload.exp).toBeLessThanOrEqual(
-      Math.floor(new Date(demo.user.demoExpiresAt ?? '').getTime() / 1000),
+    const firstPayload = await verifyAccessToken(firstDemo.accessToken);
+    const secondPayload = await verifyAccessToken(secondDemo.accessToken);
+    expect(firstPayload.kind).toBe('DEMO');
+    expect(secondPayload.kind).toBe('DEMO');
+    expect(firstPayload.exp).toBe(
+      Math.floor(new Date(firstDemo.user.demoExpiresAt ?? '').getTime() / 1000),
     );
+    expect(secondPayload.exp).toBe(
+      Math.floor(new Date(secondDemo.user.demoExpiresAt ?? '').getTime() / 1000),
+    );
+
+    const [firstParkingCount, secondParkingCount] = await Promise.all(
+      [firstDemo.user.id, secondDemo.user.id].map((ownerId) =>
+        prisma.parking.count({ where: { ownerId } }),
+      ),
+    );
+    expect(firstParkingCount).toBe(6);
+    expect(secondParkingCount).toBe(6);
+
+    const secondParking = await prisma.parking.findFirstOrThrow({
+      where: { ownerId: secondDemo.user.id },
+    });
+    const crossSandboxMutation = await request(app)
+      .patch(`/parkings/${secondParking.id}`)
+      .set('Authorization', `Bearer ${firstDemo.accessToken}`)
+      .send({ title: 'Should remain isolated' });
+    expect(crossSandboxMutation.status).toBe(403);
+    await expect(request(app).get(`/parkings/${secondParking.id}`)).resolves.toMatchObject({
+      status: 404,
+    });
   });
 });

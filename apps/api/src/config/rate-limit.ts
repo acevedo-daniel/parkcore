@@ -24,3 +24,13 @@ export function createDemoResetRateLimiter() {
     message: buildAuthRateLimitMessage(),
   });
 }
+
+export function createDemoCreationRateLimiter() {
+  return rateLimit({
+    windowMs: env.DEMO_CREATION_RATE_LIMIT_WINDOW_MS,
+    limit: env.DEMO_CREATION_RATE_LIMIT_MAX,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    message: buildAuthRateLimitMessage(),
+  });
+}

@@ -1428,7 +1428,7 @@
         "properties": {
           "available": {
             "type": "boolean",
-            "description": "Whether the configured demo operator is available for one-click access"
+            "description": "Whether one-click isolated demo sandbox creation is currently available"
           }
         },
         "required": [
@@ -3030,8 +3030,8 @@
         "tags": [
           "Demo"
         ],
-        "summary": "Start a demo operator session",
-        "description": "Creates a session only for the configured demo operator. No credentials are accepted or returned.",
+        "summary": "Create an isolated demo sandbox",
+        "description": "Creates a new isolated four-hour DEMO sandbox and canonical operational scenario. No credentials are accepted or returned. Expired DEMO owners may be cleaned up in a bounded batch during creation.",
         "responses": {
           "200": {
             "description": "Demo session created",
@@ -3082,7 +3082,7 @@
           "Demo"
         ],
         "summary": "Restore canonical demo data",
-        "description": "Requires the configured demo operator session. Concurrent resets conflict and requests are rate-limited.",
+        "description": "Requires the current active DEMO sandbox session. Concurrent resets conflict and requests are rate-limited.",
         "security": [
           {
             "bearerAuth": []

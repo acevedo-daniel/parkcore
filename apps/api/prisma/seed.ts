@@ -14,8 +14,7 @@ import {
 import { CANONICAL_SHOWCASE_USER_ID, refreshCanonicalShowcase } from '../src/data/showcase.js';
 
 export const DEFAULT_SEED_REFERENCE_TIME = CANONICAL_REFERENCE_TIME;
-export const DEFAULT_DEMO_USER_ID = '00000000-0000-4000-8000-000000000010';
-export const DEMO_TTL_MS = 4 * 60 * 60 * 1000;
+export const LEGACY_DEMO_USER_ID = '00000000-0000-4000-8000-000000000010';
 export const CANONICAL_SEED_EXPECTATIONS = {
   ...CANONICAL_SCENARIO_EXPECTATIONS,
   totalSessions: 419,
@@ -56,13 +55,15 @@ async function main(): Promise<void> {
   const adapter = new PrismaPg({ connectionString: databaseUrl });
   const prisma = new PrismaClient({ adapter });
   const ownerEmail = process.env.SEED_OWNER_EMAIL ?? 'owner@parkcore.dev';
-  const demoUserId = process.env.DEMO_USER_ID ?? DEFAULT_DEMO_USER_ID;
   const ownerPassword = process.env.SEED_OWNER_PASSWORD ?? randomBytes(32).toString('base64url');
   const referenceTime = getReferenceTime();
   const passwordHash = await argon2.hash(ownerPassword);
-  const demoExpiresAt = new Date(Date.now() + DEMO_TTL_MS);
 
-  const { owner, demo } = await prisma.$transaction(async (transaction) => {
+  const owner = await prisma.$transaction(async (transaction) => {
+    await transaction.user.deleteMany({
+      where: { id: LEGACY_DEMO_USER_ID, kind: 'DEMO' },
+    });
+
     const owner = await transaction.user.upsert({
       where: { email: ownerEmail },
       update: {
@@ -86,35 +87,9 @@ async function main(): Promise<void> {
     });
 
     await restoreCanonicalDemoData(transaction, owner.id, referenceTime);
-
-    const demo = await transaction.user.upsert({
-      where: { id: demoUserId },
-      update: {
-        email: null,
-        passwordHash: null,
-        kind: 'DEMO',
-        name: 'Demo',
-        lastName: 'Operator',
-        phone: null,
-        photoUrl: null,
-        timezone: CANONICAL_TIMEZONE,
-        demoExpiresAt,
-      },
-      create: {
-        id: demoUserId,
-        email: null,
-        passwordHash: null,
-        kind: 'DEMO',
-        name: 'Demo',
-        lastName: 'Operator',
-        timezone: CANONICAL_TIMEZONE,
-        demoExpiresAt,
-      },
-    });
-    await restoreCanonicalDemoData(transaction, demo.id, referenceTime);
     await refreshCanonicalShowcase(transaction, referenceTime);
 
-    return { owner, demo };
+    return owner;
   });
 
   const [
@@ -125,8 +100,6 @@ async function main(): Promise<void> {
     completedSessions,
     cancelledSessions,
     oldestSession,
-    demoParkingCount,
-    demoSessionCount,
     showcaseParkingCount,
     showcaseListedActiveCount,
     showcasePausedUnlistedCount,
@@ -148,8 +121,6 @@ async function main(): Promise<void> {
       orderBy: { startTime: 'asc' },
       select: { startTime: true },
     }),
-    prisma.parking.count({ where: { ownerId: demo.id } }),
-    prisma.parkingSession.count({ where: { parking: { ownerId: demo.id } } }),
     prisma.parking.count({ where: { ownerId: CANONICAL_SHOWCASE_USER_ID } }),
     prisma.parking.count({
       where: { ownerId: CANONICAL_SHOWCASE_USER_ID, isActive: true, isListed: true },
@@ -176,14 +147,12 @@ async function main(): Promise<void> {
     oldestSession === null ||
     oldestSession.startTime < oldestAllowed ||
     oldestSession.startTime > newestAllowed ||
-    demoParkingCount !== CANONICAL_SEED_EXPECTATIONS.facilities ||
-    demoSessionCount !== CANONICAL_SEED_EXPECTATIONS.totalSessions ||
     showcaseParkingCount !== CANONICAL_SEED_EXPECTATIONS.facilities ||
     showcaseListedActiveCount !== CANONICAL_SEED_EXPECTATIONS.listedActiveFacilities ||
     showcasePausedUnlistedCount !== CANONICAL_SEED_EXPECTATIONS.pausedUnlistedFacilities
   ) {
     throw new Error(
-      `Canonical seed assertions failed: facilities=${String(parkingCount)}, vehicles=${String(vehicleCount)}, sessions=${String(sessionCount)}, active=${String(activeSessions)}, completed=${String(completedSessions)}, cancelled=${String(cancelledSessions)}, oldest=${oldestSessionIso}, demoFacilities=${String(demoParkingCount)}, demoSessions=${String(demoSessionCount)}, showcaseFacilities=${String(showcaseParkingCount)}, showcaseListedActive=${String(showcaseListedActiveCount)}, showcasePausedUnlisted=${String(showcasePausedUnlistedCount)}, currency=${CANONICAL_CURRENCY}`,
+      `Canonical seed assertions failed: facilities=${String(parkingCount)}, vehicles=${String(vehicleCount)}, sessions=${String(sessionCount)}, active=${String(activeSessions)}, completed=${String(completedSessions)}, cancelled=${String(cancelledSessions)}, oldest=${oldestSessionIso}, showcaseFacilities=${String(showcaseParkingCount)}, showcaseListedActive=${String(showcaseListedActiveCount)}, showcasePausedUnlisted=${String(showcasePausedUnlistedCount)}, currency=${CANONICAL_CURRENCY}`,
     );
   }
 
