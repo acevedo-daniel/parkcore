@@ -1478,7 +1478,7 @@ export interface components {
              * Format: email
              * @description User email address
              */
-            email: string;
+            email: string | null;
             /** @description First name */
             name: string | null;
             /** @description Last name */
@@ -1555,7 +1555,7 @@ export interface components {
              * @example USD
              * @enum {string}
              */
-            currency: "USD";
+            currency: "ARS" | "USD";
             /** @description Final amount in integer cents; present after checkout */
             totalAmountCents: number | null;
             /**
@@ -1704,7 +1704,7 @@ export interface components {
              * @description Supported currency code
              * @enum {string}
              */
-            currency: "USD";
+            currency: "ARS" | "USD";
             /** @description Maximum simultaneous active vehicle stays */
             capacity: number;
             /** @description Latitude */
@@ -1758,7 +1758,7 @@ export interface components {
              * @example USD
              * @enum {string}
              */
-            currency: "USD";
+            currency: "ARS" | "USD";
             /**
              * @description Maximum simultaneous active vehicle stays
              * @example 100
@@ -1839,7 +1839,7 @@ export interface components {
              * @example USD
              * @enum {string}
              */
-            currency?: "USD";
+            currency?: "ARS" | "USD";
             /**
              * @description Maximum simultaneous active vehicle stays
              * @example 100
@@ -1865,7 +1865,7 @@ export interface components {
             completedToday: number;
             revenueTodayCents: number;
             /** @enum {string} */
-            currency: "USD";
+            currency: "ARS" | "USD";
             facilities: components["schemas"]["FacilityAnalytics"][];
         };
         FacilityAnalytics: {
@@ -1892,12 +1892,12 @@ export interface components {
              * @description Revenue currency
              * @enum {string}
              */
-            currency: "USD";
+            currency: "ARS" | "USD";
         };
         AnalyticsRevenueResponse: {
             days: 7 | 30;
             /** @enum {string} */
-            currency: "USD";
+            currency: "ARS" | "USD";
             data: {
                 /** Format: date */
                 date: string;

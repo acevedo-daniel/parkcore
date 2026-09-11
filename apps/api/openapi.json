@@ -86,7 +86,10 @@
             "description": "User UUID"
           },
           "email": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "email",
             "description": "User email address"
           },
@@ -239,6 +242,7 @@
           "currency": {
             "type": "string",
             "enum": [
+              "ARS",
               "USD"
             ],
             "description": "Supported currency snapshot",
@@ -537,6 +541,7 @@
           "currency": {
             "type": "string",
             "enum": [
+              "ARS",
               "USD"
             ],
             "description": "Supported currency code"
@@ -628,6 +633,7 @@
           "currency": {
             "type": "string",
             "enum": [
+              "ARS",
               "USD"
             ],
             "description": "Supported currency code",
@@ -766,6 +772,7 @@
           "currency": {
             "type": "string",
             "enum": [
+              "ARS",
               "USD"
             ],
             "description": "Supported currency code",
@@ -825,6 +832,7 @@
           "currency": {
             "type": "string",
             "enum": [
+              "ARS",
               "USD"
             ]
           },
@@ -891,6 +899,7 @@
           "currency": {
             "type": "string",
             "enum": [
+              "ARS",
               "USD"
             ],
             "description": "Revenue currency"
@@ -931,6 +940,7 @@
           "currency": {
             "type": "string",
             "enum": [
+              "ARS",
               "USD"
             ]
           },

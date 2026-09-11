@@ -40,7 +40,7 @@ export const updateProfileSchema = z
 export const userResponseSchema = z
   .strictObject({
     id: z.uuid().openapi({ description: 'User UUID' }),
-    email: z.email().openapi({ description: 'User email address' }),
+    email: z.email().nullable().openapi({ description: 'User email address' }),
     name: z.string().nullable().openapi({ description: 'First name' }),
     lastName: z.string().nullable().openapi({ description: 'Last name' }),
     phone: z.string().nullable().openapi({ description: 'Phone number' }),

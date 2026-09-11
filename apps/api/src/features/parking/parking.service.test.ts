@@ -42,6 +42,7 @@ describe('parking.service', () => {
     const result = await create('owner-1', createDto);
 
     expect(parkingRepository.create).toHaveBeenCalledWith({
+      neighborhood: 'Unspecified',
       ...createDto,
       owner: { connect: { id: 'owner-1' } },
     });

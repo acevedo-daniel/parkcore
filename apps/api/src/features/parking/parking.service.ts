@@ -12,6 +12,7 @@ import {
 
 export const create = async (ownerId: string, dto: CreateParking): Promise<ParkingResponse> => {
   const data: Prisma.ParkingCreateInput = {
+    neighborhood: 'Unspecified',
     ...dto,
     owner: { connect: { id: ownerId } },
   };

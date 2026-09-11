@@ -29,7 +29,7 @@ export async function login(): Promise<DemoLoginResponse> {
 
 export async function reset(userId: string): Promise<DemoResetResponse> {
   const user = await userRepository.findById(userId);
-  if (!user || !isDemoOwner(user.email)) {
+  if (!user?.email || !isDemoOwner(user.email)) {
     logger.warn({ userId }, 'Rejected demo reset request');
     throw new ForbiddenError('Demo reset is not available for this account');
   }

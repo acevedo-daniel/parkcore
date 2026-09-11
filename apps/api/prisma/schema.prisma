@@ -8,16 +8,21 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  passwordHash String
-  name         String?
-  lastName     String?
-  phone        String?
-  photoUrl     String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  parkings     Parking[] @relation("ParkingOwner")
+  id            String    @id @default(uuid())
+  email         String?   @unique
+  passwordHash  String?
+  kind          UserKind  @default(OWNER)
+  name          String?
+  lastName      String?
+  phone         String?
+  photoUrl      String?
+  timezone      String    @default("America/Argentina/Buenos_Aires")
+  demoExpiresAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  parkings      Parking[] @relation("ParkingOwner")
+
+  @@index([kind])
 }
 
 model Vehicle {
@@ -41,6 +46,7 @@ model Parking {
   title           String
   description     String?
   image           String?
+  neighborhood    String
   address         String
   hourlyRateCents Int
   currency        Currency
@@ -48,6 +54,11 @@ model Parking {
   lat             Float
   lng             Float
   isActive        Boolean          @default(true)
+  isListed        Boolean          @default(false)
+  timezone        String           @default("America/Argentina/Buenos_Aires")
+  is24Hours       Boolean          @default(true)
+  opensAt         String?
+  closesAt        String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   ownerId         String
@@ -56,6 +67,8 @@ model Parking {
   vehicles        Vehicle[]
 
   @@index([ownerId])
+  @@index([ownerId, isListed, isActive])
+  @@index([isListed, isActive])
 }
 
 model ParkingSession {
@@ -86,6 +99,12 @@ enum VehicleType {
   LARGE
 }
 
+enum UserKind {
+  OWNER
+  DEMO
+  SHOWCASE
+}
+
 enum ParkingSessionStatus {
   ACTIVE
   COMPLETED
@@ -93,5 +112,6 @@ enum ParkingSessionStatus {
 }
 
 enum Currency {
+  ARS
   USD
 }

@@ -47,7 +47,7 @@ export const register = async (dto: Register): Promise<AuthResponse> => {
 
 export const login = async (dto: Login): Promise<AuthResponse> => {
   const user = await userRepository.findByEmail(dto.email);
-  if (!user) {
+  if (!user?.passwordHash) {
     throw new UnauthorizedError('Invalid email or password');
   }
 

@@ -24,15 +24,21 @@ interface DemoSession {
 interface DemoParking {
   address: string;
   capacity: number;
-  currency: 'USD';
+  currency: 'ARS' | 'USD';
   description: string;
   hourlyRateCents: number;
   image: string | null;
   isActive: boolean;
+  is24Hours: boolean;
+  isListed: boolean;
   lat: number;
   lng: number;
+  neighborhood: string;
+  opensAt: string | null;
+  closesAt: string | null;
   sessions: DemoSession[];
   title: string;
+  timezone: string;
 }
 
 export const DEFAULT_SEED_REFERENCE_TIME = '2026-01-15T12:00:00.000Z';
@@ -65,6 +71,7 @@ const demoParkings: DemoParking[] = [
     title: 'Central Parking Demo',
     description: 'A compact downtown facility for short stays and daily operations.',
     address: '101 Market Avenue, Northbridge',
+    neighborhood: 'Downtown',
     image: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a',
     hourlyRateCents: 1200,
     currency: 'USD',
@@ -72,6 +79,11 @@ const demoParkings: DemoParking[] = [
     lat: 40.7128,
     lng: -74.006,
     isActive: true,
+    isListed: false,
+    timezone: 'America/Argentina/Buenos_Aires',
+    is24Hours: true,
+    opensAt: null,
+    closesAt: null,
     sessions: [
       {
         plate: 'AB123CD',
@@ -149,6 +161,7 @@ const demoParkings: DemoParking[] = [
     title: 'Harbor Street Garage',
     description: 'A covered neighborhood garage with a steady commuter flow.',
     address: '18 Harbor Street, Northbridge',
+    neighborhood: 'Harbor',
     image: null,
     hourlyRateCents: 1800,
     currency: 'USD',
@@ -156,6 +169,11 @@ const demoParkings: DemoParking[] = [
     lat: 40.7182,
     lng: -74.0013,
     isActive: true,
+    isListed: false,
+    timezone: 'America/Argentina/Buenos_Aires',
+    is24Hours: true,
+    opensAt: null,
+    closesAt: null,
     sessions: [
       {
         plate: 'HBR882',
@@ -197,6 +215,7 @@ const demoParkings: DemoParking[] = [
     title: 'Market District Parking',
     description: 'A high-turnover facility near the market district.',
     address: '44 Foundry Lane, Northbridge',
+    neighborhood: 'Market District',
     image: null,
     hourlyRateCents: 950,
     currency: 'USD',
@@ -204,6 +223,11 @@ const demoParkings: DemoParking[] = [
     lat: 40.7061,
     lng: -74.0117,
     isActive: true,
+    isListed: false,
+    timezone: 'America/Argentina/Buenos_Aires',
+    is24Hours: true,
+    opensAt: null,
+    closesAt: null,
     sessions: [
       {
         plate: 'MKT101',
@@ -275,6 +299,7 @@ const demoParkings: DemoParking[] = [
     title: 'North Terminal Parking',
     description: 'An inactive terminal facility retained for owner management and history.',
     address: '7 Terminal Road, Northbridge',
+    neighborhood: 'North Terminal',
     image: null,
     hourlyRateCents: 1400,
     currency: 'USD',
@@ -282,6 +307,11 @@ const demoParkings: DemoParking[] = [
     lat: 40.7281,
     lng: -74.0164,
     isActive: false,
+    isListed: false,
+    timezone: 'America/Argentina/Buenos_Aires',
+    is24Hours: true,
+    opensAt: null,
+    closesAt: null,
     sessions: [
       {
         plate: 'NTH809',
@@ -330,6 +360,7 @@ async function upsertParking(client: DatabaseClient, ownerId: string, parking: D
     title: parking.title,
     description: parking.description,
     address: parking.address,
+    neighborhood: parking.neighborhood,
     image: parking.image,
     hourlyRateCents: parking.hourlyRateCents,
     currency: parking.currency,
@@ -337,6 +368,11 @@ async function upsertParking(client: DatabaseClient, ownerId: string, parking: D
     lat: parking.lat,
     lng: parking.lng,
     isActive: parking.isActive,
+    isListed: parking.isListed,
+    timezone: parking.timezone,
+    is24Hours: parking.is24Hours,
+    opensAt: parking.opensAt,
+    closesAt: parking.closesAt,
     ownerId,
   };
 
@@ -428,16 +464,21 @@ async function main(): Promise<void> {
       where: { email: ownerEmail },
       update: {
         passwordHash,
+        kind: 'OWNER',
         name: 'Demo',
         lastName: 'Owner',
         phone: null,
         photoUrl: null,
+        timezone: 'America/Argentina/Buenos_Aires',
+        demoExpiresAt: null,
       },
       create: {
         email: ownerEmail,
         passwordHash,
+        kind: 'OWNER',
         name: 'Demo',
         lastName: 'Owner',
+        timezone: 'America/Argentina/Buenos_Aires',
       },
     });
 
@@ -472,6 +513,7 @@ async function main(): Promise<void> {
   ]);
 
   const oldestAllowed = minutesBefore(referenceTime, 30 * 1440);
+  const oldestSessionIso = oldestSession ? oldestSession.startTime.toISOString() : 'missing';
   if (
     parkingCount !== CANONICAL_SEED_EXPECTATIONS.parkings ||
     sessionCount !== CANONICAL_SEED_EXPECTATIONS.sessions ||
@@ -484,12 +526,12 @@ async function main(): Promise<void> {
     oldestSession.startTime > oldestAllowed
   ) {
     throw new Error(
-      `Canonical seed assertions failed: parkings=${String(parkingCount)}, sessions=${String(sessionCount)}, active=${String(activeSessions)}, completed=${String(completedSessions)}, cancelled=${String(cancelledSessions)}, revenue=${String(completedRevenue._sum.totalAmountCents ?? 0)}, oldest=${oldestSession?.startTime.toISOString() ?? 'missing'}`,
+      `Canonical seed assertions failed: parkings=${String(parkingCount)}, sessions=${String(sessionCount)}, active=${String(activeSessions)}, completed=${String(completedSessions)}, cancelled=${String(cancelledSessions)}, revenue=${String(completedRevenue._sum.totalAmountCents ?? 0)}, oldest=${oldestSessionIso}`,
     );
   }
 
   console.log(
-    `Seed completed for ${owner.email}: ${String(parkingCount)} parkings and ${String(sessionCount)} sessions.`,
+    `Seed completed for ${ownerEmail}: ${String(parkingCount)} parkings and ${String(sessionCount)} sessions.`,
   );
 }
 

@@ -1,4 +1,4 @@
-import { supportedCurrencies } from '../../utils/currency.js';
+import { defaultCurrency } from '../../utils/currency.js';
 import * as analyticsRepository from './analytics.repository.js';
 import type { AnalyticsFacility, AnalyticsQuery } from './analytics.schema.js';
 
@@ -79,7 +79,7 @@ export const getSummary = async (ownerId: string, now = new Date()) => {
       (sum, session) => sum + (session.totalAmountCents ?? 0),
       0,
     ),
-    currency: facilities[0]?.currency ?? supportedCurrencies[0],
+    currency: facilities[0]?.currency ?? defaultCurrency,
     facilities: facilityData,
   };
 };
@@ -105,7 +105,7 @@ export const getRevenue = async (ownerId: string, query: AnalyticsQuery, now = n
 
   return {
     days: query.days,
-    currency: supportedCurrencies[0],
+    currency: defaultCurrency,
     data: [...values].map(([date, revenueCents]) => ({ date, revenueCents })),
   };
 };
