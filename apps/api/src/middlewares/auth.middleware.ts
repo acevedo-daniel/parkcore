@@ -1,6 +1,23 @@
 import type { NextFunction, Request, Response } from 'express';
+import { decodeJwt } from 'jose';
 import { ForbiddenError, UnauthorizedError } from '../errors/index.js';
 import { verifyAccessToken } from '../features/auth/auth.jwt.js';
+import * as userRepository from '../features/user/user.repository.js';
+
+const DEMO_EXPIRED_CODE = 'DEMO_EXPIRED';
+
+const expiredDemoError = () => new UnauthorizedError('Demo access has expired', DEMO_EXPIRED_CODE);
+
+const isExpiredJwt = (error: unknown): boolean =>
+  error instanceof Error && 'code' in error && error.code === 'ERR_JWT_EXPIRED';
+
+const isDemoToken = (token: string): boolean => {
+  try {
+    return decodeJwt(token).kind === 'DEMO';
+  } catch {
+    return false;
+  }
+};
 
 export const requireAuth = async (
   req: Request,
@@ -28,12 +45,24 @@ export const requireAuth = async (
       payload.kind === 'DEMO' &&
       (!payload.demoExpiresAt || new Date(payload.demoExpiresAt).getTime() <= Date.now())
     ) {
-      next(new UnauthorizedError('Demo access has expired'));
+      next(expiredDemoError());
       return;
     }
 
+    if (payload.kind === 'DEMO') {
+      const user = await userRepository.findById(payload.sub);
+      if (user?.kind !== 'DEMO' || (user.demoExpiresAt?.getTime() ?? 0) <= Date.now()) {
+        next(expiredDemoError());
+        return;
+      }
+    }
+
     next();
-  } catch {
+  } catch (error: unknown) {
+    if (isExpiredJwt(error) && isDemoToken(token)) {
+      next(expiredDemoError());
+      return;
+    }
     next(new UnauthorizedError('Invalid or expired token'));
   }
 };

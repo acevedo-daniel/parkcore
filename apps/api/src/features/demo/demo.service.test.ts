@@ -82,6 +82,17 @@ describe('demo.service', () => {
     );
   });
 
+  it('rejects reset for an expired demo sandbox', async () => {
+    vi.mocked(userRepository.findById).mockResolvedValue(
+      demoOwner({ demoExpiresAt: new Date('2020-01-01T00:00:00.000Z') }),
+    );
+
+    await expect(reset('00000000-0000-4000-8000-000000000010')).rejects.toBeInstanceOf(
+      ForbiddenError,
+    );
+    expect(demoRepository.restoreDemoOwnerData).not.toHaveBeenCalled();
+  });
+
   it('restores canonical data for the demo owner', async () => {
     vi.mocked(userRepository.findById).mockResolvedValue(demoOwner());
     vi.mocked(demoRepository.restoreDemoOwnerData).mockResolvedValue(true);

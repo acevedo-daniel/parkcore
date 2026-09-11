@@ -46,7 +46,7 @@ Real `.env` files are ignored by Git. Copy the examples and keep non-development
 | `AUTH_RATE_LIMIT_WINDOW_MS`          |        No        | Authentication rate-limit window duration.                               |
 | `DEMO_CREATION_RATE_LIMIT_MAX`       |        No        | Maximum isolated demo sandbox creations per rate-limit window.           |
 | `DEMO_CREATION_RATE_LIMIT_WINDOW_MS` |        No        | Isolated demo creation rate-limit window duration.                       |
-| `DEMO_CLEANUP_BATCH_SIZE`            |        No        | Maximum expired DEMO owners removed during one demo creation.            |
+| `DEMO_CLEANUP_BATCH_SIZE`            |        No        | Maximum expired DEMO owners removed per cleanup operation.               |
 | `DEMO_RESET_RATE_LIMIT_MAX`          |        No        | Maximum demo resets per rate-limit window.                               |
 | `DEMO_RESET_RATE_LIMIT_WINDOW_MS`    |        No        | Demo reset rate-limit window duration.                                   |
 | `LOG_LEVEL`                          |        No        | Pino log level.                                                          |
@@ -88,6 +88,7 @@ Typical local URLs:
 | Start isolated E2E DB    | `pnpm e2e:local:db:up`                         | Start the disposable PostgreSQL service for local real-stack E2E.          |
 | Stop isolated E2E DB     | `pnpm e2e:local:db:down`                       | Remove the disposable PostgreSQL service and its data.                     |
 | Prepare database         | `pnpm db:setup`                                | Generate Prisma, apply committed migrations, and seed OWNER/SHOWCASE data. |
+| Clean expired demos      | `pnpm --filter @parkcore/api demo:cleanup`     | Remove one bounded batch of expired DEMO owners and dependent records.     |
 | Refresh public showcase  | `pnpm --filter @parkcore/api showcase:refresh` | Rebase canonical SHOWCASE activity around an optional reference time.      |
 | Develop                  | `pnpm dev`                                     | Run API and web in parallel.                                               |
 | Format check             | `pnpm format:check`                            | Verify repository formatting.                                              |
@@ -144,7 +145,7 @@ Schema changes use committed forward migrations. Use Prisma development commands
 
 The seed creates a named credentialed OWNER and the stable non-credentialed SHOWCASE identity. Both use the deterministic six-facility scenario with active, completed, and cancelled sessions, pricing snapshots, returning vehicles, and canonical Buenos Aires ARS data. SHOWCASE owns five listed active facilities and one paused unlisted facility; OWNER facilities remain unlisted.
 
-The seed is designed for development/demo use, not production data. It is safe to rerun for the same identities. DEMO owners are created only by `POST /demo/login` and receive their own scenario inside the creation transaction.
+The seed is designed for development/demo use, not production data. It is safe to rerun for the same identities. DEMO owners are created only by `POST /demo/login` and receive their own scenario inside the creation transaction. Reset preserves the original four-hour expiry. Expired DEMO owners are removed in bounded batches during demo creation or with `pnpm --filter @parkcore/api demo:cleanup`; neither path targets OWNER or SHOWCASE users. Protected requests for expired or deleted DEMO owners return `code=DEMO_EXPIRED`.
 
 An optional `SEED_REFERENCE_TIME` can be used when reproducible session timestamps are needed. Run `pnpm --filter @parkcore/api showcase:refresh` to rebase only the canonical SHOWCASE records around the current time. Pass an ISO-8601 timestamp after `--`, or set `SHOWCASE_REFERENCE_TIME`, when a fixed reference time is required. Demo creation uses a four-hour TTL and the bounded cleanup limit configured by `DEMO_CLEANUP_BATCH_SIZE`.
 

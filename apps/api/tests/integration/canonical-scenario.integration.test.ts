@@ -14,7 +14,7 @@ describe('canonical scenario persistence', () => {
       data: {
         kind: 'DEMO',
         timezone: 'America/Argentina/Buenos_Aires',
-        demoExpiresAt: new Date('2026-01-15T16:00:00.000Z'),
+        demoExpiresAt: new Date('2099-01-15T16:00:00.000Z'),
       },
     });
     demoOwnerId = demo.id;

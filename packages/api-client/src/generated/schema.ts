@@ -1503,7 +1503,7 @@ export interface paths {
                         "application/json": components["schemas"]["DemoResetResponse"];
                     };
                 };
-                /** @description Missing or invalid access token */
+                /** @description Missing, invalid, or expired demo access token */
                 401: {
                     headers: {
                         [name: string]: unknown;
@@ -1614,6 +1614,7 @@ export interface components {
             /** @enum {boolean} */
             error: true;
             message: string;
+            code?: string;
         };
         RegisterRequest: {
             /**

@@ -105,6 +105,8 @@ The web application persists the owner's access token in browser `localStorage` 
 
 Access tokens carry the authenticated identity kind. Credential login issues tokens only for `OWNER` identities. `DEMO` tokens are bounded by the demo identity expiration, while `SHOWCASE` tokens may read identity data but are rejected from parking mutation and operation paths.
 
+Each demo entry creates its own four-hour DEMO owner and canonical scenario inside one transaction. Demo reset regenerates only the authenticated DEMO owner's scenario and preserves its original expiry. Protected requests for expired or deleted DEMO subjects return `code=DEMO_EXPIRED`; the web auth provider clears its token and cached server state. Bounded opportunistic cleanup runs during creation, and the explicit `demo:cleanup` command removes only expired DEMO owners.
+
 ## Hosted topology
 
 Production keeps a small, explicit topology:

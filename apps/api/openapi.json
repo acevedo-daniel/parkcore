@@ -179,6 +179,9 @@
           },
           "message": {
             "type": "string"
+          },
+          "code": {
+            "type": "string"
           }
         },
         "required": [
@@ -3100,7 +3103,7 @@
             }
           },
           "401": {
-            "description": "Missing or invalid access token",
+            "description": "Missing, invalid, or expired demo access token",
             "content": {
               "application/json": {
                 "schema": {

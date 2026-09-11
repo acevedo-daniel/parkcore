@@ -411,14 +411,10 @@ describe('owner workflow integration', () => {
   });
 
   it('allows owner and active demo operations but blocks showcase mutations', async () => {
-    const demoToken = await signAccessToken(
-      {
-        sub: 'demo-operation-user',
-        kind: 'DEMO',
-        demoExpiresAt: new Date(Date.now() + 60_000).toISOString(),
-      },
-      { expiresAt: new Date(Date.now() + 60_000) },
-    );
+    const demoLogin = await request(app).post('/demo/login');
+    expect(demoLogin.status).toBe(200);
+    const demoToken = (demoLogin.body as AuthResponse).accessToken;
+    demoIds.push((demoLogin.body as AuthResponse).user.id);
     const showcaseToken = await signAccessToken({
       sub: 'showcase-operation-user',
       kind: 'SHOWCASE',

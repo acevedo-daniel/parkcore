@@ -51,7 +51,7 @@ export function registerDemoDocs(registry: OpenAPIRegistry): void {
         description: 'Canonical demo data restored',
         content: { 'application/json': { schema: demoResetResponseSchema } },
       },
-      401: errorResponse('Missing or invalid access token'),
+      401: errorResponse('Missing, invalid, or expired demo access token'),
       403: errorResponse('Account is not allowed to reset demo data'),
       409: errorResponse('A reset is already in progress or demo access is unavailable'),
       429: errorResponse('Too many requests'),

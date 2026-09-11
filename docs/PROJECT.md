@@ -85,6 +85,8 @@ A parking also owns its configured capacity, hourly rate, currency, location, an
 
 The canonical SHOWCASE identity is a stable, non-credentialed account created by database setup. It owns six fictional Buenos Aires facilities: five listed active facilities used by public discovery and one paused unlisted facility retained as operational proof. The `showcase:refresh` maintenance command rebases its time-dependent sessions around an optional reference time without changing facility or asset identity. SHOWCASE data is read-only through the application and is always marked as fictional demonstration data in public responses.
 
+Each demo entry creates an isolated four-hour DEMO sandbox with its own canonical facilities, vehicles, and sessions. Reset restores only the authenticated sandbox without extending its expiry. Expired or deleted DEMO access is rejected with a machine-readable `DEMO_EXPIRED` authentication error, and the browser clears the stale session so the visitor can start a new demo.
+
 ### Vehicle
 
 `Vehicle` represents stable vehicle identity within one parking.
@@ -145,6 +147,10 @@ totalAmountCents = chargedHours * hourlyRateCents
 - Only an authenticated `OWNER` or unexpired `DEMO` identity may modify a parking or operate its sessions.
 - `SHOWCASE` identities cannot reach owner mutation or operation paths.
 - Demo access tokens expire no later than the associated demo identity.
+- Each demo entry creates its own four-hour DEMO owner and canonical scenario inside one transaction.
+- Demo reset regenerates only the authenticated DEMO owner's scenario and preserves its original expiry.
+- Expired or deleted DEMO subjects are rejected with `code=DEMO_EXPIRED`.
+- Bounded opportunistic cleanup runs during demo creation, and `demo:cleanup` removes only expired DEMO owners.
 - An inactive parking cannot accept a new check-in.
 - A parking cannot exceed its configured number of concurrent active sessions.
 - The same parking/vehicle pair cannot have more than one active session.

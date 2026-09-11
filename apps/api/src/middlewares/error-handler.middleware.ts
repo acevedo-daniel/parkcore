@@ -99,6 +99,7 @@ export const errorHandler = (err: unknown, req: Request, res: Response, next: Ne
     return res.status(normalizedError.statusCode).json({
       error: true,
       message: normalizedError.message,
+      ...(normalizedError.code ? { code: normalizedError.code } : {}),
     });
   }
 

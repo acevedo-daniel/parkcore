@@ -13,6 +13,7 @@ vi.mock('../lib/logger.js', () => ({
 }));
 
 import { AppError } from '../errors/app-error.js';
+import { UnauthorizedError } from '../errors/http-errors.js';
 import { createMockRequest, createMockResponse } from '../../tests/helpers/mocks.js';
 import { errorHandler } from './error-handler.middleware.js';
 
@@ -43,6 +44,21 @@ describe('errorHandler middleware', () => {
       'Operational error',
     );
     expect(mockError).not.toHaveBeenCalled();
+  });
+
+  it('includes a machine-readable code when an operational error provides one', () => {
+    const req = createMockRequest({ path: '/users/me' });
+    const res = createMockResponse();
+    const next = vi.fn();
+
+    errorHandler(new UnauthorizedError('Demo access has expired', 'DEMO_EXPIRED'), req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({
+      error: true,
+      message: 'Demo access has expired',
+      code: 'DEMO_EXPIRED',
+    });
   });
 
   it('returns 500 and safe message for unexpected errors', () => {

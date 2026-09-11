@@ -1,14 +1,8 @@
-import { Prisma, type PrismaClient, type User } from '../../../prisma/generated/client.js';
+import { type Prisma, type PrismaClient, type User } from '../../../prisma/generated/client.js';
 import { env } from '../../config/env.js';
-import {
-  CANONICAL_REFERENCE_TIME,
-  CANONICAL_TIMEZONE,
-  restoreCanonicalScenario,
-} from '../../data/canonical-scenario.js';
+import { CANONICAL_TIMEZONE, restoreCanonicalScenario } from '../../data/canonical-scenario.js';
 import { DEMO_TTL_MS } from './demo.constants.js';
 import { prisma } from '../../config/prisma.js';
-
-const DEMO_RESET_LOCK_ID = 3948271;
 
 type DemoCreationClient = Pick<PrismaClient, 'user' | 'parking' | 'vehicle' | 'parkingSession'>;
 
@@ -55,16 +49,13 @@ export async function createDemoSandbox(): Promise<User> {
 }
 
 export async function restoreDemoOwnerData(ownerId: string): Promise<boolean> {
-  return await prisma.$transaction(
-    async (transaction) => {
-      const lock = await transaction.$queryRawUnsafe<{ acquired: boolean }[]>(
-        `SELECT pg_try_advisory_xact_lock(${String(DEMO_RESET_LOCK_ID)}) AS acquired`,
-      );
-      if (!lock[0]?.acquired) return false;
+  return await prisma.$transaction(async (transaction) => {
+    const lock = await transaction.$queryRaw<{ acquired: boolean }[]>`
+      SELECT pg_try_advisory_xact_lock(hashtextextended(${ownerId}, 0)) AS acquired
+    `;
+    if (!lock[0]?.acquired) return false;
 
-      await restoreCanonicalScenario(transaction, ownerId, new Date(CANONICAL_REFERENCE_TIME));
-      return true;
-    },
-    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
-  );
+    await restoreCanonicalScenario(transaction, ownerId, new Date());
+    return true;
+  });
 }

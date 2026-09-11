@@ -18,13 +18,13 @@ function renderRoute(element: ReactNode, path: string) {
   );
   return render(
     <AppearanceProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <QueryClientProvider client={new QueryClient()}>
+      <QueryClientProvider client={new QueryClient()}>
+        <AuthProvider>
+          <ToastProvider>
             <RouterProvider router={router} />
-          </QueryClientProvider>
-        </ToastProvider>
-      </AuthProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </AppearanceProvider>,
   );
 }

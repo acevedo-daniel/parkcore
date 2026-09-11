@@ -4,6 +4,7 @@ export const errorResponseSchema = z
   .strictObject({
     error: z.literal(true),
     message: z.string(),
+    code: z.string().optional(),
   })
   .openapi('ErrorResponse');
 
