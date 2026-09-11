@@ -17,7 +17,7 @@ From the repository root:
 ```powershell
 Copy-Item apps/api/.env.example apps/api/.env
 Copy-Item apps/web/.env.example apps/web/.env
-pnpm install
+pnpm install --frozen-lockfile
 pnpm docker:up
 pnpm db:setup
 pnpm dev
@@ -75,25 +75,29 @@ Typical local URLs:
 
 ## Root commands
 
-| Task                     | Command                                | Purpose                                                          |
-| ------------------------ | -------------------------------------- | ---------------------------------------------------------------- |
-| Start database           | `pnpm docker:up`                       | Start local PostgreSQL.                                          |
-| Stop database            | `pnpm docker:down`                     | Stop local PostgreSQL without deleting its volume.               |
-| Reset database container | `pnpm docker:reset`                    | Remove the local volume and start a clean database. Destructive. |
-| Prepare database         | `pnpm db:setup`                        | Generate Prisma, apply committed migrations, and seed demo data. |
-| Develop                  | `pnpm dev`                             | Run API and web in parallel.                                     |
-| Format check             | `pnpm format:check`                    | Verify repository formatting.                                    |
-| Lint                     | `pnpm lint`                            | Run lint checks across API, client, and web workspaces.          |
-| Typecheck                | `pnpm typecheck`                       | Type-check the TypeScript workspaces.                            |
-| Test                     | `pnpm test`                            | Run API and web test suites.                                     |
-| Coverage                 | `pnpm test:coverage`                   | Run coverage-enforced API and web tests.                         |
-| E2E                      | `pnpm --filter @parkcore/web test:e2e` | Run the default mocked browser workflow.                         |
-| Generate contract        | `pnpm contract:generate`               | Regenerate OpenAPI and the TypeScript API client.                |
-| Verify contract          | `pnpm contract:check`                  | Fail if regenerated contract artifacts differ from Git.          |
-| Build                    | `pnpm build`                           | Generate the contract and build API, client, and web.            |
-| Release checks           | `pnpm release:readiness`               | Run lint, types, coverage, contract, build, and E2E checks.      |
+| Task                     | Command                                      | Purpose                                                           |
+| ------------------------ | -------------------------------------------- | ----------------------------------------------------------------- |
+| Start database           | `pnpm docker:up`                             | Start local PostgreSQL.                                           |
+| Stop database            | `pnpm docker:down`                           | Stop local PostgreSQL without deleting its volume.                |
+| Reset database container | `pnpm docker:reset`                          | Remove the local volume and start a clean database. Destructive.  |
+| Start isolated E2E DB    | `pnpm e2e:local:db:up`                       | Start the disposable PostgreSQL service for local real-stack E2E. |
+| Stop isolated E2E DB     | `pnpm e2e:local:db:down`                     | Remove the disposable PostgreSQL service and its data.            |
+| Prepare database         | `pnpm db:setup`                              | Generate Prisma, apply committed migrations, and seed demo data.  |
+| Develop                  | `pnpm dev`                                   | Run API and web in parallel.                                      |
+| Format check             | `pnpm format:check`                          | Verify repository formatting.                                     |
+| Authored text check      | `pnpm text:check`                            | Reject forbidden em dash characters in authored repository text.  |
+| Lint                     | `pnpm lint`                                  | Run lint checks across API, client, and web workspaces.           |
+| Typecheck                | `pnpm typecheck`                             | Type-check the TypeScript workspaces.                             |
+| Test                     | `pnpm test`                                  | Run API and web test suites.                                      |
+| Coverage                 | `pnpm test:coverage`                         | Run coverage-enforced API and web tests.                          |
+| E2E                      | `pnpm --filter @parkcore/web test:e2e`       | Run the default mocked browser workflow.                          |
+| Local real-stack E2E     | `pnpm --filter @parkcore/web test:e2e:local` | Run the owner workflow against local API and PostgreSQL.          |
+| Generate contract        | `pnpm contract:generate`                     | Regenerate OpenAPI and the TypeScript API client.                 |
+| Verify contract          | `pnpm contract:check`                        | Fail if regenerated contract artifacts differ from Git.           |
+| Build                    | `pnpm build`                                 | Generate the contract and build API, client, and web.             |
+| Release checks           | `pnpm release:readiness`                     | Run lint, types, coverage, contract, build, and E2E checks.       |
 
-A production-style web build requires `VITE_API_URL`.
+A production-style web build requires `VITE_API_URL`. For a reproducible verification checkout, use `pnpm install --frozen-lockfile`; CI uses the locked form in every job that installs dependencies.
 
 ## Workspace workflow
 
@@ -124,6 +128,12 @@ Schema changes use committed forward migrations. Use Prisma development commands
 
 `pnpm docker:reset` deletes the local PostgreSQL volume. Use it only for disposable local data.
 
+## Verification troubleshooting
+
+- If the local real-stack browser workflow cannot connect to PostgreSQL, start the isolated service with `pnpm e2e:local:db:up` and confirm Docker Desktop is running. Stop it with `pnpm e2e:local:db:down` after the run.
+- If a production-style web build fails because the API URL is missing, set `VITE_API_URL` to the API base URL before running `pnpm build`. This value is browser-visible and must not contain secrets.
+- If dependency installation reports a lockfile mismatch, do not update dependencies as part of a verification run. Reconcile the manifest and lockfile in a separate change, then rerun `pnpm install --frozen-lockfile`.
+
 ## Demo seed
 
 The seed provides a coherent development/demo state around a named owner and a small set of parking facilities. It includes active, completed, and cancelled sessions and pricing snapshots so both the public and owner flows have meaningful data.
@@ -134,9 +144,9 @@ An optional `SEED_REFERENCE_TIME` can be used when reproducible session timestam
 
 ## Dependency note
 
-The root `pnpm.overrides` currently pins `deepmerge-ts` to `8.0.0` to replace a vulnerable transitive version pulled through the current Prisma dependency chain.
+The root `pnpm.overrides` pins the audited transitive dependencies `deepmerge-ts` to `8.0.0`, `fast-uri` to `3.1.7`, `mysql2` to `3.23.1`, and `qs` to `6.16.0`.
 
-Treat the override as a temporary compatibility/security measure: verify `pnpm audit --prod` and the Prisma generate/build flow before changing or removing it.
+Treat these overrides as compatibility and security measures: verify `pnpm audit --prod` and the Prisma generate/build flow before changing or removing them.
 
 ## Related documentation
 

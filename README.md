@@ -85,6 +85,7 @@ On macOS or Linux, replace `Copy-Item` with `cp`. The API starts at `http://loca
 ## Quality
 
 ```bash
+pnpm text:check
 pnpm format:check
 pnpm lint
 pnpm typecheck
@@ -95,7 +96,7 @@ pnpm contract:check
 pnpm build
 ```
 
-`pnpm build` requires `VITE_API_URL`; the local web `.env` supplies it after setup. CI runs formatting, API checks with PostgreSQL, web checks, the browser workflow, and contract verification. See [Testing](docs/TESTING.md) for test boundaries, coverage thresholds, and release verification.
+`pnpm build` requires `VITE_API_URL`; the local web `.env` supplies it after setup. CI runs quality checks, PostgreSQL-backed API checks, web tests, contract verification, a local real-stack browser workflow, a production build, and the final `CI Gate`. See [Testing](docs/TESTING.md) for test boundaries, coverage thresholds, and release verification.
 
 ## Documentation
 

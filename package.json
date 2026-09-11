@@ -25,7 +25,10 @@
   "packageManager": "pnpm@10.33.0",
   "pnpm": {
     "overrides": {
-      "deepmerge-ts": "8.0.0"
+      "deepmerge-ts": "8.0.0",
+      "fast-uri": "3.1.7",
+      "mysql2": "3.23.1",
+      "qs": "6.16.0"
     }
   },
   "scripts": {
@@ -37,6 +40,7 @@
     "test": "pnpm -r --filter @parkcore/api --filter @parkcore/web test",
     "test:coverage": "pnpm -r --filter @parkcore/api --filter @parkcore/web test:coverage",
     "lint": "pnpm -r --filter @parkcore/api --filter @parkcore/api-client --filter @parkcore/web lint",
+    "text:check": "node scripts/check-authored-text.mjs",
     "format:check": "pnpm -r --filter @parkcore/api --filter @parkcore/api-client --filter @parkcore/web format:check && prettier --check README.md docs .github docker-compose.yml package.json pnpm-workspace.yaml render.yaml vercel.json",
     "contract:generate": "pnpm --filter @parkcore/api generate:openapi && pnpm --filter @parkcore/api-client generate",
     "contract:check": "pnpm contract:generate && git diff --exit-code -- apps/api/openapi.json packages/api-client/src/generated/schema.ts",
@@ -46,6 +50,8 @@
     "docker:reset": "docker compose down -v && docker compose up -d",
     "docker:logs": "docker compose logs -f",
     "docker:ps": "docker compose ps",
+    "e2e:local:db:up": "docker compose -f docker-compose.e2e.yml up -d --wait",
+    "e2e:local:db:down": "docker compose -f docker-compose.e2e.yml down -v --remove-orphans",
     "db:setup": "pnpm --filter @parkcore/api db:setup",
     "release:readiness": "pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm contract:check && pnpm build && pnpm --filter @parkcore/web test:e2e"
   },
