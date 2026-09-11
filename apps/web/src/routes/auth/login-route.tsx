@@ -25,7 +25,7 @@ export function LoginRoute() {
         footer={<LoginFooter />}
         title={t('auth.login.title')}
       >
-        <div className="rounded-[1.75rem] bg-[#ffcc00] p-5 text-[#121417] shadow-[0_5px_0_#121417]">
+        <div className="rounded-[1.75rem] bg-accent p-5 text-accent-foreground shadow-hover">
           <div className="flex items-center gap-2 text-xs font-bold tracking-[0.1em] uppercase">
             <Sparkles aria-hidden="true" className="size-4" />
             {t('auth.login.demoEyebrow')}
@@ -33,20 +33,20 @@ export function LoginRoute() {
           <h2 className="mt-3 font-display text-xl font-extrabold tracking-[-0.03em]">
             {t('auth.login.demoTitle')}
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-[#344034]">
+          <p className="mt-2 text-sm leading-relaxed text-accent-foreground/80">
             {t('auth.login.demoDescription')}
           </p>
           <DemoLoginButton
             onSuccess={() => {
               void navigate('/app', { replace: true });
             }}
-            className="mt-5 w-full rounded-full bg-[#121417] px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-white hover:text-[#121417]"
+            className="mt-5 w-full rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary-hover"
           >
             {t('auth.login.demoAction')}
             <ArrowRight aria-hidden="true" className="ml-2 inline size-4" />
           </DemoLoginButton>
         </div>
-        <div className="mt-7 flex items-center gap-3 text-xs font-bold tracking-[0.1em] text-[#748074] uppercase before:h-px before:flex-1 before:bg-[#1d241f]/10 after:h-px after:flex-1 after:bg-[#1d241f]/10">
+        <div className="mt-7 flex items-center gap-3 text-xs font-bold tracking-[0.1em] text-foreground-muted uppercase before:h-px before:flex-1 before:bg-border-subtle after:h-px after:flex-1 after:bg-border-subtle">
           {t('auth.login.emailDivider')}
         </div>
         <LoginForm

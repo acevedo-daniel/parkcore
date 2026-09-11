@@ -34,7 +34,11 @@ describe('application shells', () => {
     renderRoute(<PublicLayout />, '/');
     expect(screen.getByRole('banner')).toBeTruthy();
     expect(screen.getByRole('navigation', { name: 'Navegación pública' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Cómo funciona' }).getAttribute('href')).toBe(
+      '/#como-funciona',
+    );
     expect(screen.getByRole('link', { name: 'Ingresar' }).getAttribute('href')).toBe('/login');
+    expect(screen.getByRole('button', { name: 'Probar demo' })).toBeTruthy();
     expect(screen.queryByRole('link', { name: 'Get started' })).toBeNull();
   });
 
@@ -45,7 +49,36 @@ describe('application shells', () => {
     await user.click(screen.getByRole('button', { name: 'Abrir navegación' }));
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByRole('navigation', { name: 'Navegación pública' })).toBeTruthy();
-    expect(within(dialog).getByRole('link', { name: 'Cocheras' })).toBeTruthy();
+    expect(
+      within(dialog)
+        .getAllByRole('link')
+        .map((link) => link.textContent),
+    ).toEqual(['Cocheras', 'Cómo funciona', 'Ingresar']);
+    expect(within(dialog).getByRole('button', { name: 'Probar demo' })).toBeTruthy();
+    expect(within(dialog).getByRole('button', { name: 'Español' })).toBeTruthy();
+    expect(within(dialog).getByRole('combobox', { name: 'Apariencia' })).toBeTruthy();
+  });
+
+  it('returns focus to the compact menu trigger after dismissal', async () => {
+    const user = userEvent.setup();
+    renderRoute(<PublicLayout />, '/');
+
+    const trigger = screen.getByRole('button', { name: 'Abrir navegación' });
+    await user.click(trigger);
+    const dialog = await screen.findByRole('dialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Cerrar navegación' }));
+
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('keeps the public shell names complete in English', () => {
+    window.localStorage.setItem('parkcore-lang', 'en-US');
+    renderRoute(<PublicLayout />, '/');
+
+    expect(screen.getByRole('navigation', { name: 'Public navigation' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'How it works' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Sign in' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Try the demo' })).toBeTruthy();
   });
 
   it('renders owner navigation without fictional product areas', () => {

@@ -121,7 +121,8 @@
     "full": "Full",
     "closed": "Closed now",
     "paused": "Paused",
-    "opensAt": "opens at {{time}}"
+    "opensAt": "opens at {{time}}",
+    "closedWithOpening": "{{status}} · opens at {{time}}"
   },
   "attention": {
     "full": "Full",
@@ -147,7 +148,171 @@
     "checkInAnother": "Check in another"
   },
   "calculator": {
-    "facility": "Where are you parking?"
+    "facility": "Where are you parking?",
+    "eyebrow": "Before you go",
+    "title": "Estimate a stay",
+    "errorTitle": "We could not load facilities",
+    "errorDescription": "The estimate needs a published rate. Try again or explore the directory.",
+    "browseAction": "Browse facilities",
+    "emptyEyebrow": "No facilities available",
+    "emptyDescription": "There is no active facility to estimate yet. You can check the directory again later.",
+    "emptyAction": "View the directory",
+    "loadingLabel": "Loading facilities",
+    "loadingMessage": "Finding active facilities…",
+    "estimatedStay": "Estimated stay",
+    "hour": "hour",
+    "hours": "hours",
+    "oneHour": "1 hour",
+    "twoHours": "2 hours",
+    "fourHours": "4 hours",
+    "eightHours": "8 hours",
+    "estimateLabel": "A simple estimate",
+    "estimateBasis": "Based on the published rate",
+    "viewFacility": "View this facility",
+    "estimateNote": "This is an estimate: confirm facility details before arriving."
+  },
+  "public": {
+    "landing": {
+      "metaDescription": "A clearer way to find, use, and run a parking facility.",
+      "metaTitle": "ParkCore | Parking, made clear",
+      "heroEyebrow": "For everyday movement",
+      "heroTitle": "Parking, under control.",
+      "heroDescription": "ParkCore brings order to a facility’s entry, payment, and history, so arriving, parking, and leaving can feel simple again.",
+      "browseAction": "Browse facilities",
+      "demoAction": "Explore the demo",
+      "heroNote": "No dependence on paper tickets. No need to make an everyday task harder.",
+      "howEyebrow": "An everyday experience",
+      "howTitle": "Parking does not need reinventing. It needs to be clear.",
+      "howDescription": "Technology should remove noise: make rates understandable, record each arrival, and keep nobody looking for a scrap of paper at the exit.",
+      "howItems": {
+        "contextTitle": "Arrive with context",
+        "contextDescription": "Location, rate, and a stay estimate before you head out.",
+        "paperTitle": "Enter without paper",
+        "paperDescription": "Your plate or QR connects the arrival to the operation.",
+        "receiptTitle": "Leave with a receipt",
+        "receiptDescription": "A clear close, with no rituals or hidden information."
+      },
+      "driverEyebrow": "For drivers",
+      "driverTitle": "Stop guessing what parking will be like.",
+      "driverDescription": "Browse facilities, understand the rate, and keep a stay receipt in one place.",
+      "driverAction": "Find a facility",
+      "operatorEyebrow": "For facility operators",
+      "operatorTitle": "Let everyday work stop depending on memory.",
+      "operatorDescription": "Every entry, payment, and exit stays visible. The operation keeps the rhythm of the facility, not a spreadsheet.",
+      "operatorAction": "See an example day",
+      "featuredEyebrow": "Near where you are going",
+      "featuredTitle": "Choose the place, not the mystery.",
+      "featuredAction": "See all facilities",
+      "operationsEyebrow": "Operations, without theatre",
+      "operationsTitle": "Three moments. One story you can follow.",
+      "operationsDescription": "The tool supports what already happens at a facility: receive a car, record a stay, and close the day with confidence.",
+      "operationSteps": {
+        "arrivalTitle": "Arrival",
+        "arrivalDescription": "A plate or QR starts a stay you can find again later.",
+        "stayTitle": "During the stay",
+        "stayDescription": "Rate and time stay connected, without extra notes to chase.",
+        "departureTitle": "Departure",
+        "departureDescription": "Closeout leaves a receipt and a record for whoever needs it."
+      },
+      "faqEyebrow": "Questions that come up at the door",
+      "faqTitle": "Better to make it clear from the start.",
+      "faq": {
+        "app": {
+          "question": "Do I need to download an app to park?",
+          "answer": "No. ParkCore works on the web and at facility entrances. You can identify your stay with your plate or a QR code."
+        },
+        "price": {
+          "question": "How do I know how much I will pay?",
+          "answer": "Each facility publishes its rate. You can estimate your stay before arriving and the receipt makes the final charge clear when you leave."
+        },
+        "ticket": {
+          "question": "What if I do not have a ticket?",
+          "answer": "Your stay is associated with your plate or chosen access method. You do not depend on a piece of paper to leave."
+        },
+        "operator": {
+          "question": "I run a facility. How can I try it?",
+          "answer": "You can enter the operator demo in one click and walk through a complete operation with example data, with no setup required."
+        }
+      },
+      "finalTitle": "Let parking become simple to use again.",
+      "finalDescription": "Enter the operator demo or find a nearby facility. Both paths start without friction.",
+      "finalDemoAction": "Try as an operator",
+      "finalBrowseAction": "Browse facilities",
+      "footerDescription": "For parking, billing, and running a facility with both feet on the ground.",
+      "footerFacilities": "Facilities",
+      "footerSignIn": "Sign in",
+      "copyright": "© {{year}} ParkCore",
+      "loadingFacilities": "Loading facilities",
+      "errorTitle": "We could not load facilities",
+      "errorDescription": "We do not hide the problem with sample data. Try again or explore the directory.",
+      "emptyEyebrow": "No facilities yet",
+      "emptyDescription": "The directory will fill in as active facilities become available.",
+      "emptyAction": "Open the directory"
+    },
+    "catalog": {
+      "metaDescription": "Browse active ParkCore parking facilities by address and hourly rate.",
+      "metaTitle": "Parkings | ParkCore",
+      "eyebrow": "Find where to leave it",
+      "title": "Facilities you can understand before you arrive.",
+      "description": "Search by area or compare rates. The important details come first, without sending you through a city of screens.",
+      "filterAction": "Filter facilities",
+      "filterDescription": "Refine the search and apply filters.",
+      "refreshing": "Refreshing parkings…",
+      "errorTitle": "We could not load the directory",
+      "errorDescription": "We could not load active parkings. We do not hide the problem with sample data. Try again in a moment.",
+      "emptyTitle": "No active parkings",
+      "emptyDescription": "Try a different address or rate range.",
+      "clearFilters": "Clear filters",
+      "results": "Parking results",
+      "pagination": "Parking catalog pagination",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {{page}} of {{totalPages}}",
+      "loading": "Loading parkings",
+      "searchLabel": "Where are you going?",
+      "searchPlaceholder": "Name, neighborhood, or address",
+      "availableNow": "Available now",
+      "applyFilters": "Apply filters",
+      "invalidRate": "Rates must be greater than 0.",
+      "invalidRange": "Minimum rate cannot exceed maximum rate.",
+      "currencyRequired": "Choose a currency for rates."
+    },
+    "detail": {
+      "metaDescription": "{{title}} is an active ParkCore parking facility at {{address}}.",
+      "metaDescriptionFallback": "View public ParkCore parking facility details.",
+      "metaTitle": "Parking details | ParkCore",
+      "directoryEyebrow": "Parking directory",
+      "notFoundTitle": "No parking here",
+      "notFoundDescription": "This parking is no longer publicly available.",
+      "errorTitle": "Unable to load parking",
+      "errorDescription": "Try loading this parking again.",
+      "retry": "Try again",
+      "back": "Return to directory",
+      "essentials": "The essentials",
+      "hourlyRate": "Hourly rate",
+      "availableSpaces": "Available spaces",
+      "spacesUnit": "vehicles",
+      "availabilityNote": "Availability is confirmed on arrival. This page shows the facility’s public information.",
+      "hours": "Hours",
+      "schedule24": "Open 24 hours",
+      "scheduleUnavailable": "Schedule unavailable",
+      "nextOpening": "Next opening",
+      "showcaseDisclosure": "Fictional parking with demonstration data for exploring ParkCore.",
+      "imageUnavailable": "Parking image not available",
+      "about": "About this facility",
+      "missingDescription": "This facility has not added a public description yet. Its rate, address, and capacity are available above.",
+      "location": "Location",
+      "directionsDescription": "Open the map to plan your route to this facility.",
+      "directionsAction": "Open {{title}} map",
+      "loading": "Loading parking"
+    },
+    "notFound": {
+      "metaDescription": "The requested ParkCore public route is unavailable.",
+      "metaTitle": "No parking here | ParkCore",
+      "title": "There is no parking here.",
+      "description": "Return to the directory and find a facility near you.",
+      "action": "Explore facilities"
+    }
   },
   "overview": {
     "attentionNeedsReview": "Some states need review.",
@@ -333,7 +498,8 @@
     "close": "Close navigation",
     "public": "Public navigation",
     "owner": "Owner navigation",
-    "ownerMobile": "Owner navigation, mobile"
+    "ownerMobile": "Owner navigation, mobile",
+    "howItWorks": "How it works"
   },
   "route": {
     "loading": "Loading route",

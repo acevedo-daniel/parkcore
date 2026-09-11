@@ -10,18 +10,17 @@ import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { getPublicParkings, type PublicParking } from '../../lib/api/public-api.js';
 import { cn } from '../../lib/cn.js';
 import { formatMoney } from '../../lib/format.js';
-import type { Locale } from '../../lib/localization.js';
+import type { Locale, MessageKey } from '../../lib/localization.js';
 
 const DURATION_OPTIONS = [
-  { hours: 1, labelEs: '1 hora', labelEn: '1 hour' },
-  { hours: 2, labelEs: '2 horas', labelEn: '2 hours' },
-  { hours: 4, labelEs: '4 horas', labelEn: '4 hours' },
-  { hours: 8, labelEs: '8 horas', labelEn: '8 hours' },
-];
+  { hours: 1, label: 'calculator.oneHour' },
+  { hours: 2, label: 'calculator.twoHours' },
+  { hours: 4, label: 'calculator.fourHours' },
+  { hours: 8, label: 'calculator.eightHours' },
+] as const satisfies readonly { hours: number; label: MessageKey }[];
 
 export function ParkingCalculatorWidget({ className }: { className?: string }) {
-  const { language, locale } = useAppearance();
-  const es = language === 'es';
+  const { locale, t } = useAppearance();
   const [selectedId, setSelectedId] = useState('');
   const [selectedHours, setSelectedHours] = useState(2);
 
@@ -44,55 +43,46 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
     >
       <div className="mb-5 flex items-start justify-between gap-4 border-b border-border-subtle pb-5">
         <div>
-          <p className="type-label text-foreground-muted">
-            {es ? 'Antes de salir' : 'Before you go'}
-          </p>
+          <p className="type-label text-foreground-muted">{t('calculator.eyebrow')}</p>
           <h2 className="mt-2 font-display text-xl font-bold tracking-[-0.03em]">
-            {es ? 'Calculá una estadía' : 'Estimate a stay'}
+            {t('calculator.title')}
           </h2>
         </div>
         <ReceiptText aria-hidden="true" className="mt-1 size-5 text-foreground" />
       </div>
 
       {parkingsQuery.isLoading ? (
-        <CalculatorLoading es={es} />
+        <CalculatorLoading />
       ) : parkingsQuery.isError ? (
         <ErrorState
           onRetry={() => {
             void parkingsQuery.refetch();
           }}
-          title={es ? 'No pudimos cargar las cocheras' : 'We could not load facilities'}
+          title={t('calculator.errorTitle')}
         >
-          {es
-            ? 'La estimación necesita una tarifa publicada. Probá de nuevo o explorá el directorio.'
-            : 'The estimate needs a published rate. Try again or explore the directory.'}
+          {t('calculator.errorDescription')}
           <Link
             className="mt-4 inline-flex text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4"
             to="/parkings"
           >
-            {es ? 'Explorar cocheras' : 'Browse facilities'}
+            {t('calculator.browseAction')}
           </Link>
         </ErrorState>
       ) : availableFacilities.length === 0 ? (
         <div className="rounded-[var(--radius-lg)] border border-dashed border-border-strong bg-surface-subtle p-5">
-          <p className="type-label text-foreground-muted">
-            {es ? 'Sin cocheras disponibles' : 'No facilities available'}
-          </p>
+          <p className="type-label text-foreground-muted">{t('calculator.emptyEyebrow')}</p>
           <p className="mt-2 text-sm leading-relaxed text-foreground-secondary">
-            {es
-              ? 'Todavía no hay una cochera activa para estimar. Podés revisar el directorio más tarde.'
-              : 'There is no active facility to estimate yet. You can check the directory again later.'}
+            {t('calculator.emptyDescription')}
           </p>
           <Link
             className="mt-4 inline-flex text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4"
             to="/parkings"
           >
-            {es ? 'Ver el directorio' : 'View the directory'}
+            {t('calculator.emptyAction')}
           </Link>
         </div>
       ) : (
         <CalculatorForm
-          es={es}
           facilities={availableFacilities}
           locale={locale}
           onFacilityChange={setSelectedId}
@@ -106,11 +96,12 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
   );
 }
 
-function CalculatorLoading({ es }: { es: boolean }) {
+function CalculatorLoading() {
+  const { t } = useAppearance();
   return (
-    <div aria-label={es ? 'Cargando cocheras' : 'Loading facilities'} aria-live="polite">
+    <div aria-label={t('calculator.loadingLabel')} aria-live="polite">
       <p className="mb-3 text-sm font-medium text-foreground-secondary">
-        {es ? 'Buscando cocheras activas…' : 'Finding active facilities…'}
+        {t('calculator.loadingMessage')}
       </p>
       <Skeleton className="h-24 rounded-[var(--radius-lg)]" />
       <Skeleton className="mt-3 h-28 rounded-[var(--radius-lg)]" />
@@ -120,7 +111,6 @@ function CalculatorLoading({ es }: { es: boolean }) {
 }
 
 interface CalculatorFormProps {
-  es: boolean;
   locale: Locale;
   facilities: {
     id: string;
@@ -141,7 +131,6 @@ interface CalculatorFormProps {
 }
 
 function CalculatorForm({
-  es,
   facilities,
   locale,
   onFacilityChange,
@@ -150,7 +139,7 @@ function CalculatorForm({
   selectedHours,
   selectedId,
 }: CalculatorFormProps) {
-  const { t } = useAppearance();
+  const { t, tPlural } = useAppearance();
   const totalCents = selectedFacility.hourlyRateCents * selectedHours;
 
   return (
@@ -183,10 +172,11 @@ function CalculatorForm({
         <div className="mb-3 flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
             <Clock aria-hidden="true" className="size-3.5" />
-            {es ? 'Estadía estimada' : 'Estimated stay'}
+            {t('calculator.estimatedStay')}
           </span>
           <span className="font-mono text-xs font-bold tabular-nums text-foreground">
-            {selectedHours} {selectedHours === 1 ? (es ? 'hora' : 'hour') : es ? 'horas' : 'hours'}
+            {selectedHours}{' '}
+            {tPlural(selectedHours, { one: 'calculator.hour', other: 'calculator.hours' })}
           </span>
         </div>
         <div className="grid grid-cols-4 gap-1.5">
@@ -204,7 +194,7 @@ function CalculatorForm({
               }}
               type="button"
             >
-              {es ? option.labelEs : option.labelEn}
+              {t(option.label)}
             </button>
           ))}
         </div>
@@ -214,10 +204,10 @@ function CalculatorForm({
         <div className="flex items-baseline justify-between border-t border-border-subtle pt-4">
           <div>
             <span className="block text-xs font-semibold text-foreground">
-              {es ? 'Presupuesto orientativo' : 'A simple estimate'}
+              {t('calculator.estimateLabel')}
             </span>
             <span className="text-[11px] text-foreground-muted">
-              {es ? 'Según tarifa publicada' : 'Based on the published rate'}
+              {t('calculator.estimateBasis')}
             </span>
           </div>
           <span className="font-display text-3xl font-bold tracking-tight tabular-nums text-foreground">
@@ -228,7 +218,7 @@ function CalculatorForm({
 
       <Button asChild className="h-12 w-full rounded-full" size="lg">
         <Link className="group" to={`/parkings/${selectedFacility.id}`}>
-          <span>{es ? 'Ver la cochera' : 'View this facility'}</span>
+          <span>{t('calculator.viewFacility')}</span>
           <ArrowRight
             aria-hidden="true"
             className="size-4 transition-transform group-hover:translate-x-1"
@@ -237,9 +227,7 @@ function CalculatorForm({
       </Button>
 
       <p className="mt-4 text-center text-[11px] leading-relaxed text-foreground-muted">
-        {es
-          ? 'Es una estimación: confirmá los detalles de la cochera antes de llegar.'
-          : 'This is an estimate: confirm facility details before arriving.'}
+        {t('calculator.estimateNote')}
       </p>
     </>
   );

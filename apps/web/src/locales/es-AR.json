@@ -121,7 +121,8 @@
     "full": "Completa",
     "closed": "Cerrada ahora",
     "paused": "Pausada",
-    "opensAt": "abre a las {{time}}"
+    "opensAt": "abre a las {{time}}",
+    "closedWithOpening": "{{status}} · abre a las {{time}}"
   },
   "attention": {
     "full": "Completa",
@@ -147,7 +148,171 @@
     "checkInAnother": "Ingresar otro"
   },
   "calculator": {
-    "facility": "¿A qué cochera vas?"
+    "facility": "¿A qué cochera vas?",
+    "eyebrow": "Antes de salir",
+    "title": "Calculá una estadía",
+    "errorTitle": "No pudimos cargar las cocheras",
+    "errorDescription": "La estimación necesita una tarifa publicada. Probá de nuevo o explorá el directorio.",
+    "browseAction": "Explorar cocheras",
+    "emptyEyebrow": "Sin cocheras disponibles",
+    "emptyDescription": "Todavía no hay una cochera activa para estimar. Podés revisar el directorio más tarde.",
+    "emptyAction": "Ver el directorio",
+    "loadingLabel": "Cargando cocheras",
+    "loadingMessage": "Buscando cocheras activas…",
+    "estimatedStay": "Estadía estimada",
+    "hour": "hora",
+    "hours": "horas",
+    "oneHour": "1 hora",
+    "twoHours": "2 horas",
+    "fourHours": "4 horas",
+    "eightHours": "8 horas",
+    "estimateLabel": "Presupuesto orientativo",
+    "estimateBasis": "Según tarifa publicada",
+    "viewFacility": "Ver la cochera",
+    "estimateNote": "Es una estimación: confirmá los detalles de la cochera antes de llegar."
+  },
+  "public": {
+    "landing": {
+      "metaDescription": "Una manera más clara de encontrar, usar y operar una cochera.",
+      "metaTitle": "ParkCore | Una cochera clara",
+      "heroEyebrow": "Para quienes se mueven todos los días",
+      "heroTitle": "Parking, bajo control.",
+      "heroDescription": "ParkCore ordena la entrada, el cobro y el historial de una cochera. Para que llegar, estacionar y salir vuelva a ser algo simple.",
+      "browseAction": "Ver cocheras",
+      "demoAction": "Recorrer la demo",
+      "heroNote": "Sin depender de tickets de papel. Sin hacer más difícil una tarea cotidiana.",
+      "howEyebrow": "Una experiencia cotidiana",
+      "howTitle": "No hace falta reinventar la cochera. Hace falta volverla clara.",
+      "howDescription": "La tecnología está para sacar ruido del camino: que la tarifa se entienda, que la entrada quede registrada y que nadie tenga que buscar un papel al salir.",
+      "howItems": {
+        "contextTitle": "Llegar con contexto",
+        "contextDescription": "Ubicación, tarifa y una estimación de estadía antes de salir.",
+        "paperTitle": "Entrar sin papel",
+        "paperDescription": "La patente o el QR conectan la llegada con la operación.",
+        "receiptTitle": "Salir con un comprobante",
+        "receiptDescription": "Un cierre claro, sin rituales ni información escondida."
+      },
+      "driverEyebrow": "Para quien maneja",
+      "driverTitle": "Dejá de adivinar cómo va a ser estacionar.",
+      "driverDescription": "Consultá las cocheras, entendé la tarifa y guardá el comprobante de una estadía en el mismo lugar.",
+      "driverAction": "Buscar una cochera",
+      "operatorEyebrow": "Para quien abre la persiana",
+      "operatorTitle": "Que el trabajo de todos los días deje de depender de la memoria.",
+      "operatorDescription": "Cada ingreso, cobro y salida queda a la vista. La operación conserva el ritmo de la cochera, no el de una planilla.",
+      "operatorAction": "Ver una jornada de ejemplo",
+      "featuredEyebrow": "Cerca de donde vas",
+      "featuredTitle": "Elegí el lugar, no el misterio.",
+      "featuredAction": "Ver todas las cocheras",
+      "operationsEyebrow": "La operación, sin teatro",
+      "operationsTitle": "Tres momentos. Una historia que se puede seguir.",
+      "operationsDescription": "La herramienta acompaña lo que ya sucede en una cochera: recibir un auto, registrar una estadía y cerrar el día con tranquilidad.",
+      "operationSteps": {
+        "arrivalTitle": "Entrada",
+        "arrivalDescription": "La patente o el QR abren una estadía que se puede ubicar después.",
+        "stayTitle": "Durante la estadía",
+        "stayDescription": "La tarifa y el tiempo quedan vinculados, sin anotar de más.",
+        "departureTitle": "Salida",
+        "departureDescription": "El cierre deja un comprobante y un registro para quien lo necesite."
+      },
+      "faqEyebrow": "Preguntas que aparecen en la puerta",
+      "faqTitle": "Mejor dejarlo claro desde el principio.",
+      "faq": {
+        "app": {
+          "question": "¿Necesito descargar una aplicación para estacionar?",
+          "answer": "No. ParkCore funciona desde la web y desde los accesos de las cocheras. Podés identificar tu estadía con la patente o un código QR."
+        },
+        "price": {
+          "question": "¿Cómo sé cuánto voy a pagar?",
+          "answer": "Cada cochera publica su tarifa. Antes de ir podés estimar la estadía y, al salir, el comprobante deja claro qué se cobró."
+        },
+        "ticket": {
+          "question": "¿Qué pasa si no tengo ticket?",
+          "answer": "La estadía queda asociada a la patente o al acceso que elegiste. No dependés de un papel para resolver tu salida."
+        },
+        "operator": {
+          "question": "Tengo una cochera, ¿cómo la pruebo?",
+          "answer": "Podés entrar a la demo de operador con un clic y recorrer una operación completa con datos de ejemplo, sin configurar nada."
+        }
+      },
+      "finalTitle": "Que la cochera vuelva a ser un lugar simple de usar.",
+      "finalDescription": "Entrá a la demo de operador o encontrá una cochera cerca. Los dos caminos empiezan sin fricción.",
+      "finalDemoAction": "Probar como operador",
+      "finalBrowseAction": "Buscar cocheras",
+      "footerDescription": "Para estacionar, cobrar y llevar una cochera con los pies en la tierra.",
+      "footerFacilities": "Cocheras",
+      "footerSignIn": "Ingresar",
+      "copyright": "© {{year}} ParkCore",
+      "loadingFacilities": "Cargando cocheras",
+      "errorTitle": "No pudimos cargar las cocheras",
+      "errorDescription": "No ocultamos el problema con datos de muestra. Probá de nuevo o explorá el directorio.",
+      "emptyEyebrow": "Todavía no hay cocheras",
+      "emptyDescription": "El directorio se va a completar cuando haya cocheras activas para publicar.",
+      "emptyAction": "Abrir el directorio"
+    },
+    "catalog": {
+      "metaDescription": "Explorá cocheras activas por zona y tarifa por hora.",
+      "metaTitle": "Cocheras | ParkCore",
+      "eyebrow": "Encontrá dónde dejarlo",
+      "title": "Cocheras que se entienden antes de llegar.",
+      "description": "Buscá por zona o compará tarifas. Los datos importantes aparecen primero, sin hacerte recorrer una ciudad de pantallas.",
+      "filterAction": "Filtrar cocheras",
+      "filterDescription": "Ajustá la búsqueda y aplicá los filtros.",
+      "refreshing": "Actualizando cocheras…",
+      "errorTitle": "No pudimos cargar el directorio",
+      "errorDescription": "No ocultamos el problema con datos de muestra. Probá actualizar las cocheras en unos instantes.",
+      "emptyTitle": "No encontramos cocheras con esos filtros.",
+      "emptyDescription": "Probá con otra zona o ampliá el rango de tarifas.",
+      "clearFilters": "Limpiar filtros",
+      "results": "Resultados de cocheras",
+      "pagination": "Paginación de cocheras",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "page": "Página {{page}} de {{totalPages}}",
+      "loading": "Cargando cocheras",
+      "searchLabel": "¿A dónde vas?",
+      "searchPlaceholder": "Nombre, barrio o dirección",
+      "availableNow": "Disponible ahora",
+      "applyFilters": "Aplicar filtros",
+      "invalidRate": "Las tarifas deben ser mayores que 0.",
+      "invalidRange": "La tarifa mínima no puede superar la máxima.",
+      "currencyRequired": "Elegí una moneda para filtrar tarifas."
+    },
+    "detail": {
+      "metaDescription": "{{title}}, cochera activa en {{address}}.",
+      "metaDescriptionFallback": "Consultá los detalles de una cochera ParkCore.",
+      "metaTitle": "Detalle de cochera | ParkCore",
+      "directoryEyebrow": "Directorio de cocheras",
+      "notFoundTitle": "Esta cochera ya no está disponible.",
+      "notFoundDescription": "Volvé al directorio para explorar las cocheras activas.",
+      "errorTitle": "No pudimos cargar esta cochera.",
+      "errorDescription": "Probá de nuevo o volvé al directorio.",
+      "retry": "Reintentar",
+      "back": "Volver a cocheras",
+      "essentials": "Lo importante",
+      "hourlyRate": "Tarifa por hora",
+      "availableSpaces": "Espacios libres",
+      "spacesUnit": "vehículos",
+      "availabilityNote": "La disponibilidad en el momento se confirma al llegar. Esta ficha muestra la información pública de la cochera.",
+      "hours": "Horario",
+      "schedule24": "Abierta las 24 horas",
+      "scheduleUnavailable": "Horario no disponible",
+      "nextOpening": "Próxima apertura",
+      "showcaseDisclosure": "Cochera ficticia con datos de demostración para explorar ParkCore.",
+      "imageUnavailable": "Imagen de la cochera no disponible",
+      "about": "Sobre esta cochera",
+      "missingDescription": "Esta cochera todavía no sumó una descripción pública. La tarifa, dirección y capacidad están disponibles arriba.",
+      "location": "Ubicación",
+      "directionsDescription": "Abrí el mapa para armar tu recorrido hasta la cochera.",
+      "directionsAction": "Abrir mapa de {{title}}",
+      "loading": "Cargando cochera"
+    },
+    "notFound": {
+      "metaDescription": "La ruta pública de ParkCore que buscás no está disponible.",
+      "metaTitle": "No hay cochera acá | ParkCore",
+      "title": "Por acá no hay cochera.",
+      "description": "Volvé al directorio y encontrá una cochera que te quede cerca.",
+      "action": "Ver cocheras"
+    }
   },
   "overview": {
     "attentionNeedsReview": "Hay estados para revisar.",
@@ -307,7 +472,7 @@
   },
   "demo": {
     "live": "Probá el ejemplo",
-    "try": "Probar la demo",
+    "try": "Probar demo",
     "opening": "Abriendo la demo…",
     "startError": "No pudimos abrir la demo. Probá de nuevo.",
     "restore": "Restaurar ejemplo",
@@ -333,7 +498,8 @@
     "close": "Cerrar navegación",
     "public": "Navegación pública",
     "owner": "Navegación de operador",
-    "ownerMobile": "Navegación de operador, móvil"
+    "ownerMobile": "Navegación de operador, móvil",
+    "howItWorks": "Cómo funciona"
   },
   "route": {
     "loading": "Cargando vista",

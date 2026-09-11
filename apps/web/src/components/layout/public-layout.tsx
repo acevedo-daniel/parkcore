@@ -18,7 +18,7 @@ function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useAppearance();
   const publicLinks = [
     { label: t('nav.parkings'), to: '/parkings' },
-    { label: t('nav.signIn'), to: '/login' },
+    { label: t('nav.howItWorks'), to: '/#como-funciona' },
   ];
   return (
     <div className="flex items-center gap-1.5">
@@ -91,6 +91,14 @@ function PublicMobileMenu() {
               <DialogPrimitive.Close asChild>
                 <Link
                   className="rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-surface-subtle"
+                  to="/#como-funciona"
+                >
+                  {t('nav.howItWorks')}
+                </Link>
+              </DialogPrimitive.Close>
+              <DialogPrimitive.Close asChild>
+                <Link
+                  className="rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-surface-subtle"
                   to="/login"
                 >
                   {t('nav.signIn')}
@@ -100,22 +108,17 @@ function PublicMobileMenu() {
           </div>
 
           <div className="flex flex-col gap-4 border-t border-border-subtle pt-6">
+            <DemoLoginButton
+              onSuccess={() => {
+                void navigate('/app', { replace: true });
+              }}
+              className="block w-full rounded-full bg-primary py-3 text-center text-xs font-bold text-primary-foreground"
+            />
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-foreground-secondary">
                 {t('appearance.languageTheme')}
               </span>
               <AppearanceControls compact />
-            </div>
-            <div className="pt-2">
-              <DemoLoginButton
-                onSuccess={() => {
-                  void navigate('/app', { replace: true });
-                }}
-                className="block w-full rounded-full bg-primary py-3 text-center text-xs font-bold text-primary-foreground"
-              />
-            </div>
-            <div className="flex items-center justify-center">
-              <span className="demo-status font-mono text-[11px]">{t('demo.live')}</span>
             </div>
           </div>
         </DialogPrimitive.Content>
@@ -156,17 +159,31 @@ export function PublicLayout() {
             </nav>
           </div>
 
-          {/* Right actions: Language, Sign in, Operator Demo pill button */}
+          {/* Right actions: language, appearance, sign in, and demo */}
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="public-header-tools hidden sm:flex items-center">
+            <div className="public-header-tools hidden md:flex items-center">
               <AppearanceControls />
             </div>
+
+            <NavLink
+              className={({ isActive }: NavLinkRenderProps) =>
+                cn(
+                  'public-nav-link hidden rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px md:inline-flex',
+                  isActive
+                    ? 'is-active bg-surface-subtle text-foreground'
+                    : 'text-foreground-secondary hover:bg-surface-subtle hover:text-foreground',
+                )
+              }
+              to="/login"
+            >
+              {t('nav.signIn')}
+            </NavLink>
 
             <DemoLoginButton
               onSuccess={() => {
                 void navigate('/app', { replace: true });
               }}
-              className="hidden rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground sm:inline-flex"
+              className="hidden rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground md:inline-flex"
             />
 
             <div className="public-mobile-nav md:hidden">

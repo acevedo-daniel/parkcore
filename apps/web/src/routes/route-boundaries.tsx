@@ -21,7 +21,7 @@ function RouteErrorBoundary({ tone }: { tone: 'owner' | 'public' }) {
       className={
         owner
           ? 'owner-page flex min-h-[55vh] items-center'
-          : 'flex min-h-[65vh] items-center bg-[#ffcc00] px-4 py-16 sm:px-6 lg:px-8'
+          : 'flex min-h-[65vh] items-center bg-accent px-4 py-16 text-accent-foreground sm:px-6 lg:px-8'
       }
       role="alert"
     >
@@ -32,17 +32,39 @@ function RouteErrorBoundary({ tone }: { tone: 'owner' | 'public' }) {
             : 'mx-auto w-full max-w-4xl'
         }
       >
-        <p className="font-mono text-xs font-bold tracking-[0.16em] text-[#121417] uppercase">
+        <p
+          className={
+            owner
+              ? 'font-mono text-xs font-bold tracking-[0.16em] text-[#121417] uppercase'
+              : 'font-mono text-xs font-bold tracking-[0.16em] uppercase'
+          }
+        >
           {notFound ? '404' : t('route.error.attention')}
         </p>
-        <h1 className="mt-5 max-w-3xl font-display text-4xl font-bold leading-[0.95] tracking-[-0.055em] text-[#121417] sm:text-6xl">
+        <h1
+          className={
+            owner
+              ? 'mt-5 max-w-3xl font-display text-4xl font-bold leading-[0.95] tracking-[-0.055em] text-[#121417] sm:text-6xl'
+              : 'mt-5 max-w-3xl font-display text-4xl font-bold leading-[0.95] tracking-[-0.055em] sm:text-6xl'
+          }
+        >
           {t(notFound ? 'route.error.notFoundTitle' : 'route.error.title')}
         </h1>
-        <p className="mt-5 max-w-xl text-base leading-relaxed text-[#34342f]">
+        <p
+          className={
+            owner
+              ? 'mt-5 max-w-xl text-base leading-relaxed text-[#34342f]'
+              : 'mt-5 max-w-xl text-base leading-relaxed text-accent-foreground/80'
+          }
+        >
           {t(notFound ? 'route.error.notFoundDescription' : 'route.error.description')}
         </p>
         <Link
-          className="mt-7 inline-flex min-h-11 items-center justify-center rounded-full bg-[#121417] px-5 py-2 text-sm font-bold text-white transition-colors hover:bg-white hover:text-[#121417]"
+          className={
+            owner
+              ? 'mt-7 inline-flex min-h-11 items-center justify-center rounded-full bg-[#121417] px-5 py-2 text-sm font-bold text-white transition-colors hover:bg-white hover:text-[#121417]'
+              : 'mt-7 inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary-hover'
+          }
           to={owner ? '/app' : '/'}
         >
           {t(owner ? 'route.error.ownerAction' : 'route.error.publicAction')}

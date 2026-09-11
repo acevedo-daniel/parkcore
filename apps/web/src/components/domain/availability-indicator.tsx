@@ -46,7 +46,9 @@ export function AvailabilityIndicator({
 
   return (
     <Badge className={className} dot variant={variantByState[state]}>
-      {nextOpening ? `${label} · ${t('availability.opensAt', { time: nextOpening })}` : label}
+      {nextOpening
+        ? t('availability.closedWithOpening', { status: label, time: nextOpening })
+        : label}
     </Badge>
   );
 }
