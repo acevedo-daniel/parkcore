@@ -39,17 +39,21 @@ export function Field({ children, error, help, htmlFor, label }: FieldProps) {
 
   return (
     <div className="field space-y-1.5">
-      <label className="field-label block text-xs font-bold text-[#121417]" htmlFor={htmlFor}>
+      <label className="field-label block text-xs font-bold text-foreground" htmlFor={htmlFor}>
         {label}
       </label>
       {control}
       {error ? (
-        <p className="field-error text-sm font-medium text-[#b42318]" id={describedBy} role="alert">
+        <p
+          className="field-error text-sm font-medium text-danger-text"
+          id={describedBy}
+          role="alert"
+        >
           {error}
         </p>
       ) : null}
       {!error && help ? (
-        <p className="field-help text-sm leading-relaxed text-[#6d695f]" id={describedBy}>
+        <p className="field-help text-sm leading-relaxed text-foreground-muted" id={describedBy}>
           {help}
         </p>
       ) : null}
@@ -61,7 +65,7 @@ export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElem
   return (
     <input
       className={cn(
-        'control parkcore-field h-11 w-full rounded-xl border border-[#121417]/12 bg-[#f5f5f5] px-3.5 text-sm font-medium text-[#121417] outline-none transition-colors placeholder:text-[#8b877d] focus:border-[#121417] focus:bg-white disabled:cursor-not-allowed disabled:opacity-60',
+        'control parkcore-field h-11 w-full rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3.5 text-sm font-medium text-foreground outline-none transition-colors placeholder:text-foreground-muted focus:border-primary focus:bg-surface focus-visible:ring-2 focus-visible:ring-focus-ring disabled:cursor-not-allowed disabled:bg-disabled-surface disabled:text-disabled-foreground disabled:opacity-100',
         className,
       )}
       {...props}
@@ -73,7 +77,7 @@ export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTex
   return (
     <textarea
       className={cn(
-        'control parkcore-field min-h-28 w-full resize-y rounded-xl border border-[#121417]/12 bg-[#f5f5f5] px-3.5 py-3 text-sm font-medium text-[#121417] outline-none transition-colors placeholder:text-[#8b877d] focus:border-[#121417] focus:bg-white disabled:cursor-not-allowed disabled:opacity-60',
+        'control parkcore-field min-h-28 w-full resize-y rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3.5 py-3 text-sm font-medium text-foreground outline-none transition-colors placeholder:text-foreground-muted focus:border-primary focus:bg-surface focus-visible:ring-2 focus-visible:ring-focus-ring disabled:cursor-not-allowed disabled:bg-disabled-surface disabled:text-disabled-foreground disabled:opacity-100',
         className,
       )}
       {...props}
@@ -85,7 +89,7 @@ export function Select({ children, className, ...props }: SelectHTMLAttributes<H
   return (
     <select
       className={cn(
-        'control parkcore-field h-11 w-full cursor-pointer rounded-xl border border-[#121417]/12 bg-[#f5f5f5] px-3.5 text-sm font-medium text-[#121417] outline-none transition-colors focus:border-[#121417] focus:bg-white disabled:cursor-not-allowed disabled:opacity-60',
+        'control parkcore-field h-11 w-full cursor-pointer rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3.5 text-sm font-medium text-foreground outline-none transition-colors focus:border-primary focus:bg-surface focus-visible:ring-2 focus-visible:ring-focus-ring disabled:cursor-not-allowed disabled:bg-disabled-surface disabled:text-disabled-foreground disabled:opacity-100',
         className,
       )}
       {...props}
@@ -103,11 +107,11 @@ export function Checkbox({ className, id, label, ...props }: CheckboxProps) {
   const checkboxId = id ?? `checkbox-${label.replaceAll(/\s+/g, '-').toLowerCase()}`;
   return (
     <label
-      className="checkbox flex cursor-pointer items-center gap-3 rounded-xl border border-[#121417]/10 bg-[#f5f5f5] px-3.5 py-3 text-sm font-semibold text-[#121417]"
+      className="checkbox flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-surface-subtle px-3.5 py-3 text-sm font-semibold text-foreground"
       htmlFor={checkboxId}
     >
       <input
-        className={cn('checkbox-control size-4 accent-[#121417]', className)}
+        className={cn('checkbox-control size-4 accent-primary', className)}
         id={checkboxId}
         type="checkbox"
         {...props}

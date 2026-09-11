@@ -16,9 +16,9 @@ const buttonVariants = cva(
         secondary:
           'parkcore-raised-action border border-border bg-surface text-foreground hover:bg-surface-hover hover:border-border-strong',
         destructive:
-          'parkcore-raised-action border border-danger bg-danger text-white hover:bg-danger/90',
+          'parkcore-raised-action border border-danger bg-danger text-danger-on-solid hover:bg-danger/90',
         danger:
-          'parkcore-raised-action border border-danger bg-danger text-white hover:bg-danger/90',
+          'parkcore-raised-action border border-danger bg-danger text-danger-on-solid hover:bg-danger/90',
         outline:
           'parkcore-raised-action border border-border bg-surface text-foreground hover:bg-surface-hover',
         ghost: 'hover:bg-surface-subtle text-foreground',

@@ -8,7 +8,8 @@ import {
   type ReactNode,
 } from 'react';
 
-type Theme = 'dark' | 'light';
+export type Theme = 'dark' | 'light';
+export type ThemePreference = 'dark' | 'light' | 'system';
 type Language = 'en' | 'es';
 
 const copy = {
@@ -28,9 +29,11 @@ const copy = {
     'nav.ownerMobile': 'Owner navigation, mobile',
     'appearance.language': 'Select language',
     'appearance.languageTheme': 'Language and theme',
+    'appearance.theme': 'Theme',
     'route.loading': 'Loading route',
-    'theme.dark': 'Switch to dark theme',
-    'theme.light': 'Switch to light theme',
+    'theme.dark': 'Dark',
+    'theme.light': 'Light',
+    'theme.system': 'System',
   },
   es: {
     'demo.live': 'Probá el ejemplo',
@@ -48,9 +51,11 @@ const copy = {
     'nav.ownerMobile': 'Navegación de operador, móvil',
     'appearance.language': 'Seleccionar idioma',
     'appearance.languageTheme': 'Idioma y tema',
+    'appearance.theme': 'Apariencia',
     'route.loading': 'Cargando vista',
-    'theme.dark': 'Cambiar a tema oscuro',
-    'theme.light': 'Cambiar a tema claro',
+    'theme.dark': 'Oscuro',
+    'theme.light': 'Claro',
+    'theme.system': 'Sistema',
   },
 } as const;
 
@@ -60,20 +65,20 @@ interface AppearanceContextValue {
   language: Language;
   locale: 'en-US' | 'es-AR';
   setLanguage: (language: Language) => void;
-  suggestTheme: (theme: Theme) => void;
+  preference: ThemePreference;
+  setThemePreference: (preference: ThemePreference) => void;
   t: (key: CopyKey) => string;
   theme: Theme;
-  toggleTheme: () => void;
 }
 
 const fallbackAppearance: AppearanceContextValue = {
   language: 'en',
   locale: 'en-US',
   setLanguage: () => undefined,
-  suggestTheme: () => undefined,
+  preference: 'system',
+  setThemePreference: () => undefined,
   t: (key) => copy.en[key],
   theme: 'light',
-  toggleTheme: () => undefined,
 };
 
 const AppearanceContext = createContext<AppearanceContextValue>(fallbackAppearance);
@@ -83,27 +88,39 @@ function getStoredValue<T extends string>(key: string, values: readonly T[]) {
   return values.includes(value as T) ? (value as T) : undefined;
 }
 
+function getSystemTheme(): Theme {
+  return typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
+}
+
 export function AppearanceProvider({ children }: { children: ReactNode }) {
-  const [hasThemePreference, setHasThemePreference] = useState(
-    () => getStoredValue('parkcore-theme', ['light', 'dark'] as const) !== undefined,
+  const [preference, setPreference] = useState<ThemePreference>(
+    () => getStoredValue('parkcore-theme', ['system', 'light', 'dark'] as const) ?? 'system',
   );
-  const [theme, setTheme] = useState<Theme>(
-    () =>
-      getStoredValue('parkcore-theme', ['light', 'dark'] as const) ??
-      (typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'),
-  );
+  const [systemTheme, setSystemTheme] = useState<Theme>(getSystemTheme);
+  const theme = preference === 'system' ? systemTheme : preference;
   const [language, setLanguageState] = useState<Language>(
     () => getStoredValue('parkcore-lang', ['es', 'en'] as const) ?? 'es',
   );
 
   useEffect(() => {
+    if (preference !== 'system' || typeof window.matchMedia !== 'function') return undefined;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (event: MediaQueryListEvent) => {
+      setSystemTheme(event.matches ? 'dark' : 'light');
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, [preference]);
+
+  useEffect(() => {
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
-    window.localStorage.setItem('parkcore-theme', theme);
-  }, [theme]);
+  }, [preference, theme]);
 
   useEffect(() => {
     document.documentElement.lang = language === 'es' ? 'es-AR' : 'en-US';
@@ -113,29 +130,22 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   const setLanguage = useCallback((nextLanguage: Language) => {
     setLanguageState(nextLanguage);
   }, []);
-  const toggleTheme = useCallback(() => {
-    setHasThemePreference(true);
-    setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'));
+  const setThemePreference = useCallback((nextPreference: ThemePreference) => {
+    setPreference(nextPreference);
+    window.localStorage.setItem('parkcore-theme', nextPreference);
   }, []);
-  const suggestTheme = useCallback(
-    (suggestedTheme: Theme) => {
-      if (hasThemePreference) return;
-      setTheme(suggestedTheme);
-    },
-    [hasThemePreference],
-  );
 
   const value = useMemo<AppearanceContextValue>(
     () => ({
       language,
       locale: language === 'es' ? 'es-AR' : 'en-US',
+      preference,
       setLanguage,
-      suggestTheme,
+      setThemePreference,
       t: (key) => copy[language][key],
       theme,
-      toggleTheme,
     }),
-    [language, setLanguage, suggestTheme, theme, toggleTheme],
+    [language, preference, setLanguage, setThemePreference, theme],
   );
 
   return <AppearanceContext.Provider value={value}>{children}</AppearanceContext.Provider>;
