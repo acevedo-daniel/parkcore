@@ -24,7 +24,7 @@ function formatBarDate(date: string, locale: Locale): string {
 }
 
 export function OwnerOverviewRoute() {
-  const { language, locale } = useAppearance();
+  const { language, locale, t } = useAppearance();
   const es = language === 'es';
   const [days, setDays] = useState<7 | 30>(7);
   const [activeBarIndex, setActiveBarIndex] = useState<number | null>(null);
@@ -67,11 +67,7 @@ export function OwnerOverviewRoute() {
   if (parkingsQuery.isLoading) return <OwnerOverviewSkeleton />;
   if (parkingsQuery.isError) {
     return (
-      <ErrorState onRetry={() => void parkingsQuery.refetch()}>
-        {es
-          ? 'No pudimos cargar las operaciones de tus cocheras.'
-          : 'We could not load your parking operations.'}
-      </ErrorState>
+      <ErrorState onRetry={() => void parkingsQuery.refetch()}>{t('api.loadParkings')}</ErrorState>
     );
   }
   if (parkings.length === 0) {
@@ -287,10 +283,7 @@ export function OwnerOverviewRoute() {
 
         <div className="p-6 sm:p-8">
           {revenueQuery.isLoading || volumeQuery.isLoading ? (
-            <div
-              className="flex h-56 items-end gap-2"
-              aria-label={es ? 'Cargando actividad' : 'Loading activity'}
-            >
+            <div className="flex h-56 items-end gap-2" aria-label={t('api.loadAnalytics')}>
               {Array.from({ length: days === 7 ? 7 : 14 }).map((_, index) => (
                 <div
                   className="flex-1 animate-pulse rounded-t bg-foreground-muted/20"
@@ -301,9 +294,7 @@ export function OwnerOverviewRoute() {
             </div>
           ) : revenueQuery.isError || volumeQuery.isError ? (
             <div className="flex h-56 items-center justify-center text-sm text-foreground-secondary">
-              {es
-                ? 'La actividad analítica no está disponible ahora.'
-                : 'Activity analytics are unavailable right now.'}
+              {t('api.loadAnalytics')}
             </div>
           ) : revenueSeries.length === 0 ? (
             <div className="flex h-56 items-center justify-center text-sm text-foreground-muted">
@@ -457,8 +448,9 @@ function SummaryValue({ label, value }: { label: string; value: string }) {
 }
 
 function OwnerOverviewSkeleton() {
+  const { t } = useAppearance();
   return (
-    <div className="space-y-10" aria-label="Loading parking operations">
+    <div className="space-y-10" aria-label={t('api.loadParkings')}>
       <Skeleton className="h-44 rounded-[var(--radius-xl)]" />
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (

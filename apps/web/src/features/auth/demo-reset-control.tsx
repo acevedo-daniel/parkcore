@@ -7,6 +7,7 @@ import { useAppearance } from '../../app/appearance-provider.js';
 import { resetDemo } from '../../lib/api/auth-api.js';
 import { Button } from '../../components/ui/button.js';
 import { Dialog } from '../../components/ui/dialog.js';
+import { localizeApiError } from '../../lib/api/api-error.js';
 import { useToast } from '../../components/ui/toast-context.js';
 
 export function DemoResetControl() {
@@ -27,7 +28,7 @@ export function DemoResetControl() {
       setOpen(false);
       void navigate('/app', { replace: true });
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t('demo.restoreError'));
+      setError(localizeApiError(reason, t, 'demo.restoreError'));
     }
   };
 

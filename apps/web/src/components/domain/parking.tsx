@@ -31,11 +31,11 @@ export function RateDisplay({
   currency,
   hourlyRateCents,
 }: Pick<Parking, 'currency' | 'hourlyRateCents'>) {
-  const { locale } = useAppearance();
+  const { locale, t } = useAppearance();
   return (
     <div className="rate-display">
       <span className="type-operational">{formatMoney(hourlyRateCents, currency, locale)}</span>
-      <span className="type-label">Per hour</span>
+      <span className="type-label">{t('parking.perHour')}</span>
     </div>
   );
 }
@@ -50,6 +50,7 @@ export function Metric({ label, value }: { label: string; value: string | number
 }
 
 export function OccupancyMeter({ active, capacity }: { active: number; capacity: number }) {
+  const { t } = useAppearance();
   const percentage = capacity === 0 ? 0 : Math.min(100, Math.round((active / capacity) * 100));
   const threshold =
     active >= capacity
@@ -63,14 +64,14 @@ export function OccupancyMeter({ active, capacity }: { active: number; capacity:
             : 'optimal';
   const status =
     threshold === 'full'
-      ? 'Intake locked · facility full'
+      ? t('parking.intakeLocked')
       : threshold === 'critical'
         ? percentage >= 95
-          ? 'Nearly full'
-          : 'Critical capacity'
+          ? t('parking.nearlyFull')
+          : t('parking.criticalCapacity')
         : threshold === 'warning'
-          ? 'Elevated occupancy'
-          : 'Optimal capacity';
+          ? t('parking.elevatedOccupancy')
+          : t('parking.optimalCapacity');
   const available = Math.max(0, capacity - active);
   return (
     <div
@@ -81,13 +82,13 @@ export function OccupancyMeter({ active, capacity }: { active: number; capacity:
       )}
     >
       <div className="capacity-gauge-heading">
-        <span className="type-label">Occupancy gauge</span>
+        <span className="type-label">{t('parking.occupancyGauge')}</span>
         <span className="type-operational">
-          {active} / {capacity} inside
+          {active} / {capacity} {t('parking.inside')}
         </span>
       </div>
       <div
-        aria-label={`${String(active)} of ${String(capacity)} spaces occupied`}
+        aria-label={t('parkingOperation.occupancyLabel', { active, capacity })}
         aria-valuemax={capacity}
         aria-valuemin={0}
         aria-valuenow={active}
@@ -98,7 +99,7 @@ export function OccupancyMeter({ active, capacity }: { active: number; capacity:
       </div>
       <p className="capacity-gauge-status">
         <span aria-hidden="true">●</span> {status} · {available}{' '}
-        {available === 1 ? 'spot' : 'spots'} available
+        {available === 1 ? t('parking.spot') : t('parking.spots')} {t('parking.openSpots')}
       </p>
     </div>
   );
@@ -119,10 +120,15 @@ export function ParkingListItem({
   parking,
   to,
 }: ParkingListItemProps) {
+  const { t } = useAppearance();
   const available =
     activeSessions === undefined ? undefined : Math.max(0, parking.capacity - activeSessions);
   return (
-    <Link aria-label={`Open ${parking.title}`} className="parking-list-item" to={to}>
+    <Link
+      aria-label={`${t('parking.open')} ${parking.title}`}
+      className="parking-list-item"
+      to={to}
+    >
       <div>
         <ParkingIdentity identifier={identifier} parking={parking} />
       </div>
@@ -130,12 +136,14 @@ export function ParkingListItem({
         <ParkingStatus isActive={parking.isActive} />
         <RateDisplay currency={parking.currency} hourlyRateCents={parking.hourlyRateCents} />
         {occupancyUnavailable ? (
-          <span className="type-small">Occupancy unavailable</span>
+          <span className="type-small">{t('parkingOperation.occupancyUnavailable')}</span>
         ) : available === undefined ? (
-          <span className="type-small">Capacity {parking.capacity}</span>
+          <span className="type-small">
+            {t('parkingOperation.capacity')} {parking.capacity}
+          </span>
         ) : (
           <span className="type-operational">
-            {activeSessions} / {parking.capacity} occupied
+            {activeSessions} / {parking.capacity} {t('parking.occupied')}
           </span>
         )}
         <ArrowUpRight aria-hidden="true" size={18} />

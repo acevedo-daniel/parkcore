@@ -140,7 +140,7 @@ export function PublicLayout() {
           {/* Brand mark */}
           <div className="flex items-center gap-10">
             <Link
-              aria-label="ParkCore home"
+              aria-label={t('shell.publicHome')}
               className="brand-mark group flex items-center gap-2 font-display text-xl font-black tracking-tight text-foreground sm:text-2xl"
               to="/"
             >

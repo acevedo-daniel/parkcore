@@ -57,8 +57,13 @@ export function SessionRow({
   to: string;
   timezone?: string;
 }) {
-  const { language, locale, t } = useAppearance();
-  const es = language === 'es';
+  const { locale, t } = useAppearance();
+  const statusLabel =
+    session.status === 'ACTIVE'
+      ? t('session.active')
+      : session.status === 'COMPLETED'
+        ? t('session.completed')
+        : t('session.cancelledStatus');
   return (
     <Link
       aria-label={t('session.openFor', { plate: session.vehicle.plate })}
@@ -72,13 +77,13 @@ export function SessionRow({
         </span>
       </div>
       <div>
-        <p className="type-label text-foreground-muted">{es ? 'Ingreso' : 'Arrived'}</p>
+        <p className="type-label text-foreground-muted">{t('session.arrived')}</p>
         <div className="mt-1 text-sm font-semibold">
           <OperationalTimestamp value={session.startTime} timezone={timezone} />
         </div>
       </div>
       <div>
-        <p className="type-label text-foreground-muted">{es ? 'Transcurrido' : 'Elapsed'}</p>
+        <p className="type-label text-foreground-muted">{t('session.elapsed')}</p>
         <div className="mt-1 text-sm font-semibold">
           {session.endTime ? (
             <span className="type-operational">
@@ -91,8 +96,7 @@ export function SessionRow({
       </div>
       <div className="flex items-center justify-between gap-4 lg:justify-end">
         <span className="rounded-full border border-border-strong px-2.5 py-1 text-xs font-bold">
-          {session.status[0]}
-          {session.status.slice(1).toLowerCase()}
+          {statusLabel}
         </span>
         <ArrowUpRight
           aria-hidden="true"
@@ -123,7 +127,11 @@ export function SessionHistoryRow({
       className="session-history-row"
       to={to}
     >
-      <OperationalTimestamp label="Date" value={session.startTime} timezone={timezone} />
+      <OperationalTimestamp
+        label={t('session.date')}
+        value={session.startTime}
+        timezone={timezone}
+      />
       <Plate plate={session.vehicle.plate} />
       {session.endTime ? (
         <span className="session-history-duration type-operational">
@@ -140,8 +148,7 @@ export function SessionHistoryRow({
 }
 
 export function CheckoutSummary({ session, timezone }: { session: Session; timezone?: string }) {
-  const { language, locale, tPlural } = useAppearance();
-  const es = language === 'es';
+  const { locale, t, tPlural } = useAppearance();
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -159,17 +166,17 @@ export function CheckoutSummary({ session, timezone }: { session: Session; timez
   const chargedHours = preview?.chargedHours;
   return (
     <section
-      aria-label="Checkout summary"
+      aria-label={t('session.checkoutSummary')}
       className="rounded-[var(--radius-lg)] border border-border bg-surface-emphasis p-5 text-foreground"
     >
       <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
-        <span className="type-label text-foreground-muted">{es ? 'Ingreso' : 'Started'}</span>
+        <span className="type-label text-foreground-muted">{t('session.started')}</span>
         <OperationalTimestamp value={session.startTime} timezone={timezone} />
       </div>
       {!session.endTime ? (
         <div className="flex items-center justify-between gap-4 border-b border-border py-3">
           <span className="type-label text-foreground-muted">
-            {es ? 'Cálculo actual' : 'Current calculation'}
+            {t('session.currentCalculation')}
           </span>
           <time className="type-operational" dateTime={now.toISOString()}>
             {formatTimestamp(now.toISOString(), timezone, locale)}
@@ -177,14 +184,14 @@ export function CheckoutSummary({ session, timezone }: { session: Session; timez
         </div>
       ) : null}
       <div className="flex items-center justify-between gap-4 border-b border-border py-3">
-        <span className="type-label text-foreground-muted">{es ? 'Tarifa' : 'Rate'}</span>
+        <span className="type-label text-foreground-muted">{t('session.rate')}</span>
         <span className="type-operational">
           {formatMoney(session.hourlyRateCents, session.currency, locale)} / H
         </span>
       </div>
       {chargedHours ? (
         <div className="flex items-center justify-between gap-4 border-b border-border py-3">
-          <span className="type-label text-foreground-muted">{es ? 'Cobrado' : 'Charged'}</span>
+          <span className="type-label text-foreground-muted">{t('session.charged')}</span>
           <span className="type-operational">
             {chargedHours} {tPlural(chargedHours, { one: 'session.hour', other: 'session.hours' })}
           </span>
@@ -192,13 +199,7 @@ export function CheckoutSummary({ session, timezone }: { session: Session; timez
       ) : null}
       <div className="flex items-end justify-between gap-4 pt-5">
         <span className="type-label text-foreground-muted">
-          {session.endTime
-            ? es
-              ? 'Total confirmado'
-              : 'Confirmed total'
-            : es
-              ? 'Estimación'
-              : 'Estimate'}
+          {session.endTime ? t('session.confirmedTotal') : t('session.estimate')}
         </span>
         <strong className="font-display text-3xl font-bold leading-none tracking-[-0.055em] tabular-nums">
           {total === undefined ? 'N/A' : formatMoney(total, session.currency, locale)}
@@ -209,58 +210,53 @@ export function CheckoutSummary({ session, timezone }: { session: Session; timez
 }
 
 export function OperationalReceipt({ session, timezone }: { session: Session; timezone?: string }) {
-  const { language, locale } = useAppearance();
-  const es = language === 'es';
+  const { locale, t } = useAppearance();
   const total = session.totalAmountCents;
   return (
     <section
-      aria-label={es ? 'Comprobante operativo' : 'Operational receipt'}
+      aria-label={t('session.operationalReceipt')}
       className="rounded-[var(--radius-xl)] border border-success-foreground bg-success-surface p-6 text-foreground sm:p-8"
     >
       <div className="flex flex-col justify-between gap-5 border-b border-success-foreground/30 pb-5 sm:flex-row sm:items-start">
         <div>
-          <p className="type-label text-success-text">
-            {es ? 'Cobro confirmado por el servidor' : 'Server-confirmed checkout'}
-          </p>
+          <p className="type-label text-success-text">{t('session.serverConfirmedCheckout')}</p>
           <h2 className="mt-3 font-display text-3xl font-bold tracking-[-0.045em]">
-            {es ? 'Comprobante operativo' : 'Operational receipt'}
+            {t('session.operationalReceipt')}
           </h2>
         </div>
         <span className="rounded-full border border-success-foreground px-3 py-1.5 text-xs font-bold text-success-text">
-          {es ? 'Cerrada' : 'Completed'}
+          {t('session.completedLabel')}
         </span>
       </div>
 
       <dl className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
-        <ReceiptItem label={es ? 'Patente' : 'Plate'} value={session.vehicle.plate} />
+        <ReceiptItem label={t('session.plate')} value={session.vehicle.plate} />
         <ReceiptItem
-          label={es ? 'Ingreso' : 'Started'}
+          label={t('session.started')}
           value={formatTimestamp(session.startTime, timezone, locale)}
         />
         <ReceiptItem
-          label={es ? 'Salida' : 'Completed'}
+          label={t('session.completedAt')}
           value={session.endTime ? formatTimestamp(session.endTime, timezone, locale) : 'N/A'}
         />
         <ReceiptItem
-          label={es ? 'Duración' : 'Duration'}
+          label={t('session.duration')}
           value={
             session.endTime ? formatDuration(session.startTime, session.endTime, locale) : 'N/A'
           }
         />
         <ReceiptItem
-          label={es ? 'Tarifa registrada' : 'Rate snapshot'}
+          label={t('session.rateSnapshot')}
           value={`${formatMoney(session.hourlyRateCents, session.currency, locale)} / H`}
         />
         <ReceiptItem
-          label={es ? 'Total cobrado' : 'Charged total'}
+          label={t('session.chargedTotal')}
           value={total === null ? 'N/A' : formatMoney(total, session.currency, locale)}
         />
       </dl>
 
       <div className="mt-7 flex items-end justify-between gap-4 border-t border-success-foreground/30 pt-5">
-        <span className="type-label text-success-text">
-          {es ? 'Importe final' : 'Final amount'}
-        </span>
+        <span className="type-label text-success-text">{t('session.finalAmount')}</span>
         <strong className="font-display text-4xl font-bold leading-none tracking-[-0.055em] tabular-nums">
           {total === null ? 'N/A' : formatMoney(total, session.currency, locale)}
         </strong>

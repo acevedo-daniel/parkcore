@@ -9,7 +9,7 @@ import { useOwnedParkingOperations } from '../../features/parking/use-owned-park
 import { cn } from '../../lib/cn.js';
 
 export function OwnerParkingsRoute() {
-  const { language } = useAppearance();
+  const { language, t } = useAppearance();
   const es = language === 'es';
   const { parkings, parkingsQuery } = useOwnedParkingOperations();
   const knownOccupancies = parkings.filter(
@@ -24,9 +24,7 @@ export function OwnerParkingsRoute() {
   if (parkingsQuery.isLoading) return <OwnerParkingsSkeleton />;
   if (parkingsQuery.isError) {
     return (
-      <ErrorState onRetry={() => void parkingsQuery.refetch()}>
-        {es ? 'No pudimos cargar tus cocheras.' : 'We could not load your facilities.'}
-      </ErrorState>
+      <ErrorState onRetry={() => void parkingsQuery.refetch()}>{t('api.loadParkings')}</ErrorState>
     );
   }
 
@@ -52,7 +50,7 @@ export function OwnerParkingsRoute() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
-              aria-label={es ? 'Actualizar cocheras' : 'Refresh facilities'}
+              aria-label={t('parkingOperation.refreshFacilities')}
               className="border-[#121417] bg-white text-[#121417] hover:bg-[#f1eee7]"
               disabled={parkingsQuery.isFetching}
               onClick={() => void parkingsQuery.refetch()}
@@ -121,7 +119,7 @@ export function OwnerParkingsRoute() {
               className="font-mono text-xs font-semibold uppercase tracking-wider text-[#6d695f]"
               role="status"
             >
-              {es ? 'Actualizando cocheras…' : 'Refreshing facilities…'}
+              {t('parkingOperation.refreshingFacilities')}
             </p>
           ) : null}
 
@@ -160,8 +158,9 @@ function NetworkMetric({ label, note, value }: { label: string; note?: string; v
 }
 
 function OwnerParkingsSkeleton() {
+  const { t } = useAppearance();
   return (
-    <div className="space-y-8" aria-label="Loading facilities">
+    <div className="space-y-8" aria-label={t('parkingOperation.refreshFacilities')}>
       <Skeleton className="h-44 rounded-[1.75rem]" />
       <Skeleton className="h-32 rounded-[1.35rem]" />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

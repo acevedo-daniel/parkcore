@@ -13,6 +13,7 @@ import {
 import { ApiError } from '../../lib/api/api-error.js';
 import { authExpiredEvent } from '../../lib/api/api-client.js';
 import { clearAccessToken, getAccessToken, setAccessToken } from '../../lib/auth/auth-storage.js';
+import type { MessageKey } from '../../lib/localization.js';
 import { AuthContext, type AuthContextValue, type AuthStatus } from './auth-context.js';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -21,13 +22,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     getAccessToken() ? 'loading' : 'unauthenticated',
   );
   const [user, setUser] = useState<User>();
-  const [errorMessage, setErrorMessage] = useState<string>();
+  const [errorKey, setErrorKey] = useState<MessageKey>();
 
   const clearSession = useCallback(() => {
     clearAccessToken();
     queryClient.clear();
     setUser(undefined);
-    setErrorMessage(undefined);
+    setErrorKey(undefined);
     setStatus('unauthenticated');
   }, [queryClient]);
 
@@ -38,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     setStatus('loading');
-    setErrorMessage(undefined);
+    setErrorKey(undefined);
     try {
       const currentUser = await getCurrentUser();
       setUser(currentUser);
@@ -49,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       setUser(undefined);
-      setErrorMessage('Unable to restore your session. Check your connection and try again.');
+      setErrorKey('auth.restoreError');
       setStatus('unavailable');
     }
   }, [clearSession]);
@@ -74,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const completeAuthentication = useCallback((response: { accessToken: string; user: User }) => {
     setAccessToken(response.accessToken);
     setUser(response.user);
-    setErrorMessage(undefined);
+    setErrorKey(undefined);
     setStatus('authenticated');
   }, []);
 
@@ -102,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AuthContextValue>(
     () => ({
-      errorMessage,
+      errorKey,
       login: loginUser,
       loginDemo: loginDemoUser,
       logout: clearSession,
@@ -114,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }),
     [
       clearSession,
-      errorMessage,
+      errorKey,
       loginDemoUser,
       loginUser,
       registerUser,

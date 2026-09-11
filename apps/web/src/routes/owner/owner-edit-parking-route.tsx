@@ -4,14 +4,14 @@ import { useNavigate, useParams } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { ParkingForm } from '../../features/parking/parking-form.js';
-import { getOwnedParkings, updateParking } from '../../lib/api/owner-api.js';
 import { Button } from '../../components/ui/button.js';
 import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
+import { localizeApiError } from '../../lib/api/api-error.js';
+import { getOwnedParkings, updateParking } from '../../lib/api/owner-api.js';
 import { useToast } from '../../components/ui/toast-context.js';
 
 export function OwnerEditParkingRoute() {
-  const { language } = useAppearance();
-  const es = language === 'es';
+  const { t } = useAppearance();
   const { parkingId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -31,16 +31,14 @@ export function OwnerEditParkingRoute() {
           void parkingsQuery.refetch();
         }}
       >
-        {es ? 'No pudimos cargar esta cochera.' : 'We could not load this parking.'}
+        {t('parkingRoute.loadError')}
       </ErrorState>
     );
   const parking = parkingsQuery.data?.find((item) => item.id === parkingId);
   if (!parking)
     return (
-      <ErrorState title={es ? 'Cochera no disponible' : 'Parking unavailable'}>
-        {es
-          ? 'Esta cochera no está disponible en tu cuenta.'
-          : 'This parking is not available in your account.'}
+      <ErrorState title={t('parkingOperation.unavailableTitle')}>
+        {t('api.parkingUnavailable')}
       </ErrorState>
     );
 
@@ -48,9 +46,9 @@ export function OwnerEditParkingRoute() {
     <section className="owner-page stack-owner" aria-labelledby="edit-parking-title">
       <header className="owner-page-header">
         <div>
-          <p className="type-label">{es ? 'Gestión' : 'Management'}</p>
+          <p className="type-label">{t('parkingRoute.management')}</p>
           <h1 className="type-page-title" id="edit-parking-title">
-            {es ? 'Editar cochera' : 'Edit parking'}
+            {t('parkingRoute.editTitle')}
           </h1>
         </div>
         <Button
@@ -60,7 +58,7 @@ export function OwnerEditParkingRoute() {
             void navigate(`/app/parkings/${parking.id}`);
           }}
         >
-          {es ? 'Cancelar' : 'Cancel'}
+          {t('parkingRoute.cancel')}
         </Button>
       </header>
       <ParkingForm
@@ -72,16 +70,10 @@ export function OwnerEditParkingRoute() {
           try {
             await mutation.mutateAsync(input);
             await queryClient.invalidateQueries({ queryKey: ['owned-parkings'] });
-            showToast(es ? 'La cochera fue actualizada.' : 'Parking updated.');
+            showToast(t('parkingRoute.updated'));
             await navigate(`/app/parkings/${parking.id}`, { replace: true });
           } catch (reason) {
-            setError(
-              reason instanceof Error
-                ? reason.message
-                : es
-                  ? 'No pudimos actualizar esta cochera.'
-                  : 'Unable to update this parking.',
-            );
+            setError(localizeApiError(reason, t, 'api.updateParking'));
           }
         }}
       />

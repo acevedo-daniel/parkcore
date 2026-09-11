@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
+import { AppearanceProvider } from '../../app/appearance-provider.js';
 import { CheckInPanel } from './check-in-panel.js';
 import { OccupancyMeter } from './parking.js';
 
@@ -35,6 +36,24 @@ describe('CheckInPanel', () => {
     expect((await screen.findByRole('alert')).textContent).toContain(
       'Use 4 to 10 alphanumeric characters.',
     );
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('localizes validation and controls in Spanish', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    window.localStorage.setItem('parkcore-lang', 'es-AR');
+    render(
+      <AppearanceProvider>
+        <CheckInPanel onSubmit={onSubmit} />
+      </AppearanceProvider>,
+    );
+
+    expect(screen.getByLabelText('Patente')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Iniciar estadía' })).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: 'Iniciar estadía' }));
+
+    expect(await screen.findByText('Ingresá una patente.')).toBeTruthy();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 });

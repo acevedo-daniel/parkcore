@@ -4,13 +4,13 @@ import { useNavigate } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { ParkingForm } from '../../features/parking/parking-form.js';
+import { localizeApiError } from '../../lib/api/api-error.js';
 import { createParking } from '../../lib/api/owner-api.js';
 import { Button } from '../../components/ui/button.js';
 import { useToast } from '../../components/ui/toast-context.js';
 
 export function OwnerCreateParkingRoute() {
-  const { language } = useAppearance();
-  const es = language === 'es';
+  const { t } = useAppearance();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
@@ -21,9 +21,9 @@ export function OwnerCreateParkingRoute() {
     <section className="owner-page stack-owner" aria-labelledby="create-parking-title">
       <header className="owner-page-header">
         <div>
-          <p className="type-label">{es ? 'Gestión' : 'Management'}</p>
+          <p className="type-label">{t('parkingRoute.management')}</p>
           <h1 className="type-page-title" id="create-parking-title">
-            {es ? 'Crear cochera' : 'Create parking'}
+            {t('parkingRoute.createTitle')}
           </h1>
         </div>
         <Button
@@ -33,7 +33,7 @@ export function OwnerCreateParkingRoute() {
             void navigate('/app/parkings');
           }}
         >
-          {es ? 'Cancelar' : 'Cancel'}
+          {t('parkingRoute.cancel')}
         </Button>
       </header>
       <ParkingForm
@@ -44,16 +44,10 @@ export function OwnerCreateParkingRoute() {
           try {
             const parking = await mutation.mutateAsync(input);
             await queryClient.invalidateQueries({ queryKey: ['owned-parkings'] });
-            showToast(es ? 'La cochera fue creada.' : 'Parking created.');
+            showToast(t('parkingRoute.created'));
             await navigate(`/app/parkings/${parking.id}`, { replace: true });
           } catch (reason) {
-            setError(
-              reason instanceof Error
-                ? reason.message
-                : es
-                  ? 'No pudimos crear esta cochera.'
-                  : 'Unable to create this parking.',
-            );
+            setError(localizeApiError(reason, t, 'api.createParking'));
           }
         }}
       />

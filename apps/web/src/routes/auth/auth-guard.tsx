@@ -1,13 +1,15 @@
 import { Navigate, Outlet, useLocation, useSearchParams } from 'react-router';
 import type { ReactNode } from 'react';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { useAuth } from '../../features/auth/use-auth.js';
 import { getReturnTo } from './auth-redirect.js';
 
 function AuthLoadingState() {
+  const { t } = useAppearance();
   return (
-    <section aria-label="Restoring session" className="auth-loading">
+    <section aria-label={t('authGuard.loading')} className="auth-loading">
       <Skeleton className="skeleton-title" />
       <Skeleton className="auth-loading-field" />
       <Skeleton className="auth-loading-field" />
@@ -16,7 +18,8 @@ function AuthLoadingState() {
 }
 
 export function RequireAuthentication() {
-  const { errorMessage, restore, status } = useAuth();
+  const { errorKey, restore, status } = useAuth();
+  const { t } = useAppearance();
   const location = useLocation();
 
   if (status === 'loading') return <AuthLoadingState />;
@@ -26,9 +29,9 @@ export function RequireAuthentication() {
         onRetry={() => {
           void restore();
         }}
-        title="Session unavailable"
+        title={t('authGuard.unavailableTitle')}
       >
-        {errorMessage ?? 'Unable to restore your session.'}
+        {errorKey ? t(errorKey) : t('auth.restoreError')}
       </ErrorState>
     );
   }

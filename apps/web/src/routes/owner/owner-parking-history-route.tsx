@@ -21,7 +21,7 @@ type SessionFilter = 'ALL' | ParkingSession['status'];
 type HistoryPeriod = 'today' | '7d' | '30d';
 
 export function OwnerParkingHistoryRoute() {
-  const { language, locale } = useAppearance();
+  const { language, locale, t } = useAppearance();
   const es = language === 'es';
   const { parkingId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -115,18 +115,14 @@ export function OwnerParkingHistoryRoute() {
           void sessionsQuery.refetch();
         }}
       >
-        {es
-          ? 'No pudimos cargar el historial de esta cochera.'
-          : 'We could not load this parking history.'}
+        {t('api.loadParkingHistory')}
       </ErrorState>
     );
   }
   if (!parking) {
     return (
-      <ErrorState title={es ? 'Cochera no disponible' : 'Parking unavailable'}>
-        {es
-          ? 'Esta cochera no está disponible en tu cuenta.'
-          : 'This parking is not available in your account.'}
+      <ErrorState title={t('parkingOperation.unavailableTitle')}>
+        {t('api.parkingUnavailable')}
       </ErrorState>
     );
   }
@@ -217,9 +213,7 @@ export function OwnerParkingHistoryRoute() {
         </Button>
       </div>
       {exportError ? (
-        <ErrorState onRetry={() => void exportHistory()}>
-          {es ? 'No pudimos exportar el historial.' : 'We could not export this history.'}
-        </ErrorState>
+        <ErrorState onRetry={() => void exportHistory()}>{t('api.exportHistory')}</ErrorState>
       ) : null}
       {aggregate ? (
         <section className="grid gap-4 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:grid-cols-4 sm:p-6">

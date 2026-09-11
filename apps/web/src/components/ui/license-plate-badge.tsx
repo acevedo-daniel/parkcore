@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Car, Bike, Truck } from 'lucide-react';
 
+import { useAppearance } from '../../app/appearance-provider.js';
 import { cn } from '../../lib/cn.js';
 
 export interface LicensePlateBadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
@@ -16,6 +17,7 @@ export function LicensePlateBadge({
   className,
   ...props
 }: LicensePlateBadgeProps) {
+  const { t } = useAppearance();
   // Format plate nicely if it contains alphanumeric characters (e.g. ABC 1234 or AA 123 BB)
   const cleanPlate = plate.trim().toUpperCase();
 
@@ -36,7 +38,7 @@ export function LicensePlateBadge({
 
   return (
     <span
-      aria-label={`Vehicle plate ${cleanPlate}`}
+      aria-label={t('parking.vehiclePlate', { plate: cleanPlate })}
       className={cn(
         'inline-flex items-center gap-1.5 rounded-[var(--radius-sm)] border border-border-strong bg-surface-raised font-mono font-bold tracking-wider text-foreground shadow-xs select-all',
         size === 'sm' && 'px-2 py-0.5 text-xs',

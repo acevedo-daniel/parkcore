@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../../components/ui/button.js';
-import { ApiError } from '../../lib/api/api-error.js';
+import { localizeApiError } from '../../lib/api/api-error.js';
 import { useAuth } from './use-auth.js';
 
 export function DemoLoginButton({
@@ -28,7 +28,7 @@ export function DemoLoginButton({
       await loginDemo();
       onSuccess();
     } catch (reason) {
-      setError(reason instanceof ApiError ? reason.message : t('demo.startError'));
+      setError(localizeApiError(reason, t, 'demo.startError'));
     } finally {
       setIsSubmitting(false);
     }

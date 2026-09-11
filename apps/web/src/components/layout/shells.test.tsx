@@ -54,6 +54,6 @@ describe('application shells', () => {
     expect(navigation.textContent).toContain('Resumen');
     expect(navigation.textContent).toContain('Cocheras');
     expect(navigation.textContent).not.toContain('Payments');
-    expect(document.title).toBe('ParkCore | Operations');
+    expect(document.title).toBe('ParkCore | Operaciones');
   });
 });

@@ -67,9 +67,9 @@ export function OwnerLayout() {
     };
   }, []);
   useDocumentMeta({
-    description: 'Operate ParkCore parking facilities with active sessions, capacity and rates.',
+    description: t('shell.ownerMetaDescription'),
     noIndex: true,
-    title: 'ParkCore | Operations',
+    title: t('shell.ownerMetaTitle'),
   });
 
   const signOut = () => {
@@ -85,7 +85,7 @@ export function OwnerLayout() {
         <div className="flex flex-col gap-6">
           <div className="owner-brand-block border-b border-border-strong pb-5">
             <Link
-              aria-label="ParkCore operations"
+              aria-label={t('shell.ownerHome')}
               className="brand-mark font-display text-lg font-bold tracking-[-0.035em] text-foreground transition-colors hover:text-foreground-secondary"
               to="/app"
             >

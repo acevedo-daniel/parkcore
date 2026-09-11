@@ -1,48 +1,82 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useEffect, useMemo } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
 import { useAppearance } from '../../app/appearance-provider.js';
-import type { CreateParkingRequest, Parking } from '../../lib/api/owner-api.js';
 import { Button } from '../../components/ui/button.js';
 import { Field, Input, Select, Textarea } from '../../components/ui/field.js';
 import { Switch } from '../../components/ui/switch.js';
+import type { CreateParkingRequest, Parking } from '../../lib/api/owner-api.js';
+import type { Translator } from '../../lib/localization.js';
 
-const parkingFormSchema = z
-  .object({
-    address: z.string().trim().min(5, 'Use at least 5 characters.').max(200),
-    capacity: z.number().int('Use a whole number.').positive('Capacity must be positive.'),
-    closesAt: z.string(),
-    currency: z.enum(['ARS', 'USD']),
-    description: z.string().trim().max(500, 'Use no more than 500 characters.'),
-    hourlyRate: z.number().positive('Hourly rate must be positive.'),
-    image: z.union([z.literal(''), z.url('Enter a valid image URL.')]),
-    isActive: z.boolean(),
-    is24Hours: z.boolean(),
-    isListed: z.boolean(),
-    lat: z.number().min(-90, 'Latitude must be between -90 and 90.').max(90),
-    lng: z.number().min(-180, 'Longitude must be between -180 and 180.').max(180),
-    neighborhood: z.string().trim().min(2, 'Use at least 2 characters.').max(100),
-    opensAt: z.string(),
-    title: z.string().trim().min(5, 'Use at least 5 characters.').max(100),
-    timezone: z.string().trim().min(1, 'Timezone is required.'),
-  })
-  .superRefine((values, context) => {
-    if (values.is24Hours) return;
-    if (!values.opensAt || !values.closesAt) {
-      context.addIssue({
-        code: 'custom',
-        path: ['opensAt'],
-        message: 'Set opening and closing times.',
-      });
-      return;
-    }
-    if (values.opensAt === values.closesAt) {
-      context.addIssue({ code: 'custom', path: ['closesAt'], message: 'Times cannot be equal.' });
-    }
-  });
+function createParkingFormSchema(t: Translator) {
+  return z
+    .object({
+      address: z
+        .string()
+        .trim()
+        .min(5, t('validation.parkingAddressMin', { count: 5 }))
+        .max(200),
+      capacity: z
+        .number({ error: t('validation.number') })
+        .int(t('validation.parkingCapacityInteger'))
+        .positive(t('validation.parkingCapacityPositive')),
+      closesAt: z.string(),
+      currency: z.enum(['ARS', 'USD']),
+      description: z
+        .string()
+        .trim()
+        .max(500, t('validation.parkingDescriptionMax', { count: 500 })),
+      hourlyRate: z
+        .number({ error: t('validation.number') })
+        .positive(t('validation.parkingRatePositive')),
+      image: z.union([z.literal(''), z.url(t('validation.parkingImageUrl'))]),
+      isActive: z.boolean(),
+      is24Hours: z.boolean(),
+      isListed: z.boolean(),
+      lat: z
+        .number({ error: t('validation.number') })
+        .min(-90, t('validation.parkingLatitude'))
+        .max(90, t('validation.parkingLatitude')),
+      lng: z
+        .number({ error: t('validation.number') })
+        .min(-180, t('validation.parkingLongitude'))
+        .max(180, t('validation.parkingLongitude')),
+      neighborhood: z
+        .string()
+        .trim()
+        .min(2, t('validation.parkingNeighborhoodMin', { count: 2 }))
+        .max(100),
+      opensAt: z.string(),
+      title: z
+        .string()
+        .trim()
+        .min(5, t('validation.parkingTitleMin', { count: 5 }))
+        .max(100),
+      timezone: z.string().trim().min(1, t('validation.parkingTimezone')),
+    })
+    .superRefine((values, context) => {
+      if (values.is24Hours) return;
+      if (!values.opensAt || !values.closesAt) {
+        context.addIssue({
+          code: 'custom',
+          path: ['opensAt'],
+          message: t('validation.parkingHoursRequired'),
+        });
+        return;
+      }
+      if (values.opensAt === values.closesAt) {
+        context.addIssue({
+          code: 'custom',
+          path: ['closesAt'],
+          message: t('validation.parkingHoursEqual'),
+        });
+      }
+    });
+}
 
-type ParkingFormValues = z.infer<typeof parkingFormSchema>;
+type ParkingFormValues = z.infer<ReturnType<typeof createParkingFormSchema>>;
 
 function defaults(parking?: Parking) {
   return {
@@ -96,12 +130,16 @@ export function ParkingForm({
   onSubmit: (input: CreateParkingRequest & { isActive?: boolean }) => Promise<void> | void;
   parking?: Parking;
 }) {
-  const { language } = useAppearance();
-  const es = language === 'es';
+  const { t } = useAppearance();
+  const schema = useMemo(() => createParkingFormSchema(t), [t]);
   const form = useForm<ParkingFormValues>({
     defaultValues: defaults(parking),
-    resolver: zodResolver(parkingFormSchema),
+    resolver: zodResolver(schema),
   });
+  const is24Hours = useWatch({ control: form.control, name: 'is24Hours' });
+  useEffect(() => {
+    if (Object.keys(form.formState.errors).length > 0) void form.trigger();
+  }, [form, t]);
 
   const submit = form.handleSubmit(async (values) => {
     await onSubmit({ ...toRequest(values), ...(parking ? { isActive: values.isActive } : {}) });
@@ -117,45 +155,45 @@ export function ParkingForm({
     >
       <fieldset className="space-y-5 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:p-6 lg:col-span-2">
         <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-          {es ? 'Información general' : 'General information'}
+          {t('parkingForm.general')}
         </legend>
         <Field
           error={form.formState.errors.title?.message}
           htmlFor="parking-title"
-          label={es ? 'Nombre' : 'Name'}
+          label={t('parkingForm.title')}
         >
           <Input id="parking-title" {...form.register('title')} />
         </Field>
         <Field
           error={form.formState.errors.neighborhood?.message}
           htmlFor="parking-neighborhood"
-          label={es ? 'Barrio' : 'Neighborhood'}
+          label={t('parkingForm.neighborhood')}
         >
           <Input id="parking-neighborhood" {...form.register('neighborhood')} />
         </Field>
         <Field
           error={form.formState.errors.description?.message}
           htmlFor="parking-description"
-          label={es ? 'Descripción' : 'Description'}
+          label={t('parkingForm.description')}
         >
           <Textarea id="parking-description" rows={4} {...form.register('description')} />
         </Field>
         <Field
           error={form.formState.errors.image?.message}
           htmlFor="parking-image"
-          label={es ? 'URL de imagen' : 'Image URL'}
+          label={t('parkingForm.imageUrl')}
         >
           <Input id="parking-image" inputMode="url" type="url" {...form.register('image')} />
         </Field>
       </fieldset>
       <fieldset className="space-y-5 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:p-6">
         <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-          {es ? 'Ubicación' : 'Location'}
+          {t('parkingForm.location')}
         </legend>
         <Field
           error={form.formState.errors.address?.message}
           htmlFor="parking-address"
-          label={es ? 'Dirección' : 'Address'}
+          label={t('parkingForm.address')}
         >
           <Input id="parking-address" {...form.register('address')} />
         </Field>
@@ -163,7 +201,7 @@ export function ParkingForm({
           <Field
             error={form.formState.errors.lat?.message}
             htmlFor="parking-lat"
-            label={es ? 'Latitud' : 'Latitude'}
+            label={t('parkingForm.latitude')}
           >
             <Input
               id="parking-lat"
@@ -176,7 +214,7 @@ export function ParkingForm({
           <Field
             error={form.formState.errors.lng?.message}
             htmlFor="parking-lng"
-            label={es ? 'Longitud' : 'Longitude'}
+            label={t('parkingForm.longitude')}
           >
             <Input
               id="parking-lng"
@@ -190,38 +228,34 @@ export function ParkingForm({
         <Field
           error={form.formState.errors.timezone?.message}
           htmlFor="parking-timezone"
-          label={es ? 'Zona horaria' : 'Timezone'}
+          label={t('parkingForm.timezone')}
         >
           <Input id="parking-timezone" {...form.register('timezone')} />
         </Field>
       </fieldset>
       <fieldset className="space-y-5 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:p-6">
         <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-          {es ? 'Horarios' : 'Hours'}
+          {t('parkingForm.hours')}
         </legend>
         <Switch
-          description={
-            es
-              ? 'No hace falta completar horarios de apertura y cierre.'
-              : 'Opening and closing times are not required.'
-          }
+          description={t('parkingForm.open24HoursDescription')}
           id="parking-24-hours"
-          label={es ? 'Abierta las 24 horas' : 'Open 24 hours'}
+          label={t('parkingForm.open24Hours')}
           {...form.register('is24Hours')}
         />
-        {!form.watch('is24Hours') ? (
+        {!is24Hours ? (
           <div className="grid gap-4 sm:grid-cols-2">
             <Field
               error={form.formState.errors.opensAt?.message}
               htmlFor="parking-opens-at"
-              label={es ? 'Apertura' : 'Opening'}
+              label={t('parkingForm.opening')}
             >
               <Input id="parking-opens-at" type="time" {...form.register('opensAt')} />
             </Field>
             <Field
               error={form.formState.errors.closesAt?.message}
               htmlFor="parking-closes-at"
-              label={es ? 'Cierre' : 'Closing'}
+              label={t('parkingForm.closing')}
             >
               <Input id="parking-closes-at" type="time" {...form.register('closesAt')} />
             </Field>
@@ -230,13 +264,13 @@ export function ParkingForm({
       </fieldset>
       <fieldset className="space-y-5 rounded-[1.5rem] border border-[#121417]/12 bg-[#f5f5f5] p-5 sm:p-6">
         <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-          {es ? 'Operación' : 'Operations'}
+          {t('parkingForm.operations')}
         </legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
             error={form.formState.errors.capacity?.message}
             htmlFor="parking-capacity"
-            label={es ? 'Capacidad' : 'Capacity'}
+            label={t('parkingForm.capacity')}
           >
             <Input
               id="parking-capacity"
@@ -248,7 +282,7 @@ export function ParkingForm({
           <Field
             error={form.formState.errors.hourlyRate?.message}
             htmlFor="parking-rate"
-            label={es ? 'Tarifa por hora (USD)' : 'Hourly rate (USD)'}
+            label={t('parkingForm.hourlyRate', { currency: 'USD' })}
           >
             <Input
               id="parking-rate"
@@ -259,7 +293,7 @@ export function ParkingForm({
             />
           </Field>
         </div>
-        <Field htmlFor="parking-currency" label={es ? 'Moneda' : 'Currency'}>
+        <Field htmlFor="parking-currency" label={t('parkingForm.currency')}>
           <Select id="parking-currency" {...form.register('currency')}>
             <option value="ARS">ARS</option>
             <option value="USD">USD</option>
@@ -269,32 +303,24 @@ export function ParkingForm({
       {parking ? (
         <fieldset className="space-y-3 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:p-6 lg:col-span-2">
           <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-            {es ? 'Disponibilidad' : 'Availability'}
+            {t('parkingForm.availability')}
           </legend>
           <Switch
-            description={
-              es
-                ? 'La cochera puede aceptar nuevos ingresos mientras esté habilitada.'
-                : 'The parking can accept new check-ins while enabled.'
-            }
+            description={t('parkingForm.acceptCheckInsDescription')}
             id="parking-active"
-            label={es ? 'Aceptar nuevos ingresos' : 'Accept new check-ins'}
+            label={t('parkingForm.acceptCheckIns')}
             {...form.register('isActive')}
           />
         </fieldset>
       ) : null}
       <fieldset className="space-y-3 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:p-6 lg:col-span-2">
         <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-          {es ? 'Publicación' : 'Publication'}
+          {t('parkingForm.publication')}
         </legend>
         <Switch
-          description={
-            es
-              ? 'Aparece en el directorio público cuando está activa.'
-              : 'Appears in the public directory when active.'
-          }
+          description={t('parkingForm.visibleInDirectoryDescription')}
           id="parking-listed"
-          label={es ? 'Visible en el directorio' : 'Visible in directory'}
+          label={t('parkingForm.visibleInDirectory')}
           {...form.register('isListed')}
         />
       </fieldset>
@@ -309,16 +335,10 @@ export function ParkingForm({
         type="submit"
       >
         {isSubmitting
-          ? es
-            ? 'Guardando…'
-            : 'Saving…'
+          ? t('parkingForm.saving')
           : parking
-            ? es
-              ? 'Guardar cambios'
-              : 'Save changes'
-            : es
-              ? 'Crear cochera'
-              : 'Create parking'}
+            ? t('parkingForm.saveChanges')
+            : t('parkingForm.create')}
       </Button>
     </form>
   );
