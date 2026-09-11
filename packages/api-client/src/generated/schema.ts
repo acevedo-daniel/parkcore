@@ -1475,6 +1475,11 @@ export interface components {
              */
             id: string;
             /**
+             * @description User identity kind
+             * @enum {string}
+             */
+            kind: "OWNER" | "DEMO" | "SHOWCASE";
+            /**
              * Format: email
              * @description User email address
              */
@@ -1487,6 +1492,13 @@ export interface components {
             phone: string | null;
             /** @description Profile photo URL */
             photoUrl: string | null;
+            /** @description User IANA timezone */
+            timezone: string;
+            /**
+             * Format: date-time
+             * @description Demo access expiration time
+             */
+            demoExpiresAt: string | null;
             /**
              * Format: date-time
              * @description Creation time
@@ -1515,10 +1527,21 @@ export interface components {
              */
             password: string;
             /**
-             * @description User display name
-             * @example John Doe
+             * @description User first name
+             * @example John
              */
-            name?: string;
+            name: string;
+            /**
+             * @description User last name
+             * @example Doe
+             */
+            lastName: string;
+            /**
+             * @description User IANA timezone
+             * @default America/Argentina/Buenos_Aires
+             * @example America/Argentina/Buenos_Aires
+             */
+            timezone: string;
         };
         LoginRequest: {
             /**

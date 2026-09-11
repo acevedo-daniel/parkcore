@@ -66,6 +66,8 @@ describe('authentication forms', () => {
     const register = vi.fn().mockRejectedValue(new ApiError('Email taken', 409));
     renderWithAuth(<RegisterForm onSuccess={vi.fn()} />, { register });
 
+    await user.type(screen.getByLabelText('First name'), 'Park');
+    await user.type(screen.getByLabelText('Last name'), 'Core');
     await user.type(screen.getByLabelText('Email'), 'owner@example.com');
     await user.type(screen.getByLabelText('Password'), 'password123');
     await user.click(screen.getByRole('button', { name: 'Create account' }));

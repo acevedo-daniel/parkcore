@@ -50,7 +50,7 @@ function OwnerLink({
 
 export function OwnerLayout() {
   const { language, t } = useAppearance();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
   const navigation = useNavigation();
   const [clock, setClock] = useState(() => new Date());
@@ -142,9 +142,11 @@ export function OwnerLayout() {
               <span>{t('nav.signOut')}</span>
             </button>
           </section>
-          <div className="border-t border-border-subtle pt-3">
-            <DemoResetControl />
-          </div>
+          {user?.kind === 'DEMO' ? (
+            <div className="border-t border-border-subtle pt-3">
+              <DemoResetControl />
+            </div>
+          ) : null}
         </div>
       </aside>
       <header className="owner-mobile-header sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border-strong bg-surface px-4 md:hidden">

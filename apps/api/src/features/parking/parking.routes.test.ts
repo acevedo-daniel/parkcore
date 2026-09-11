@@ -47,7 +47,7 @@ function expectErrorContract(body: unknown): void {
 }
 
 async function authorizationHeader(userId = 'owner-1'): Promise<Record<string, string>> {
-  const token = await signAccessToken({ sub: userId });
+  const token = await signAccessToken({ sub: userId, kind: 'OWNER' });
   return { authorization: `Bearer ${token}` };
 }
 

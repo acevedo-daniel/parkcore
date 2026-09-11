@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import app from '../../app.js';
 import { prisma } from '../../src/config/prisma.js';
+import { verifyAccessToken, signAccessToken } from '../../src/features/auth/auth.jwt.js';
 
 interface AuthResponse {
   accessToken: string;
@@ -56,12 +57,19 @@ describe('owner workflow integration', () => {
       .send({
         email: `owner-${suffix}@parkcore.test`,
         password: 'Passw0rd!123',
-        name: 'Integration Owner',
+        name: 'Integration',
+        lastName: 'Owner',
+        timezone: 'America/Argentina/Buenos_Aires',
       });
 
     expect(registerResponse.status).toBe(201);
     const auth = registerResponse.body as unknown as AuthResponse;
     ownerId = auth.user.id;
+    expect(auth.user).toMatchObject({
+      kind: 'OWNER',
+      timezone: 'America/Argentina/Buenos_Aires',
+      demoExpiresAt: null,
+    });
     const authorization = `Bearer ${auth.accessToken}`;
 
     const createParkingResponse = await request(app)
@@ -156,5 +164,76 @@ describe('owner workflow integration', () => {
       totalAmountCents: 1500,
       vehicle: { plate: 'AB123CD' },
     });
+  });
+
+  it('allows owner and active demo operations but blocks showcase mutations', async () => {
+    const demoToken = await signAccessToken(
+      {
+        sub: 'demo-operation-user',
+        kind: 'DEMO',
+        demoExpiresAt: new Date(Date.now() + 60_000).toISOString(),
+      },
+      { expiresAt: new Date(Date.now() + 60_000) },
+    );
+    const showcaseToken = await signAccessToken({
+      sub: 'showcase-operation-user',
+      kind: 'SHOWCASE',
+    });
+
+    const demoResponse = await request(app)
+      .get('/parkings/me')
+      .set('Authorization', `Bearer ${demoToken}`);
+    expect(demoResponse.status).toBe(200);
+
+    const showcaseResponse = await request(app)
+      .get('/parkings/me')
+      .set('Authorization', `Bearer ${showcaseToken}`);
+    expect(showcaseResponse.status).toBe(403);
+    expect(showcaseResponse.body).toMatchObject({ error: true });
+  });
+
+  it('rejects incomplete owner registration and invalid timezones', async () => {
+    const suffix = randomUUID();
+
+    const missingLastName = await request(app)
+      .post('/auth/register')
+      .send({
+        email: `missing-last-name-${suffix}@parkcore.test`,
+        name: 'Missing',
+        password: 'Passw0rd!123',
+      });
+    expect(missingLastName.status).toBe(400);
+
+    const invalidTimezone = await request(app)
+      .post('/auth/register')
+      .send({
+        email: `invalid-timezone-${suffix}@parkcore.test`,
+        lastName: 'Timezone',
+        name: 'Invalid',
+        password: 'Passw0rd!123',
+        timezone: 'Not/A-Timezone',
+      });
+    expect(invalidTimezone.status).toBe(400);
+  });
+
+  it('issues demo access without credentials and bounds its token to demo expiry', async () => {
+    const response = await request(app).post('/demo/login');
+
+    expect(response.status).toBe(200);
+    const demo = response.body as {
+      accessToken: string;
+      user: { demoExpiresAt: string | null; email: string | null; id: string; kind: string };
+    };
+    expect(demo.user).toMatchObject({
+      email: null,
+      kind: 'DEMO',
+    });
+    expect(typeof demo.user.demoExpiresAt).toBe('string');
+
+    const payload = await verifyAccessToken(demo.accessToken);
+    expect(payload.kind).toBe('DEMO');
+    expect(payload.exp).toBeLessThanOrEqual(
+      Math.floor(new Date(demo.user.demoExpiresAt ?? '').getTime() / 1000),
+    );
   });
 });

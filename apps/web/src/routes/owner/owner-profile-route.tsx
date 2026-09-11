@@ -110,7 +110,7 @@ export function OwnerProfileRoute() {
               <Input id="profile-name" {...form.register('name')} />
             </Field>
             <Field htmlFor="profile-email" label={es ? 'Correo electrónico' : 'Email'}>
-              <Input disabled id="profile-email" type="email" value={user.email} />
+              <Input disabled id="profile-email" type="email" value={user.email ?? ''} />
             </Field>
           </div>
           {form.formState.errors.root?.message ? (

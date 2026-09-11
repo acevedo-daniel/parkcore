@@ -20,6 +20,9 @@ async function createDemoTestApp(maxRequests: number) {
     requireAuth: (_req: Request, _res: Response, next: () => void) => {
       next();
     },
+    requireDemo: (_req: Request, _res: Response, next: () => void) => {
+      next();
+    },
   }));
   vi.doMock('./demo.controller.js', () => ({
     getStatus: vi.fn(),

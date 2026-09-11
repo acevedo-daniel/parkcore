@@ -40,11 +40,17 @@ export const updateProfileSchema = z
 export const userResponseSchema = z
   .strictObject({
     id: z.uuid().openapi({ description: 'User UUID' }),
+    kind: z.enum(['OWNER', 'DEMO', 'SHOWCASE']).openapi({ description: 'User identity kind' }),
     email: z.email().nullable().openapi({ description: 'User email address' }),
     name: z.string().nullable().openapi({ description: 'First name' }),
     lastName: z.string().nullable().openapi({ description: 'Last name' }),
     phone: z.string().nullable().openapi({ description: 'Phone number' }),
     photoUrl: z.string().nullable().openapi({ description: 'Profile photo URL' }),
+    timezone: z.string().openapi({ description: 'User IANA timezone' }),
+    demoExpiresAt: z
+      .iso.datetime()
+      .nullable()
+      .openapi({ description: 'Demo access expiration time', format: 'date-time' }),
     createdAt: z.iso.datetime().openapi({ description: 'Creation time', format: 'date-time' }),
     updatedAt: z.iso.datetime().openapi({ description: 'Last update time', format: 'date-time' }),
   })
@@ -55,11 +61,14 @@ export type UserResponse = z.infer<typeof userResponseSchema>;
 
 export const toUserResponse = (user: User): UserResponse => ({
   id: user.id,
+  kind: user.kind,
   email: user.email,
   name: user.name,
   lastName: user.lastName,
   phone: user.phone,
   photoUrl: user.photoUrl,
+  timezone: user.timezone,
+  demoExpiresAt: user.demoExpiresAt?.toISOString() ?? null,
   createdAt: user.createdAt.toISOString(),
   updatedAt: user.updatedAt.toISOString(),
 });

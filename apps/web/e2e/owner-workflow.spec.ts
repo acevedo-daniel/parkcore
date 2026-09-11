@@ -10,10 +10,13 @@ const owner: User = {
   createdAt: '2026-08-17T09:00:00.000Z',
   email: 'owner@parkcore.test',
   id: 'owner-1',
+  kind: 'OWNER',
   lastName: null,
   name: 'ParkCore Owner',
   phone: null,
   photoUrl: null,
+  timezone: 'America/Argentina/Buenos_Aires',
+  demoExpiresAt: null,
   updatedAt: '2026-08-17T09:00:00.000Z',
 };
 
@@ -172,7 +175,7 @@ test('signs in, creates a parking, checks in, and completes a parking session', 
   });
 
   await page.goto('/login');
-  await page.getByLabel('Email').fill(owner.email);
+  await page.getByLabel('Email').fill(owner.email ?? '');
   await page.getByLabel('Password').fill('password123');
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL(/\/app$/);

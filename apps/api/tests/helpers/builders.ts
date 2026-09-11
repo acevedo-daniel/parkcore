@@ -12,13 +12,17 @@ export const buildRegisterDto = (
     email: string;
     password: string;
     name: string;
+    lastName: string;
+    timezone: string;
   }>,
 ) => {
   return merge(
     {
       email: `user-${randomUUID()}@parkcore.test`,
       password: 'Passw0rd!123',
-      name: 'Test User',
+      name: 'Test',
+      lastName: 'User',
+      timezone: 'America/Argentina/Buenos_Aires',
     },
     overrides,
   );

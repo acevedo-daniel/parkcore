@@ -60,11 +60,14 @@ describe('auth.service', () => {
 
     const expectedUser = {
       id: createdUser.id,
+      kind: createdUser.kind,
       email: createdUser.email,
       name: createdUser.name,
       lastName: createdUser.lastName,
       phone: createdUser.phone,
       photoUrl: createdUser.photoUrl,
+      timezone: createdUser.timezone,
+      demoExpiresAt: null,
       createdAt: createdUser.createdAt.toISOString(),
       updatedAt: createdUser.updatedAt.toISOString(),
     };
@@ -75,8 +78,14 @@ describe('auth.service', () => {
       email: dto.email,
       passwordHash: 'hashed-password',
       name: dto.name,
+      lastName: dto.lastName,
+      kind: 'OWNER',
+      timezone: dto.timezone,
     });
-    expect(authJwt.signAccessToken).toHaveBeenCalledWith({ sub: createdUser.id });
+    expect(authJwt.signAccessToken).toHaveBeenCalledWith({
+      sub: createdUser.id,
+      kind: createdUser.kind,
+    });
     expect(result).toEqual({
       user: expectedUser,
       accessToken: 'token-123',
@@ -128,11 +137,14 @@ describe('auth.service', () => {
     const result = await login(dto);
     const expectedUser = {
       id: existingUser.id,
+      kind: existingUser.kind,
       email: existingUser.email,
       name: existingUser.name,
       lastName: existingUser.lastName,
       phone: existingUser.phone,
       photoUrl: existingUser.photoUrl,
+      timezone: existingUser.timezone,
+      demoExpiresAt: null,
       createdAt: existingUser.createdAt.toISOString(),
       updatedAt: existingUser.updatedAt.toISOString(),
     };
@@ -142,7 +154,10 @@ describe('auth.service', () => {
       existingUser.passwordHash,
       dto.password,
     );
-    expect(authJwt.signAccessToken).toHaveBeenCalledWith({ sub: existingUser.id });
+    expect(authJwt.signAccessToken).toHaveBeenCalledWith({
+      sub: existingUser.id,
+      kind: existingUser.kind,
+    });
     expect(result).toEqual({
       user: expectedUser,
       accessToken: 'token-456',
@@ -175,6 +190,21 @@ describe('auth.service', () => {
     await expect(promise).rejects.toBeInstanceOf(UnauthorizedError);
     await expect(promise).rejects.toThrow('Invalid email or password');
 
+    expect(authJwt.signAccessToken).not.toHaveBeenCalled();
+  });
+
+  it('denies credential login for a non-owner identity', async () => {
+    const dto = buildLoginDto({ email: 'demo@parkcore.test' });
+    const demoUser = buildUser({
+      email: null,
+      kind: 'DEMO',
+      passwordHash: null,
+    });
+
+    vi.mocked(userRepository.findByEmail).mockResolvedValue(demoUser);
+
+    await expect(login(dto)).rejects.toThrow('Invalid email or password');
+    expect(authPassword.verifyPassword).not.toHaveBeenCalled();
     expect(authJwt.signAccessToken).not.toHaveBeenCalled();
   });
 });

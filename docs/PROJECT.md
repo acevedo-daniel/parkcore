@@ -19,7 +19,9 @@ ParkCore keeps those facts together in one workflow without expanding into reser
 | Actor          | Capabilities                                                                 |
 | -------------- | ---------------------------------------------------------------------------- |
 | Public visitor | Browse, search, filter, and view active parking facilities.                  |
-| Owner/operator | Register, manage a profile and owned parkings, and operate parking sessions. |
+| Owner/operator | Register with first name, last name, email, password, and timezone; manage a profile and owned parkings; and operate parking sessions. |
+
+The API also distinguishes non-credentialed `DEMO` and `SHOWCASE` identities. Demo access is time-bounded; showcase identities cannot operate or edit parking data.
 
 Driver information can be recorded as visit data during check-in, but drivers do not have ParkCore accounts or direct API access.
 
@@ -35,7 +37,7 @@ Driver information can be recorded as visit data during check-in, but drivers do
 
 ### Owner experience
 
-- Register and authenticate as an owner.
+- Register and authenticate as an owner with a valid IANA timezone. The browser supplies its timezone when available, and the API falls back to `America/Argentina/Buenos_Aires`.
 - Manage the owner profile.
 - Create and edit owned parking facilities.
 - Activate or deactivate a parking.
@@ -68,7 +70,7 @@ ParkCore 1.0 intentionally does not include:
 
 ### User and Parking
 
-`User` is the owner/operator identity. Every `Parking` belongs to exactly one user.
+`User` is an identity with one of three kinds: `OWNER`, `DEMO`, or `SHOWCASE`. Owners authenticate with credentials. Demo and showcase identities have no credentials; demo identities include an expiration time. Every `Parking` belongs to exactly one user.
 
 `Parking.isActive` controls operational availability:
 
@@ -128,7 +130,10 @@ totalAmountCents = chargedHours * hourlyRateCents
 ## Business rules
 
 - Only active parkings are exposed through public parking reads.
-- Only the owner may modify a parking or operate its sessions.
+- Credential login is available only to `OWNER` identities.
+- Only an authenticated `OWNER` or unexpired `DEMO` identity may modify a parking or operate its sessions.
+- `SHOWCASE` identities cannot reach owner mutation or operation paths.
+- Demo access tokens expire no later than the associated demo identity.
 - An inactive parking cannot accept a new check-in.
 - A parking cannot exceed its configured number of concurrent active sessions.
 - The same parking/vehicle pair cannot have more than one active session.
@@ -140,7 +145,7 @@ totalAmountCents = chargedHours * hourlyRateCents
 
 ## Product limitations
 
-- `USD` is the only supported currency in ParkCore 1.0.
+- `ARS` and `USD` are supported currencies in ParkCore 1.0.
 - Capacity represents concurrent vehicles, not mapped physical spaces.
 - The public experience is discovery-only: it cannot create or alter parking sessions.
 - Driver/contact data belongs to an individual stay and does not create a customer account.

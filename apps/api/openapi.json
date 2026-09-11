@@ -85,6 +85,15 @@
             "format": "uuid",
             "description": "User UUID"
           },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "OWNER",
+              "DEMO",
+              "SHOWCASE"
+            ],
+            "description": "User identity kind"
+          },
           "email": {
             "type": [
               "string",
@@ -121,6 +130,18 @@
             ],
             "description": "Profile photo URL"
           },
+          "timezone": {
+            "type": "string",
+            "description": "User IANA timezone"
+          },
+          "demoExpiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Demo access expiration time"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time",
@@ -134,11 +155,14 @@
         },
         "required": [
           "id",
+          "kind",
           "email",
           "name",
           "lastName",
           "phone",
           "photoUrl",
+          "timezone",
+          "demoExpiresAt",
           "createdAt",
           "updatedAt"
         ],
@@ -182,13 +206,28 @@
             "type": "string",
             "minLength": 2,
             "maxLength": 50,
-            "description": "User display name",
-            "example": "John Doe"
+            "description": "User first name",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "description": "User last name",
+            "example": "Doe"
+          },
+          "timezone": {
+            "type": "string",
+            "default": "America/Argentina/Buenos_Aires",
+            "description": "User IANA timezone",
+            "example": "America/Argentina/Buenos_Aires"
           }
         },
         "required": [
           "email",
-          "password"
+          "password",
+          "name",
+          "lastName"
         ],
         "additionalProperties": false
       },

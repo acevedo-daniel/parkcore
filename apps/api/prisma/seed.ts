@@ -42,6 +42,8 @@ interface DemoParking {
 }
 
 export const DEFAULT_SEED_REFERENCE_TIME = '2026-01-15T12:00:00.000Z';
+export const DEFAULT_DEMO_USER_ID = '00000000-0000-4000-8000-000000000010';
+export const DEMO_TTL_MS = 4 * 60 * 60 * 1000;
 export const CANONICAL_SEED_EXPECTATIONS = {
   parkings: 4,
   sessions: 24,
@@ -455,12 +457,14 @@ async function main(): Promise<void> {
   const adapter = new PrismaPg({ connectionString: databaseUrl });
   const prisma = new PrismaClient({ adapter });
   const ownerEmail = process.env.SEED_OWNER_EMAIL ?? 'owner@parkcore.dev';
+  const demoUserId = process.env.DEMO_USER_ID ?? DEFAULT_DEMO_USER_ID;
   const ownerPassword = process.env.SEED_OWNER_PASSWORD ?? randomBytes(32).toString('base64url');
   const referenceTime = getReferenceTime();
   const passwordHash = await argon2.hash(ownerPassword);
+  const demoExpiresAt = new Date(Date.now() + DEMO_TTL_MS);
 
   const owner = await prisma.$transaction(async (transaction) => {
-    const demoOwner = await transaction.user.upsert({
+    const owner = await transaction.user.upsert({
       where: { email: ownerEmail },
       update: {
         passwordHash,
@@ -482,9 +486,36 @@ async function main(): Promise<void> {
       },
     });
 
-    await restoreCanonicalDemoData(transaction, demoOwner.id, referenceTime);
+    await restoreCanonicalDemoData(transaction, owner.id, referenceTime);
 
-    return demoOwner;
+    const demo = await transaction.user.upsert({
+      where: { id: demoUserId },
+      update: {
+        email: null,
+        passwordHash: null,
+        kind: 'DEMO',
+        name: 'Demo',
+        lastName: 'Operator',
+        phone: null,
+        photoUrl: null,
+        timezone: 'America/Argentina/Buenos_Aires',
+        demoExpiresAt,
+      },
+      create: {
+        id: demoUserId,
+        email: null,
+        passwordHash: null,
+        kind: 'DEMO',
+        name: 'Demo',
+        lastName: 'Operator',
+        timezone: 'America/Argentina/Buenos_Aires',
+        demoExpiresAt,
+      },
+    });
+
+    await restoreCanonicalDemoData(transaction, demo.id, referenceTime);
+
+    return owner;
   });
 
   const [

@@ -47,11 +47,14 @@ describe('user.service', () => {
       expect(userRepository.findById).toHaveBeenCalledWith('user-1');
       expect(result).toEqual({
         id: user.id,
+        kind: user.kind,
         email: user.email,
         name: user.name,
         lastName: user.lastName,
         phone: user.phone,
         photoUrl: user.photoUrl,
+        timezone: user.timezone,
+        demoExpiresAt: null,
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
       });
@@ -84,11 +87,14 @@ describe('user.service', () => {
       expect(userRepository.update).toHaveBeenCalledWith('user-1', updateData);
       expect(result).toEqual({
         id: updatedUser.id,
+        kind: updatedUser.kind,
         email: updatedUser.email,
         name: updatedUser.name,
         lastName: updatedUser.lastName,
         phone: updatedUser.phone,
         photoUrl: updatedUser.photoUrl,
+        timezone: updatedUser.timezone,
+        demoExpiresAt: null,
         createdAt: updatedUser.createdAt.toISOString(),
         updatedAt: updatedUser.updatedAt.toISOString(),
       });

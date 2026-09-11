@@ -91,6 +91,8 @@ Its main state boundaries are:
 
 The web application persists the owner's access token in browser `localStorage` and supplies it to the generated API client. Authorization remains enforced by the API on every protected request.
 
+Access tokens carry the authenticated identity kind. Credential login issues tokens only for `OWNER` identities. `DEMO` tokens are bounded by the demo identity expiration, while `SHOWCASE` tokens may read identity data but are rejected from parking mutation and operation paths.
+
 ## Hosted topology
 
 Production keeps a small, explicit topology:
@@ -111,7 +113,8 @@ Provider-specific SDKs are not part of the application architecture; hosting con
 ## Invariants
 
 - **API authority:** browser state is never trusted as authorization or domain truth.
-- **Parking ownership:** protected parking/session operations are scoped to the authenticated owner.
+- **Identity-aware authorization:** protected parking/session operations accept only authenticated `OWNER` or unexpired `DEMO` identities, and remain scoped to the token subject.
+- **Credential boundary:** only `OWNER` identities have credential login; `DEMO` and `SHOWCASE` responses never expose credentials.
 - **Contract boundary:** the web application consumes the API through the generated client.
 - **Persistence authority:** PostgreSQL constraints and transactions reinforce critical session invariants.
 - **Pricing history:** a session owns the pricing snapshot used to calculate its completed total.

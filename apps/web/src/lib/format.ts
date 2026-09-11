@@ -2,7 +2,7 @@ function locale() {
   return document.documentElement.lang === 'en-US' ? 'en-US' : 'es-AR';
 }
 
-export function formatMoney(cents: number, currency: 'USD' = 'USD') {
+export function formatMoney(cents: number, currency: 'ARS' | 'USD' = 'USD') {
   return new Intl.NumberFormat(locale(), { style: 'currency', currency }).format(cents / 100);
 }
 

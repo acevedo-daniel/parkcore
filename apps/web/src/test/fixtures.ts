@@ -56,10 +56,13 @@ export function userFixture(overrides: Partial<User> = {}): User {
     createdAt: '2026-08-17T09:00:00.000Z',
     email: 'owner@parkcore.test',
     id: 'owner-1',
+    kind: 'OWNER',
     lastName: null,
     name: 'ParkCore Owner',
     phone: null,
     photoUrl: null,
+    timezone: 'America/Argentina/Buenos_Aires',
+    demoExpiresAt: null,
     updatedAt: '2026-08-17T09:00:00.000Z',
     ...overrides,
   };

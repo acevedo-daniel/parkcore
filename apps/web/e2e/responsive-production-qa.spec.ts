@@ -165,8 +165,10 @@ test('keeps the deployed public and owner surfaces usable at production viewport
     const registerResponse = await page.request.post(`${apiBaseUrl}/auth/register`, {
       data: {
         email,
-        name: 'Responsive Production QA',
+        lastName: 'QA',
+        name: 'Responsive Production',
         password: 'ParkCoreResponsiveQA!',
+        timezone: 'America/Argentina/Buenos_Aires',
       },
     });
     expect(registerResponse.status()).toBe(201);

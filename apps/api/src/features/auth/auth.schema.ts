@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { userResponseSchema } from '../user/user.schema.js';
+import { DEFAULT_TIMEZONE, isValidIanaTimezone } from '../../utils/timezone.js';
 
 export const registerSchema = z
   .strictObject({
@@ -21,8 +22,22 @@ export const registerSchema = z
       .trim()
       .min(2, { error: 'Min 2 chars' })
       .max(50, { error: 'Max 50 chars' })
+      .openapi({ description: 'User first name', example: 'John' }),
+
+    lastName: z
+      .string()
+      .trim()
+      .min(2, { error: 'Min 2 chars' })
+      .max(50, { error: 'Max 50 chars' })
+      .openapi({ description: 'User last name', example: 'Doe' }),
+
+    timezone: z
+      .string()
+      .trim()
+      .refine(isValidIanaTimezone, { error: 'Invalid IANA timezone' })
       .optional()
-      .openapi({ description: 'User display name', example: 'John Doe' }),
+      .default(DEFAULT_TIMEZONE)
+      .openapi({ description: 'User IANA timezone', example: DEFAULT_TIMEZONE }),
   })
   .openapi('RegisterRequest');
 
