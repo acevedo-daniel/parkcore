@@ -263,6 +263,9 @@ export function LandingRoute() {
             <p className="mt-6 max-w-lg text-base leading-relaxed sm:text-lg">
               {t('public.landing.operationsDescription')}
             </p>
+            <p className="mt-4 text-sm font-semibold text-accent-foreground/75">
+              {t('public.landing.operationsNote')}
+            </p>
           </div>
           <ol className="grid gap-4 lg:col-span-6 lg:col-start-7">
             {OPERATION_ITEMS.map((item, index) => (

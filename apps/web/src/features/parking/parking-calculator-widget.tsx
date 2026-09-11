@@ -6,23 +6,32 @@ import { Link } from 'react-router';
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Combobox } from '../../components/ui/combobox.js';
 import { Button } from '../../components/ui/button.js';
+import { Field, Input } from '../../components/ui/field.js';
 import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { getPublicParkings, type PublicParking } from '../../lib/api/public-api.js';
 import { cn } from '../../lib/cn.js';
-import { formatMoney } from '../../lib/format.js';
+import { formatMoney, formatNumber } from '../../lib/format.js';
 import type { Locale, MessageKey } from '../../lib/localization.js';
+import { calculateParkingEstimate } from './parking-estimate.js';
 
 const DURATION_OPTIONS = [
-  { hours: 1, label: 'calculator.oneHour' },
-  { hours: 2, label: 'calculator.twoHours' },
-  { hours: 4, label: 'calculator.fourHours' },
-  { hours: 8, label: 'calculator.eightHours' },
-] as const satisfies readonly { hours: number; label: MessageKey }[];
+  { durationMinutes: 60, id: 'one-hour', label: 'calculator.oneHour' },
+  { durationMinutes: 120, id: 'two-hours', label: 'calculator.twoHours' },
+  { durationMinutes: 240, id: 'four-hours', label: 'calculator.fourHours' },
+  { durationMinutes: 480, id: 'eight-hours', label: 'calculator.eightHours' },
+  { durationMinutes: null, id: 'custom', label: 'calculator.custom' },
+] as const satisfies readonly {
+  durationMinutes: number | null;
+  id: string;
+  label: MessageKey;
+}[];
+
+type DurationOptionId = (typeof DURATION_OPTIONS)[number]['id'];
 
 export function ParkingCalculatorWidget({ className }: { className?: string }) {
   const { locale, t } = useAppearance();
   const [selectedId, setSelectedId] = useState('');
-  const [selectedHours, setSelectedHours] = useState(2);
+  const [selectedDuration, setSelectedDuration] = useState<DurationOptionId>('two-hours');
 
   const parkingsQuery = useQuery({
     queryKey: ['public-parkings-widget'],
@@ -86,9 +95,9 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
           facilities={availableFacilities}
           locale={locale}
           onFacilityChange={setSelectedId}
-          onHoursChange={setSelectedHours}
+          onDurationChange={setSelectedDuration}
           selectedFacility={selectedFacility}
-          selectedHours={selectedHours}
+          selectedDuration={selectedDuration}
           selectedId={selectedFacility.id}
         />
       )}
@@ -124,23 +133,46 @@ interface CalculatorFormProps {
     hourlyRateCents: number;
     currency: PublicParking['currency'];
   };
-  selectedHours: number;
+  selectedDuration: DurationOptionId;
   selectedId: string;
   onFacilityChange: (id: string) => void;
-  onHoursChange: (hours: number) => void;
+  onDurationChange: (duration: DurationOptionId) => void;
 }
 
 function CalculatorForm({
   facilities,
   locale,
   onFacilityChange,
-  onHoursChange,
+  onDurationChange,
   selectedFacility,
-  selectedHours,
+  selectedDuration,
   selectedId,
 }: CalculatorFormProps) {
   const { t, tPlural } = useAppearance();
-  const totalCents = selectedFacility.hourlyRateCents * selectedHours;
+  const [customDurationMinutes, setCustomDurationMinutes] = useState('');
+  const selectedDurationOption = DURATION_OPTIONS.find((option) => option.id === selectedDuration);
+  const parsedCustomDuration = parseCustomDuration(customDurationMinutes);
+  const selectedDurationMinutes = selectedDurationOption?.durationMinutes ?? parsedCustomDuration;
+  const estimate =
+    selectedDurationMinutes === null
+      ? null
+      : calculateParkingEstimate(selectedDurationMinutes, selectedFacility.hourlyRateCents);
+  const customDurationError =
+    selectedDuration === 'custom'
+      ? customDurationMinutes.trim() === ''
+        ? t('calculator.durationRequired')
+        : parsedCustomDuration === null
+          ? t('calculator.invalidDuration')
+          : undefined
+      : undefined;
+  const durationSummary =
+    selectedDuration === 'custom'
+      ? parsedCustomDuration === null
+        ? t('calculator.durationPending')
+        : `${formatNumber(parsedCustomDuration, locale)} ${tPlural(parsedCustomDuration, { one: 'calculator.minute', other: 'calculator.minutes' })}`
+      : selectedDurationOption
+        ? `${formatNumber((selectedDurationOption.durationMinutes ?? 0) / 60, locale)} ${tPlural((selectedDurationOption.durationMinutes ?? 0) / 60, { one: 'calculator.hour', other: 'calculator.hours' })}`
+        : '';
 
   return (
     <>
@@ -152,6 +184,7 @@ function CalculatorForm({
           <Combobox
             className="min-w-0 flex-1"
             id="estimate-facility"
+            key={facilities.map((facility) => facility.id).join('|')}
             label={t('calculator.facility')}
             onValueChange={(id) => {
               onFacilityChange(id);
@@ -163,7 +196,9 @@ function CalculatorForm({
             <span className="font-mono text-xs font-bold tabular-nums text-foreground">
               {formatMoney(selectedFacility.hourlyRateCents, selectedFacility.currency, locale)}
             </span>
-            <span className="block text-[10px] text-foreground-muted">/ h</span>
+            <span className="block text-[10px] text-foreground-muted">
+              {t('calculator.perHour')}
+            </span>
           </span>
         </div>
       </div>
@@ -175,22 +210,21 @@ function CalculatorForm({
             {t('calculator.estimatedStay')}
           </span>
           <span className="font-mono text-xs font-bold tabular-nums text-foreground">
-            {selectedHours}{' '}
-            {tPlural(selectedHours, { one: 'calculator.hour', other: 'calculator.hours' })}
+            {durationSummary}
           </span>
         </div>
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-5">
           {DURATION_OPTIONS.map((option) => (
             <button
               className={cn(
                 'min-h-10 cursor-pointer rounded-[var(--radius-sm)] px-1 py-2 text-center text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring',
-                selectedHours === option.hours
+                selectedDuration === option.id
                   ? 'bg-primary text-primary-foreground'
                   : 'border border-border bg-surface text-foreground hover:bg-accent hover:text-accent-foreground',
               )}
-              key={option.hours}
+              key={option.id}
               onClick={() => {
-                onHoursChange(option.hours);
+                onDurationChange(option.id);
               }}
               type="button"
             >
@@ -198,6 +232,29 @@ function CalculatorForm({
             </button>
           ))}
         </div>
+        {selectedDuration === 'custom' ? (
+          <div className="mt-4 border-t border-border-subtle pt-4">
+            <Field
+              error={customDurationError}
+              help={customDurationError ? undefined : t('calculator.customDurationHelp')}
+              htmlFor="estimate-custom-duration"
+              label={t('calculator.customDurationLabel')}
+            >
+              <Input
+                id="estimate-custom-duration"
+                inputMode="numeric"
+                min={1}
+                onChange={(event) => {
+                  setCustomDurationMinutes(event.target.value);
+                }}
+                placeholder={t('calculator.customDurationPlaceholder')}
+                step={1}
+                type="number"
+                value={customDurationMinutes}
+              />
+            </Field>
+          </div>
+        ) : null}
       </div>
 
       <div className="my-5 px-1 text-xs">
@@ -207,11 +264,24 @@ function CalculatorForm({
               {t('calculator.estimateLabel')}
             </span>
             <span className="text-[11px] text-foreground-muted">
-              {t('calculator.estimateBasis')}
+              {estimate
+                ? tPlural(estimate.chargedHours, {
+                    one: 'calculator.chargedHour',
+                    other: 'calculator.chargedHours',
+                  })
+                : t('calculator.estimatePending')}
             </span>
           </div>
-          <span className="font-display text-3xl font-bold tracking-tight tabular-nums text-foreground">
-            {formatMoney(totalCents, selectedFacility.currency, locale)}
+          <span
+            aria-live="polite"
+            className={cn(
+              'font-display text-3xl font-bold tracking-tight tabular-nums text-foreground',
+              !estimate && 'max-w-40 text-right text-base leading-tight text-foreground-secondary',
+            )}
+          >
+            {estimate
+              ? formatMoney(estimate.totalAmountCents, selectedFacility.currency, locale)
+              : t('calculator.estimateUnavailable')}
           </span>
         </div>
       </div>
@@ -231,4 +301,10 @@ function CalculatorForm({
       </p>
     </>
   );
+}
+
+function parseCustomDuration(value: string): number | null {
+  if (value.trim() === '') return null;
+  const durationMinutes = Number(value);
+  return Number.isInteger(durationMinutes) && durationMinutes > 0 ? durationMinutes : null;
 }

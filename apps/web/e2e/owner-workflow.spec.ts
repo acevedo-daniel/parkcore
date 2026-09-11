@@ -75,6 +75,8 @@ test('keeps public mobile navigation and main content usable with a keyboard', a
   const signIn = menu.getByRole('link', { name: 'Sign in' });
   await signIn.focus();
   await page.keyboard.press('Shift+Tab');
+  await expect(menu.getByRole('link', { name: 'How it works' })).toBeFocused();
+  await page.keyboard.press('Shift+Tab');
   await expect(menu.getByRole('link', { name: 'Parkings' })).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(menu).toBeHidden();
