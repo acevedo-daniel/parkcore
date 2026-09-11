@@ -11,6 +11,7 @@ import {
   restoreCanonicalScenario,
   type CanonicalDatabaseClient,
 } from '../src/data/canonical-scenario.js';
+import { CANONICAL_SHOWCASE_USER_ID, refreshCanonicalShowcase } from '../src/data/showcase.js';
 
 export const DEFAULT_SEED_REFERENCE_TIME = CANONICAL_REFERENCE_TIME;
 export const DEFAULT_DEMO_USER_ID = '00000000-0000-4000-8000-000000000010';
@@ -111,6 +112,7 @@ async function main(): Promise<void> {
       },
     });
     await restoreCanonicalDemoData(transaction, demo.id, referenceTime);
+    await refreshCanonicalShowcase(transaction, referenceTime);
 
     return { owner, demo };
   });
@@ -125,6 +127,9 @@ async function main(): Promise<void> {
     oldestSession,
     demoParkingCount,
     demoSessionCount,
+    showcaseParkingCount,
+    showcaseListedActiveCount,
+    showcasePausedUnlistedCount,
   ] = await Promise.all([
     prisma.parking.count({ where: { ownerId: owner.id } }),
     prisma.vehicle.count({ where: { parking: { ownerId: owner.id } } }),
@@ -145,6 +150,13 @@ async function main(): Promise<void> {
     }),
     prisma.parking.count({ where: { ownerId: demo.id } }),
     prisma.parkingSession.count({ where: { parking: { ownerId: demo.id } } }),
+    prisma.parking.count({ where: { ownerId: CANONICAL_SHOWCASE_USER_ID } }),
+    prisma.parking.count({
+      where: { ownerId: CANONICAL_SHOWCASE_USER_ID, isActive: true, isListed: true },
+    }),
+    prisma.parking.count({
+      where: { ownerId: CANONICAL_SHOWCASE_USER_ID, isActive: false, isListed: false },
+    }),
   ]);
 
   const oldestAllowed = new Date(
@@ -165,10 +177,13 @@ async function main(): Promise<void> {
     oldestSession.startTime < oldestAllowed ||
     oldestSession.startTime > newestAllowed ||
     demoParkingCount !== CANONICAL_SEED_EXPECTATIONS.facilities ||
-    demoSessionCount !== CANONICAL_SEED_EXPECTATIONS.totalSessions
+    demoSessionCount !== CANONICAL_SEED_EXPECTATIONS.totalSessions ||
+    showcaseParkingCount !== CANONICAL_SEED_EXPECTATIONS.facilities ||
+    showcaseListedActiveCount !== CANONICAL_SEED_EXPECTATIONS.listedActiveFacilities ||
+    showcasePausedUnlistedCount !== CANONICAL_SEED_EXPECTATIONS.pausedUnlistedFacilities
   ) {
     throw new Error(
-      `Canonical seed assertions failed: facilities=${String(parkingCount)}, vehicles=${String(vehicleCount)}, sessions=${String(sessionCount)}, active=${String(activeSessions)}, completed=${String(completedSessions)}, cancelled=${String(cancelledSessions)}, oldest=${oldestSessionIso}, demoFacilities=${String(demoParkingCount)}, demoSessions=${String(demoSessionCount)}, currency=${CANONICAL_CURRENCY}`,
+      `Canonical seed assertions failed: facilities=${String(parkingCount)}, vehicles=${String(vehicleCount)}, sessions=${String(sessionCount)}, active=${String(activeSessions)}, completed=${String(completedSessions)}, cancelled=${String(cancelledSessions)}, oldest=${oldestSessionIso}, demoFacilities=${String(demoParkingCount)}, demoSessions=${String(demoSessionCount)}, showcaseFacilities=${String(showcaseParkingCount)}, showcaseListedActive=${String(showcaseListedActiveCount)}, showcasePausedUnlisted=${String(showcasePausedUnlistedCount)}, currency=${CANONICAL_CURRENCY}`,
     );
   }
 

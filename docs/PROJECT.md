@@ -83,6 +83,8 @@ ParkCore 1.0 intentionally does not include:
 
 A parking also owns its configured capacity, hourly rate, currency, location, and the vehicles and sessions associated with that facility.
 
+The canonical SHOWCASE identity is a stable, non-credentialed account created by database setup. It owns six fictional Buenos Aires facilities: five listed active facilities used by public discovery and one paused unlisted facility retained as operational proof. The `showcase:refresh` maintenance command rebases its time-dependent sessions around an optional reference time without changing facility or asset identity. SHOWCASE data is read-only through the application and is always marked as fictional demonstration data in public responses.
+
 ### Vehicle
 
 `Vehicle` represents stable vehicle identity within one parking.

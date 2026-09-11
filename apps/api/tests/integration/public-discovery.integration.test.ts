@@ -55,9 +55,9 @@ describe('public discovery integration', () => {
     const createParking = (ownerId: string, title: string, overrides = {}) =>
       prisma.parking.create({
         data: {
-          title,
+          title: `${title} ${suffix}`,
           neighborhood: 'Palermo',
-          address: `${title} Street`,
+          address: `${title} ${suffix} Street`,
           hourlyRateCents: 1500,
           currency: 'USD',
           capacity: 5,
@@ -98,14 +98,15 @@ describe('public discovery integration', () => {
     }
     await addActiveSession(full.id, `FUL${suffix.slice(0, 5)}`);
 
-    const listResponse = await request(app).get('/parkings?limit=2&page=1');
+    const search = encodeURIComponent(suffix);
+    const listResponse = await request(app).get(`/parkings?search=${search}&limit=2&page=1`);
     const listBody = listResponse.body as unknown as PublicListBody;
 
     expect(listResponse.status).toBe(200);
     expect(listBody.data.map(({ id }) => id)).toEqual([available.id, showcaseParking.id]);
     expect(listBody.meta).toMatchObject({ total: 4, totalPages: 2 });
 
-    const secondPageResponse = await request(app).get('/parkings?limit=2&page=2');
+    const secondPageResponse = await request(app).get(`/parkings?search=${search}&limit=2&page=2`);
     const secondPageBody = secondPageResponse.body as unknown as PublicListBody;
     expect(secondPageBody.data.map(({ id }) => id)).toEqual([limited.id, full.id]);
     expect(secondPageBody.data[0]).toMatchObject({
@@ -127,7 +128,7 @@ describe('public discovery integration', () => {
       status: 404,
     });
 
-    const availableNow = await request(app).get('/parkings?availableNow=true');
+    const availableNow = await request(app).get(`/parkings?search=${search}&availableNow=true`);
     const availableNowBody = availableNow.body as unknown as PublicListBody;
     expect(availableNow.status).toBe(200);
     expect(availableNowBody.data.map(({ id }) => id)).toEqual([

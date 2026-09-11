@@ -75,27 +75,28 @@ Typical local URLs:
 
 ## Root commands
 
-| Task                     | Command                                      | Purpose                                                           |
-| ------------------------ | -------------------------------------------- | ----------------------------------------------------------------- |
-| Start database           | `pnpm docker:up`                             | Start local PostgreSQL.                                           |
-| Stop database            | `pnpm docker:down`                           | Stop local PostgreSQL without deleting its volume.                |
-| Reset database container | `pnpm docker:reset`                          | Remove the local volume and start a clean database. Destructive.  |
-| Start isolated E2E DB    | `pnpm e2e:local:db:up`                       | Start the disposable PostgreSQL service for local real-stack E2E. |
-| Stop isolated E2E DB     | `pnpm e2e:local:db:down`                     | Remove the disposable PostgreSQL service and its data.            |
-| Prepare database         | `pnpm db:setup`                              | Generate Prisma, apply committed migrations, and seed demo data.  |
-| Develop                  | `pnpm dev`                                   | Run API and web in parallel.                                      |
-| Format check             | `pnpm format:check`                          | Verify repository formatting.                                     |
-| Authored text check      | `pnpm text:check`                            | Reject forbidden em dash characters in authored repository text.  |
-| Lint                     | `pnpm lint`                                  | Run lint checks across API, client, and web workspaces.           |
-| Typecheck                | `pnpm typecheck`                             | Type-check the TypeScript workspaces.                             |
-| Test                     | `pnpm test`                                  | Run API and web test suites.                                      |
-| Coverage                 | `pnpm test:coverage`                         | Run coverage-enforced API and web tests.                          |
-| E2E                      | `pnpm --filter @parkcore/web test:e2e`       | Run the default mocked browser workflow.                          |
-| Local real-stack E2E     | `pnpm --filter @parkcore/web test:e2e:local` | Run the owner workflow against local API and PostgreSQL.          |
-| Generate contract        | `pnpm contract:generate`                     | Regenerate OpenAPI and the TypeScript API client.                 |
-| Verify contract          | `pnpm contract:check`                        | Fail if regenerated contract artifacts differ from Git.           |
-| Build                    | `pnpm build`                                 | Generate the contract and build API, client, and web.             |
-| Release checks           | `pnpm release:readiness`                     | Run lint, types, coverage, contract, build, and E2E checks.       |
+| Task                     | Command                                        | Purpose                                                               |
+| ------------------------ | ---------------------------------------------- | --------------------------------------------------------------------- |
+| Start database           | `pnpm docker:up`                               | Start local PostgreSQL.                                               |
+| Stop database            | `pnpm docker:down`                             | Stop local PostgreSQL without deleting its volume.                    |
+| Reset database container | `pnpm docker:reset`                            | Remove the local volume and start a clean database. Destructive.      |
+| Start isolated E2E DB    | `pnpm e2e:local:db:up`                         | Start the disposable PostgreSQL service for local real-stack E2E.     |
+| Stop isolated E2E DB     | `pnpm e2e:local:db:down`                       | Remove the disposable PostgreSQL service and its data.                |
+| Prepare database         | `pnpm db:setup`                                | Generate Prisma, apply committed migrations, and seed demo data.      |
+| Refresh public showcase  | `pnpm --filter @parkcore/api showcase:refresh` | Rebase canonical SHOWCASE activity around an optional reference time. |
+| Develop                  | `pnpm dev`                                     | Run API and web in parallel.                                          |
+| Format check             | `pnpm format:check`                            | Verify repository formatting.                                         |
+| Authored text check      | `pnpm text:check`                              | Reject forbidden em dash characters in authored repository text.      |
+| Lint                     | `pnpm lint`                                    | Run lint checks across API, client, and web workspaces.               |
+| Typecheck                | `pnpm typecheck`                               | Type-check the TypeScript workspaces.                                 |
+| Test                     | `pnpm test`                                    | Run API and web test suites.                                          |
+| Coverage                 | `pnpm test:coverage`                           | Run coverage-enforced API and web tests.                              |
+| E2E                      | `pnpm --filter @parkcore/web test:e2e`         | Run the default mocked browser workflow.                              |
+| Local real-stack E2E     | `pnpm --filter @parkcore/web test:e2e:local`   | Run the owner workflow against local API and PostgreSQL.              |
+| Generate contract        | `pnpm contract:generate`                       | Regenerate OpenAPI and the TypeScript API client.                     |
+| Verify contract          | `pnpm contract:check`                          | Fail if regenerated contract artifacts differ from Git.               |
+| Build                    | `pnpm build`                                   | Generate the contract and build API, client, and web.                 |
+| Release checks           | `pnpm release:readiness`                       | Run lint, types, coverage, contract, build, and E2E checks.           |
 
 A production-style web build requires `VITE_API_URL`. For a reproducible verification checkout, use `pnpm install --frozen-lockfile`; CI uses the locked form in every job that installs dependencies.
 
@@ -122,7 +123,7 @@ pnpm db:setup
 
 1. Prisma client generation;
 2. committed migration deployment;
-3. demo seeding.
+3. canonical OWNER, SHOWCASE, and DEMO seeding.
 
 Schema changes use committed forward migrations. Use Prisma development commands from the API workspace when creating a new migration, and never edit an already-applied migration to change history.
 
@@ -134,13 +135,13 @@ Schema changes use committed forward migrations. Use Prisma development commands
 - If a production-style web build fails because the API URL is missing, set `VITE_API_URL` to the API base URL before running `pnpm build`. This value is browser-visible and must not contain secrets.
 - If dependency installation reports a lockfile mismatch, do not update dependencies as part of a verification run. Reconcile the manifest and lockfile in a separate change, then rerun `pnpm install --frozen-lockfile`.
 
-## Demo seed
+## Canonical data
 
-The seed provides a coherent development/demo state around a named owner and a small set of parking facilities. It includes active, completed, and cancelled sessions and pricing snapshots so both the public and owner flows have meaningful data.
+The seed creates a named credentialed OWNER, the stable non-credentialed SHOWCASE identity, and the configured DEMO identity. Each receives the deterministic six-facility scenario with active, completed, and cancelled sessions, pricing snapshots, returning vehicles, and canonical Buenos Aires ARS data. SHOWCASE owns five listed active facilities and one paused unlisted facility; OWNER and DEMO facilities remain unlisted.
 
-The seed is designed for development/demo use, not production data.
+The seed is designed for development/demo use, not production data. It is safe to rerun for the same identities.
 
-An optional `SEED_REFERENCE_TIME` can be used when reproducible session timestamps are needed.
+An optional `SEED_REFERENCE_TIME` can be used when reproducible session timestamps are needed. Run `pnpm --filter @parkcore/api showcase:refresh` to rebase only the canonical SHOWCASE records around the current time. Pass an ISO-8601 timestamp after `--`, or set `SHOWCASE_REFERENCE_TIME`, when a fixed reference time is required.
 
 ## Dependency note
 

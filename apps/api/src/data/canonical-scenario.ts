@@ -404,27 +404,68 @@ export type CanonicalDatabaseClient = PrismaClientLike | Prisma.TransactionClien
 
 type PrismaClientLike = Pick<PrismaClient, 'user' | 'parking' | 'vehicle' | 'parkingSession'>;
 
+const getPersistedScenario = async (
+  client: CanonicalDatabaseClient,
+  ownerId: string,
+  referenceTime: Date,
+): Promise<CanonicalScenario> => {
+  const scenario = buildCanonicalScenario(ownerId, referenceTime);
+  const owner = await client.user.findUnique({ where: { id: ownerId }, select: { kind: true } });
+  if (!owner) throw new Error(`Canonical scenario owner not found: ${ownerId}`);
+
+  return owner.kind === 'SHOWCASE'
+    ? scenario
+    : {
+        ...scenario,
+        facilities: scenario.facilities.map((facility) => ({ ...facility, isListed: false })),
+      };
+};
+
+const persistScenario = async (
+  client: CanonicalDatabaseClient,
+  scenario: CanonicalScenario,
+  preserveFacilities: boolean,
+): Promise<void> => {
+  if (!preserveFacilities) {
+    await client.parking.deleteMany({ where: { ownerId: scenario.facilities[0].ownerId } });
+    await client.parking.createMany({ data: scenario.facilities });
+  } else {
+    const ownerId = scenario.facilities[0].ownerId;
+    const facilityIds = scenario.facilities.map((facility) => facility.id);
+    await client.parkingSession.deleteMany({ where: { parking: { ownerId } } });
+    await client.vehicle.deleteMany({ where: { parking: { ownerId } } });
+    await client.parking.deleteMany({ where: { ownerId, id: { notIn: facilityIds } } });
+
+    for (const facility of scenario.facilities) {
+      const { id, ownerId: facilityOwnerId, ...parkingData } = facility;
+      await client.parking.upsert({
+        where: { id },
+        update: parkingData,
+        create: { id, ownerId: facilityOwnerId, ...parkingData },
+      });
+    }
+  }
+
+  await client.vehicle.createMany({ data: scenario.vehicles });
+  await client.parkingSession.createMany({ data: scenario.sessions });
+};
+
 export async function restoreCanonicalScenario(
   client: CanonicalDatabaseClient,
   ownerId: string,
   referenceTime: Date,
 ): Promise<CanonicalScenario> {
-  const scenario = buildCanonicalScenario(ownerId, referenceTime);
-  const owner = await client.user.findUnique({ where: { id: ownerId }, select: { kind: true } });
-  if (!owner) throw new Error(`Canonical scenario owner not found: ${ownerId}`);
+  const scenario = await getPersistedScenario(client, ownerId, referenceTime);
+  await persistScenario(client, scenario, false);
+  return scenario;
+}
 
-  const persistedScenario =
-    owner.kind === 'SHOWCASE'
-      ? scenario
-      : {
-          ...scenario,
-          facilities: scenario.facilities.map((facility) => ({ ...facility, isListed: false })),
-        };
-
-  await client.parking.deleteMany({ where: { ownerId } });
-  await client.parking.createMany({ data: persistedScenario.facilities });
-  await client.vehicle.createMany({ data: persistedScenario.vehicles });
-  await client.parkingSession.createMany({ data: persistedScenario.sessions });
-
-  return persistedScenario;
+export async function refreshCanonicalScenario(
+  client: CanonicalDatabaseClient,
+  ownerId: string,
+  referenceTime: Date,
+): Promise<CanonicalScenario> {
+  const scenario = await getPersistedScenario(client, ownerId, referenceTime);
+  await persistScenario(client, scenario, true);
+  return scenario;
 }
