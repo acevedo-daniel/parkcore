@@ -5,13 +5,22 @@ import { Link, useParams } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { CheckInPanel } from '../../components/domain/check-in-panel.js';
+import { CheckInSuccess } from '../../components/domain/check-in-success.js';
+import { OccupancyMeter } from '../../components/domain/parking.js';
 import { SessionRow } from '../../components/domain/session.js';
+import { AvailabilityIndicator } from '../../components/domain/availability-indicator.js';
+import { PageHeader } from '../../components/domain/page-header.js';
 import { Button } from '../../components/ui/button.js';
 import { Sheet } from '../../components/ui/dialog.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { useToast } from '../../components/ui/toast-context.js';
 import { localizeApiError } from '../../lib/api/api-error.js';
-import { checkIn, getActiveSessions, getOwnedParkings } from '../../lib/api/owner-api.js';
+import {
+  checkIn,
+  getActiveSessions,
+  getOwnedParkings,
+  type ParkingSession,
+} from '../../lib/api/owner-api.js';
 import { normalizePlate } from '../../lib/plate.js';
 import { useDebouncedValue } from '../../lib/use-debounced-value.js';
 
@@ -22,6 +31,7 @@ export function OwnerParkingOverviewRoute() {
   const { showToast } = useToast();
   const [checkInOpen, setCheckInOpen] = useState(false);
   const [checkInError, setCheckInError] = useState<string>();
+  const [checkInSuccess, setCheckInSuccess] = useState<ParkingSession>();
   const [plateSearch, setPlateSearch] = useState('');
   const debouncedPlateSearch = useDebouncedValue(normalizePlate(plateSearch), 250);
   const parkingsQuery = useQuery({ queryKey: ['owned-parkings'], queryFn: getOwnedParkings });
@@ -82,41 +92,16 @@ export function OwnerParkingOverviewRoute() {
 
   const activeSessions = activeSessionsQuery.data;
   const occupancy = occupancyQuery.data?.length ?? 0;
-  const occupancyPercent =
-    parking.capacity === 0 ? 0 : Math.min(100, Math.round((occupancy / parking.capacity) * 100));
-  const available = Math.max(0, parking.capacity - occupancy);
   const openCheckIn = () => {
     if (parking.isActive) setCheckInOpen(true);
   };
 
   return (
     <section className="owner-page space-y-9" aria-labelledby="parking-overview-title">
-      <header className="border-b border-border-strong pb-7">
-        <Link
-          className="inline-flex items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
-          to="/app/parkings"
-        >
-          <ChevronLeft aria-hidden="true" className="size-4" />
-          {t('parkingOperation.allFacilities')}
-        </Link>
-        <div className="mt-7 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-          <div className="max-w-2xl">
-            <p className="type-label text-foreground-muted">{t('parkingOperation.eyebrow')}</p>
-            <h1
-              className="mt-3 font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] sm:text-5xl"
-              id="parking-overview-title"
-            >
-              {parking.title}
-            </h1>
-            <p className="mt-4 flex items-start gap-2 text-base leading-relaxed text-foreground-secondary">
-              <MapPin aria-hidden="true" className="mt-1 size-4 shrink-0" />
-              {parking.address}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-border-strong px-3 py-2 text-xs font-bold">
-              {parking.isActive ? t('parkingOperation.operating') : t('parkingOperation.paused')}
-            </span>
+      <PageHeader
+        actions={
+          <>
+            <AvailabilityIndicator state={parking.isActive ? 'AVAILABLE' : 'PAUSED'} />
             <Button asChild size="sm" variant="outline">
               <Link
                 aria-label={t('parkingOperation.editAria', { title: parking.title })}
@@ -125,9 +110,27 @@ export function OwnerParkingOverviewRoute() {
                 <Pencil aria-hidden="true" className="size-3.5" /> {t('parkingOperation.edit')}
               </Link>
             </Button>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+        backAction={
+          <Link
+            className="inline-flex items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
+            to="/app/parkings"
+          >
+            <ChevronLeft aria-hidden="true" className="size-4" />
+            {t('parkingOperation.allFacilities')}
+          </Link>
+        }
+        description={
+          <span className="flex items-start gap-2">
+            <MapPin aria-hidden="true" className="mt-1 size-4 shrink-0" />
+            {parking.address}
+          </span>
+        }
+        eyebrow={t('parkingOperation.eyebrow')}
+        id="parking-overview-title"
+        title={parking.title}
+      />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
         <section
@@ -168,51 +171,38 @@ export function OwnerParkingOverviewRoute() {
           className="rounded-[var(--radius-xl)] border border-border bg-surface p-6 sm:p-8"
           aria-labelledby="capacity-title"
         >
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="type-label text-foreground-muted">{t('parkingOperation.capacity')}</p>
-              <h2
-                className="mt-3 font-display text-4xl font-bold leading-none tracking-[-0.06em] tabular-nums"
-                id="capacity-title"
-              >
-                {occupancyQuery.isLoading
-                  ? 'N/A'
-                  : `${String(occupancy)} / ${String(parking.capacity)}`}
-              </h2>
-            </div>
-            <span className="font-mono text-sm font-bold tabular-nums">{occupancyPercent}%</span>
-          </div>
+          <p className="type-label text-foreground-muted" id="capacity-title">
+            {t('parkingOperation.capacity')}
+          </p>
           {occupancyQuery.isError ? (
             <p className="mt-8 text-sm text-foreground-secondary">
               {t('parkingOperation.occupancyUnavailable')}
             </p>
+          ) : occupancyQuery.isLoading ? (
+            <p className="mt-8 text-sm text-foreground-secondary" role="status">
+              {t('parkingOperation.loadingCapacity')}
+            </p>
           ) : (
-            <>
-              <div
-                aria-label={t('parkingOperation.occupancyLabel', {
-                  active: occupancy,
-                  capacity: parking.capacity,
-                })}
-                aria-valuemax={parking.capacity}
-                aria-valuemin={0}
-                aria-valuenow={occupancy}
-                className="mt-8 h-3 overflow-hidden rounded-full bg-surface-emphasis"
-                role="progressbar"
-              >
-                <div
-                  className="h-full rounded-full bg-primary"
-                  style={{ width: `${String(occupancyPercent)}%` }}
-                />
-              </div>
-              <p className="mt-4 text-sm text-foreground-secondary">
-                {occupancyQuery.isLoading
-                  ? t('parkingOperation.loadingCapacity')
-                  : t('parkingOperation.spacesAvailable', { count: available })}
-              </p>
-            </>
+            <div className="mt-5">
+              <OccupancyMeter active={occupancy} capacity={parking.capacity} compact />
+            </div>
           )}
         </section>
       </div>
+
+      {checkInSuccess ? (
+        <CheckInSuccess
+          onCheckInAnother={() => {
+            setCheckInSuccess(undefined);
+            setCheckInError(undefined);
+            setCheckInOpen(true);
+          }}
+          parkingTitle={parking.title}
+          session={checkInSuccess}
+          timezone={parking.timezone}
+          to={`/app/sessions/${checkInSuccess.id}`}
+        />
+      ) : null}
 
       <section aria-labelledby="active-sessions-title">
         <div className="flex flex-col justify-between gap-5 border-b border-border-strong pb-5 sm:flex-row sm:items-end">
@@ -316,6 +306,7 @@ export function OwnerParkingOverviewRoute() {
               const session = await checkInMutation.mutateAsync(input);
               await queryClient.invalidateQueries({ queryKey: ['active-sessions', parking.id] });
               await queryClient.invalidateQueries({ queryKey: ['parking-sessions', parking.id] });
+              setCheckInSuccess(session);
               showToast(t('parkingOperation.checkInSuccess', { plate: session.vehicle.plate }));
               setCheckInOpen(false);
             } catch (reason) {

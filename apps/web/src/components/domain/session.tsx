@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { Button } from '../ui/button.js';
 import { formatDuration, formatMoney, formatTimestamp } from '../../lib/format.js';
 import { Plate } from './plate.js';
 import { SessionStatus } from './status.js';
@@ -58,12 +59,7 @@ export function SessionRow({
   timezone?: string;
 }) {
   const { locale, t } = useAppearance();
-  const statusLabel =
-    session.status === 'ACTIVE'
-      ? t('session.active')
-      : session.status === 'COMPLETED'
-        ? t('session.completed')
-        : t('session.cancelledStatus');
+  const vehicleType = getVehicleTypeLabel(session.vehicle.type, t);
   return (
     <Link
       aria-label={t('session.openFor', { plate: session.vehicle.plate })}
@@ -72,9 +68,7 @@ export function SessionRow({
     >
       <div className="flex items-center gap-3">
         <Plate plate={session.vehicle.plate} />
-        <span className="text-xs font-semibold text-foreground-secondary">
-          {session.vehicle.type.replaceAll('_', ' ')}
-        </span>
+        <span className="text-xs font-semibold text-foreground-secondary">{vehicleType}</span>
       </div>
       <div>
         <p className="type-label text-foreground-muted">{t('session.arrived')}</p>
@@ -95,9 +89,7 @@ export function SessionRow({
         </div>
       </div>
       <div className="flex items-center justify-between gap-4 lg:justify-end">
-        <span className="rounded-full border border-border-strong px-2.5 py-1 text-xs font-bold">
-          {statusLabel}
-        </span>
+        <SessionStatus status={session.status} />
         <ArrowUpRight
           aria-hidden="true"
           className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
@@ -209,9 +201,29 @@ export function CheckoutSummary({ session, timezone }: { session: Session; timez
   );
 }
 
-export function OperationalReceipt({ session, timezone }: { session: Session; timezone?: string }) {
-  const { locale, t } = useAppearance();
+export function OperationalReceipt({
+  historyHref,
+  parkingHref,
+  parkingTitle,
+  session,
+  timezone,
+}: {
+  historyHref?: string;
+  parkingHref?: string;
+  parkingTitle?: string;
+  session: Session;
+  timezone?: string;
+}) {
+  const { locale, t, tPlural } = useAppearance();
   const total = session.totalAmountCents;
+  const chargedHours = session.endTime
+    ? Math.max(
+        1,
+        Math.ceil(
+          (new Date(session.endTime).getTime() - new Date(session.startTime).getTime()) / 3_600_000,
+        ),
+      )
+    : undefined;
   return (
     <section
       aria-label={t('session.operationalReceipt')}
@@ -232,37 +244,85 @@ export function OperationalReceipt({ session, timezone }: { session: Session; ti
       <dl className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
         <ReceiptItem label={t('session.plate')} value={session.vehicle.plate} />
         <ReceiptItem
+          label={t('session.parking')}
+          value={parkingTitle ?? t('common.notAvailable')}
+        />
+        <ReceiptItem
           label={t('session.started')}
           value={formatTimestamp(session.startTime, timezone, locale)}
         />
         <ReceiptItem
           label={t('session.completedAt')}
-          value={session.endTime ? formatTimestamp(session.endTime, timezone, locale) : 'N/A'}
+          value={
+            session.endTime
+              ? formatTimestamp(session.endTime, timezone, locale)
+              : t('common.notAvailable')
+          }
         />
         <ReceiptItem
           label={t('session.duration')}
           value={
-            session.endTime ? formatDuration(session.startTime, session.endTime, locale) : 'N/A'
+            session.endTime
+              ? formatDuration(session.startTime, session.endTime, locale)
+              : t('common.notAvailable')
           }
         />
         <ReceiptItem
           label={t('session.rateSnapshot')}
-          value={`${formatMoney(session.hourlyRateCents, session.currency, locale)} / H`}
+          value={`${formatMoney(session.hourlyRateCents, session.currency, locale)} / ${t('session.perHour')}`}
+        />
+        <ReceiptItem
+          label={t('session.charged')}
+          value={
+            chargedHours === undefined
+              ? t('common.notAvailable')
+              : `${String(chargedHours)} ${tPlural(chargedHours, {
+                  one: 'session.hour',
+                  other: 'session.hours',
+                })}`
+          }
         />
         <ReceiptItem
           label={t('session.chargedTotal')}
-          value={total === null ? 'N/A' : formatMoney(total, session.currency, locale)}
+          value={
+            total === null ? t('common.notAvailable') : formatMoney(total, session.currency, locale)
+          }
         />
       </dl>
 
       <div className="mt-7 flex items-end justify-between gap-4 border-t border-success-foreground/30 pt-5">
         <span className="type-label text-success-text">{t('session.finalAmount')}</span>
         <strong className="font-display text-4xl font-bold leading-none tracking-[-0.055em] tabular-nums">
-          {total === null ? 'N/A' : formatMoney(total, session.currency, locale)}
+          {total === null ? t('common.notAvailable') : formatMoney(total, session.currency, locale)}
         </strong>
       </div>
+      {parkingHref || historyHref ? (
+        <div className="mt-6 flex flex-wrap gap-2">
+          {parkingHref ? (
+            <Button asChild size="sm" variant="secondary">
+              <Link to={parkingHref}>{t('session.returnToParking')}</Link>
+            </Button>
+          ) : null}
+          {historyHref ? (
+            <Button asChild size="sm" variant="ghost">
+              <Link to={historyHref}>{t('session.viewHistory')}</Link>
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
     </section>
   );
+}
+
+function getVehicleTypeLabel(
+  type: Session['vehicle']['type'],
+  t: ReturnType<typeof useAppearance>['t'],
+) {
+  return type === 'CAR'
+    ? t('checkIn.car')
+    : type === 'MOTORCYCLE'
+      ? t('checkIn.motorcycle')
+      : t('checkIn.largeVehicle');
 }
 
 function ReceiptItem({ label, value }: { label: string; value: string }) {

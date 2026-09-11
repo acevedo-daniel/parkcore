@@ -49,19 +49,28 @@ export function Metric({ label, value }: { label: string; value: string | number
   );
 }
 
-export function OccupancyMeter({ active, capacity }: { active: number; capacity: number }) {
-  const { t } = useAppearance();
-  const percentage = capacity === 0 ? 0 : Math.min(100, Math.round((active / capacity) * 100));
+export function OccupancyMeter({
+  active,
+  capacity,
+  compact = false,
+}: {
+  active: number;
+  capacity: number;
+  compact?: boolean;
+}) {
+  const { t, tPlural } = useAppearance();
+  const safeActive = Math.max(0, active);
+  const safeCapacity = Math.max(0, capacity);
+  const percentage =
+    safeCapacity === 0 ? 0 : Math.min(100, Math.round((safeActive / safeCapacity) * 100));
   const threshold =
-    active >= capacity
+    safeActive >= safeCapacity && safeCapacity > 0
       ? 'full'
-      : percentage >= 95
+      : percentage >= 90
         ? 'critical'
-        : percentage >= 90
-          ? 'critical'
-          : percentage >= 70
-            ? 'warning'
-            : 'optimal';
+        : percentage >= 70
+          ? 'warning'
+          : 'optimal';
   const status =
     threshold === 'full'
       ? t('parking.intakeLocked')
@@ -72,11 +81,12 @@ export function OccupancyMeter({ active, capacity }: { active: number; capacity:
         : threshold === 'warning'
           ? t('parking.elevatedOccupancy')
           : t('parking.optimalCapacity');
-  const available = Math.max(0, capacity - active);
+  const available = Math.max(0, safeCapacity - safeActive);
   return (
     <div
       className={cn(
         'capacity-gauge',
+        compact && 'border-0 bg-transparent p-0 shadow-none',
         `capacity-gauge-${threshold}`,
         `occupancy-${threshold === 'optimal' ? 'neutral' : threshold}`,
       )}
@@ -84,14 +94,23 @@ export function OccupancyMeter({ active, capacity }: { active: number; capacity:
       <div className="capacity-gauge-heading">
         <span className="type-label">{t('parking.occupancyGauge')}</span>
         <span className="type-operational">
-          {active} / {capacity} {t('parking.inside')}
+          {safeActive} / {safeCapacity} {t('parking.inside')}
         </span>
       </div>
       <div
-        aria-label={t('parkingOperation.occupancyLabel', { active, capacity })}
-        aria-valuemax={capacity}
+        aria-label={t('parkingOperation.occupancyLabel', {
+          active: safeActive,
+          capacity: safeCapacity,
+        })}
+        aria-valuemax={safeCapacity}
         aria-valuemin={0}
-        aria-valuenow={active}
+        aria-valuenow={safeActive}
+        aria-valuetext={t('parking.occupancySummary', {
+          active: safeActive,
+          available,
+          capacity: safeCapacity,
+          percent: percentage,
+        })}
         className="capacity-gauge-track"
         role="progressbar"
       >
@@ -99,7 +118,8 @@ export function OccupancyMeter({ active, capacity }: { active: number; capacity:
       </div>
       <p className="capacity-gauge-status">
         <span aria-hidden="true">●</span> {status} · {available}{' '}
-        {available === 1 ? t('parking.spot') : t('parking.spots')} {t('parking.openSpots')}
+        {tPlural(available, { one: 'parking.spot', other: 'parking.spots' })}{' '}
+        {t('parking.openSpots')}
       </p>
     </div>
   );

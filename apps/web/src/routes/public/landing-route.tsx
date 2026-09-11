@@ -496,12 +496,7 @@ function FeaturedFacilities({
   return (
     <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
       {facilities.map((parking) => (
-        <ParkingDiscoveryCard
-          es={es}
-          key={parking.id}
-          parking={parking}
-          to={`/parkings/${parking.id}`}
-        />
+        <ParkingDiscoveryCard key={parking.id} parking={parking} to={`/parkings/${parking.id}`} />
       ))}
     </div>
   );

@@ -88,6 +88,7 @@ The test strategy protects the rules that define the parking workflow:
 - shared auth, parking, and check-in forms render localized labels and validation in both locales;
 - API failures are mapped to catalog messages instead of exposing backend response text;
 - localized form errors, loading states, success feedback, and ARIA names remain queryable in the selected locale.
+- shared domain primitives preserve visible status meaning, localized display values, and combobox keyboard, option, outside-click, and focus behavior.
 
 ## Run tests
 

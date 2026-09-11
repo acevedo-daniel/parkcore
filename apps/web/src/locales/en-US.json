@@ -8,6 +8,8 @@
   },
   "common": {
     "dismissNotification": "Dismiss notification",
+    "notAvailable": "N/A",
+    "noOptions": "No options",
     "tryAgain": "Try again"
   },
   "dialog": {
@@ -103,7 +105,57 @@
     "spots": "spots",
     "open": "Open",
     "occupied": "occupied",
-    "openSpots": "open"
+    "openSpots": "open",
+    "discoveryImageAlt": "{{title}} parking facility",
+    "fallbackEyebrow": "The facility",
+    "fallbackMessage": "Clear information before you arrive.",
+    "demo": "Demo",
+    "hourlyRate": "Hourly rate",
+    "availableSpaces": "{{available}} / {{capacity}} open",
+    "viewDetails": "View details",
+    "occupancySummary": "{{active}} of {{capacity}} occupied, {{available}} available ({{percent}}%)."
+  },
+  "availability": {
+    "available": "Available",
+    "limited": "Limited spaces",
+    "full": "Full",
+    "closed": "Closed now",
+    "paused": "Paused",
+    "opensAt": "opens at {{time}}"
+  },
+  "attention": {
+    "full": "Full",
+    "limited": "Limited availability",
+    "longRunning": "Long-running stay",
+    "paused": "Paused",
+    "open": "Open context"
+  },
+  "filters": {
+    "rate": "Hourly rate",
+    "currency": "Currency",
+    "anyCurrency": "any currency",
+    "allCurrencies": "All",
+    "minRate": "Min. rate ({{currency}})",
+    "maxRate": "Max. rate ({{currency}})",
+    "clearRate": "Clear rate"
+  },
+  "checkInSuccess": {
+    "region": "Check-in confirmation",
+    "eyebrow": "Vehicle checked in",
+    "title": "The stay is active.",
+    "viewSession": "View stay",
+    "checkInAnother": "Check in another"
+  },
+  "calculator": {
+    "facility": "Where are you parking?"
+  },
+  "overview": {
+    "attentionNeedsReview": "Some states need review.",
+    "attentionNormal": "Everything is operating normally.",
+    "attentionPaused": "Review the paused facility before expecting new arrivals.",
+    "attentionFull": "There are no spaces available for new arrivals.",
+    "attentionLimited": "Only a few spaces remain. Review the operation before the next arrivals.",
+    "attentionNone": "There are no operational alerts to review right now."
   },
   "validation": {
     "number": "Enter a valid number.",
@@ -330,8 +382,12 @@
     "completedAt": "Completed",
     "duration": "Duration",
     "rateSnapshot": "Rate snapshot",
+    "perHour": "hour",
     "chargedTotal": "Charged total",
     "finalAmount": "Final amount",
+    "parking": "Parking",
+    "returnToParking": "Back to parking",
+    "viewHistory": "View history",
     "hour": "hour",
     "hours": "hours",
     "checkedOut": "Session checked out.",

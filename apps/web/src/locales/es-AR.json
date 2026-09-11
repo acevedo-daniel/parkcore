@@ -8,6 +8,8 @@
   },
   "common": {
     "dismissNotification": "Cerrar notificación",
+    "notAvailable": "N/D",
+    "noOptions": "No hay opciones",
     "tryAgain": "Reintentar"
   },
   "dialog": {
@@ -103,7 +105,57 @@
     "spots": "lugares",
     "open": "Abrir",
     "occupied": "ocupados",
-    "openSpots": "libres"
+    "openSpots": "libres",
+    "discoveryImageAlt": "Cochera {{title}}",
+    "fallbackEyebrow": "La cochera",
+    "fallbackMessage": "Información clara para llegar.",
+    "demo": "Demo",
+    "hourlyRate": "Tarifa por hora",
+    "availableSpaces": "{{available}} / {{capacity}} libres",
+    "viewDetails": "Ver detalles",
+    "occupancySummary": "{{active}} de {{capacity}} lugares ocupados, {{available}} disponibles ({{percent}}%)."
+  },
+  "availability": {
+    "available": "Disponible",
+    "limited": "Últimos lugares",
+    "full": "Completa",
+    "closed": "Cerrada ahora",
+    "paused": "Pausada",
+    "opensAt": "abre a las {{time}}"
+  },
+  "attention": {
+    "full": "Completa",
+    "limited": "Disponibilidad limitada",
+    "longRunning": "Estadía prolongada",
+    "paused": "Pausada",
+    "open": "Abrir contexto"
+  },
+  "filters": {
+    "rate": "Tarifa por hora",
+    "currency": "Moneda",
+    "anyCurrency": "cualquier moneda",
+    "allCurrencies": "Todas",
+    "minRate": "Mínimo por hora ({{currency}})",
+    "maxRate": "Máximo por hora ({{currency}})",
+    "clearRate": "Limpiar tarifa"
+  },
+  "checkInSuccess": {
+    "region": "Confirmación de ingreso",
+    "eyebrow": "Vehículo ingresado",
+    "title": "La estadía está activa.",
+    "viewSession": "Ver estadía",
+    "checkInAnother": "Ingresar otro"
+  },
+  "calculator": {
+    "facility": "¿A qué cochera vas?"
+  },
+  "overview": {
+    "attentionNeedsReview": "Hay estados para revisar.",
+    "attentionNormal": "Todo funciona con normalidad.",
+    "attentionPaused": "Revisá la cochera pausada antes de esperar nuevos ingresos.",
+    "attentionFull": "No quedan lugares disponibles para nuevos ingresos.",
+    "attentionLimited": "Quedan pocos lugares. Revisá la operación antes de los próximos ingresos.",
+    "attentionNone": "No hay alertas operativas para revisar en este momento."
   },
   "validation": {
     "number": "Ingresá un número válido.",
@@ -330,8 +382,12 @@
     "completedAt": "Salida",
     "duration": "Duración",
     "rateSnapshot": "Tarifa registrada",
+    "perHour": "hora",
     "chargedTotal": "Total cobrado",
     "finalAmount": "Importe final",
+    "parking": "Cochera",
+    "returnToParking": "Volver a la cochera",
+    "viewHistory": "Ver historial",
     "hour": "hora",
     "hours": "horas",
     "checkedOut": "La estadía se cerró.",

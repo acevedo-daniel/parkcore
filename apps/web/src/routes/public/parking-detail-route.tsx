@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { AvailabilityIndicator } from '../../components/domain/availability-indicator.js';
 import { getPublicParking, PublicApiError } from '../../lib/api/public-api.js';
 import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
 import { formatMoney } from '../../lib/format.js';
@@ -94,12 +95,6 @@ export function ParkingDetailRoute() {
   if (!parking) return null;
 
   const mapUrl = `https://www.openstreetmap.org/?mlat=${String(parking.lat)}&mlon=${String(parking.lng)}#map=17/${String(parking.lat)}/${String(parking.lng)}`;
-  const availabilityLabel = {
-    AVAILABLE: es ? 'Disponible' : 'Available',
-    LIMITED: es ? 'Últimos lugares' : 'Limited spaces',
-    FULL: es ? 'Completa' : 'Full',
-    CLOSED: es ? 'Cerrada ahora' : 'Closed now',
-  }[parking.availabilityState];
   const scheduleLabel = parking.is24Hours
     ? es
       ? 'Abierta las 24 horas'
@@ -128,10 +123,11 @@ export function ParkingDetailRoute() {
                 Demo
               </span>
             ) : null}
-            <span className="inline-flex items-center gap-2 rounded-full bg-[#f5f5f5] px-3 py-1.5 text-xs font-bold text-[#121417]">
-              <span className="size-1.5 rounded-full bg-[#121417]" />
-              {availabilityLabel}
-            </span>
+            <AvailabilityIndicator
+              nextOpeningAt={parking.nextOpeningAt}
+              state={parking.availabilityState}
+              timezone={parking.timezone}
+            />
             <h1 className="mt-6 max-w-3xl font-display text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[#1d241f] sm:text-6xl">
               {parking.title}
             </h1>

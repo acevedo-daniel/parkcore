@@ -4,11 +4,12 @@ import { useState, type SyntheticEvent } from 'react';
 import { useSearchParams } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { MonetaryFilterGroup } from '../../components/domain/monetary-filter-group.js';
 import { ParkingDiscoveryCard } from '../../components/domain/parking-discovery-card.js';
 import { Button } from '../../components/ui/button.js';
 import { Sheet } from '../../components/ui/dialog.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
-import { Checkbox, Input, Select } from '../../components/ui/field.js';
+import { Input } from '../../components/ui/field.js';
 import { getPublicParkings, type PublicParkingQuery } from '../../lib/api/public-api.js';
 import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
 
@@ -117,6 +118,16 @@ export function ParkingCatalogRoute() {
     setSearchParams(params);
   };
 
+  const clearMonetaryFilters = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete('currency');
+    params.delete('minRate');
+    params.delete('maxRate');
+    params.delete('page');
+    setFilterError(undefined);
+    setSearchParams(params);
+  };
+
   return (
     <section className="min-h-full bg-canvas pb-20 pt-10 sm:pb-28 sm:pt-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -155,7 +166,9 @@ export function ParkingCatalogRoute() {
           <CatalogFilters
             es={es}
             filterError={filterError}
+            idPrefix="catalog-desktop"
             key={searchParams.toString()}
+            onClear={clearMonetaryFilters}
             onSubmit={applyFilters}
             searchParams={searchParams}
             currency={currency}
@@ -174,7 +187,9 @@ export function ParkingCatalogRoute() {
             <CatalogFilters
               es={es}
               filterError={filterError}
+              idPrefix="catalog-mobile"
               key={`mobile-${searchParams.toString()}`}
+              onClear={clearMonetaryFilters}
               onSubmit={applyFilters}
               searchParams={searchParams}
               currency={currency}
@@ -235,7 +250,6 @@ export function ParkingCatalogRoute() {
           >
             {parkingQuery.data.data.map((parking) => (
               <ParkingDiscoveryCard
-                es={es}
                 key={parking.id}
                 parking={parking}
                 to={`/parkings/${parking.id}`}
@@ -284,22 +298,30 @@ function CatalogFilters({
   currency,
   es,
   filterError,
+  idPrefix,
+  onClear,
   onSubmit,
   searchParams,
 }: {
   currency?: 'ARS' | 'USD';
   es: boolean;
   filterError?: string;
+  idPrefix: string;
+  onClear: () => void;
   onSubmit: (event: SyntheticEvent<HTMLFormElement>) => void;
   searchParams: URLSearchParams;
 }) {
   return (
     <form
       className="grid gap-4 rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-xs lg:grid-cols-12 lg:items-end lg:p-6"
+      noValidate
       onSubmit={onSubmit}
     >
       <div className="lg:col-span-6">
-        <label className="mb-2 block text-xs font-bold text-foreground" htmlFor="parking-search">
+        <label
+          className="mb-2 block text-xs font-bold text-foreground"
+          htmlFor={`${idPrefix}-search`}
+        >
           {es ? '¿A dónde vas?' : 'Where are you going?'}
         </label>
         <div className="flex items-center gap-2 rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3 focus-within:border-primary focus-within:bg-surface">
@@ -307,67 +329,31 @@ function CatalogFilters({
           <Input
             className="h-12 border-0 bg-transparent px-0 focus:bg-transparent"
             defaultValue={searchParams.get('search') ?? ''}
-            id="parking-search"
+            id={`${idPrefix}-search`}
             name="search"
             placeholder={es ? 'Nombre, barrio o dirección' : 'Name, neighborhood, or address'}
           />
         </div>
       </div>
-      <div className="lg:col-span-2">
-        <label
-          className="block text-xs font-bold text-foreground"
-          htmlFor="parking-currency-filter"
-        >
-          {es ? 'Moneda' : 'Currency'}
-          <Select
-            className="mt-2 h-12"
-            defaultValue={currency ?? ''}
-            id="parking-currency-filter"
-            name="currency"
-          >
-            <option value="">{es ? 'Todas' : 'All'}</option>
-            <option value="ARS">ARS</option>
-            <option value="USD">USD</option>
-          </Select>
-        </label>
-      </div>
-      <div className="grid grid-cols-2 gap-3 lg:col-span-3">
-        <label className="block text-xs font-bold text-foreground" htmlFor="min-rate">
-          {es ? 'Mínimo por hora' : `Min. rate (${currency ?? 'USD'})`}
-          <Input
-            className="mt-2 h-12"
-            defaultValue={searchParams.get('minRate') ?? ''}
-            id="min-rate"
-            inputMode="decimal"
-            min="0.01"
-            name="minRate"
-            placeholder="0.00"
-            step="0.01"
-            type="number"
-          />
-        </label>
-        <label className="block text-xs font-bold text-foreground" htmlFor="max-rate">
-          {es ? 'Máximo por hora' : `Max. rate (${currency ?? 'USD'})`}
-          <Input
-            className="mt-2 h-12"
-            defaultValue={searchParams.get('maxRate') ?? ''}
-            id="max-rate"
-            inputMode="decimal"
-            min="0.01"
-            name="maxRate"
-            placeholder="0.00"
-            step="0.01"
-            type="number"
-          />
-        </label>
-      </div>
+      <MonetaryFilterGroup
+        className="lg:col-span-5"
+        currency={currency}
+        defaultMax={searchParams.get('maxRate') ?? ''}
+        defaultMin={searchParams.get('minRate') ?? ''}
+        idPrefix={idPrefix}
+        onClear={onClear}
+      />
       <div className="flex items-center lg:col-span-2">
-        <Checkbox
-          defaultChecked={searchParams.get('availableNow') === 'true'}
-          id="available-now"
-          label={es ? 'Disponible ahora' : 'Available now'}
-          name="availableNow"
-        />
+        <label className="flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-surface-subtle px-3.5 py-3 text-sm font-semibold text-foreground">
+          <input
+            className="size-4 rounded border-border accent-primary focus-visible:ring-2 focus-visible:ring-focus-ring"
+            defaultChecked={searchParams.get('availableNow') === 'true'}
+            id={`${idPrefix}-available-now`}
+            name="availableNow"
+            type="checkbox"
+          />
+          <span>{es ? 'Disponible ahora' : 'Available now'}</span>
+        </label>
       </div>
       <Button className="rounded-full lg:col-span-3" type="submit">
         <SlidersHorizontal aria-hidden="true" className="size-4" />

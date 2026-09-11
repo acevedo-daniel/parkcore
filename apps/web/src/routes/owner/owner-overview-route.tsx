@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { AttentionItem, type AttentionState } from '../../components/domain/attention-item.js';
+import { PageHeader } from '../../components/domain/page-header.js';
 import { Button } from '../../components/ui/button.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import {
@@ -21,6 +23,17 @@ function formatBarDate(date: string, locale: Locale): string {
     day: 'numeric',
     month: 'short',
   }).format(new Date(`${date}T00:00:00`));
+}
+
+function attentionRank(state: AttentionState) {
+  return { FULL: 0, LIMITED: 1, LONG_RUNNING: 2, PAUSED: 3 }[state];
+}
+
+interface OverviewAttentionItem {
+  description: string;
+  parkingTitle: string;
+  state: AttentionState;
+  to: string;
 }
 
 export function OwnerOverviewRoute() {
@@ -56,6 +69,44 @@ export function OwnerOverviewRoute() {
   const totalRevenue = revenueSeries.reduce((total, point) => total + revenueForCurrency(point), 0);
   const totalStays = volumeSeries.reduce((total, point) => total + point.completedSessions, 0);
   const analyticsError = summaryQuery.isError || revenueQuery.isError || volumeQuery.isError;
+  const attentionItems: OverviewAttentionItem[] = parkings
+    .flatMap(({ activeSessionCount, parking }): OverviewAttentionItem[] => {
+      if (!parking.isActive) {
+        return [
+          {
+            description: t('overview.attentionPaused'),
+            parkingTitle: parking.title,
+            state: 'PAUSED',
+            to: `/app/parkings/${parking.id}`,
+          },
+        ];
+      }
+      if (activeSessionCount !== undefined && activeSessionCount >= parking.capacity) {
+        return [
+          {
+            description: t('overview.attentionFull'),
+            parkingTitle: parking.title,
+            state: 'FULL',
+            to: `/app/parkings/${parking.id}`,
+          },
+        ];
+      }
+      if (
+        activeSessionCount !== undefined &&
+        activeSessionCount / Math.max(1, parking.capacity) >= 0.8
+      ) {
+        return [
+          {
+            description: t('overview.attentionLimited'),
+            parkingTitle: parking.title,
+            state: 'LIMITED',
+            to: `/app/parkings/${parking.id}`,
+          },
+        ];
+      }
+      return [];
+    })
+    .sort((left, right) => attentionRank(left.state) - attentionRank(right.state));
 
   const refresh = () => {
     void parkingsQuery.refetch();
@@ -92,25 +143,9 @@ export function OwnerOverviewRoute() {
 
   return (
     <section className="owner-page space-y-10" aria-labelledby="overview-title">
-      <header className="border-b border-border-strong pb-7">
-        <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-          <div className="max-w-2xl">
-            <p className="type-label text-foreground-muted">
-              {es ? 'Operación / hoy' : 'Operations / today'}
-            </p>
-            <h1
-              className="mt-3 font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] sm:text-5xl"
-              id="overview-title"
-            >
-              {es ? 'Todo lo importante, a la vista.' : 'Everything important, in view.'}
-            </h1>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-foreground-secondary">
-              {es
-                ? 'Una lectura simple de la red para tomar decisiones durante el día.'
-                : 'A clear reading of your network for the decisions you make each day.'}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+      <PageHeader
+        actions={
+          <>
             <Button
               aria-label={es ? 'Actualizar datos' : 'Refresh data'}
               disabled={isRefreshing}
@@ -130,9 +165,17 @@ export function OwnerOverviewRoute() {
                 {es ? 'Nueva cochera' : 'New facility'}
               </Link>
             </Button>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+        description={
+          es
+            ? 'Una lectura simple de la red para tomar decisiones durante el día.'
+            : 'A clear reading of your network for the decisions you make each day.'
+        }
+        eyebrow={es ? 'Operación / hoy' : 'Operations / today'}
+        id="overview-title"
+        title={es ? 'Todo lo importante, a la vista.' : 'Everything important, in view.'}
+      />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
         <section
@@ -178,23 +221,21 @@ export function OwnerOverviewRoute() {
             className="mt-4 font-display text-2xl font-bold tracking-[-0.04em]"
             id="attention-title"
           >
-            {parkings.some(({ parking }) => !parking.isActive)
-              ? es
-                ? 'Hay cocheras pausadas.'
-                : 'Some facilities are paused.'
-              : es
-                ? 'Todo funciona con normalidad.'
-                : 'Everything is operating normally.'}
+            {attentionItems.length > 0
+              ? t('overview.attentionNeedsReview')
+              : t('overview.attentionNormal')}
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-foreground-secondary">
-            {parkings.some(({ parking }) => !parking.isActive)
-              ? es
-                ? 'Revisá las cocheras pausadas antes de esperar nuevos ingresos.'
-                : 'Review paused facilities before expecting new arrivals.'
-              : es
-                ? 'No hay alertas operativas para revisar en este momento.'
-                : 'There are no operational alerts to review right now.'}
-          </p>
+          {attentionItems.length > 0 ? (
+            <ul className="mt-5">
+              {attentionItems.map((item) => (
+                <AttentionItem key={`${item.state}-${item.parkingTitle}`} {...item} />
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-sm leading-relaxed text-foreground-secondary">
+              {t('overview.attentionNone')}
+            </p>
+          )}
         </section>
       </div>
       {analyticsError ? (

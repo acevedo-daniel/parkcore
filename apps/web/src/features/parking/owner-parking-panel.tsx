@@ -2,6 +2,8 @@ import { ArrowUpRight, MapPin } from 'lucide-react';
 import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { AvailabilityIndicator } from '../../components/domain/availability-indicator.js';
+import { OccupancyMeter } from '../../components/domain/parking.js';
 import type { Parking } from '../../lib/api/owner-api.js';
 import { formatMoney } from '../../lib/format.js';
 
@@ -19,12 +21,6 @@ export function OwnerParkingPanel({
   parking: Parking;
 }) {
   const { locale, t } = useAppearance();
-  const occupancy =
-    activeSessionCount === undefined || parking.capacity === 0
-      ? 0
-      : Math.min(100, Math.round((activeSessionCount / parking.capacity) * 100));
-  const available = Math.max(0, parking.capacity - (activeSessionCount ?? 0));
-
   return (
     <Link
       aria-label={t('parking.openOperations', { title: parking.title })}
@@ -68,38 +64,11 @@ export function OwnerParkingPanel({
             <div className="h-2 w-full rounded-full bg-surface-emphasis" />
           </div>
         ) : (
-          <div>
-            <div className="flex items-baseline justify-between gap-3">
-              <p className="font-mono text-sm font-bold tabular-nums">
-                {activeSessionCount} / {parking.capacity}
-              </p>
-              <p className="text-xs font-semibold text-foreground-secondary">
-                {available} {t('parking.openSpots')} · {occupancy}%
-              </p>
-            </div>
-            <div
-              aria-label={t('parkingOperation.occupancyLabel', {
-                active: activeSessionCount,
-                capacity: parking.capacity,
-              })}
-              aria-valuemax={parking.capacity}
-              aria-valuemin={0}
-              aria-valuenow={activeSessionCount}
-              className="mt-3 h-2 overflow-hidden rounded-full bg-surface-emphasis"
-              role="progressbar"
-            >
-              <div
-                className="h-full rounded-full bg-primary"
-                style={{ width: `${String(occupancy)}%` }}
-              />
-            </div>
-          </div>
+          <OccupancyMeter active={activeSessionCount} capacity={parking.capacity} compact />
         )}
 
         <div className="mt-5 flex items-center justify-between gap-3">
-          <span className="text-xs font-semibold text-foreground-secondary">
-            {parking.isActive ? t('parkingOperation.operating') : t('parkingOperation.paused')}
-          </span>
+          <AvailabilityIndicator state={parking.isActive ? 'AVAILABLE' : 'PAUSED'} />
           <span className="font-mono text-sm font-bold tabular-nums">
             {formatMoney(parking.hourlyRateCents, parking.currency, locale)}
             <span className="font-sans text-xs font-medium text-foreground-secondary"> / h</span>

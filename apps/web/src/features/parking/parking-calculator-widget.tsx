@@ -4,9 +4,9 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { Combobox } from '../../components/ui/combobox.js';
 import { Button } from '../../components/ui/button.js';
 import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
-import { Select } from '../../components/ui/field.js';
 import { getPublicParkings, type PublicParking } from '../../lib/api/public-api.js';
 import { cn } from '../../lib/cn.js';
 import { formatMoney } from '../../lib/format.js';
@@ -150,33 +150,26 @@ function CalculatorForm({
   selectedHours,
   selectedId,
 }: CalculatorFormProps) {
+  const { t } = useAppearance();
   const totalCents = selectedFacility.hourlyRateCents * selectedHours;
 
   return (
     <>
       <div className="rounded-[var(--radius-lg)] border border-border bg-surface-subtle p-4 transition-colors focus-within:border-primary focus-within:bg-surface">
-        <label className="mb-2 block text-xs font-bold text-foreground" htmlFor="estimate-facility">
-          {es ? '¿A qué cochera vas?' : 'Where are you parking?'}
-        </label>
         <div className="flex items-center gap-3">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
             <MapPin aria-hidden="true" className="size-3.5" />
           </span>
-          <Select
-            aria-label={es ? 'Elegir cochera' : 'Choose facility'}
-            className="h-10 min-w-0 flex-1 border-0 bg-transparent px-0 font-display text-base font-bold focus:bg-transparent"
+          <Combobox
+            className="min-w-0 flex-1"
             id="estimate-facility"
-            onChange={(event) => {
-              onFacilityChange(event.target.value);
+            label={t('calculator.facility')}
+            onValueChange={(id) => {
+              onFacilityChange(id);
             }}
+            options={facilities.map((facility) => ({ label: facility.title, value: facility.id }))}
             value={selectedId}
-          >
-            {facilities.map((facility) => (
-              <option key={facility.id} value={facility.id}>
-                {facility.title}
-              </option>
-            ))}
-          </Select>
+          />
           <span className="shrink-0 text-right">
             <span className="font-mono text-xs font-bold tabular-nums text-foreground">
               {formatMoney(selectedFacility.hourlyRateCents, selectedFacility.currency, locale)}

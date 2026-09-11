@@ -226,7 +226,13 @@ export function OwnerSessionDetailRoute() {
       </div>
 
       {session.status === 'COMPLETED' ? (
-        <OperationalReceipt session={session} timezone={parking?.timezone} />
+        <OperationalReceipt
+          historyHref={parking ? `/app/parkings/${parking.id}/sessions` : undefined}
+          parkingHref={parking ? `/app/parkings/${parking.id}` : undefined}
+          parkingTitle={parking?.title}
+          session={session}
+          timezone={parking?.timezone}
+        />
       ) : null}
       {session.status === 'CANCELLED' ? (
         <section
