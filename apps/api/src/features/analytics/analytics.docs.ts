@@ -35,12 +35,12 @@ export function registerAnalyticsDocs(registry: OpenAPIRegistry): void {
     ...common,
     method: 'get',
     path: '/analytics/revenue',
-    summary: 'Get revenue series',
+    summary: 'Get revenue series grouped by currency',
     request: { query: analyticsQuerySchema },
     responses: {
       ...common.responses,
       200: {
-        description: 'Daily revenue series',
+        description: 'Daily revenue series grouped by currency',
         content: { 'application/json': { schema: analyticsRevenueResponseSchema } },
       },
       400: errorResponse('Validation error'),

@@ -52,6 +52,8 @@ Driver information can be recorded as visit data during check-in, but drivers do
 - Track `ACTIVE`, `COMPLETED`, and `CANCELLED` sessions.
 - Calculate capacity from concurrent active sessions.
 - Preserve the hourly rate and currency that applied when a session started.
+- Review history by parking-local today, 7-day, and 30-day periods.
+- Export complete filtered history and view revenue grouped by currency.
 
 ## Out of scope
 
@@ -115,6 +117,8 @@ ACTIVE --cancel----> CANCELLED
 
 An `ACTIVE` session has no `endTime`. Both terminal transitions record the time they occur; cancellation leaves `totalAmountCents` null.
 
+Network analytics use the owner's IANA timezone. Parking history periods, displayed session times, and CSV timestamps use the parking's IANA timezone. Revenue summaries never combine ARS and USD amounts into one total.
+
 ## Capacity and pricing
 
 Capacity is the maximum number of simultaneous `ACTIVE` sessions in a parking. ParkCore does not model individual physical spaces.
@@ -147,6 +151,8 @@ totalAmountCents = chargedHours * hourlyRateCents
 - Checkout and cancellation transition only an `ACTIVE` session.
 - Terminal sessions retain their terminal `endTime`; cancelled sessions retain a null amount.
 - Checkout calculates from the session's stored pricing snapshot.
+- History periods are parking-local `today`, `7d`, or `30d` filters, and aggregates cover every filtered session rather than only the current page.
+- History CSV exports use local-offset ISO timestamps, include the parking timezone, exclude default customer contact columns, and leave cancelled totals empty.
 - Vehicle identity is managed through the check-in workflow; there is no standalone vehicle CRUD surface.
 
 ## Product limitations

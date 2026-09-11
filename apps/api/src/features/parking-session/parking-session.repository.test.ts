@@ -109,7 +109,7 @@ describe('parking session repository', () => {
     },
   );
 
-  it('filters historical sessions by normalized plate and start date range', async () => {
+  it('filters historical sessions by normalized plate and parking-local period range', async () => {
     mockPrisma.parkingSession.findMany.mockResolvedValue([]);
     mockPrisma.parkingSession.count.mockResolvedValue(0);
 
@@ -118,17 +118,17 @@ describe('parking session repository', () => {
         skip: 0,
         take: 10,
         plate: 'AB123CD',
-        dateFrom: '2026-02-01',
-        dateTo: '2026-02-28',
+        startTimeFrom: new Date('2026-02-01T03:00:00.000Z'),
+        startTimeTo: new Date('2026-02-28T02:59:59.999Z'),
       }),
-    ).resolves.toEqual({ data: [], total: 0 });
+    ).resolves.toEqual({ data: [], total: 0, aggregateRows: [] });
 
     const expectedWhere = {
       parkingId: 'parking-1',
       vehicle: { plate: { contains: 'AB123CD' } },
       startTime: {
-        gte: new Date('2026-02-01'),
-        lte: new Date('2026-02-28T23:59:59.999Z'),
+        gte: new Date('2026-02-01T03:00:00.000Z'),
+        lte: new Date('2026-02-28T02:59:59.999Z'),
       },
     };
     expect(mockPrisma.parkingSession.findMany).toHaveBeenCalledWith(

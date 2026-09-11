@@ -31,6 +31,14 @@ function sessionList(data: ParkingSession[]) {
       total: data.length,
       totalPages: 1,
     },
+    aggregate: {
+      totalSessions: data.length,
+      activeSessions: data.filter((session) => session.status === 'ACTIVE').length,
+      completedSessions: data.filter((session) => session.status === 'COMPLETED').length,
+      cancelledSessions: data.filter((session) => session.status === 'CANCELLED').length,
+      revenueByCurrency: [],
+    },
+    timezone: 'America/Argentina/Buenos_Aires',
   } satisfies components['schemas']['ParkingSessionListResponse'];
 }
 

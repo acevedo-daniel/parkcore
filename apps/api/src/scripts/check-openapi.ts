@@ -35,6 +35,7 @@ const requiredPaths = [
   '/parkings/{id}',
   '/parkings/{parkingId}/sessions/check-in',
   '/parkings/{parkingId}/sessions',
+  '/parkings/{parkingId}/sessions/export.csv',
   '/parkings/{parkingId}/sessions/active',
   '/sessions/{sessionId}',
   '/sessions/{sessionId}/check-out',

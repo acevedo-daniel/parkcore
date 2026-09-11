@@ -10,12 +10,20 @@ import { SessionStatus } from './status.js';
 
 type Session = components['schemas']['ParkingSessionResponse'];
 
-export function OperationalTimestamp({ label, value }: { label?: string; value: string }) {
+export function OperationalTimestamp({
+  label,
+  value,
+  timezone,
+}: {
+  label?: string;
+  value: string;
+  timezone?: string;
+}) {
   return (
     <span className="operational-timestamp">
       {label ? <span className="type-label">{label}</span> : null}
       <time className="type-operational" dateTime={value}>
-        {formatTimestamp(value)}
+        {formatTimestamp(value, timezone)}
       </time>
     </span>
   );
@@ -36,7 +44,15 @@ export function ElapsedDuration({ startTime }: { startTime: string }) {
   return <span className="type-operational">{formatDuration(startTime, now.toISOString())}</span>;
 }
 
-export function SessionRow({ session, to }: { session: Session; to: string }) {
+export function SessionRow({
+  session,
+  to,
+  timezone,
+}: {
+  session: Session;
+  to: string;
+  timezone?: string;
+}) {
   const { language } = useAppearance();
   const es = language === 'es';
   return (
@@ -54,7 +70,7 @@ export function SessionRow({ session, to }: { session: Session; to: string }) {
       <div>
         <p className="type-label text-foreground-muted">{es ? 'Ingreso' : 'Arrived'}</p>
         <div className="mt-1 text-sm font-semibold">
-          <OperationalTimestamp value={session.startTime} />
+          <OperationalTimestamp value={session.startTime} timezone={timezone} />
         </div>
       </div>
       <div>
@@ -83,7 +99,15 @@ export function SessionRow({ session, to }: { session: Session; to: string }) {
   );
 }
 
-export function SessionHistoryRow({ session, to }: { session: Session; to: string }) {
+export function SessionHistoryRow({
+  session,
+  to,
+  timezone,
+}: {
+  session: Session;
+  to: string;
+  timezone?: string;
+}) {
   const total =
     session.totalAmountCents === null
       ? 'N/A'
@@ -94,7 +118,7 @@ export function SessionHistoryRow({ session, to }: { session: Session; to: strin
       className="session-history-row"
       to={to}
     >
-      <OperationalTimestamp label="Date" value={session.startTime} />
+      <OperationalTimestamp label="Date" value={session.startTime} timezone={timezone} />
       <Plate plate={session.vehicle.plate} />
       {session.endTime ? (
         <span className="session-history-duration type-operational">
@@ -110,7 +134,7 @@ export function SessionHistoryRow({ session, to }: { session: Session; to: strin
   );
 }
 
-export function CheckoutSummary({ session }: { session: Session }) {
+export function CheckoutSummary({ session, timezone }: { session: Session; timezone?: string }) {
   const { language } = useAppearance();
   const es = language === 'es';
   const [now, setNow] = useState(() => new Date());
@@ -135,7 +159,7 @@ export function CheckoutSummary({ session }: { session: Session }) {
     >
       <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
         <span className="type-label text-foreground-muted">{es ? 'Ingreso' : 'Started'}</span>
-        <OperationalTimestamp value={session.startTime} />
+        <OperationalTimestamp value={session.startTime} timezone={timezone} />
       </div>
       {!session.endTime ? (
         <div className="flex items-center justify-between gap-4 border-b border-border py-3">
@@ -143,7 +167,7 @@ export function CheckoutSummary({ session }: { session: Session }) {
             {es ? 'Cálculo actual' : 'Current calculation'}
           </span>
           <time className="type-operational" dateTime={now.toISOString()}>
-            {formatTimestamp(now.toISOString())}
+            {formatTimestamp(now.toISOString(), timezone)}
           </time>
         </div>
       ) : null}
@@ -179,7 +203,7 @@ export function CheckoutSummary({ session }: { session: Session }) {
   );
 }
 
-export function OperationalReceipt({ session }: { session: Session }) {
+export function OperationalReceipt({ session, timezone }: { session: Session; timezone?: string }) {
   const { language } = useAppearance();
   const es = language === 'es';
   const total = session.totalAmountCents;
@@ -206,11 +230,11 @@ export function OperationalReceipt({ session }: { session: Session }) {
         <ReceiptItem label={es ? 'Patente' : 'Plate'} value={session.vehicle.plate} />
         <ReceiptItem
           label={es ? 'Ingreso' : 'Started'}
-          value={formatTimestamp(session.startTime)}
+          value={formatTimestamp(session.startTime, timezone)}
         />
         <ReceiptItem
           label={es ? 'Salida' : 'Completed'}
-          value={session.endTime ? formatTimestamp(session.endTime) : 'N/A'}
+          value={session.endTime ? formatTimestamp(session.endTime, timezone) : 'N/A'}
         />
         <ReceiptItem
           label={es ? 'Duración' : 'Duration'}

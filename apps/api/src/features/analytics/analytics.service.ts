@@ -1,25 +1,27 @@
-import { defaultCurrency } from '../../utils/currency.js';
+import type { Currency } from '../../../prisma/generated/client.js';
+import { getLocalDateKey, getLocalDateKeys, getLocalPeriodWindow } from '../../utils/timezone.js';
 import * as analyticsRepository from './analytics.repository.js';
 import type { AnalyticsFacility, AnalyticsQuery } from './analytics.schema.js';
 
-const DAY_MS = 86_400_000;
+interface CurrencyRevenue {
+  currency: Currency;
+  revenueCents: number;
+}
 
-const startOfUtcDay = (value: Date): Date =>
-  new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()));
+const toCurrencyRevenue = (
+  sessions: analyticsRepository.OwnerAnalyticsSession[],
+): CurrencyRevenue[] => {
+  const totals = new Map<Currency, number>();
+  for (const session of sessions) {
+    if (session.status !== 'COMPLETED' || session.totalAmountCents === null) continue;
+    totals.set(session.currency, (totals.get(session.currency) ?? 0) + session.totalAmountCents);
+  }
+  return [...totals.entries()]
+    .sort(([first], [second]) => first.localeCompare(second))
+    .map(([currency, revenueCents]) => ({ currency, revenueCents }));
+};
 
 const roundPercent = (value: number): number => Math.round(value * 10) / 10;
-
-const dateKey = (value: Date): string => value.toISOString().slice(0, 10);
-
-const buildDateKeys = (days: number, now: Date): string[] => {
-  const firstDay = startOfUtcDay(now).getTime() - (days - 1) * DAY_MS;
-  return Array.from({ length: days }, (_, index) => dateKey(new Date(firstDay + index * DAY_MS)));
-};
-
-const getWindowStart = (days: number, now: Date): Date => {
-  const firstDay = startOfUtcDay(now);
-  return new Date(firstDay.getTime() - (days - 1) * DAY_MS);
-};
 
 const toFacilityAnalytics = (
   facility: analyticsRepository.OwnerFacility,
@@ -44,25 +46,22 @@ const toFacilityAnalytics = (
 };
 
 export const getSummary = async (ownerId: string, now = new Date()) => {
-  const [facilities, activeSessions, completedToday] = await Promise.all([
+  const [facilities, activeSessions, timezone] = await Promise.all([
     analyticsRepository.findOwnerFacilities(ownerId),
     analyticsRepository.findOwnerSessions(ownerId, { status: 'ACTIVE' }),
-    analyticsRepository.findOwnerSessions(ownerId, {
-      status: 'COMPLETED',
-      endTimeFrom: startOfUtcDay(now),
-      endTimeTo: now,
-    }),
+    analyticsRepository.findOwnerTimezone(ownerId),
   ]);
-
-  const activeByParking = new Map<string, number>();
-  for (const session of activeSessions) {
-    activeByParking.set(session.parkingId, (activeByParking.get(session.parkingId) ?? 0) + 1);
-  }
+  const today = getLocalPeriodWindow('today', timezone, now);
+  const completedToday = await analyticsRepository.findOwnerSessions(ownerId, {
+    status: 'COMPLETED',
+    endTimeFrom: today.start,
+    endTimeTo: today.end,
+  });
 
   const facilityData = facilities.map((facility) =>
     toFacilityAnalytics(
       facility,
-      activeByParking.get(facility.id) ?? 0,
+      activeSessions.filter((session) => session.parkingId === facility.id).length,
       completedToday.filter((session) => session.parkingId === facility.id),
     ),
   );
@@ -75,51 +74,54 @@ export const getSummary = async (ownerId: string, now = new Date()) => {
     occupancyPercent:
       totalCapacity === 0 ? 0 : roundPercent((activeVehicles / totalCapacity) * 100),
     completedToday: completedToday.length,
-    revenueTodayCents: completedToday.reduce(
-      (sum, session) => sum + (session.totalAmountCents ?? 0),
-      0,
-    ),
-    currency: facilities[0]?.currency ?? defaultCurrency,
+    revenueToday: toCurrencyRevenue(completedToday),
     facilities: facilityData,
   };
 };
 
-const getCompletedWindow = async (ownerId: string, days: number, now: Date) =>
-  await analyticsRepository.findOwnerSessions(ownerId, {
+const getCompletedWindow = async (ownerId: string, days: number, now: Date) => {
+  const timezone = await analyticsRepository.findOwnerTimezone(ownerId);
+  const window = getLocalPeriodWindow(days === 7 ? '7d' : '30d', timezone, now);
+  const sessions = await analyticsRepository.findOwnerSessions(ownerId, {
     status: 'COMPLETED',
-    endTimeFrom: getWindowStart(days, now),
-    endTimeTo: now,
+    endTimeFrom: window.start,
+    endTimeTo: window.end,
   });
+  return { sessions, timezone };
+};
 
 export const getRevenue = async (ownerId: string, query: AnalyticsQuery, now = new Date()) => {
-  const sessions = await getCompletedWindow(ownerId, query.days, now);
-  const values = new Map(buildDateKeys(query.days, now).map((date) => [date, 0]));
+  const { sessions, timezone } = await getCompletedWindow(ownerId, query.days, now);
+  const keys = getLocalDateKeys(query.days, timezone, now);
+  const values = new Map(keys.map((date) => [date, [] as CurrencyRevenue[]]));
   for (const session of sessions) {
-    if (session.endTime) {
-      const key = dateKey(session.endTime);
-      if (values.has(key)) {
-        values.set(key, (values.get(key) ?? 0) + (session.totalAmountCents ?? 0));
-      }
-    }
+    if (!session.endTime || session.totalAmountCents === null) continue;
+    const key = getLocalDateKey(session.endTime, timezone);
+    const day = values.get(key);
+    if (!day) continue;
+    const existing = day.find((entry) => entry.currency === session.currency);
+    if (existing) existing.revenueCents += session.totalAmountCents;
+    else day.push({ currency: session.currency, revenueCents: session.totalAmountCents });
   }
 
   return {
     days: query.days,
-    currency: defaultCurrency,
-    data: [...values].map(([date, revenueCents]) => ({ date, revenueCents })),
+    data: [...values].map(([date, revenueByCurrency]) => ({
+      date,
+      revenueByCurrency: revenueByCurrency.sort((first, second) =>
+        first.currency.localeCompare(second.currency),
+      ),
+    })),
   };
 };
 
 export const getVolume = async (ownerId: string, query: AnalyticsQuery, now = new Date()) => {
-  const sessions = await getCompletedWindow(ownerId, query.days, now);
-  const values = new Map(buildDateKeys(query.days, now).map((date) => [date, 0]));
+  const { sessions, timezone } = await getCompletedWindow(ownerId, query.days, now);
+  const values = new Map(getLocalDateKeys(query.days, timezone, now).map((date) => [date, 0]));
   for (const session of sessions) {
-    if (session.endTime) {
-      const key = dateKey(session.endTime);
-      if (values.has(key)) {
-        values.set(key, (values.get(key) ?? 0) + 1);
-      }
-    }
+    if (!session.endTime) continue;
+    const key = getLocalDateKey(session.endTime, timezone);
+    if (values.has(key)) values.set(key, (values.get(key) ?? 0) + 1);
   }
 
   return {
@@ -129,7 +131,7 @@ export const getVolume = async (ownerId: string, query: AnalyticsQuery, now = ne
 };
 
 export const getFacilities = async (ownerId: string, query: AnalyticsQuery, now = new Date()) => {
-  const [facilities, activeSessions, completedSessions] = await Promise.all([
+  const [facilities, activeSessions, completedWindow] = await Promise.all([
     analyticsRepository.findOwnerFacilities(ownerId),
     analyticsRepository.findOwnerSessions(ownerId, { status: 'ACTIVE' }),
     getCompletedWindow(ownerId, query.days, now),
@@ -144,7 +146,7 @@ export const getFacilities = async (ownerId: string, query: AnalyticsQuery, now 
       toFacilityAnalytics(
         facility,
         activeByParking.get(facility.id) ?? 0,
-        completedSessions.filter((session) => session.parkingId === facility.id),
+        completedWindow.sessions.filter((session) => session.parkingId === facility.id),
       ),
     ),
   };

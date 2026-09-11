@@ -38,6 +38,14 @@ interface SessionResponse {
 
 interface SessionListResponse {
   data: SessionResponse[];
+  aggregate: {
+    totalSessions: number;
+    activeSessions: number;
+    completedSessions: number;
+    cancelledSessions: number;
+    revenueByCurrency: { currency: string; revenueCents: number }[];
+  };
+  timezone: string;
 }
 
 describe('owner workflow integration', () => {
@@ -204,7 +212,8 @@ describe('owner workflow integration', () => {
       status: 'CANCELLED',
       totalAmountCents: null,
     });
-    expect(returningCancelResponse.body.endTime).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    const returningCancelBody = returningCancelResponse.body as { endTime: string };
+    expect(returningCancelBody.endTime).toMatch(/^\d{4}-\d{2}-\d{2}T/);
 
     const repeatedCancelResponse = await request(app)
       .patch(`/sessions/${returningCheckIn.id}/cancel`)
@@ -219,7 +228,8 @@ describe('owner workflow integration', () => {
       status: 'CANCELLED',
       totalAmountCents: null,
     });
-    expect(cancelResponse.body.endTime).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    const cancelBody = cancelResponse.body as { endTime: string };
+    expect(cancelBody.endTime).toMatch(/^\d{4}-\d{2}-\d{2}T/);
 
     const detailResponse = await request(app)
       .get(`/sessions/${checkedIn.id}`)
@@ -238,6 +248,42 @@ describe('owner workflow integration', () => {
       status: 'COMPLETED',
       totalAmountCents: 1500,
       vehicle: { plate: 'AB123CD' },
+    });
+    expect(history).toMatchObject({
+      aggregate: {
+        totalSessions: 1,
+        activeSessions: 0,
+        completedSessions: 1,
+        cancelledSessions: 0,
+        revenueByCurrency: [{ currency: 'USD', revenueCents: 1500 }],
+      },
+      timezone: 'America/Argentina/Buenos_Aires',
+    });
+
+    const csvResponse = await request(app)
+      .get(`/parkings/${parking.id}/sessions/export.csv?period=30d`)
+      .set('Authorization', authorization);
+    expect(csvResponse.status).toBe(200);
+    expect(csvResponse.headers['content-type']).toContain('text/csv');
+    expect(csvResponse.text.split('\r\n')[0]).toBe(
+      'plate,vehicleType,brand,model,startTime,endTime,durationMinutes,status,hourlyRate,currency,totalAmount,timezone',
+    );
+    expect(csvResponse.text).not.toContain('customerName');
+    expect(csvResponse.text).toContain('America/Argentina/Buenos_Aires');
+
+    const completeHistoryResponse = await request(app)
+      .get(`/parkings/${parking.id}/sessions?period=30d&limit=1`)
+      .set('Authorization', authorization);
+    expect(completeHistoryResponse.status).toBe(200);
+    const completeHistoryBody = completeHistoryResponse.body as {
+      data: unknown[];
+      aggregate: { totalSessions: number; completedSessions: number; cancelledSessions: number };
+    };
+    expect(completeHistoryBody.data).toHaveLength(1);
+    expect(completeHistoryBody.aggregate).toMatchObject({
+      totalSessions: 3,
+      completedSessions: 1,
+      cancelledSessions: 2,
     });
   });
 
@@ -293,6 +339,19 @@ describe('owner workflow integration', () => {
     expect(firstSession.vehicle).toMatchObject({ plate: 'AB123CD', brand: 'Toyota' });
     expect(secondSession.vehicle).toMatchObject({ plate: 'AB123CD', brand: 'Honda' });
     expect(secondSession.vehicle.id).not.toBe(firstSession.vehicle.id);
+
+    const firstHistoryResponse = await request(app)
+      .get(`/parkings/${firstParking.id}/sessions?period=30d`)
+      .set('Authorization', authorization);
+    const secondHistoryResponse = await request(app)
+      .get(`/parkings/${secondParking.id}/sessions?period=30d`)
+      .set('Authorization', authorization);
+    const firstHistoryBody = firstHistoryResponse.body as { aggregate: { totalSessions: number } };
+    const secondHistoryBody = secondHistoryResponse.body as {
+      aggregate: { totalSessions: number };
+    };
+    expect(firstHistoryBody.aggregate.totalSessions).toBe(1);
+    expect(secondHistoryBody.aggregate.totalSessions).toBe(1);
   });
 
   it('preserves capacity when concurrent check-ins race for the last space', async () => {

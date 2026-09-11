@@ -10,6 +10,7 @@ import { OwnerParkingHistoryRoute } from './owner-parking-history-route.js';
 
 const api = vi.hoisted(() => ({
   getOwnedParkings: vi.fn(),
+  getParkingSessionsCsv: vi.fn(),
   getParkingSessions: vi.fn(),
 }));
 
@@ -32,6 +33,14 @@ function sessionList(
       totalPages: 1,
       ...meta,
     },
+    aggregate: {
+      totalSessions: data.length,
+      activeSessions: data.filter((session) => session.status === 'ACTIVE').length,
+      completedSessions: data.filter((session) => session.status === 'COMPLETED').length,
+      cancelledSessions: data.filter((session) => session.status === 'CANCELLED').length,
+      revenueByCurrency: [],
+    },
+    timezone: 'America/Argentina/Buenos_Aires',
   };
 }
 
@@ -50,6 +59,7 @@ function renderHistory(initialEntry = '/app/parkings/parking-1/sessions') {
 
 afterEach(() => {
   api.getOwnedParkings.mockReset();
+  api.getParkingSessionsCsv.mockReset();
   api.getParkingSessions.mockReset();
 });
 
@@ -63,6 +73,7 @@ describe('parking session history pagination', () => {
     expect(api.getParkingSessions).toHaveBeenLastCalledWith('parking-1', {
       page: 1,
       plate: 'AB123CD',
+      period: '30d',
     });
   });
 
@@ -97,6 +108,7 @@ describe('parking session history pagination', () => {
     expect(api.getParkingSessions).toHaveBeenLastCalledWith('parking-1', {
       page: 2,
       status: 'COMPLETED',
+      period: '30d',
     });
   });
 
@@ -121,6 +133,7 @@ describe('parking session history pagination', () => {
     expect(api.getParkingSessions).toHaveBeenLastCalledWith('parking-1', {
       page: 1,
       status: 'CANCELLED',
+      period: '30d',
     });
   });
 });

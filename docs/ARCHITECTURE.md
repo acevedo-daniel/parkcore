@@ -62,6 +62,8 @@ Checkout and cancellation use conditional updates against `status = 'ACTIVE'`, s
 
 Vehicle lookup normalizes the plate and scopes the unique identity to `(plate, parkingId)`. Returning check-in updates only supplied stable vehicle metadata. Customer name, phone, and notes are stored on the new session and are not copied from prior visits.
 
+Analytics asks the owner timezone boundary utility for network today and rolling 7-day or 30-day windows. Revenue is grouped by currency in both summaries and series, so ARS and USD are never arithmetically combined. Parking history derives its predefined periods from the parking timezone, calculates aggregates from the complete filtered set, and uses the same filters for its CSV export.
+
 ## Public discovery pipeline
 
 Public parking list and detail reads share the same repository visibility predicate: the owner kind must be `OWNER` or `SHOWCASE`, the parking must be listed, and operational state must be active. DEMO-owned facilities are excluded regardless of their stored listing state. Hidden detail requests resolve as not found.
@@ -128,6 +130,7 @@ Provider-specific SDKs are not part of the application architecture; hosting con
 - **Pricing history:** a session owns the pricing snapshot used to calculate its completed total.
 - **Terminal sessions:** completed or cancelled sessions do not transition again.
 - **Vehicle identity:** normalized plates are unique per parking, while visit-specific contact data belongs only to its session.
+- **Timezone scope:** network analytics use `User.timezone`; parking history, displayed timestamps, and CSV values use `Parking.timezone`.
 
 ## Trade-offs
 

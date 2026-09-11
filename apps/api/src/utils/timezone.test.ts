@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { getScheduleState, validateDailySchedule } from './timezone.js';
+import {
+  formatZonedIso,
+  getLocalPeriodWindow,
+  getScheduleState,
+  validateDailySchedule,
+} from './timezone.js';
 
 const timezone = 'America/Argentina/Buenos_Aires';
 
@@ -37,5 +42,19 @@ describe('parking schedule time utility', () => {
     expect(
       validateDailySchedule({ timezone, is24Hours: false, opensAt: '10:00', closesAt: '10:00' }),
     ).toContain('equal');
+  });
+
+  it('uses local calendar boundaries across daylight saving transitions', () => {
+    const now = new Date('2026-03-08T06:30:00.000Z');
+    expect(getLocalPeriodWindow('today', 'America/New_York', now)).toEqual({
+      start: new Date('2026-03-08T05:00:00.000Z'),
+      end: now,
+    });
+    expect(formatZonedIso(new Date('2026-03-08T06:30:00.000Z'), 'America/New_York')).toBe(
+      '2026-03-08T01:30:00.000-05:00',
+    );
+    expect(formatZonedIso(new Date('2026-03-08T07:30:00.000Z'), 'America/New_York')).toBe(
+      '2026-03-08T03:30:00.000-04:00',
+    );
   });
 });

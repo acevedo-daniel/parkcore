@@ -4,9 +4,11 @@ import { type PaginationResult, createPaginatedResult } from '../../utils/pagina
 import * as parkingService from '../parking/parking.service.js';
 import * as vehicleService from '../vehicle/vehicle.service.js';
 import * as parkingSessionRepository from './parking-session.repository.js';
-import { isParkingOpen } from '../../utils/timezone.js';
+import { formatZonedIso, getLocalPeriodWindow, isParkingOpen } from '../../utils/timezone.js';
 import type {
   CheckIn,
+  ParkingSessionAggregate,
+  ParkingSessionFilter,
   ParkingSessionActiveQuery,
   ParkingSessionQuery,
   ParkingSessionResponse,
@@ -123,26 +125,129 @@ export const getSessionsByParking = async (
   ownerId: string,
   parkingId: string,
   query: ParkingSessionQuery,
-): Promise<PaginationResult<ParkingSessionResponse>> => {
+  now = new Date(),
+): Promise<
+  PaginationResult<ParkingSessionResponse> & {
+    aggregate: ParkingSessionAggregate;
+    timezone: string;
+  }
+> => {
   const parking = await parkingService.findById(parkingId);
   if (parking.ownerId !== ownerId)
     throw new ForbiddenError("You don't have access to this parking");
 
-  const { page, limit, status, plate, dateFrom, dateTo } = query;
+  const { page, limit, status, plate, period } = query;
+  const periodWindow = getLocalPeriodWindow(period, parking.timezone, now);
   const result = await parkingSessionRepository.findByParking(parkingId, {
     skip: (page - 1) * limit,
     take: limit,
     ...(status ? { status } : {}),
     ...(plate ? { plate } : {}),
-    ...(dateFrom ? { dateFrom } : {}),
-    ...(dateTo ? { dateTo } : {}),
+    startTimeFrom: periodWindow.start,
+    startTimeTo: periodWindow.end,
   });
-  return createPaginatedResult(
-    result.data.map(toParkingSessionResponse),
-    result.total,
-    page,
-    limit,
-  );
+  return {
+    ...createPaginatedResult(result.data.map(toParkingSessionResponse), result.total, page, limit),
+    aggregate: toParkingSessionAggregate(result.aggregateRows),
+    timezone: parking.timezone,
+  };
+};
+
+export const toParkingSessionAggregate = (
+  rows: parkingSessionRepository.ParkingSessionHistoryAggregateRow[],
+): ParkingSessionAggregate => {
+  const revenueByCurrency = new Map<'ARS' | 'USD', number>();
+  let activeSessions = 0;
+  let completedSessions = 0;
+  let cancelledSessions = 0;
+
+  for (const row of rows) {
+    if (row.status === 'ACTIVE') activeSessions += 1;
+    if (row.status === 'COMPLETED') {
+      completedSessions += 1;
+      if (row.totalAmountCents !== null) {
+        revenueByCurrency.set(
+          row.currency,
+          (revenueByCurrency.get(row.currency) ?? 0) + row.totalAmountCents,
+        );
+      }
+    }
+    if (row.status === 'CANCELLED') cancelledSessions += 1;
+  }
+
+  return {
+    totalSessions: rows.length,
+    activeSessions,
+    completedSessions,
+    cancelledSessions,
+    revenueByCurrency: [...revenueByCurrency.entries()]
+      .sort(([first], [second]) => first.localeCompare(second))
+      .map(([currency, revenueCents]) => ({ currency, revenueCents })),
+  };
+};
+
+const escapeCsv = (value: string | number): string => {
+  const stringValue = String(value);
+  return /[",\r\n]/.test(stringValue) ? `"${stringValue.replaceAll('"', '""')}"` : stringValue;
+};
+
+const csvValue = (value: string | number | null): string =>
+  value === null ? '' : escapeCsv(value);
+
+const historyCsvHeader = [
+  'plate',
+  'vehicleType',
+  'brand',
+  'model',
+  'startTime',
+  'endTime',
+  'durationMinutes',
+  'status',
+  'hourlyRate',
+  'currency',
+  'totalAmount',
+  'timezone',
+];
+
+export const getParkingSessionsCsv = async (
+  ownerId: string,
+  parkingId: string,
+  query: ParkingSessionFilter,
+  now = new Date(),
+): Promise<string> => {
+  const parking = await parkingService.findById(parkingId);
+  if (parking.ownerId !== ownerId) {
+    throw new ForbiddenError("You don't have access to this parking");
+  }
+  const periodWindow = getLocalPeriodWindow(query.period, parking.timezone, now);
+  const sessions = await parkingSessionRepository.findForExport(parkingId, {
+    ...(query.status ? { status: query.status } : {}),
+    ...(query.plate ? { plate: query.plate } : {}),
+    startTimeFrom: periodWindow.start,
+    startTimeTo: periodWindow.end,
+  });
+  const rows = sessions.map((session) => {
+    const durationMinutes = session.endTime
+      ? Math.max(0, Math.floor((session.endTime.getTime() - session.startTime.getTime()) / 60_000))
+      : null;
+    return [
+      session.vehicle.plate,
+      session.vehicle.type,
+      session.vehicle.brand,
+      session.vehicle.model,
+      formatZonedIso(session.startTime, parking.timezone),
+      session.endTime ? formatZonedIso(session.endTime, parking.timezone) : null,
+      durationMinutes,
+      session.status,
+      session.hourlyRateCents,
+      session.currency,
+      session.status === 'COMPLETED' ? session.totalAmountCents : null,
+      parking.timezone,
+    ]
+      .map((value) => csvValue(value))
+      .join(',');
+  });
+  return [historyCsvHeader.join(','), ...rows].join('\r\n');
 };
 
 export const getSessionById = async (

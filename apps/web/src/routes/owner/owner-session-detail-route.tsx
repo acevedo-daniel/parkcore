@@ -208,7 +208,7 @@ export function OwnerSessionDetailRoute() {
               </DetailItem>
             ) : null}
             <DetailItem label={es ? 'Ingreso' : 'Started'}>
-              <OperationalTimestamp value={session.startTime} />
+              <OperationalTimestamp value={session.startTime} timezone={parking?.timezone} />
             </DetailItem>
             <DetailItem label={es ? 'Tarifa registrada' : 'Rate snapshot'}>
               {formatMoney(session.hourlyRateCents, session.currency)} / H
@@ -224,7 +224,9 @@ export function OwnerSessionDetailRoute() {
         </section>
       </div>
 
-      {session.status === 'COMPLETED' ? <OperationalReceipt session={session} /> : null}
+      {session.status === 'COMPLETED' ? (
+        <OperationalReceipt session={session} timezone={parking?.timezone} />
+      ) : null}
       {session.status === 'CANCELLED' ? (
         <section
           aria-label={es ? 'Estadía cancelada' : 'Cancelled session'}
@@ -260,7 +262,7 @@ export function OwnerSessionDetailRoute() {
               {session.vehicle.type.replaceAll('_', ' ')}
             </span>
           </div>
-          <CheckoutSummary session={session} />
+          <CheckoutSummary session={session} timezone={parking?.timezone} />
           {actionError ? (
             <p
               className="rounded-[var(--radius-md)] border border-danger-foreground bg-danger-surface p-3 text-sm font-semibold text-danger-text"

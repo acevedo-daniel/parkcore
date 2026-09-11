@@ -5,6 +5,7 @@ import {
   parkingParamsSchema,
   parkingSessionListResponseSchema,
   parkingSessionActiveQuerySchema,
+  parkingSessionFilterSchema,
   parkingSessionParamsSchema,
   parkingSessionQuerySchema,
   parkingSessionResponseSchema,
@@ -83,9 +84,28 @@ export function registerParkingSessionDocs(registry: OpenAPIRegistry): void {
     request: { params: parkingParamsSchema, query: parkingSessionQuerySchema },
     responses: {
       200: {
-        description: 'Parking sessions',
+        description: 'Paginated parking sessions with a complete filtered aggregate',
         content: { 'application/json': { schema: parkingSessionListResponseSchema } },
       },
+      401: errorResponse('Unauthorized'),
+      403: errorResponse('Forbidden - not the owner'),
+      404: errorResponse('Parking not found'),
+    },
+  });
+
+  registry.registerPath({
+    method: 'get',
+    path: '/parkings/{parkingId}/sessions/export.csv',
+    tags: ['Parking Sessions'],
+    summary: 'Export parking session history as CSV',
+    security: [{ bearerAuth: [] }],
+    request: { params: parkingParamsSchema, query: parkingSessionFilterSchema },
+    responses: {
+      200: {
+        description: 'Complete filtered parking session history CSV',
+        content: { 'text/csv': { schema: { type: 'string' } } },
+      },
+      400: errorResponse('Validation error'),
       401: errorResponse('Unauthorized'),
       403: errorResponse('Forbidden - not the owner'),
       404: errorResponse('Parking not found'),

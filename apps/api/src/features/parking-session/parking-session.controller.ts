@@ -6,6 +6,7 @@ import {
   parkingParamsSchema,
   parkingSessionParamsSchema,
   parkingSessionActiveQuerySchema,
+  parkingSessionFilterSchema,
   parkingSessionQuerySchema,
 } from './parking-session.schema.js';
 
@@ -38,6 +39,17 @@ export const findAll = async (req: Request, res: Response): Promise<void> => {
   const query = parkingSessionQuerySchema.parse(req.query);
   const result = await parkingSessionService.getSessionsByParking(userId, parkingId, query);
   res.json(result);
+};
+
+export const exportCsv = async (req: Request, res: Response): Promise<void> => {
+  const userId = getAuthenticatedUserId(req);
+  const { parkingId } = parkingParamsSchema.parse(req.params);
+  const query = parkingSessionFilterSchema.parse(req.query);
+  const csv = await parkingSessionService.getParkingSessionsCsv(userId, parkingId, query);
+  res
+    .type('text/csv')
+    .set('Content-Disposition', `attachment; filename="parking-${parkingId}-history.csv"`)
+    .send(csv);
 };
 
 export const findById = async (req: Request, res: Response): Promise<void> => {

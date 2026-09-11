@@ -535,11 +535,79 @@
               "hasPreviousPage"
             ],
             "additionalProperties": false
+          },
+          "aggregate": {
+            "$ref": "#/components/schemas/ParkingSessionAggregate"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Parking IANA timezone"
           }
         },
         "required": [
           "data",
-          "meta"
+          "meta",
+          "aggregate",
+          "timezone"
+        ],
+        "additionalProperties": false
+      },
+      "ParkingSessionAggregate": {
+        "type": "object",
+        "properties": {
+          "totalSessions": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "All filtered sessions"
+          },
+          "activeSessions": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Filtered active sessions"
+          },
+          "completedSessions": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Filtered completed sessions"
+          },
+          "cancelledSessions": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Filtered cancelled sessions"
+          },
+          "revenueByCurrency": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "currency": {
+                  "type": "string",
+                  "enum": [
+                    "ARS",
+                    "USD"
+                  ],
+                  "description": "Revenue currency"
+                },
+                "revenueCents": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Revenue in integer cents"
+                }
+              },
+              "required": [
+                "currency",
+                "revenueCents"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "totalSessions",
+          "activeSessions",
+          "completedSessions",
+          "cancelledSessions",
+          "revenueByCurrency"
         ],
         "additionalProperties": false
       },
@@ -1116,16 +1184,12 @@
             "type": "integer",
             "minimum": 0
           },
-          "revenueTodayCents": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "currency": {
-            "type": "string",
-            "enum": [
-              "ARS",
-              "USD"
-            ]
+          "revenueToday": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CurrencyRevenue"
+            },
+            "description": "Completed revenue grouped by currency for today"
           },
           "facilities": {
             "type": "array",
@@ -1139,9 +1203,31 @@
           "totalCapacity",
           "occupancyPercent",
           "completedToday",
-          "revenueTodayCents",
-          "currency",
+          "revenueToday",
           "facilities"
+        ],
+        "additionalProperties": false
+      },
+      "CurrencyRevenue": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "enum": [
+              "ARS",
+              "USD"
+            ],
+            "description": "Revenue currency"
+          },
+          "revenueCents": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Revenue in integer cents"
+          }
+        },
+        "required": [
+          "currency",
+          "revenueCents"
         ],
         "additionalProperties": false
       },
@@ -1228,13 +1314,6 @@
               }
             ]
           },
-          "currency": {
-            "type": "string",
-            "enum": [
-              "ARS",
-              "USD"
-            ]
-          },
           "data": {
             "type": "array",
             "items": {
@@ -1244,14 +1323,16 @@
                   "type": "string",
                   "format": "date"
                 },
-                "revenueCents": {
-                  "type": "integer",
-                  "minimum": 0
+                "revenueByCurrency": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CurrencyRevenue"
+                  }
                 }
               },
               "required": [
                 "date",
-                "revenueCents"
+                "revenueByCurrency"
               ],
               "additionalProperties": false
             }
@@ -1259,7 +1340,6 @@
         },
         "required": [
           "days",
-          "currency",
           "data"
         ],
         "additionalProperties": false
@@ -1824,6 +1904,50 @@
           },
           {
             "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "COMPLETED",
+                "CANCELLED"
+              ],
+              "description": "Filter by session status",
+              "example": "COMPLETED"
+            },
+            "required": false,
+            "description": "Filter by session status",
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Normalized plate search term",
+              "example": "AB123CD"
+            },
+            "required": false,
+            "description": "Normalized plate search term",
+            "name": "plate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "today",
+                "7d",
+                "30d"
+              ],
+              "default": "30d",
+              "description": "Parking-local history period",
+              "example": "30d"
+            },
+            "required": false,
+            "description": "Parking-local history period",
+            "name": "period",
+            "in": "query"
+          },
+          {
+            "schema": {
               "type": "integer",
               "exclusiveMinimum": 0,
               "default": 1,
@@ -1848,6 +1972,74 @@
             "description": "Items per page",
             "name": "limit",
             "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated parking sessions with a complete filtered aggregate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParkingSessionListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - not the owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parking not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parkings/{parkingId}/sessions/export.csv": {
+      "get": {
+        "tags": [
+          "Parking Sessions"
+        ],
+        "summary": "Export parking session history as CSV",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Parking UUID"
+            },
+            "required": true,
+            "description": "Parking UUID",
+            "name": "parkingId",
+            "in": "path"
           },
           {
             "schema": {
@@ -1858,7 +2050,7 @@
                 "CANCELLED"
               ],
               "description": "Filter by session status",
-              "example": "ACTIVE"
+              "example": "COMPLETED"
             },
             "required": false,
             "description": "Filter by session status",
@@ -1878,50 +2070,39 @@
           },
           {
             "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "date"
-                },
-                {
-                  "type": "string",
-                  "format": "date-time"
-                }
+              "type": "string",
+              "enum": [
+                "today",
+                "7d",
+                "30d"
               ],
-              "description": "Include sessions starting on or after this date or time"
+              "default": "30d",
+              "description": "Parking-local history period",
+              "example": "30d"
             },
             "required": false,
-            "description": "Include sessions starting on or after this date or time",
-            "name": "dateFrom",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "format": "date"
-                },
-                {
-                  "type": "string",
-                  "format": "date-time"
-                }
-              ],
-              "description": "Include sessions starting on or before this date or time"
-            },
-            "required": false,
-            "description": "Include sessions starting on or before this date or time",
-            "name": "dateTo",
+            "description": "Parking-local history period",
+            "name": "period",
             "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "description": "Parking sessions",
+            "description": "Complete filtered parking session history CSV",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ParkingSessionListResponse"
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -2646,7 +2827,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Get revenue series",
+        "summary": "Get revenue series grouped by currency",
         "parameters": [
           {
             "schema": {
@@ -2663,7 +2844,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Daily revenue series",
+            "description": "Daily revenue series grouped by currency",
             "content": {
               "application/json": {
                 "schema": {

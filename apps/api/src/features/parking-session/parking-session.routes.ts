@@ -6,6 +6,7 @@ export const parkingSessionsRouter = Router({ mergeParams: true });
 parkingSessionsRouter.use(requireAuth, requireOperator);
 parkingSessionsRouter.post('/check-in', parkingSessionController.checkIn);
 parkingSessionsRouter.get('/active', parkingSessionController.listActive);
+parkingSessionsRouter.get('/export.csv', parkingSessionController.exportCsv);
 parkingSessionsRouter.get('/', parkingSessionController.findAll);
 
 export const parkingSessionRouter = Router();

@@ -438,18 +438,16 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description Page number */
-                    page?: number;
-                    /** @description Items per page */
-                    limit?: number;
                     /** @description Filter by session status */
                     status?: "ACTIVE" | "COMPLETED" | "CANCELLED";
                     /** @description Normalized plate search term */
                     plate?: string;
-                    /** @description Include sessions starting on or after this date or time */
-                    dateFrom?: string;
-                    /** @description Include sessions starting on or before this date or time */
-                    dateTo?: string;
+                    /** @description Parking-local history period */
+                    period?: "today" | "7d" | "30d";
+                    /** @description Page number */
+                    page?: number;
+                    /** @description Items per page */
+                    limit?: number;
                 };
                 header?: never;
                 path: {
@@ -460,13 +458,95 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Parking sessions */
+                /** @description Paginated parking sessions with a complete filtered aggregate */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
                         "application/json": components["schemas"]["ParkingSessionListResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden - not the owner */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Parking not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/parkings/{parkingId}/sessions/export.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export parking session history as CSV */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Filter by session status */
+                    status?: "ACTIVE" | "COMPLETED" | "CANCELLED";
+                    /** @description Normalized plate search term */
+                    plate?: string;
+                    /** @description Parking-local history period */
+                    period?: "today" | "7d" | "30d";
+                };
+                header?: never;
+                path: {
+                    /** @description Parking UUID */
+                    parkingId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Complete filtered parking session history CSV */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/csv": string;
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
                 /** @description Unauthorized */
@@ -1114,7 +1194,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get revenue series */
+        /** Get revenue series grouped by currency */
         get: {
             parameters: {
                 query?: {
@@ -1127,7 +1207,7 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Daily revenue series */
+                /** @description Daily revenue series grouped by currency */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -1726,6 +1806,28 @@ export interface components {
                  */
                 hasPreviousPage: boolean;
             };
+            aggregate: components["schemas"]["ParkingSessionAggregate"];
+            /** @description Parking IANA timezone */
+            timezone: string;
+        };
+        ParkingSessionAggregate: {
+            /** @description All filtered sessions */
+            totalSessions: number;
+            /** @description Filtered active sessions */
+            activeSessions: number;
+            /** @description Filtered completed sessions */
+            completedSessions: number;
+            /** @description Filtered cancelled sessions */
+            cancelledSessions: number;
+            revenueByCurrency: {
+                /**
+                 * @description Revenue currency
+                 * @enum {string}
+                 */
+                currency: "ARS" | "USD";
+                /** @description Revenue in integer cents */
+                revenueCents: number;
+            }[];
         };
         ParkingResponse: {
             /**
@@ -2010,10 +2112,18 @@ export interface components {
             totalCapacity: number;
             occupancyPercent: number;
             completedToday: number;
-            revenueTodayCents: number;
-            /** @enum {string} */
-            currency: "ARS" | "USD";
+            /** @description Completed revenue grouped by currency for today */
+            revenueToday: components["schemas"]["CurrencyRevenue"][];
             facilities: components["schemas"]["FacilityAnalytics"][];
+        };
+        CurrencyRevenue: {
+            /**
+             * @description Revenue currency
+             * @enum {string}
+             */
+            currency: "ARS" | "USD";
+            /** @description Revenue in integer cents */
+            revenueCents: number;
         };
         FacilityAnalytics: {
             /**
@@ -2043,12 +2153,10 @@ export interface components {
         };
         AnalyticsRevenueResponse: {
             days: 7 | 30;
-            /** @enum {string} */
-            currency: "ARS" | "USD";
             data: {
                 /** Format: date */
                 date: string;
-                revenueCents: number;
+                revenueByCurrency: components["schemas"]["CurrencyRevenue"][];
             }[];
         };
         AnalyticsVolumeResponse: {
