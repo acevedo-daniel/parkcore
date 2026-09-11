@@ -146,7 +146,7 @@ This turns API/client synchronization into an explicit CI check rather than a ma
 pnpm --filter @parkcore/web test:e2e
 ```
 
-This is the deterministic mocked owner workflow used for fast UI-level feedback.
+This is the deterministic mocked owner workflow used for fast UI-level feedback. It covers language switching, explicit and system appearance changes, form-state preservation, reduced-motion behavior, keyboard navigation, dialog and sheet focus restoration, and the representative owner success path.
 
 ### Local real-stack workflow
 
