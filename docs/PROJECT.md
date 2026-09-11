@@ -36,6 +36,7 @@ Driver information can be recorded as visit data during check-in, but drivers do
 - Open Google Maps directions from a facility's public coordinates.
 - Navigate paginated catalog results.
 - Receive a public not-found state for unavailable facilities.
+- Start an isolated operator demo without exposing its facilities through public discovery.
 
 ### Owner experience
 

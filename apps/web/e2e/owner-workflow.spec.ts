@@ -243,7 +243,7 @@ test('signs in, creates a parking, checks in, and completes a parking session', 
 
   await page.goto('/login');
   await page.getByLabel('Email').fill(owner.email ?? '');
-  await page.getByLabel('Password').fill('password123');
+  await page.getByRole('textbox', { name: 'Password' }).fill('password123');
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL(/\/app$/);
   await page.getByRole('link', { name: 'Create parking' }).click();

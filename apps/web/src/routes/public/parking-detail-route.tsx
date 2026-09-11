@@ -181,7 +181,7 @@ export function ParkingDetailRoute() {
         </div>
 
         <div className="mt-12 grid gap-8 md:grid-cols-12">
-          <div className="aspect-[16/10] overflow-hidden rounded-[2.5rem_2.5rem_5rem_2.5rem] border border-border bg-surface-emphasis md:col-span-7">
+          <div className="min-w-0 aspect-[16/10] overflow-hidden rounded-[2.5rem_2.5rem_5rem_2.5rem] border border-border bg-surface-emphasis md:col-span-7">
             <PublicParkingImage
               alt={t('parking.discoveryImageAlt', { title: parking.title })}
               fetchPriority="high"
@@ -192,14 +192,14 @@ export function ParkingDetailRoute() {
             />
           </div>
 
-          <div className="grid gap-6 md:col-span-5 md:col-start-8 xl:col-span-4 xl:col-start-9">
-            <section className="rounded-[2rem] border border-border bg-surface p-6 sm:p-7">
+          <div className="grid min-w-0 gap-6 md:col-span-5 md:col-start-8 xl:col-span-4 xl:col-start-9">
+            <section className="min-w-0 rounded-[2rem] border border-border bg-surface p-6 sm:p-7">
               <p className="type-label text-foreground-muted">{t('public.detail.about')}</p>
               <p className="mt-4 text-base leading-relaxed text-foreground-secondary">
                 {parking.description ?? t('public.detail.missingDescription')}
               </p>
             </section>
-            <ParkingCalculatorWidget className="max-w-none" parking={parking} />
+            <ParkingCalculatorWidget className="min-w-0 max-w-none" parking={parking} />
           </div>
         </div>
       </div>

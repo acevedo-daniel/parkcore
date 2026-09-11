@@ -6,7 +6,7 @@
 
 ParkCore tests the system at several boundaries rather than relying on one large end-to-end suite.
 
-The API suite exercises domain rules, authorization, validation, persistence behavior, and session transitions against PostgreSQL. The web suite verifies browser-facing components and route behavior. A generated-contract check protects the API/client boundary, while Playwright covers the owner workflow separately.
+The API suite exercises domain rules, authorization, validation, persistence behavior, and session transitions against PostgreSQL. The web suite verifies browser-facing components and route behavior. A generated-contract check protects the API/client boundary, while Playwright covers the public visitor and owner workflows separately.
 
 Local real-stack browser checks run against disposable services. Deployed real-stack checks remain explicit remote verification and are not part of the production pull request path.
 
@@ -18,7 +18,7 @@ Local real-stack browser checks run against disposable services. Deployed real-s
 | Web tests                 | Forms, route behavior, loading/error states, UI interactions, and Spanish/English shared-workflow parity     | Vitest + Testing Library in `apps/web/src/**/*.test.{ts,tsx}`          |
 | Localization parity       | Detect missing or extra nested keys between supported locale catalogs                                        | `pnpm locales:check`                                                   |
 | Contract check            | Detect drift between the API OpenAPI artifact and generated browser client                                   | `pnpm contract:check`                                                  |
-| Mocked browser workflow   | Verify the owner workflow against contract-shaped mocked responses                                           | Playwright in `apps/web/e2e`                                           |
+| Mocked browser workflows  | Verify public discovery and owner workflows against contract-shaped mocked responses                         | Playwright in `apps/web/e2e`                                           |
 | Local real-stack workflow | Exercise the local preview, API, and PostgreSQL persistence boundary                                         | `pnpm --filter @parkcore/web test:e2e:local`                           |
 | Remote real-stack checks  | Exercise the deployed web application and its configured API                                                 | Playwright real-stack configuration; run explicitly                    |
 | Remote API smoke          | Verify deployed API liveness and optional remote behavior                                                    | `pnpm --filter @parkcore/api smoke:remote`                             |
@@ -146,7 +146,7 @@ This turns API/client synchronization into an explicit CI check rather than a ma
 pnpm --filter @parkcore/web test:e2e
 ```
 
-This is the deterministic mocked owner workflow used for fast UI-level feedback. It covers language switching, explicit and system appearance changes, form-state preservation, reduced-motion behavior, keyboard navigation, dialog and sheet focus restoration, and the representative owner success path.
+This is the deterministic mocked browser workflow used for fast UI-level feedback. It covers public landing discovery, the started-hour estimator, URL-backed directory filters, SHOWCASE disclosure, directions attributes, auth entry and autofill semantics, isolated demo entry, public not-found recovery, loading/empty/error/retry/filter-validation states, and the responsive light/dark screenshot matrix. The existing owner workflow continues to cover language switching, explicit and system appearance changes, form-state preservation, reduced-motion behavior, keyboard navigation, dialog and sheet focus restoration, and the representative owner success path.
 
 ### Local real-stack workflow
 
