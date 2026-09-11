@@ -36,8 +36,8 @@ function OwnerLink({
             ? 'owner-nav-link flex min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-medium transition-colors'
             : 'owner-nav-link flex items-center gap-3 rounded-[var(--radius-sm)] px-3.5 py-2.5 text-sm font-medium transition-colors',
           isActive
-            ? 'is-active bg-[#121417] text-white font-semibold'
-            : 'text-foreground-secondary hover:text-foreground hover:bg-[#f1eee7]',
+            ? 'is-active bg-primary text-primary-foreground font-semibold'
+            : 'text-foreground-secondary hover:bg-surface-subtle hover:text-foreground',
         )
       }
       to={to}
@@ -49,7 +49,7 @@ function OwnerLink({
 }
 
 export function OwnerLayout() {
-  const { language, suggestTheme, t } = useAppearance();
+  const { language, t } = useAppearance();
   const { logout } = useAuth();
   const navigate = useNavigate();
   const navigation = useNavigation();
@@ -59,14 +59,13 @@ export function OwnerLayout() {
     { Icon: Building2, label: t('nav.parkings'), to: '/app/parkings' },
   ];
   useEffect(() => {
-    suggestTheme('light');
     const interval = window.setInterval(() => {
       setClock(new Date());
     }, 30_000);
     return () => {
       window.clearInterval(interval);
     };
-  }, [suggestTheme]);
+  }, []);
   useDocumentMeta({
     description: 'Operate ParkCore parking facilities with active sessions, capacity and rates.',
     noIndex: true,
@@ -78,16 +77,16 @@ export function OwnerLayout() {
     void navigate('/login', { replace: true });
   };
   return (
-    <div className="owner-theme owner-shell min-h-screen flex flex-col md:flex-row bg-canvas text-foreground">
+    <div className="owner-theme owner-shell flex min-h-screen flex-col bg-canvas text-foreground md:flex-row">
       <a className="skip-link" href="#owner-main">
         {t('nav.skipMain')}
       </a>
-      <aside className="owner-sidebar hidden md:flex md:w-64 md:flex-col md:justify-between border-r border-[#121417] bg-white p-6 shrink-0">
+      <aside className="owner-sidebar hidden shrink-0 border-r border-border-strong bg-surface p-6 md:flex md:w-64 md:flex-col md:justify-between">
         <div className="flex flex-col gap-6">
-          <div className="owner-brand-block border-b border-[#121417] pb-5">
+          <div className="owner-brand-block border-b border-border-strong pb-5">
             <Link
               aria-label="ParkCore operations"
-              className="brand-mark font-display text-lg font-bold tracking-[-0.035em] text-[#121417] transition-colors hover:text-[#45423c]"
+              className="brand-mark font-display text-lg font-bold tracking-[-0.035em] text-foreground transition-colors hover:text-foreground-secondary"
               to="/app"
             >
               PARKCORE
@@ -99,7 +98,7 @@ export function OwnerLayout() {
             ))}
           </nav>
         </div>
-        <div className="owner-account flex flex-col gap-4 border-t border-[#121417] pt-5">
+        <div className="owner-account flex flex-col gap-4 border-t border-border-strong pt-5">
           <div className="flex items-center justify-between">
             <time
               className="system-clock font-mono text-xs text-foreground-muted tabular-nums"
@@ -110,14 +109,14 @@ export function OwnerLayout() {
               )}
             </time>
           </div>
-          <section className="rounded-[var(--radius-sm)] border border-[#121417]/10 bg-[#f5f5f5] p-3">
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#6d695f]">
+          <section className="rounded-[var(--radius-sm)] border border-border-subtle bg-surface-subtle p-3">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-foreground-muted">
               {language === 'es' ? 'Preferencias' : 'Preferences'}
             </p>
             <AppearanceControls compact />
           </section>
-          <section className="border-t border-[#121417]/10 pt-3">
-            <p className="mb-1 px-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#6d695f]">
+          <section className="border-t border-border-subtle pt-3">
+            <p className="mb-1 px-1 text-[10px] font-bold uppercase tracking-[0.12em] text-foreground-muted">
               {language === 'es' ? 'Cuenta' : 'Account'}
             </p>
             <NavLink
@@ -125,8 +124,8 @@ export function OwnerLayout() {
                 cn(
                   'owner-nav-link flex items-center gap-3 px-3.5 py-2 rounded-[var(--radius-sm)] text-sm font-medium transition-colors',
                   isActive
-                    ? 'is-active bg-[#121417] text-white font-semibold'
-                    : 'text-foreground-secondary hover:text-foreground hover:bg-[#f1eee7]',
+                    ? 'is-active bg-primary text-primary-foreground font-semibold'
+                    : 'text-foreground-secondary hover:bg-surface-subtle hover:text-foreground',
                 )
               }
               to="/app/profile"
@@ -135,7 +134,7 @@ export function OwnerLayout() {
               <span>{t('nav.profile')}</span>
             </NavLink>
             <button
-              className="owner-nav-link owner-sign-out flex w-full cursor-pointer items-center gap-3 rounded-[var(--radius-sm)] px-3.5 py-2 text-left text-sm font-medium text-foreground-secondary transition-colors hover:bg-[#f1eee7] hover:text-foreground"
+              className="owner-nav-link owner-sign-out flex w-full cursor-pointer items-center gap-3 rounded-[var(--radius-sm)] px-3.5 py-2 text-left text-sm font-medium text-foreground-secondary transition-colors hover:bg-surface-subtle hover:text-foreground"
               onClick={signOut}
               type="button"
             >
@@ -143,14 +142,14 @@ export function OwnerLayout() {
               <span>{t('nav.signOut')}</span>
             </button>
           </section>
-          <div className="border-t border-[#121417]/10 pt-3">
+          <div className="border-t border-border-subtle pt-3">
             <DemoResetControl />
           </div>
         </div>
       </aside>
-      <header className="owner-mobile-header md:hidden flex items-center justify-between h-14 px-4 border-b border-[#121417] bg-white sticky top-0 z-30">
+      <header className="owner-mobile-header sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border-strong bg-surface px-4 md:hidden">
         <Link
-          className="brand-mark font-display text-base font-bold tracking-[-0.035em] text-[#121417]"
+          className="brand-mark font-display text-base font-bold tracking-[-0.035em] text-foreground"
           to="/app"
         >
           PARKCORE
@@ -159,7 +158,7 @@ export function OwnerLayout() {
           <span className="type-label">{t('nav.operations')}</span>
           <button
             aria-label={t('nav.signOut')}
-            className="icon-button size-9 rounded-md border border-[#121417] bg-white flex items-center justify-center text-[#121417] hover:bg-[#f1eee7] transition-colors"
+            className="icon-button flex size-9 items-center justify-center rounded-md border border-border-strong bg-surface text-foreground transition-colors hover:bg-surface-hover"
             onClick={signOut}
             type="button"
           >
@@ -170,7 +169,7 @@ export function OwnerLayout() {
       {navigation.state !== 'idle' ? (
         <div
           aria-live="polite"
-          className="route-loading-bar fixed top-0 inset-x-0 h-1 bg-primary animate-pulse z-50"
+          className="route-loading-bar fixed inset-x-0 top-0 z-50 h-1 animate-pulse bg-primary"
           role="status"
         >
           <span className="visually-hidden">{t('route.loading')}</span>
@@ -185,7 +184,7 @@ export function OwnerLayout() {
       </main>
       <nav
         aria-label={t('nav.ownerMobile')}
-        className="owner-mobile-nav md:hidden fixed bottom-0 inset-x-0 h-16 border-t border-[#121417] bg-white/95 backdrop-blur-md z-30 flex items-center justify-around px-4"
+        className="owner-mobile-nav fixed inset-x-0 bottom-0 z-30 flex h-16 items-center justify-around border-t border-border-strong bg-surface/95 px-4 backdrop-blur-md md:hidden"
       >
         {ownerLinks.map((link) => (
           <OwnerLink compact key={link.to} {...link} />
@@ -195,7 +194,7 @@ export function OwnerLayout() {
             cn(
               'owner-nav-link flex min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-medium transition-colors',
               isActive
-                ? 'is-active text-[#121417] font-semibold'
+                ? 'is-active text-foreground font-semibold'
                 : 'text-foreground-secondary hover:text-foreground',
             )
           }

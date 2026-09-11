@@ -69,13 +69,13 @@ export function EmptyState({
     <section
       aria-labelledby={titleId}
       aria-live="polite"
-      className="flex min-h-56 flex-col items-start justify-center rounded-[1.5rem] border border-dashed border-[#121417] bg-white p-6 text-[#121417] sm:p-8"
+      className="flex min-h-56 flex-col items-start justify-center rounded-[var(--radius-xl)] border border-dashed border-border-strong bg-surface p-6 text-foreground sm:p-8"
       role="status"
     >
-      <span className="flex size-10 items-center justify-center rounded-full bg-[#ffcc00] text-[#121417]">
+      <span className="flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground">
         <Inbox aria-hidden="true" className="size-5" />
       </span>
-      <p className="mt-5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#6d695f]">
+      <p className="mt-5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground-muted">
         {es ? 'Todavía no hay nada acá' : 'Nothing here yet'}
       </p>
       <h2
@@ -84,7 +84,7 @@ export function EmptyState({
       >
         {title}
       </h2>
-      <p className="mt-3 max-w-lg text-sm leading-relaxed text-[#45423c]">{children}</p>
+      <p className="mt-3 max-w-lg text-sm leading-relaxed text-foreground-secondary">{children}</p>
       {action ? <div className="mt-6">{action}</div> : null}
     </section>
   );
@@ -107,13 +107,13 @@ export function ErrorState({
   return (
     <section
       aria-labelledby={titleId}
-      className="flex min-h-56 flex-col items-start justify-center rounded-[1.5rem] border border-[#121417] bg-[#f1eee7] p-6 text-[#121417] sm:p-8"
+      className="flex min-h-56 flex-col items-start justify-center rounded-[var(--radius-xl)] border border-border-strong bg-surface-emphasis p-6 text-foreground sm:p-8"
       role="alert"
     >
-      <span className="flex size-10 items-center justify-center rounded-full border border-[#121417] bg-white text-[#121417]">
+      <span className="flex size-10 items-center justify-center rounded-full border border-border-strong bg-surface text-foreground">
         <AlertTriangle aria-hidden="true" className="size-5" />
       </span>
-      <p className="mt-5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#6d695f]">
+      <p className="mt-5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground-muted">
         {es ? 'Necesita atención' : 'Needs attention'}
       </p>
       <h2
@@ -122,10 +122,10 @@ export function ErrorState({
       >
         {resolvedTitle}
       </h2>
-      <p className="mt-3 max-w-lg text-sm leading-relaxed text-[#45423c]">{children}</p>
+      <p className="mt-3 max-w-lg text-sm leading-relaxed text-foreground-secondary">{children}</p>
       {onRetry ? (
         <button
-          className="mt-6 inline-flex h-10 items-center justify-center gap-2 rounded-full border border-[#121417] bg-white px-4 text-sm font-bold text-[#121417] transition-colors hover:bg-[#ffcc00]"
+          className="mt-6 inline-flex h-10 items-center justify-center gap-2 rounded-full border border-border-strong bg-surface px-4 text-sm font-bold text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           onClick={onRetry}
           type="button"
         >

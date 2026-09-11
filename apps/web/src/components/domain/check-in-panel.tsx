@@ -37,7 +37,7 @@ type CheckInForm = z.infer<typeof checkInFormSchema>;
 type CheckInRequest = components['schemas']['CheckInRequest'];
 
 const controlClassName =
-  'block h-12 w-full rounded-xl border border-[#121417] bg-white px-3 text-[#121417] shadow-none focus:border-[#121417] focus:ring-2 focus:ring-[#ffcc00]';
+  'h-12 w-full rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3.5 text-foreground shadow-xs focus:border-primary focus:ring-2 focus:ring-focus-ring';
 
 export function CheckInPanel({
   error,
@@ -101,7 +101,7 @@ export function CheckInPanel({
           {...register('plate')}
         />
       </Field>
-      <p className="text-sm leading-relaxed text-[#45423c]">
+      <p className="text-sm leading-relaxed text-foreground-secondary">
         {es
           ? 'La patente se normaliza. Los vehículos conocidos se reutilizan dentro de esta cochera.'
           : 'Plates are normalized. Known vehicles are reused within this parking.'}
@@ -140,7 +140,7 @@ export function CheckInPanel({
       </div>
       <Field htmlFor="check-in-notes" label={es ? 'Notas' : 'Notes'}>
         <Textarea
-          className="block min-h-24 w-full rounded-xl border border-[#121417] bg-white px-3 py-2 text-[#121417] shadow-none focus:border-[#121417] focus:ring-2 focus:ring-[#ffcc00]"
+          className="min-h-24 w-full rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3.5 py-3 text-foreground shadow-xs focus:border-primary focus:ring-2 focus:ring-focus-ring"
           id="check-in-notes"
           {...register('notes')}
         />
@@ -148,18 +148,13 @@ export function CheckInPanel({
 
       {error ? (
         <p
-          className="border border-[#121417] bg-[#ffcc00] p-3 text-sm font-semibold text-[#121417]"
+          className="rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-3 text-sm font-semibold text-warning-text"
           role="alert"
         >
           {error}
         </p>
       ) : null}
-      <Button
-        className="border-[#121417] bg-[#121417] text-white hover:bg-[#30312d]"
-        disabled={isSubmitting}
-        fullWidth
-        type="submit"
-      >
+      <Button disabled={isSubmitting} fullWidth type="submit">
         {isSubmitting
           ? es
             ? 'Iniciando estadía…'
@@ -174,10 +169,8 @@ export function CheckInPanel({
 
 function FormDivider({ label }: { label: string }) {
   return (
-    <div className="border-t border-[#121417]/20 pt-5">
-      <span className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#6d695f]">
-        {label}
-      </span>
+    <div className="border-t border-border-subtle pt-5">
+      <span className="type-label text-foreground-muted">{label}</span>
     </div>
   );
 }

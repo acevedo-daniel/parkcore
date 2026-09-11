@@ -21,6 +21,24 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="canonical" href="https://parkcore-app.vercel.app/" />
     <title>ParkCore | Parking Operations</title>
+    <script>
+      (() => {
+        try {
+          const stored = localStorage.getItem('parkcore-theme');
+          const preference = ['system', 'light', 'dark'].includes(stored ?? '') ? stored : 'system';
+          const theme =
+            preference === 'dark' ||
+            (preference === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
+              ? 'dark'
+              : 'light';
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.style.colorScheme = theme;
+        } catch {
+          document.documentElement.dataset.theme = 'light';
+          document.documentElement.style.colorScheme = 'light';
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
