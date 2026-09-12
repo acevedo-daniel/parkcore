@@ -1,17 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, ArrowUpRight, MapPin } from 'lucide-react';
-import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { AvailabilityIndicator } from '../../components/domain/availability-indicator.js';
+import { PublicParkingImage } from '../../components/domain/public-parking-image.js';
+import { Button } from '../../components/ui/button.js';
+import { ParkingCalculatorWidget } from '../../features/parking/parking-calculator-widget.js';
 import { getPublicParking, PublicApiError } from '../../lib/api/public-api.js';
 import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
 import { formatMoney } from '../../lib/format.js';
 
 export function ParkingDetailRoute() {
-  const { language, locale } = useAppearance();
-  const es = language === 'es';
+  const { locale, t } = useAppearance();
   const { parkingId } = useParams();
   const parkingQuery = useQuery({
     queryKey: ['public-parking', parkingId],
@@ -19,23 +20,16 @@ export function ParkingDetailRoute() {
     queryFn: () => getPublicParking(parkingId ?? ''),
   });
   const parking = parkingQuery.data;
-  const [unavailableImage, setUnavailableImage] = useState<string | null>();
 
   useDocumentMeta({
     description: parking
-      ? es
-        ? `${parking.title}, cochera activa en ${parking.address}.`
-        : `${parking.title} is an active ParkCore parking facility at ${parking.address}.`
-      : es
-        ? 'Consultá los detalles de una cochera ParkCore.'
-        : 'View public ParkCore parking facility details.',
+      ? t('public.detail.metaDescription', { address: parking.address, title: parking.title })
+      : t('public.detail.metaDescriptionFallback'),
     noIndex: parkingQuery.isError,
     publicUrl: parking ? publicUrl(`/parkings/${parking.id}`) : undefined,
     title: parking
-      ? `${parking.title} | ParkCore`
-      : es
-        ? 'Detalle de cochera | ParkCore'
-        : 'Parking details | ParkCore',
+      ? t('public.detail.metaTitleWithTitle', { title: parking.title })
+      : t('public.detail.metaTitle'),
   });
 
   if (parkingQuery.isLoading) return <ParkingDetailSkeleton />;
@@ -43,50 +37,32 @@ export function ParkingDetailRoute() {
     const notFound =
       parkingQuery.error instanceof PublicApiError && parkingQuery.error.status === 404;
     return (
-      <section className="min-h-full bg-white px-4 py-16 sm:px-6 lg:px-8">
+      <section className="min-h-full bg-canvas px-4 py-16 sm:px-6 lg:px-8">
         <div
-          className="mx-auto max-w-3xl rounded-[2rem] border border-[#121417]/20 bg-[#f5f5f5] p-8 sm:p-10"
+          className="mx-auto max-w-3xl rounded-[2rem] border border-border-strong bg-surface-emphasis p-8 sm:p-10"
           role="alert"
         >
-          <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
-            {es ? 'Directorio de cocheras' : 'Parking directory'}
-          </p>
-          <h1 className="mt-4 font-display text-3xl font-black tracking-[-0.04em] text-[#1d241f]">
-            {notFound
-              ? es
-                ? 'Esta cochera ya no está disponible.'
-                : 'No parking here'
-              : es
-                ? 'No pudimos cargar esta cochera.'
-                : 'Unable to load parking'}
+          <p className="type-label text-foreground-muted">{t('public.detail.directoryEyebrow')}</p>
+          <h1 className="mt-4 font-display text-3xl font-black tracking-[-0.04em] text-foreground">
+            {t(notFound ? 'public.detail.notFoundTitle' : 'public.detail.errorTitle')}
           </h1>
-          <p className="mt-4 text-base leading-relaxed text-[#3f3f3f]">
-            {notFound
-              ? es
-                ? 'Volvé al directorio para explorar las cocheras activas.'
-                : 'This parking is no longer publicly available.'
-              : es
-                ? 'Probá de nuevo o volvé al directorio.'
-                : 'Try loading this parking again.'}
+          <p className="mt-4 text-base leading-relaxed text-foreground-secondary">
+            {t(notFound ? 'public.detail.notFoundDescription' : 'public.detail.errorDescription')}
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             {!notFound ? (
-              <button
-                className="rounded-full bg-[#121417] px-5 py-3 text-sm font-bold text-white hover:bg-[#ffcc00] hover:text-[#121417]"
+              <Button
                 onClick={() => {
                   void parkingQuery.refetch();
                 }}
-                type="button"
+                variant="primary"
               >
-                {es ? 'Reintentar' : 'Try again'}
-              </button>
+                {t('public.detail.retry')}
+              </Button>
             ) : null}
-            <Link
-              className="rounded-full border border-[#121417]/15 px-5 py-3 text-sm font-bold text-[#121417] hover:bg-[#ffcc00]"
-              to="/parkings"
-            >
-              {es ? 'Volver a cocheras' : 'Return to directory'}
-            </Link>
+            <Button asChild variant="secondary">
+              <Link to="/parkings">{t('public.detail.back')}</Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -94,86 +70,84 @@ export function ParkingDetailRoute() {
   }
   if (!parking) return null;
 
-  const mapUrl = `https://www.openstreetmap.org/?mlat=${String(parking.lat)}&mlon=${String(parking.lng)}#map=17/${String(parking.lat)}/${String(parking.lng)}`;
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${String(parking.lat)},${String(parking.lng)}`;
   const scheduleLabel = parking.is24Hours
-    ? es
-      ? 'Abierta las 24 horas'
-      : 'Open 24 hours'
+    ? t('public.detail.schedule24')
     : parking.opensAt && parking.closesAt
-      ? `${parking.opensAt} - ${parking.closesAt}`
-      : es
-        ? 'Horario no disponible'
-        : 'Schedule unavailable';
+      ? t('public.detail.scheduleRange', {
+          closesAt: parking.closesAt,
+          opensAt: parking.opensAt,
+        })
+      : t('public.detail.scheduleUnavailable');
 
   return (
-    <article className="min-h-full bg-white pb-20 pt-10 sm:pb-28 sm:pt-16">
+    <article className="min-h-full bg-canvas pb-20 pt-10 text-foreground sm:pb-28 sm:pt-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link
-          className="inline-flex items-center gap-2 text-sm font-bold text-[#121417] underline decoration-[#ffcc00] decoration-2 underline-offset-4"
+          className="inline-flex items-center gap-2 rounded-sm text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset"
           to="/parkings"
         >
           <ArrowLeft aria-hidden="true" className="size-4" />
-          {es ? 'Volver a cocheras' : 'Back to parkings'}
+          {t('public.detail.back')}
         </Link>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:items-start">
           <header className="lg:col-span-7">
             {parking.isShowcase ? (
-              <span className="mb-4 inline-flex rounded-full bg-accent px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-accent-foreground">
-                Demo
+              <span className="mb-4 inline-flex rounded-full border border-accent-strong bg-accent-soft px-3 py-1.5 text-xs font-bold text-accent-foreground">
+                {t('parking.demo')}
               </span>
             ) : null}
+            <h1 className="mt-2 max-w-3xl font-display text-5xl font-black leading-[0.98] tracking-[-0.055em] text-foreground sm:text-6xl">
+              {parking.title}
+            </h1>
             <AvailabilityIndicator
+              className="mt-5"
               nextOpeningAt={parking.nextOpeningAt}
               state={parking.availabilityState}
               timezone={parking.timezone}
             />
-            <h1 className="mt-6 max-w-3xl font-display text-5xl font-black leading-[0.98] tracking-[-0.055em] text-[#1d241f] sm:text-6xl">
-              {parking.title}
-            </h1>
-            <p className="mt-5 flex max-w-xl items-start gap-2 text-base leading-relaxed text-[#3f3f3f] sm:text-lg">
-              <MapPin aria-hidden="true" className="mt-1 size-5 shrink-0 text-[#121417]" />
+            <p className="mt-5 flex max-w-xl items-start gap-2 text-base leading-relaxed text-foreground-secondary sm:text-lg">
+              <MapPin aria-hidden="true" className="mt-1 size-5 shrink-0 text-foreground" />
               <span>
                 {parking.neighborhood} · {parking.address}
               </span>
             </p>
           </header>
 
-          <aside className="rounded-[2rem_2rem_4rem_2rem] border border-[#121417]/10 bg-white p-6 shadow-[0_8px_0_rgba(18,20,23,0.08)] lg:col-span-4 lg:col-start-9">
-            <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
-              {es ? 'Lo importante' : 'The essentials'}
-            </p>
-            <div className="mt-6 grid gap-5 border-y border-[#1d241f]/10 py-5 sm:grid-cols-2 lg:grid-cols-1">
+          <aside className="rounded-[2rem_2rem_4rem_2rem] border border-border bg-surface p-6 shadow-hover lg:col-span-4 lg:col-start-9">
+            <p className="type-label text-foreground-muted">{t('public.detail.essentials')}</p>
+            <div className="mt-6 grid gap-5 border-y border-border-subtle py-5 sm:grid-cols-2 lg:grid-cols-1">
               <div>
-                <p className="text-xs font-medium text-[#3f3f3f]">
-                  {es ? 'Tarifa por hora' : 'Hourly rate'}
+                <p className="text-xs font-medium text-foreground-secondary">
+                  {t('public.detail.hourlyRate')}
                 </p>
-                <p className="mt-1 font-mono text-2xl font-bold text-[#1d241f]">
+                <p className="mt-1 font-mono text-2xl font-bold text-foreground">
                   {formatMoney(parking.hourlyRateCents, parking.currency, locale)}{' '}
-                  <span className="text-sm">/ h</span>
+                  <span className="text-sm">{t('public.detail.perHour')}</span>
                 </p>
               </div>
               <div>
-                <p className="text-xs font-medium text-[#3f3f3f]">
-                  {es ? 'Espacios libres' : 'Available spaces'}
+                <p className="text-xs font-medium text-foreground-secondary">
+                  {t('public.detail.availableSpaces')}
                 </p>
-                <p className="mt-1 font-display text-2xl font-extrabold text-[#1d241f]">
+                <p className="mt-1 font-display text-2xl font-extrabold text-foreground">
                   {parking.availableSpaces}{' '}
-                  <span className="text-sm font-medium">{es ? 'vehículos' : 'vehicles'}</span>
+                  <span className="text-sm font-medium">{t('public.detail.spacesUnit')}</span>
                 </p>
               </div>
             </div>
-            <p className="mt-5 text-sm leading-relaxed text-[#3f3f3f]">
-              {es
-                ? 'La disponibilidad en el momento se confirma al llegar. Esta ficha muestra la información pública de la cochera.'
-                : 'Availability is confirmed on arrival. This page shows the facility’s public information.'}
+            <p className="mt-5 text-sm leading-relaxed text-foreground-secondary">
+              {t('public.detail.availabilityNote')}
             </p>
-            <div className="mt-5 border-t border-[#1d241f]/10 pt-5">
-              <p className="text-xs font-medium text-[#3f3f3f]">{es ? 'Horario' : 'Hours'}</p>
-              <p className="mt-1 text-sm font-bold text-[#1d241f]">{scheduleLabel}</p>
+            <div className="mt-5 border-t border-border-subtle pt-5">
+              <p className="text-xs font-medium text-foreground-secondary">
+                {t('public.detail.hours')}
+              </p>
+              <p className="mt-1 text-sm font-bold text-foreground">{scheduleLabel}</p>
               {parking.nextOpeningAt ? (
-                <p className="mt-1 text-xs text-[#3f3f3f]">
-                  {es ? 'Próxima apertura' : 'Next opening'}{' '}
+                <p className="mt-1 text-xs text-foreground-secondary">
+                  {t('public.detail.nextOpening')}{' '}
                   {new Intl.DateTimeFormat(locale, {
                     hour: '2-digit',
                     minute: '2-digit',
@@ -182,79 +156,50 @@ export function ParkingDetailRoute() {
                 </p>
               ) : null}
             </div>
+            <div className="mt-6 border-t border-border-subtle pt-5">
+              <p className="type-label text-foreground-muted">{t('public.detail.location')}</p>
+              <p className="mt-3 text-sm leading-relaxed text-foreground-secondary">
+                {t('public.detail.directionsDescription')}
+              </p>
+              <a
+                aria-label={t('public.detail.directionsAction', { title: parking.title })}
+                className="mt-5 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-bold text-accent-foreground outline-none transition-colors hover:bg-accent-hover focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset"
+                href={directionsUrl}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {t('public.detail.directionsAction', { title: parking.title })}
+                <ArrowUpRight aria-hidden="true" className="size-4" />
+              </a>
+            </div>
             {parking.isShowcase ? (
-              <p className="mt-5 rounded-2xl bg-accent/20 p-4 text-sm font-medium leading-relaxed text-[#1d241f]">
-                {es
-                  ? 'Cochera ficticia con datos de demostración para explorar ParkCore.'
-                  : 'Fictional parking with demonstration data for exploring ParkCore.'}
+              <p className="mt-5 rounded-2xl bg-accent-soft p-4 text-sm font-medium leading-relaxed text-accent-foreground">
+                {t('public.detail.showcaseDisclosure')}
               </p>
             ) : null}
           </aside>
         </div>
 
-        <div className="mt-12 grid gap-8 lg:grid-cols-12">
-          <div className="overflow-hidden rounded-[2.5rem_2.5rem_5rem_2.5rem] border border-[#121417]/10 bg-[#f5f5f5] lg:col-span-7">
-            {parking.image && unavailableImage !== parking.image ? (
-              <img
-                alt={`${parking.title} parking facility`}
-                className="aspect-[16/10] h-full w-full object-cover"
-                decoding="async"
-                fetchPriority="high"
-                onError={() => {
-                  setUnavailableImage(parking.image);
-                }}
-                src={parking.image}
-              />
-            ) : (
-              <div
-                aria-label="Parking image not available"
-                className="flex aspect-[16/10] items-end bg-[#121417] p-8"
-              >
-                <div className="max-w-64 border-l-4 border-[#ffcc00] bg-white p-5 shadow-sm">
-                  <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
-                    {es ? 'La cochera' : 'The facility'}
-                  </p>
-                  <p className="mt-2 font-display text-xl font-extrabold leading-tight text-[#1d241f]">
-                    {es
-                      ? 'Una ficha clara también llega sin foto.'
-                      : 'A clear profile still works without a photo.'}
-                  </p>
-                </div>
-              </div>
-            )}
+        <div className="mt-12 grid gap-8 md:grid-cols-12">
+          <div className="min-w-0 aspect-[16/10] overflow-hidden rounded-[2.5rem_2.5rem_5rem_2.5rem] border border-border bg-surface-emphasis md:col-span-7">
+            <PublicParkingImage
+              alt={t('parking.discoveryImageAlt', { title: parking.title })}
+              fetchPriority="high"
+              image={parking.image}
+              imageClassName="h-full w-full object-cover"
+              loading="eager"
+              variant="detail"
+            />
           </div>
 
-          <div className="grid gap-6 lg:col-span-4 lg:col-start-9">
-            <section className="rounded-[2rem] border border-[#121417]/10 bg-white p-6 sm:p-7">
-              <p className="text-xs font-bold tracking-[0.12em] text-[#121417] uppercase">
-                {es ? 'Sobre esta cochera' : 'About this facility'}
-              </p>
-              <p className="mt-4 text-base leading-relaxed text-[#3f3f3f]">
-                {parking.description ??
-                  (es
-                    ? 'Esta cochera todavía no sumó una descripción pública. La tarifa, dirección y capacidad están disponibles arriba.'
-                    : 'This facility has not added a public description yet. Its rate, address, and capacity are available above.')}
+          <div className="grid min-w-0 gap-6 md:col-span-5 md:col-start-8 xl:col-span-4 xl:col-start-9">
+            <section className="min-w-0 rounded-[2rem] border border-border bg-surface p-6 sm:p-7">
+              <p className="type-label text-foreground-muted">{t('public.detail.about')}</p>
+              <p className="mt-4 text-base leading-relaxed text-foreground-secondary">
+                {parking.description ?? t('public.detail.missingDescription')}
               </p>
             </section>
-            <section className="rounded-[2rem] bg-[#121417] p-6 text-white sm:p-7">
-              <p className="text-xs font-bold tracking-[0.12em] text-[#ffcc00] uppercase">
-                {es ? 'Ubicación' : 'Location'}
-              </p>
-              <p className="mt-4 text-sm leading-relaxed text-[#f5f5f5]">
-                {es
-                  ? 'Abrí el mapa para armar tu recorrido hasta la cochera.'
-                  : 'Open the map to plan your route to this facility.'}
-              </p>
-              <a
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#ffcc00] px-5 py-3 text-sm font-bold text-[#121417] hover:bg-white"
-                href={mapUrl}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                {es ? `Abrir mapa de ${parking.title}` : `Open ${parking.title} map`}
-                <ArrowUpRight aria-hidden="true" className="size-4" />
-              </a>
-            </section>
+            <ParkingCalculatorWidget className="min-w-0 max-w-none" parking={parking} />
           </div>
         </div>
       </div>
@@ -263,15 +208,19 @@ export function ParkingDetailRoute() {
 }
 
 function ParkingDetailSkeleton() {
+  const { t } = useAppearance();
   return (
-    <div aria-label="Loading parking" className="min-h-full bg-white px-4 py-16 sm:px-6 lg:px-8">
+    <div
+      aria-label={t('public.detail.loading')}
+      className="min-h-full bg-canvas px-4 py-16 sm:px-6 lg:px-8"
+    >
       <div className="mx-auto max-w-7xl animate-pulse">
-        <div className="h-5 w-36 rounded bg-[#e5e5e5]" />
-        <div className="mt-10 h-16 max-w-2xl rounded bg-[#e5e5e5]" />
-        <div className="mt-5 h-6 max-w-lg rounded bg-[#e5e5e5]" />
-        <div className="mt-12 grid gap-8 lg:grid-cols-12">
-          <div className="aspect-[16/10] rounded-[2.5rem] bg-[#e5e5e5] lg:col-span-7" />
-          <div className="min-h-64 rounded-[2rem] bg-[#e5e5e5] lg:col-span-4 lg:col-start-9" />
+        <div className="h-5 w-36 rounded bg-surface-emphasis" />
+        <div className="mt-10 h-16 max-w-2xl rounded bg-surface-emphasis" />
+        <div className="mt-5 h-6 max-w-lg rounded bg-surface-emphasis" />
+        <div className="mt-12 grid gap-8 md:grid-cols-12">
+          <div className="aspect-[16/10] rounded-[2.5rem] bg-surface-emphasis md:col-span-7" />
+          <div className="min-h-64 rounded-[2rem] bg-surface-emphasis md:col-span-5 md:col-start-8 xl:col-span-4 xl:col-start-9" />
         </div>
       </div>
     </div>

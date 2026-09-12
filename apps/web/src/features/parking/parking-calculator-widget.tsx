@@ -6,34 +6,53 @@ import { Link } from 'react-router';
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Combobox } from '../../components/ui/combobox.js';
 import { Button } from '../../components/ui/button.js';
+import { Field, Input } from '../../components/ui/field.js';
 import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { getPublicParkings, type PublicParking } from '../../lib/api/public-api.js';
 import { cn } from '../../lib/cn.js';
-import { formatMoney } from '../../lib/format.js';
-import type { Locale } from '../../lib/localization.js';
+import { formatMoney, formatNumber } from '../../lib/format.js';
+import type { Locale, MessageKey } from '../../lib/localization.js';
+import { calculateParkingEstimate } from './parking-estimate.js';
 
 const DURATION_OPTIONS = [
-  { hours: 1, labelEs: '1 hora', labelEn: '1 hour' },
-  { hours: 2, labelEs: '2 horas', labelEn: '2 hours' },
-  { hours: 4, labelEs: '4 horas', labelEn: '4 hours' },
-  { hours: 8, labelEs: '8 horas', labelEn: '8 hours' },
-];
+  { durationMinutes: 60, id: 'one-hour', label: 'calculator.oneHour' },
+  { durationMinutes: 120, id: 'two-hours', label: 'calculator.twoHours' },
+  { durationMinutes: 240, id: 'four-hours', label: 'calculator.fourHours' },
+  { durationMinutes: 480, id: 'eight-hours', label: 'calculator.eightHours' },
+  { durationMinutes: null, id: 'custom', label: 'calculator.custom' },
+] as const satisfies readonly {
+  durationMinutes: number | null;
+  id: string;
+  label: MessageKey;
+}[];
 
-export function ParkingCalculatorWidget({ className }: { className?: string }) {
-  const { language, locale } = useAppearance();
-  const es = language === 'es';
+type DurationOptionId = (typeof DURATION_OPTIONS)[number]['id'];
+
+interface ParkingCalculatorWidgetProps {
+  className?: string;
+  parking?: PublicParking;
+}
+
+export function ParkingCalculatorWidget({ className, parking }: ParkingCalculatorWidgetProps) {
+  const { locale, t } = useAppearance();
   const [selectedId, setSelectedId] = useState('');
-  const [selectedHours, setSelectedHours] = useState(2);
+  const [selectedDuration, setSelectedDuration] = useState<DurationOptionId>('two-hours');
 
   const parkingsQuery = useQuery({
+    enabled: !parking,
     queryKey: ['public-parkings-widget'],
     queryFn: () => getPublicParkings({ limit: 10 }),
     staleTime: 60_000,
   });
 
-  const availableFacilities = useMemo(() => parkingsQuery.data?.data ?? [], [parkingsQuery.data]);
+  const availableFacilities = useMemo(
+    () => (parking ? [parking] : (parkingsQuery.data?.data ?? [])),
+    [parking, parkingsQuery.data],
+  );
   const selectedFacility =
-    availableFacilities.find((facility) => facility.id === selectedId) ?? availableFacilities[0];
+    parking ??
+    availableFacilities.find((facility) => facility.id === selectedId) ??
+    availableFacilities[0];
 
   return (
     <div
@@ -44,73 +63,65 @@ export function ParkingCalculatorWidget({ className }: { className?: string }) {
     >
       <div className="mb-5 flex items-start justify-between gap-4 border-b border-border-subtle pb-5">
         <div>
-          <p className="type-label text-foreground-muted">
-            {es ? 'Antes de salir' : 'Before you go'}
-          </p>
+          <p className="type-label text-foreground-muted">{t('calculator.eyebrow')}</p>
           <h2 className="mt-2 font-display text-xl font-bold tracking-[-0.03em]">
-            {es ? 'Calculá una estadía' : 'Estimate a stay'}
+            {t('calculator.title')}
           </h2>
         </div>
         <ReceiptText aria-hidden="true" className="mt-1 size-5 text-foreground" />
       </div>
 
       {parkingsQuery.isLoading ? (
-        <CalculatorLoading es={es} />
+        <CalculatorLoading />
       ) : parkingsQuery.isError ? (
         <ErrorState
           onRetry={() => {
             void parkingsQuery.refetch();
           }}
-          title={es ? 'No pudimos cargar las cocheras' : 'We could not load facilities'}
+          title={t('calculator.errorTitle')}
         >
-          {es
-            ? 'La estimación necesita una tarifa publicada. Probá de nuevo o explorá el directorio.'
-            : 'The estimate needs a published rate. Try again or explore the directory.'}
+          {t('calculator.errorDescription')}
           <Link
             className="mt-4 inline-flex text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4"
             to="/parkings"
           >
-            {es ? 'Explorar cocheras' : 'Browse facilities'}
+            {t('calculator.browseAction')}
           </Link>
         </ErrorState>
       ) : availableFacilities.length === 0 ? (
         <div className="rounded-[var(--radius-lg)] border border-dashed border-border-strong bg-surface-subtle p-5">
-          <p className="type-label text-foreground-muted">
-            {es ? 'Sin cocheras disponibles' : 'No facilities available'}
-          </p>
+          <p className="type-label text-foreground-muted">{t('calculator.emptyEyebrow')}</p>
           <p className="mt-2 text-sm leading-relaxed text-foreground-secondary">
-            {es
-              ? 'Todavía no hay una cochera activa para estimar. Podés revisar el directorio más tarde.'
-              : 'There is no active facility to estimate yet. You can check the directory again later.'}
+            {t('calculator.emptyDescription')}
           </p>
           <Link
             className="mt-4 inline-flex text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4"
             to="/parkings"
           >
-            {es ? 'Ver el directorio' : 'View the directory'}
+            {t('calculator.emptyAction')}
           </Link>
         </div>
       ) : (
         <CalculatorForm
-          es={es}
           facilities={availableFacilities}
           locale={locale}
           onFacilityChange={setSelectedId}
-          onHoursChange={setSelectedHours}
+          onDurationChange={setSelectedDuration}
           selectedFacility={selectedFacility}
-          selectedHours={selectedHours}
-          selectedId={selectedFacility.id}
+          selectedDuration={selectedDuration}
+          selectedId={parking?.id ?? selectedFacility.id}
         />
       )}
     </div>
   );
 }
 
-function CalculatorLoading({ es }: { es: boolean }) {
+function CalculatorLoading() {
+  const { t } = useAppearance();
   return (
-    <div aria-label={es ? 'Cargando cocheras' : 'Loading facilities'} aria-live="polite">
+    <div aria-label={t('calculator.loadingLabel')} aria-live="polite">
       <p className="mb-3 text-sm font-medium text-foreground-secondary">
-        {es ? 'Buscando cocheras activas…' : 'Finding active facilities…'}
+        {t('calculator.loadingMessage')}
       </p>
       <Skeleton className="h-24 rounded-[var(--radius-lg)]" />
       <Skeleton className="mt-3 h-28 rounded-[var(--radius-lg)]" />
@@ -120,7 +131,6 @@ function CalculatorLoading({ es }: { es: boolean }) {
 }
 
 interface CalculatorFormProps {
-  es: boolean;
   locale: Locale;
   facilities: {
     id: string;
@@ -134,24 +144,46 @@ interface CalculatorFormProps {
     hourlyRateCents: number;
     currency: PublicParking['currency'];
   };
-  selectedHours: number;
+  selectedDuration: DurationOptionId;
   selectedId: string;
   onFacilityChange: (id: string) => void;
-  onHoursChange: (hours: number) => void;
+  onDurationChange: (duration: DurationOptionId) => void;
 }
 
 function CalculatorForm({
-  es,
   facilities,
   locale,
   onFacilityChange,
-  onHoursChange,
+  onDurationChange,
   selectedFacility,
-  selectedHours,
+  selectedDuration,
   selectedId,
 }: CalculatorFormProps) {
-  const { t } = useAppearance();
-  const totalCents = selectedFacility.hourlyRateCents * selectedHours;
+  const { t, tPlural } = useAppearance();
+  const [customDurationMinutes, setCustomDurationMinutes] = useState('');
+  const selectedDurationOption = DURATION_OPTIONS.find((option) => option.id === selectedDuration);
+  const parsedCustomDuration = parseCustomDuration(customDurationMinutes);
+  const selectedDurationMinutes = selectedDurationOption?.durationMinutes ?? parsedCustomDuration;
+  const estimate =
+    selectedDurationMinutes === null
+      ? null
+      : calculateParkingEstimate(selectedDurationMinutes, selectedFacility.hourlyRateCents);
+  const customDurationError =
+    selectedDuration === 'custom'
+      ? customDurationMinutes.trim() === ''
+        ? t('calculator.durationRequired')
+        : parsedCustomDuration === null
+          ? t('calculator.invalidDuration')
+          : undefined
+      : undefined;
+  const durationSummary =
+    selectedDuration === 'custom'
+      ? parsedCustomDuration === null
+        ? t('calculator.durationPending')
+        : `${formatNumber(parsedCustomDuration, locale)} ${tPlural(parsedCustomDuration, { one: 'calculator.minute', other: 'calculator.minutes' })}`
+      : selectedDurationOption
+        ? `${formatNumber((selectedDurationOption.durationMinutes ?? 0) / 60, locale)} ${tPlural((selectedDurationOption.durationMinutes ?? 0) / 60, { one: 'calculator.hour', other: 'calculator.hours' })}`
+        : '';
 
   return (
     <>
@@ -163,6 +195,7 @@ function CalculatorForm({
           <Combobox
             className="min-w-0 flex-1"
             id="estimate-facility"
+            key={facilities.map((facility) => facility.id).join('|')}
             label={t('calculator.facility')}
             onValueChange={(id) => {
               onFacilityChange(id);
@@ -174,7 +207,9 @@ function CalculatorForm({
             <span className="font-mono text-xs font-bold tabular-nums text-foreground">
               {formatMoney(selectedFacility.hourlyRateCents, selectedFacility.currency, locale)}
             </span>
-            <span className="block text-[10px] text-foreground-muted">/ h</span>
+            <span className="block text-[10px] text-foreground-muted">
+              {t('calculator.perHour')}
+            </span>
           </span>
         </div>
       </div>
@@ -183,52 +218,88 @@ function CalculatorForm({
         <div className="mb-3 flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
             <Clock aria-hidden="true" className="size-3.5" />
-            {es ? 'Estadía estimada' : 'Estimated stay'}
+            {t('calculator.estimatedStay')}
           </span>
           <span className="font-mono text-xs font-bold tabular-nums text-foreground">
-            {selectedHours} {selectedHours === 1 ? (es ? 'hora' : 'hour') : es ? 'horas' : 'hours'}
+            {durationSummary}
           </span>
         </div>
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-5">
           {DURATION_OPTIONS.map((option) => (
             <button
               className={cn(
                 'min-h-10 cursor-pointer rounded-[var(--radius-sm)] px-1 py-2 text-center text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring',
-                selectedHours === option.hours
+                selectedDuration === option.id
                   ? 'bg-primary text-primary-foreground'
                   : 'border border-border bg-surface text-foreground hover:bg-accent hover:text-accent-foreground',
               )}
-              key={option.hours}
+              key={option.id}
               onClick={() => {
-                onHoursChange(option.hours);
+                onDurationChange(option.id);
               }}
               type="button"
             >
-              {es ? option.labelEs : option.labelEn}
+              {t(option.label)}
             </button>
           ))}
         </div>
+        {selectedDuration === 'custom' ? (
+          <div className="mt-4 border-t border-border-subtle pt-4">
+            <Field
+              error={customDurationError}
+              help={customDurationError ? undefined : t('calculator.customDurationHelp')}
+              htmlFor="estimate-custom-duration"
+              label={t('calculator.customDurationLabel')}
+            >
+              <Input
+                id="estimate-custom-duration"
+                inputMode="numeric"
+                min={1}
+                onChange={(event) => {
+                  setCustomDurationMinutes(event.target.value);
+                }}
+                placeholder={t('calculator.customDurationPlaceholder')}
+                step={1}
+                type="number"
+                value={customDurationMinutes}
+              />
+            </Field>
+          </div>
+        ) : null}
       </div>
 
       <div className="my-5 px-1 text-xs">
         <div className="flex items-baseline justify-between border-t border-border-subtle pt-4">
           <div>
             <span className="block text-xs font-semibold text-foreground">
-              {es ? 'Presupuesto orientativo' : 'A simple estimate'}
+              {t('calculator.estimateLabel')}
             </span>
             <span className="text-[11px] text-foreground-muted">
-              {es ? 'Según tarifa publicada' : 'Based on the published rate'}
+              {estimate
+                ? tPlural(estimate.chargedHours, {
+                    one: 'calculator.chargedHour',
+                    other: 'calculator.chargedHours',
+                  })
+                : t('calculator.estimatePending')}
             </span>
           </div>
-          <span className="font-display text-3xl font-bold tracking-tight tabular-nums text-foreground">
-            {formatMoney(totalCents, selectedFacility.currency, locale)}
+          <span
+            aria-live="polite"
+            className={cn(
+              'font-display text-3xl font-bold tracking-tight tabular-nums text-foreground',
+              !estimate && 'max-w-40 text-right text-base leading-tight text-foreground-secondary',
+            )}
+          >
+            {estimate
+              ? formatMoney(estimate.totalAmountCents, selectedFacility.currency, locale)
+              : t('calculator.estimateUnavailable')}
           </span>
         </div>
       </div>
 
       <Button asChild className="h-12 w-full rounded-full" size="lg">
         <Link className="group" to={`/parkings/${selectedFacility.id}`}>
-          <span>{es ? 'Ver la cochera' : 'View this facility'}</span>
+          <span>{t('calculator.viewFacility')}</span>
           <ArrowRight
             aria-hidden="true"
             className="size-4 transition-transform group-hover:translate-x-1"
@@ -237,10 +308,14 @@ function CalculatorForm({
       </Button>
 
       <p className="mt-4 text-center text-[11px] leading-relaxed text-foreground-muted">
-        {es
-          ? 'Es una estimación: confirmá los detalles de la cochera antes de llegar.'
-          : 'This is an estimate: confirm facility details before arriving.'}
+        {t('calculator.estimateNote')}
       </p>
     </>
   );
+}
+
+function parseCustomDuration(value: string): number | null {
+  if (value.trim() === '') return null;
+  const durationMinutes = Number(value);
+  return Number.isInteger(durationMinutes) && durationMinutes > 0 ? durationMinutes : null;
 }

@@ -264,7 +264,7 @@ test('keeps the deployed public and owner surfaces usable at production viewport
 
       await page.goto('/login');
       await page.getByLabel('Email').fill(email);
-      await page.getByLabel('Password').fill('ParkCoreResponsiveQA!');
+      await page.getByRole('textbox', { name: 'Password' }).fill('ParkCoreResponsiveQA!');
       await page.getByRole('button', { name: 'Sign in' }).click();
       await expect(page).toHaveURL(/\/app$/);
       token = await page.evaluate(() => localStorage.getItem('parkcore.access-token') ?? '');

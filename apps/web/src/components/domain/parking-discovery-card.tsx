@@ -1,11 +1,11 @@
 import { ArrowRight, MapPin } from 'lucide-react';
-import { useState } from 'react';
 import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import type { PublicParking } from '../../lib/api/public-api.js';
 import { formatMoney } from '../../lib/format.js';
 import { AvailabilityIndicator } from './availability-indicator.js';
+import { PublicParkingImage } from './public-parking-image.js';
 
 interface ParkingDiscoveryCardProps {
   parking: PublicParking;
@@ -14,7 +14,6 @@ interface ParkingDiscoveryCardProps {
 
 export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps) {
   const { locale, t } = useAppearance();
-  const [imageUnavailable, setImageUnavailable] = useState(false);
 
   return (
     <Link
@@ -23,27 +22,11 @@ export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps)
       to={to}
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-emphasis">
-        {parking.image && !imageUnavailable ? (
-          <img
-            alt={t('parking.discoveryImageAlt', { title: parking.title })}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-            decoding="async"
-            loading="lazy"
-            onError={() => {
-              setImageUnavailable(true);
-            }}
-            src={parking.image}
-          />
-        ) : (
-          <div className="flex h-full items-end bg-surface-inverse p-5 text-foreground-on-inverse">
-            <div className="max-w-52 border-l-4 border-accent pl-4">
-              <p className="type-label text-accent">{t('parking.fallbackEyebrow')}</p>
-              <p className="mt-2 font-display text-lg font-bold leading-tight">
-                {t('parking.fallbackMessage')}
-              </p>
-            </div>
-          </div>
-        )}
+        <PublicParkingImage
+          alt={t('parking.discoveryImageAlt', { title: parking.title })}
+          image={parking.image}
+          imageClassName="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+        />
         <AvailabilityIndicator
           className="absolute left-4 top-4 bg-surface/95 backdrop-blur-sm"
           state={parking.availabilityState}
@@ -58,7 +41,7 @@ export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps)
             {parking.title}
           </h2>
           {parking.isShowcase ? (
-            <span className="mt-2 inline-flex rounded-full bg-accent px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-accent-foreground">
+            <span className="mt-2 inline-flex rounded-full border border-accent-strong bg-accent-soft px-2.5 py-1 text-[10px] font-bold text-accent-foreground">
               {t('parking.demo')}
             </span>
           ) : null}

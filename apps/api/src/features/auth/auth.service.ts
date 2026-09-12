@@ -5,6 +5,7 @@ import { signAccessToken } from './auth.jwt.js';
 import * as userRepository from '../user/user.repository.js';
 import { type Register, type Login, type AuthResponse } from './auth.schema.js';
 import { toUserResponse } from '../user/user.schema.js';
+import { DEFAULT_TIMEZONE } from '../../utils/timezone.js';
 
 const isUniqueEmailError = (error: unknown): boolean => {
   if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
@@ -31,7 +32,7 @@ export const register = async (dto: Register): Promise<AuthResponse> => {
       name: dto.name,
       lastName: dto.lastName,
       kind: 'OWNER',
-      timezone: dto.timezone,
+      timezone: dto.timezone ?? DEFAULT_TIMEZONE,
     });
   } catch (error) {
     if (isUniqueEmailError(error)) {

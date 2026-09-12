@@ -9,7 +9,7 @@ test('operates, completes, and cleans up a real parking session', async ({ page 
   await page.goto('/login');
   await expect(page).toHaveURL(/\/login$/);
   await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password').fill(password);
+  await page.getByRole('textbox', { name: 'Password' }).fill(password);
   const loginResponse = page.waitForResponse(
     (response) => response.url().endsWith('/auth/login') && response.request().method() === 'POST',
   );
@@ -20,7 +20,7 @@ test('operates, completes, and cleans up a real parking session', async ({ page 
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/login\?returnTo=%2Fapp$/);
   await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password').fill(password);
+  await page.getByRole('textbox', { name: 'Password' }).fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL(/\/app$/);
   await page.reload();

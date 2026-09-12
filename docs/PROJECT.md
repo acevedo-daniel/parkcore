@@ -32,8 +32,11 @@ Driver information can be recorded as visit data during check-in, but drivers do
 - List active parking facilities.
 - Search and filter the catalog by address and hourly rate.
 - View public parking details.
+- Estimate an advisory stay cost from a facility's current hourly rate.
+- Open Google Maps directions from a facility's public coordinates.
 - Navigate paginated catalog results.
 - Receive a public not-found state for unavailable facilities.
+- Start an isolated operator demo without exposing its facilities through public discovery.
 
 ### Owner experience
 
@@ -147,6 +150,8 @@ elapsedHours = (checkoutTime - startTime) / 3,600,000
 chargedHours = max(1, ceil(elapsedHours))
 totalAmountCents = chargedHours * hourlyRateCents
 ```
+
+The public estimator applies the same started-hour rule to the facility's current rate. It is advisory only: it does not reserve capacity or create a session.
 
 ## Business rules
 

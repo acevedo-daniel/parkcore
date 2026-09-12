@@ -70,6 +70,10 @@ Public parking list and detail reads share the same repository visibility predic
 
 The service loads the eligible candidate set with active-session counts, derives schedule state and availability in the parking timezone, applies text, currency-safe price, and availability filters, orders by `AVAILABLE`, `LIMITED`, `FULL`, and `CLOSED` with a title tie-break, and paginates last. Public DTOs expose only public facility data plus `isShowcase`, `isOpen`, `availabilityState`, `availableSpaces`, `occupancyPercent`, and `nextOpeningAt`; owner IDs and credential data are not part of that representation.
 
+The web public detail route uses that DTO for the facility profile, advisory started-hour estimate, and availability presentation. Its directions action builds a Google Maps directions URL from the server-provided latitude and longitude and opens it in a new tab; the web app does not embed a map SDK.
+
+The public catalog canonicalizes its search, currency, rate, availability, and pagination state into URL parameters before requesting the typed client. Auth entry routes accept only internal `/app` return targets, while public unavailable states use localized recovery links and no-index metadata.
+
 The canonical SHOWCASE identity has a stable ID and no credentials. Database setup provisions its six-facility fictional Buenos Aires scenario. The `showcase:refresh` maintenance command accepts an optional reference time and runs the canonical replacement inside one PostgreSQL transaction, preserving facility and asset IDs while rebasing sessions. It targets only the SHOWCASE owner, so normal OWNER and DEMO data are not changed.
 
 ## Contract flow

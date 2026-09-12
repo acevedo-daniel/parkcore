@@ -8,7 +8,6 @@ import {
   OwnerParkingEditRedirect,
   OwnerParkingHistoryRedirect,
   OwnerParkingRedirect,
-  RegisterRedirect,
 } from '../routes/owner/owner-redirects.js';
 import { OwnerRouteErrorBoundary, PublicRouteErrorBoundary } from '../routes/route-boundaries.js';
 
@@ -48,7 +47,9 @@ export const router = createBrowserRouter([
           },
           {
             path: 'register',
-            element: <RegisterRedirect />,
+            lazy: async () => ({
+              Component: (await import('../routes/auth/register-route.js')).RegisterRoute,
+            }),
           },
           {
             path: '*',

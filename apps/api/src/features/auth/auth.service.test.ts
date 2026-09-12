@@ -21,6 +21,7 @@ import * as userRepository from '../user/user.repository.js';
 import * as authJwt from './auth.jwt.js';
 import * as authPassword from './auth.password.js';
 import { login, register } from './auth.service.js';
+import { DEFAULT_TIMEZONE } from '../../utils/timezone.js';
 
 const buildUser = (overrides?: Partial<User>): User => {
   const now = new Date('2026-02-21T00:00:00.000Z');
@@ -89,6 +90,29 @@ describe('auth.service', () => {
     expect(result).toEqual({
       user: expectedUser,
       accessToken: 'token-123',
+    });
+  });
+
+  it('uses the canonical timezone when registration omits a browser timezone', async () => {
+    const { timezone: _timezone, ...dtoWithoutTimezone } = buildRegisterDto({
+      email: 'default-timezone@parkcore.test',
+    });
+    const createdUser = buildUser({ email: dtoWithoutTimezone.email });
+
+    vi.mocked(userRepository.findByEmail).mockResolvedValue(null);
+    vi.mocked(authPassword.hashPassword).mockResolvedValue('hashed-password');
+    vi.mocked(userRepository.create).mockResolvedValue(createdUser);
+    vi.mocked(authJwt.signAccessToken).mockResolvedValue('token-default-timezone');
+
+    await register(dtoWithoutTimezone);
+
+    expect(userRepository.create).toHaveBeenCalledWith({
+      email: dtoWithoutTimezone.email,
+      passwordHash: 'hashed-password',
+      name: dtoWithoutTimezone.name,
+      lastName: dtoWithoutTimezone.lastName,
+      kind: 'OWNER',
+      timezone: DEFAULT_TIMEZONE,
     });
   });
 

@@ -30,4 +30,18 @@ describe('localization foundation', () => {
     expect(translatePlural(1, { one: 'session.hour', other: 'session.hours' })).toBe('hour');
     expect(translatePlural(2, { one: 'session.hour', other: 'session.hours' })).toBe('hours');
   });
+
+  it('keeps public shell and status messages available in both locales', () => {
+    expect(createTranslator('es-AR')('nav.howItWorks')).toBe('Cómo funciona');
+    expect(createTranslator('en-US')('nav.howItWorks')).toBe('How it works');
+    expect(
+      createTranslator('es-AR')('availability.closedWithOpening', {
+        status: 'Cerrada ahora',
+        time: '08:00',
+      }),
+    ).toBe('Cerrada ahora · abre a las 08:00');
+    expect(createTranslator('en-US')('public.detail.showcaseDisclosure')).toBe(
+      'Fictional parking with demonstration data for exploring ParkCore.',
+    );
+  });
 });

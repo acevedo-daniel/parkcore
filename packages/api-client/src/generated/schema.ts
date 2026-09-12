@@ -1639,10 +1639,9 @@ export interface components {
             lastName: string;
             /**
              * @description User IANA timezone
-             * @default America/Argentina/Buenos_Aires
              * @example America/Argentina/Buenos_Aires
              */
-            timezone: string;
+            timezone?: string;
         };
         LoginRequest: {
             /**

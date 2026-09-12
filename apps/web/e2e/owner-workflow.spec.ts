@@ -75,6 +75,8 @@ test('keeps public mobile navigation and main content usable with a keyboard', a
   const signIn = menu.getByRole('link', { name: 'Sign in' });
   await signIn.focus();
   await page.keyboard.press('Shift+Tab');
+  await expect(menu.getByRole('link', { name: 'How it works' })).toBeFocused();
+  await page.keyboard.press('Shift+Tab');
   await expect(menu.getByRole('link', { name: 'Parkings' })).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(menu).toBeHidden();
@@ -241,7 +243,7 @@ test('signs in, creates a parking, checks in, and completes a parking session', 
 
   await page.goto('/login');
   await page.getByLabel('Email').fill(owner.email ?? '');
-  await page.getByLabel('Password').fill('password123');
+  await page.getByRole('textbox', { name: 'Password' }).fill('password123');
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL(/\/app$/);
   await page.getByRole('link', { name: 'Create parking' }).click();

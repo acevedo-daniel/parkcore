@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
-import { useState, type SyntheticEvent } from 'react';
+import { useEffect, useState, type SyntheticEvent } from 'react';
 import { useSearchParams } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
@@ -12,54 +12,49 @@ import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.j
 import { Input } from '../../components/ui/field.js';
 import { getPublicParkings, type PublicParkingQuery } from '../../lib/api/public-api.js';
 import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
-
-function rateToCents(value: string) {
-  const normalized = value.trim();
-  if (!normalized) return undefined;
-  const parsed = Number(normalized);
-  const cents = Math.round(parsed * 100);
-  return Number.isFinite(parsed) && cents > 0 ? cents : undefined;
-}
-
-function pageFromSearchParams(searchParams: URLSearchParams) {
-  const page = Number(searchParams.get('page'));
-  return Number.isInteger(page) && page > 0 ? page : 1;
-}
+import {
+  PARKING_CATALOG_PAGE_SIZE,
+  parseCatalogRate,
+  parseParkingCatalogUrlState,
+  parkingCatalogSearchParamsFromState,
+} from './parking-catalog-query.js';
 
 function getFormText(formData: FormData, name: string) {
   const value = formData.get(name);
   return typeof value === 'string' ? value : '';
 }
 
-function currencyFromSearchParams(searchParams: URLSearchParams): 'ARS' | 'USD' | undefined {
-  const currency = searchParams.get('currency');
-  return currency === 'ARS' || currency === 'USD' ? currency : undefined;
-}
-
 export function ParkingCatalogRoute() {
-  const { language } = useAppearance();
-  const es = language === 'es';
+  const { t, tPlural } = useAppearance();
   const [searchParams, setSearchParams] = useSearchParams();
   const [filterError, setFilterError] = useState<string>();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const page = pageFromSearchParams(searchParams);
-  const currency = currencyFromSearchParams(searchParams);
+  const catalogState = parseParkingCatalogUrlState(searchParams);
+  const currency = catalogState.currency;
+  const canonicalSearchParams = parkingCatalogSearchParamsFromState(catalogState);
+  const rawSearch = searchParams.toString();
+  const canonicalSearch = canonicalSearchParams.toString();
+
+  useEffect(() => {
+    if (rawSearch !== canonicalSearch) {
+      setSearchParams(canonicalSearch, { replace: true });
+    }
+  }, [canonicalSearch, rawSearch, setSearchParams]);
+
   const query: PublicParkingQuery = {
-    availableNow: searchParams.get('availableNow') === 'true' ? 'true' : undefined,
-    currency,
-    limit: 30,
-    page,
-    maxHourlyRateCents: currency ? rateToCents(searchParams.get('maxRate') ?? '') : undefined,
-    minHourlyRateCents: currency ? rateToCents(searchParams.get('minRate') ?? '') : undefined,
-    search: searchParams.get('search') ?? undefined,
+    availableNow: catalogState.availableNow ? 'true' : undefined,
+    currency: catalogState.currency,
+    limit: PARKING_CATALOG_PAGE_SIZE,
+    maxHourlyRateCents: catalogState.maxRate?.cents,
+    minHourlyRateCents: catalogState.minRate?.cents,
+    page: catalogState.page,
+    search: catalogState.search,
   };
 
   useDocumentMeta({
-    description: es
-      ? 'Explorá cocheras activas por zona y tarifa por hora.'
-      : 'Browse active ParkCore parking facilities by address and hourly rate.',
+    description: t('public.catalog.metaDescription'),
     publicUrl: publicUrl('/parkings'),
-    title: es ? 'Cocheras | ParkCore' : 'Parkings | ParkCore',
+    title: t('public.catalog.metaTitle'),
   });
 
   const parkingQuery = useQuery({
@@ -67,7 +62,13 @@ export function ParkingCatalogRoute() {
     queryFn: () => getPublicParkings(query),
     placeholderData: (previousData) => previousData,
   });
-  const hasFilters = [...searchParams.keys()].some((key) => key !== 'page');
+  const hasFilters = Boolean(
+    catalogState.currency ??
+    catalogState.maxRate ??
+    catalogState.minRate ??
+    catalogState.search ??
+    (catalogState.availableNow ? true : undefined),
+  );
 
   const applyFilters = (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -77,55 +78,52 @@ export function ParkingCatalogRoute() {
     const minRateText = getFormText(formData, 'minRate');
     const maxRateText = getFormText(formData, 'maxRate');
     const availableNow = formData.get('availableNow') === 'on';
-    const minRate = rateToCents(minRateText);
-    const maxRate = rateToCents(maxRateText);
+    const minRate = parseCatalogRate(minRateText);
+    const maxRate = parseCatalogRate(maxRateText);
     if (
       (minRateText.trim() && minRate === undefined) ||
       (maxRateText.trim() && maxRate === undefined)
     ) {
-      setFilterError(es ? 'Las tarifas deben ser mayores que 0.' : 'Rates must be greater than 0.');
+      setFilterError(t('public.catalog.invalidRate'));
       return;
     }
-    if (minRate !== undefined && maxRate !== undefined && minRate > maxRate) {
-      setFilterError(
-        es
-          ? 'La tarifa mínima no puede superar la máxima.'
-          : 'Minimum rate cannot exceed maximum rate.',
-      );
+    if (minRate && maxRate && minRate.cents > maxRate.cents) {
+      setFilterError(t('public.catalog.invalidRange'));
       return;
     }
-    if ((minRate !== undefined || maxRate !== undefined) && !currency) {
-      setFilterError(
-        es ? 'Elegí una moneda para filtrar tarifas.' : 'Choose a currency for rates.',
-      );
+    if ((minRate || maxRate) && currency !== 'ARS' && currency !== 'USD') {
+      setFilterError(t('public.catalog.currencyRequired'));
       return;
     }
     setFilterError(undefined);
-    const params = new URLSearchParams();
-    if (search) params.set('search', search);
-    if (currency === 'ARS' || currency === 'USD') params.set('currency', currency);
-    if (minRate !== undefined) params.set('minRate', minRateText);
-    if (maxRate !== undefined) params.set('maxRate', maxRateText);
-    if (availableNow) params.set('availableNow', 'true');
+    const params = parkingCatalogSearchParamsFromState({
+      availableNow,
+      currency: currency === 'ARS' || currency === 'USD' ? currency : undefined,
+      maxRate,
+      minRate,
+      page: 1,
+      search,
+    });
     setSearchParams(params);
     setMobileFiltersOpen(false);
   };
 
   const changePage = (nextPage: number) => {
-    const params = new URLSearchParams(searchParams);
-    if (nextPage <= 1) params.delete('page');
-    else params.set('page', String(nextPage));
-    setSearchParams(params);
+    setFilterError(undefined);
+    setSearchParams(parkingCatalogSearchParamsFromState({ ...catalogState, page: nextPage }));
   };
 
   const clearMonetaryFilters = () => {
-    const params = new URLSearchParams(searchParams);
-    params.delete('currency');
-    params.delete('minRate');
-    params.delete('maxRate');
-    params.delete('page');
     setFilterError(undefined);
-    setSearchParams(params);
+    setSearchParams(
+      parkingCatalogSearchParamsFromState({
+        ...catalogState,
+        currency: undefined,
+        maxRate: undefined,
+        minRate: undefined,
+        page: 1,
+      }),
+    );
   };
 
   return (
@@ -133,19 +131,13 @@ export function ParkingCatalogRoute() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <header className="grid gap-8 border-b border-border-subtle pb-10 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-7">
-            <p className="type-label text-foreground-muted">
-              {es ? 'Encontrá dónde dejarlo' : 'Find where to leave it'}
-            </p>
+            <p className="type-label text-foreground-muted">{t('public.catalog.eyebrow')}</p>
             <h1 className="mt-4 font-display text-4xl font-bold leading-[1.02] tracking-[-0.05em] sm:text-5xl lg:text-6xl">
-              {es
-                ? 'Cocheras que se entienden antes de llegar.'
-                : 'Facilities you can understand before you arrive.'}
+              {t('public.catalog.title')}
             </h1>
           </div>
           <p className="max-w-lg text-base leading-relaxed text-foreground-secondary lg:col-span-4 lg:col-start-9 sm:text-lg">
-            {es
-              ? 'Buscá por zona o compará tarifas. Los datos importantes aparecen primero, sin hacerte recorrer una ciudad de pantallas.'
-              : 'Search by area or compare rates. The important details come first, without sending you through a city of screens.'}
+            {t('public.catalog.description')}
           </p>
         </header>
 
@@ -158,40 +150,36 @@ export function ParkingCatalogRoute() {
             variant="secondary"
           >
             <SlidersHorizontal aria-hidden="true" className="size-4" />
-            {es ? 'Filtrar cocheras' : 'Filter facilities'}
+            {t('public.catalog.filterAction')}
           </Button>
         </div>
 
         <div className="mt-8 hidden md:block">
           <CatalogFilters
-            es={es}
             filterError={filterError}
             idPrefix="catalog-desktop"
-            key={searchParams.toString()}
+            key={canonicalSearch}
             onClear={clearMonetaryFilters}
             onSubmit={applyFilters}
-            searchParams={searchParams}
+            searchParams={canonicalSearchParams}
             currency={currency}
           />
         </div>
 
         <Sheet
-          description={
-            es ? 'Ajustá la búsqueda y aplicá los filtros.' : 'Refine the search and apply filters.'
-          }
+          description={t('public.catalog.filterDescription')}
           onOpenChange={setMobileFiltersOpen}
           open={mobileFiltersOpen}
-          title={es ? 'Filtrar cocheras' : 'Filter facilities'}
+          title={t('public.catalog.filterAction')}
         >
           <div className="mt-6">
             <CatalogFilters
-              es={es}
               filterError={filterError}
               idPrefix="catalog-mobile"
-              key={`mobile-${searchParams.toString()}`}
+              key={`mobile-${canonicalSearch}`}
               onClear={clearMonetaryFilters}
               onSubmit={applyFilters}
-              searchParams={searchParams}
+              searchParams={canonicalSearchParams}
               currency={currency}
             />
           </div>
@@ -199,21 +187,19 @@ export function ParkingCatalogRoute() {
 
         {parkingQuery.isFetching && !parkingQuery.isLoading ? (
           <p className="mt-5 text-sm font-medium text-foreground-secondary" role="status">
-            {es ? 'Actualizando cocheras…' : 'Refreshing parkings…'}
+            {t('public.catalog.refreshing')}
           </p>
         ) : null}
-        {parkingQuery.isLoading ? <CatalogSkeleton es={es} /> : null}
+        {parkingQuery.isLoading ? <CatalogSkeleton /> : null}
         {parkingQuery.isError ? (
           <div className="mt-10">
             <ErrorState
               onRetry={() => {
                 void parkingQuery.refetch();
               }}
-              title={es ? 'No pudimos cargar el directorio' : 'We could not load the directory'}
+              title={t('public.catalog.errorTitle')}
             >
-              {es
-                ? 'No ocultamos el problema con datos de muestra. Probá actualizar las cocheras en unos instantes.'
-                : 'We could not load active parkings. We do not hide the problem with sample data. Try again in a moment.'}
+              {t('public.catalog.errorDescription')}
             </ErrorState>
           </div>
         ) : null}
@@ -231,21 +217,27 @@ export function ParkingCatalogRoute() {
                     variant="secondary"
                   >
                     <X aria-hidden="true" className="size-4" />
-                    {es ? 'Limpiar filtros' : 'Clear filters'}
+                    {t('public.catalog.clearFilters')}
                   </Button>
                 ) : undefined
               }
-              title={es ? 'No encontramos cocheras con esos filtros.' : 'No active parkings'}
+              title={t('public.catalog.emptyTitle')}
             >
-              {es
-                ? 'Probá con otra zona o ampliá el rango de tarifas.'
-                : 'Try a different address or rate range.'}
+              {t('public.catalog.emptyDescription')}
             </EmptyState>
           </div>
         ) : null}
+        {parkingQuery.data && !parkingQuery.isError ? (
+          <p className="mt-8 text-sm font-semibold text-foreground-secondary" role="status">
+            {tPlural(parkingQuery.data.meta.total, {
+              one: 'public.catalog.resultCountOne',
+              other: 'public.catalog.resultCountOther',
+            })}
+          </p>
+        ) : null}
         {!parkingQuery.isLoading && !parkingQuery.isError && parkingQuery.data?.data.length ? (
           <div
-            aria-label={es ? 'Resultados de cocheras' : 'Parking results'}
+            aria-label={t('public.catalog.results')}
             className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3"
           >
             {parkingQuery.data.data.map((parking) => (
@@ -259,7 +251,7 @@ export function ParkingCatalogRoute() {
         ) : null}
         {parkingQuery.data && !parkingQuery.isError ? (
           <nav
-            aria-label={es ? 'Paginación de cocheras' : 'Parking catalog pagination'}
+            aria-label={t('public.catalog.pagination')}
             className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-border-subtle pt-7"
           >
             <Button
@@ -270,12 +262,13 @@ export function ParkingCatalogRoute() {
               type="button"
               variant="secondary"
             >
-              {es ? 'Anterior' : 'Previous'}
+              {t('public.catalog.previous')}
             </Button>
             <span aria-live="polite" className="text-sm font-medium text-foreground-secondary">
-              {es
-                ? `Página ${String(parkingQuery.data.meta.page)} de ${String(parkingQuery.data.meta.totalPages)}`
-                : `Page ${String(parkingQuery.data.meta.page)} of ${String(parkingQuery.data.meta.totalPages)}`}
+              {t('public.catalog.page', {
+                page: parkingQuery.data.meta.page,
+                totalPages: parkingQuery.data.meta.totalPages,
+              })}
             </span>
             <Button
               disabled={!parkingQuery.data.meta.hasNextPage}
@@ -285,7 +278,7 @@ export function ParkingCatalogRoute() {
               type="button"
               variant="secondary"
             >
-              {es ? 'Siguiente' : 'Next'}
+              {t('public.catalog.next')}
             </Button>
           </nav>
         ) : null}
@@ -296,7 +289,6 @@ export function ParkingCatalogRoute() {
 
 function CatalogFilters({
   currency,
-  es,
   filterError,
   idPrefix,
   onClear,
@@ -304,25 +296,25 @@ function CatalogFilters({
   searchParams,
 }: {
   currency?: 'ARS' | 'USD';
-  es: boolean;
   filterError?: string;
   idPrefix: string;
   onClear: () => void;
   onSubmit: (event: SyntheticEvent<HTMLFormElement>) => void;
   searchParams: URLSearchParams;
 }) {
+  const { t } = useAppearance();
   return (
     <form
-      className="grid gap-4 rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-xs lg:grid-cols-12 lg:items-end lg:p-6"
+      className="grid gap-4 rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-xs md:grid-cols-2 md:items-end lg:grid-cols-12 lg:p-6"
       noValidate
       onSubmit={onSubmit}
     >
-      <div className="lg:col-span-6">
+      <div className="md:col-span-2 lg:col-span-5">
         <label
           className="mb-2 block text-xs font-bold text-foreground"
           htmlFor={`${idPrefix}-search`}
         >
-          {es ? '¿A dónde vas?' : 'Where are you going?'}
+          {t('public.catalog.searchLabel')}
         </label>
         <div className="flex items-center gap-2 rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3 focus-within:border-primary focus-within:bg-surface">
           <Search aria-hidden="true" className="size-4 shrink-0 text-foreground-muted" />
@@ -331,19 +323,19 @@ function CatalogFilters({
             defaultValue={searchParams.get('search') ?? ''}
             id={`${idPrefix}-search`}
             name="search"
-            placeholder={es ? 'Nombre, barrio o dirección' : 'Name, neighborhood, or address'}
+            placeholder={t('public.catalog.searchPlaceholder')}
           />
         </div>
       </div>
       <MonetaryFilterGroup
-        className="lg:col-span-5"
+        className="md:col-span-2 lg:col-span-5"
         currency={currency}
         defaultMax={searchParams.get('maxRate') ?? ''}
         defaultMin={searchParams.get('minRate') ?? ''}
         idPrefix={idPrefix}
         onClear={onClear}
       />
-      <div className="flex items-center lg:col-span-2">
+      <div className="flex items-center md:col-span-1 lg:col-span-2">
         <label className="flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-surface-subtle px-3.5 py-3 text-sm font-semibold text-foreground">
           <input
             className="size-4 rounded border-border accent-primary focus-visible:ring-2 focus-visible:ring-focus-ring"
@@ -352,12 +344,12 @@ function CatalogFilters({
             name="availableNow"
             type="checkbox"
           />
-          <span>{es ? 'Disponible ahora' : 'Available now'}</span>
+          <span>{t('public.catalog.availableNow')}</span>
         </label>
       </div>
-      <Button className="rounded-full lg:col-span-3" type="submit">
+      <Button className="rounded-full md:col-span-1 lg:col-span-full lg:w-fit" type="submit">
         <SlidersHorizontal aria-hidden="true" className="size-4" />
-        {es ? 'Aplicar filtros' : 'Apply filters'}
+        {t('public.catalog.applyFilters')}
       </Button>
       {filterError ? (
         <p className="text-sm font-medium text-danger-text lg:col-span-full" role="alert">
@@ -368,10 +360,11 @@ function CatalogFilters({
   );
 }
 
-function CatalogSkeleton({ es }: { es: boolean }) {
+function CatalogSkeleton() {
+  const { t } = useAppearance();
   return (
     <div
-      aria-label={es ? 'Cargando cocheras' : 'Loading parkings'}
+      aria-label={t('public.catalog.loading')}
       className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3"
     >
       {Array.from({ length: 6 }, (_, index) => (

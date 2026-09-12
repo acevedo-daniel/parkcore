@@ -1,9 +1,4 @@
-import { Navigate, useLocation, useParams } from 'react-router';
-
-export function RegisterRedirect() {
-  const location = useLocation();
-  return <Navigate replace to={{ pathname: '/login', search: location.search }} />;
-}
+import { Navigate, useParams } from 'react-router';
 
 export function OwnerParkingRedirect() {
   const { parkingId } = useParams();
