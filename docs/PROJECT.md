@@ -139,6 +139,8 @@ An `ACTIVE` session has no `endTime`. Both terminal transitions record the time 
 
 Network analytics use the owner's IANA timezone. Parking history periods, displayed session times, and CSV timestamps use the parking's IANA timezone. Revenue summaries never combine ARS and USD amounts into one total.
 
+The protected owner overview presents a current network briefing from facility snapshots and owner-scoped analytics: active vehicles, free capacity, active and paused facilities, completed stays today, facility attention for full, nearly full, paused, and long-running active stays, plus 7-day and 30-day revenue and completed-stay trends. Facility attention opens the relevant facility operation, while a long-running stay opens its session. Revenue remains separated by currency. Summary, revenue, or volume failures degrade their local overview sections while facility operations remain available.
+
 ## Capacity and pricing
 
 Capacity is the maximum number of simultaneous `ACTIVE` sessions in a parking. ParkCore does not model individual physical spaces.

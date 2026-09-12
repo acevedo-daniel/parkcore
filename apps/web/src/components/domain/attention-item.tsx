@@ -33,7 +33,7 @@ export function AttentionItem({
 }: AttentionItemProps) {
   const { t } = useAppearance();
   const stateLabel = t(stateLabelKey[state]);
-  const subject = parkingTitle ?? plate ?? '';
+  const subject = [parkingTitle, plate].filter(Boolean).join(' · ');
 
   return (
     <li
