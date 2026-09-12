@@ -7,7 +7,10 @@ type User = components['schemas']['UserResponse'];
 
 export function parkingFixture(overrides: Partial<Parking> = {}): Parking {
   return {
+    activeSessionCount: 0,
     address: '101 Main Street',
+    availabilityState: 'AVAILABLE',
+    availableSpaces: 12,
     capacity: 12,
     createdAt: '2026-08-17T09:00:00.000Z',
     currency: 'USD',
@@ -18,6 +21,7 @@ export function parkingFixture(overrides: Partial<Parking> = {}): Parking {
     image: null,
     isListed: false,
     isActive: true,
+    isOpen: true,
     lat: -34.6037,
     lng: -58.3816,
     ownerId: 'owner-1',
@@ -27,6 +31,8 @@ export function parkingFixture(overrides: Partial<Parking> = {}): Parking {
     timezone: 'America/Argentina/Buenos_Aires',
     title: 'Central Parking',
     updatedAt: '2026-08-17T09:00:00.000Z',
+    nextOpeningAt: null,
+    occupancyPercent: 0,
     ...overrides,
   };
 }

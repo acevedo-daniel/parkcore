@@ -55,7 +55,7 @@ export function OwnerLayout() {
   const navigation = useNavigation();
   const [clock, setClock] = useState(() => new Date());
   const ownerLinks = [
-    { Icon: LayoutDashboard, label: t('nav.overview'), to: '/app' },
+    { Icon: LayoutDashboard, label: t('nav.home'), to: '/app' },
     { Icon: Building2, label: t('nav.parkings'), to: '/app/parkings' },
   ];
   useEffect(() => {
@@ -77,11 +77,11 @@ export function OwnerLayout() {
     void navigate('/login', { replace: true });
   };
   return (
-    <div className="owner-theme owner-shell flex min-h-screen flex-col bg-canvas text-foreground md:flex-row">
+    <div className="owner-theme owner-shell flex min-h-screen flex-col bg-canvas text-foreground xl:flex-row">
       <a className="skip-link" href="#owner-main">
         {t('nav.skipMain')}
       </a>
-      <aside className="owner-sidebar hidden shrink-0 border-r border-border-strong bg-surface p-6 md:flex md:w-64 md:flex-col md:justify-between">
+      <aside className="owner-sidebar hidden shrink-0 border-r border-border-strong bg-surface p-6 xl:sticky xl:top-0 xl:flex xl:h-screen xl:w-64 xl:flex-col xl:justify-between">
         <div className="flex flex-col gap-6">
           <div className="owner-brand-block border-b border-border-strong pb-5">
             <Link
@@ -149,7 +149,7 @@ export function OwnerLayout() {
           ) : null}
         </div>
       </aside>
-      <header className="owner-mobile-header sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border-strong bg-surface px-4 md:hidden">
+      <header className="owner-mobile-header sticky top-0 z-30 flex min-h-14 items-center justify-between gap-3 border-b border-border-strong bg-surface px-4 py-2 xl:hidden">
         <Link
           className="brand-mark font-display text-base font-bold tracking-[-0.035em] text-foreground"
           to="/app"
@@ -157,7 +157,9 @@ export function OwnerLayout() {
           PARKCORE
         </Link>
         <div className="flex items-center gap-2">
-          <span className="type-label">{t('nav.operations')}</span>
+          <AppearanceControls />
+          {user?.kind === 'DEMO' ? <DemoResetControl compact /> : null}
+          <span className="type-label hidden sm:inline">{t('nav.operations')}</span>
           <button
             aria-label={t('nav.signOut')}
             className="icon-button flex size-9 items-center justify-center rounded-md border border-border-strong bg-surface text-foreground transition-colors hover:bg-surface-hover"
@@ -178,7 +180,7 @@ export function OwnerLayout() {
         </div>
       ) : null}
       <main
-        className="owner-main flex-1 p-5 sm:p-7 lg:p-10 max-w-7xl mx-auto w-full pb-24 md:pb-10"
+        className="owner-main mx-auto w-full max-w-7xl flex-1 p-5 pb-24 sm:p-7 lg:p-10 xl:pb-10"
         id="owner-main"
         tabIndex={-1}
       >
@@ -186,7 +188,7 @@ export function OwnerLayout() {
       </main>
       <nav
         aria-label={t('nav.ownerMobile')}
-        className="owner-mobile-nav fixed inset-x-0 bottom-0 z-30 flex h-16 items-center justify-around border-t border-border-strong bg-surface/95 px-4 backdrop-blur-md md:hidden"
+        className="owner-mobile-nav fixed inset-x-0 bottom-0 z-30 flex h-16 items-center justify-around border-t border-border-strong bg-surface/95 px-4 backdrop-blur-md xl:hidden"
       >
         {ownerLinks.map((link) => (
           <OwnerLink compact key={link.to} {...link} />

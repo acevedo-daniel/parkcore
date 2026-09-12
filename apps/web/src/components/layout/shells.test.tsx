@@ -84,9 +84,13 @@ describe('application shells', () => {
   it('renders owner navigation without fictional product areas', () => {
     renderRoute(<OwnerLayout />, '/app');
     const navigation = screen.getByRole('navigation', { name: 'Navegación de operador' });
-    expect(navigation.textContent).toContain('Resumen');
+    expect(navigation.textContent).toContain('Inicio');
     expect(navigation.textContent).toContain('Cocheras');
     expect(navigation.textContent).not.toContain('Payments');
+    expect(screen.getByRole('complementary').className).toContain('xl:flex');
+    expect(screen.getByRole('banner').className).toContain('xl:hidden');
+    expect(screen.getByRole('navigation', { name: 'Navegación de operador, móvil' })).toBeTruthy();
+    expect(screen.getAllByRole('combobox', { name: 'Apariencia' })).toHaveLength(2);
     expect(document.title).toBe('ParkCore | Operaciones');
   });
 });

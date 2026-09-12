@@ -8,7 +8,7 @@ import {
 import * as parkingRepository from './parking.repository.js';
 import { Parking, Prisma } from '../../../prisma/generated/client.js';
 import * as userRepository from '../user/user.repository.js';
-import { getScheduleState, validateDailySchedule } from '../../utils/timezone.js';
+import { validateDailySchedule } from '../../utils/timezone.js';
 import {
   CreateParking,
   UpdateParking,
@@ -16,6 +16,7 @@ import {
   ParkingResponse,
   PublicParkingListResponse,
   PublicParkingResponse,
+  deriveParkingAvailabilitySnapshot,
   toParkingResponse,
 } from './parking.schema.js';
 
@@ -103,22 +104,7 @@ const availabilityRank: Record<PublicParkingResponse['availabilityState'], numbe
 export const toPublicParkingResponse = (
   parking: parkingRepository.PublicParkingRecord,
 ): PublicParkingResponse => {
-  const activeSessionCount = parking.parkingSessions.length;
-  const schedule = getScheduleState({
-    timezone: parking.timezone,
-    is24Hours: parking.is24Hours,
-    opensAt: parking.opensAt,
-    closesAt: parking.closesAt,
-  });
-  const availableSpaces = Math.max(0, parking.capacity - activeSessionCount);
-  const occupancyPercent = (activeSessionCount / parking.capacity) * 100;
-  const availabilityState = !schedule.isOpen
-    ? 'CLOSED'
-    : availableSpaces === 0
-      ? 'FULL'
-      : occupancyPercent >= 80
-        ? 'LIMITED'
-        : 'AVAILABLE';
+  const snapshot = deriveParkingAvailabilitySnapshot(parking);
 
   return {
     id: parking.id,
@@ -137,11 +123,7 @@ export const toPublicParkingResponse = (
     opensAt: parking.opensAt,
     closesAt: parking.closesAt,
     isShowcase: parking.owner.kind === 'SHOWCASE',
-    isOpen: schedule.isOpen,
-    availabilityState,
-    availableSpaces,
-    occupancyPercent,
-    nextOpeningAt: schedule.nextOpeningAt?.toISOString() ?? null,
+    ...snapshot,
   };
 };
 

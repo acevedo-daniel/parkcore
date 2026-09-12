@@ -41,9 +41,11 @@ Driver information can be recorded as visit data during check-in, but drivers do
 ### Owner experience
 
 - Register and authenticate as an owner with a valid IANA timezone. The browser supplies its timezone when available, and the API falls back to `America/Argentina/Buenos_Aires`.
+- Use a responsive operations shell with persistent wide navigation and compact top and bottom navigation.
 - Manage the owner profile.
 - Create and edit owned parking facilities.
 - Activate or deactivate a parking.
+- Scan server-derived facility state, occupancy, capacity, publication, neighborhood, and address with separate operation, edit, and history actions.
 - View occupancy and active sessions.
 - Check vehicles in.
 - Complete or cancel active sessions.
@@ -93,6 +95,8 @@ ParkCore 1.0 intentionally does not include:
 
 `Parking.isListed` is independent publication state. Public discovery includes only parking owned by `OWNER` or `SHOWCASE` identities when `isListed=true` and `isActive=true`. DEMO-owned parking is never public. Public responses expose a restrained showcase marker, derived availability, available spaces, occupancy, and next opening without exposing owner identity or credentials.
 
+Protected owner parking responses also expose the server-derived operational snapshot: active session count, free capacity, occupancy percentage, schedule open state, availability state including `PAUSED`, and the next opening when the facility is scheduled and currently closed. The snapshot is calculated from active sessions scoped to the facility and is returned by owner listing, create, and update operations.
+
 A parking also owns its configured capacity, hourly rate, currency, location, and the vehicles and sessions associated with that facility.
 
 The canonical SHOWCASE identity is a stable, non-credentialed account created by database setup. It owns six fictional Buenos Aires facilities: five listed active facilities used by public discovery and one paused unlisted facility retained as operational proof. The `showcase:refresh` maintenance command rebases its time-dependent sessions around an optional reference time without changing facility or asset identity. SHOWCASE data is read-only through the application and is always marked as fictional demonstration data in public responses.
@@ -134,6 +138,8 @@ ACTIVE --cancel----> CANCELLED
 An `ACTIVE` session has no `endTime`. Both terminal transitions record the time they occur; cancellation leaves `totalAmountCents` null.
 
 Network analytics use the owner's IANA timezone. Parking history periods, displayed session times, and CSV timestamps use the parking's IANA timezone. Revenue summaries never combine ARS and USD amounts into one total.
+
+The protected owner overview presents a current network briefing from facility snapshots and owner-scoped analytics: active vehicles, free capacity, active and paused facilities, completed stays today, facility attention for full, nearly full, paused, and long-running active stays, plus 7-day and 30-day revenue and completed-stay trends. Facility attention opens the relevant facility operation, while a long-running stay opens its session. Revenue remains separated by currency. Summary, revenue, or volume failures degrade their local overview sections while facility operations remain available.
 
 ## Capacity and pricing
 

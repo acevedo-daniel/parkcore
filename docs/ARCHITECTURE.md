@@ -72,6 +72,8 @@ The service loads the eligible candidate set with active-session counts, derives
 
 The web public detail route uses that DTO for the facility profile, advisory started-hour estimate, and availability presentation. Its directions action builds a Google Maps directions URL from the server-provided latitude and longitude and opens it in a new tab; the web app does not embed a map SDK.
 
+Protected owner parking reads use a parallel operational snapshot. The repository selects only `ACTIVE` session identifiers for facilities owned by the authenticated user, and the service derives active count, available spaces, occupancy, schedule open state, `AVAILABLE`, `LIMITED`, `FULL`, `CLOSED`, or owner-only `PAUSED` status, and the next opening in the facility timezone. The same snapshot is returned after creation and updates so the owner does not need a second occupancy request to trust the result.
+
 The public catalog canonicalizes its search, currency, rate, availability, and pagination state into URL parameters before requesting the typed client. Auth entry routes accept only internal `/app` return targets, while public unavailable states use localized recovery links and no-index metadata.
 
 The canonical SHOWCASE identity has a stable ID and no credentials. Database setup provisions its six-facility fictional Buenos Aires scenario. The `showcase:refresh` maintenance command accepts an optional reference time and runs the canonical replacement inside one PostgreSQL transaction, preserving facility and asset IDs while rebasing sessions. It targets only the SHOWCASE owner, so normal OWNER and DEMO data are not changed.
@@ -110,6 +112,8 @@ The web application persists the owner's access token in browser `localStorage` 
 The web localization boundary lives in `apps/web/src/lib/localization.ts` and the adjacent `src/locales/` catalogs. The provider exposes the typed `es-AR` or `en-US` locale, translation, and plural helpers to React consumers. Locale-sensitive formatters receive that locale explicitly, so display output does not depend on the document language as an implicit global.
 
 Shared web controls and feedback live under `apps/web/src/components/ui/`, while reusable operational presentation primitives live under `apps/web/src/components/domain/`. Native inputs, textareas, selects, checkboxes, and switches remain the browser interaction source of truth, while the shared `Field` wrapper owns label, help, and error association. Radix owns dialog, sheet, and toast focus containment and dismissal behavior. These controls and domain primitives consume semantic theme tokens and typed shared labels so route components compose the interaction layer without recreating its accessibility or theme contract.
+
+The owner overview composes the owned parking snapshot with active-session reads for long-running attention context and the owner analytics summary, revenue, and volume queries. It keeps the network and facility briefing available when an analytics query is degraded, uses owner-timezone period boundaries supplied by the API, and keeps revenue totals separated by currency.
 
 Access tokens carry the authenticated identity kind. Credential login issues tokens only for `OWNER` identities. `DEMO` tokens are bounded by the demo identity expiration, while `SHOWCASE` tokens may read identity data but are rejected from parking mutation and operation paths.
 

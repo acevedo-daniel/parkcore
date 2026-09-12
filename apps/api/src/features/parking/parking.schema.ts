@@ -4,9 +4,84 @@ import { supportedCurrencies } from '../../utils/currency.js';
 import { paginationMetaSchema } from '../../utils/pagination.schema.js';
 import {
   DEFAULT_TIMEZONE,
+  getScheduleState,
   isValidIanaTimezone,
   validateDailySchedule,
 } from '../../utils/timezone.js';
+
+export type ParkingWithActiveSessionIds = Parking & {
+  parkingSessions?: readonly { id: string }[];
+};
+
+export const parkingAvailabilityStates = ['AVAILABLE', 'LIMITED', 'FULL', 'CLOSED'] as const;
+export const ownerParkingAvailabilityStates = [...parkingAvailabilityStates, 'PAUSED'] as const;
+
+export type ParkingAvailabilityState = (typeof parkingAvailabilityStates)[number];
+export type OwnerParkingAvailabilityState = (typeof ownerParkingAvailabilityStates)[number];
+
+export interface ParkingAvailabilitySnapshot {
+  activeSessionCount: number;
+  availableSpaces: number;
+  occupancyPercent: number;
+  isOpen: boolean;
+  availabilityState: ParkingAvailabilityState;
+  nextOpeningAt: string | null;
+}
+
+export interface OwnerParkingOperationalSnapshot extends Omit<
+  ParkingAvailabilitySnapshot,
+  'availabilityState'
+> {
+  availabilityState: OwnerParkingAvailabilityState;
+}
+
+export const deriveParkingAvailabilitySnapshot = (
+  parking: ParkingWithActiveSessionIds,
+  now = new Date(),
+): ParkingAvailabilitySnapshot => {
+  const timezone = parking.timezone || DEFAULT_TIMEZONE;
+  const schedule = getScheduleState(
+    {
+      timezone,
+      is24Hours: parking.is24Hours,
+      opensAt: parking.opensAt,
+      closesAt: parking.closesAt,
+    },
+    now,
+  );
+  const capacity = Math.max(0, parking.capacity);
+  const activeSessionCount = Math.min(parking.parkingSessions?.length ?? 0, capacity);
+  const availableSpaces = Math.max(0, capacity - activeSessionCount);
+  const occupancyPercent =
+    capacity === 0 ? 0 : Math.min(100, (activeSessionCount / capacity) * 100);
+  const availabilityState: ParkingAvailabilityState = !schedule.isOpen
+    ? 'CLOSED'
+    : availableSpaces === 0
+      ? 'FULL'
+      : occupancyPercent >= 80
+        ? 'LIMITED'
+        : 'AVAILABLE';
+
+  return {
+    activeSessionCount,
+    availableSpaces,
+    occupancyPercent,
+    isOpen: schedule.isOpen,
+    availabilityState,
+    nextOpeningAt: schedule.nextOpeningAt?.toISOString() ?? null,
+  };
+};
+
+export const deriveOwnerParkingSnapshot = (
+  parking: ParkingWithActiveSessionIds,
+  now = new Date(),
+): OwnerParkingOperationalSnapshot => {
+  const snapshot = deriveParkingAvailabilitySnapshot(parking, now);
+  return {
+    ...snapshot,
+    availabilityState: parking.isActive ? snapshot.availabilityState : 'PAUSED',
+  };
+};
 
 const localTimeSchema = z
   .string()
@@ -242,6 +317,24 @@ export const parkingResponseSchema = z
     opensAt: z.string().nullable().openapi({ description: 'Local opening time in HH:mm' }),
     closesAt: z.string().nullable().openapi({ description: 'Local closing time in HH:mm' }),
     isListed: z.boolean().openapi({ description: 'Whether the facility is publicly listed' }),
+    activeSessionCount: z
+      .int()
+      .nonnegative()
+      .openapi({ description: 'Current active sessions in this facility' }),
+    availableSpaces: z.int().nonnegative().openapi({ description: 'Current available spaces' }),
+    occupancyPercent: z
+      .number()
+      .nonnegative()
+      .max(100)
+      .openapi({ description: 'Current occupancy percentage' }),
+    isOpen: z.boolean().openapi({ description: 'Whether the facility schedule is open now' }),
+    availabilityState: z
+      .enum(ownerParkingAvailabilityStates)
+      .openapi({ description: 'Derived owner operational state' }),
+    nextOpeningAt: z.iso
+      .datetime()
+      .nullable()
+      .openapi({ description: 'Next opening time as an ISO date-time' }),
     createdAt: z.iso.datetime().openapi({ description: 'Creation time', format: 'date-time' }),
     updatedAt: z.iso.datetime().openapi({ description: 'Last update time', format: 'date-time' }),
   })
@@ -267,7 +360,7 @@ export const publicParkingResponseSchema = z
     isShowcase: z.boolean().openapi({ description: 'Whether this is fictional showcase data' }),
     isOpen: z.boolean().openapi({ description: 'Whether the facility is open now' }),
     availabilityState: z
-      .enum(['AVAILABLE', 'LIMITED', 'FULL', 'CLOSED'])
+      .enum(parkingAvailabilityStates)
       .openapi({ description: 'Derived public availability state' }),
     availableSpaces: z.int().nonnegative().openapi({ description: 'Current available spaces' }),
     occupancyPercent: z
@@ -296,25 +389,30 @@ export type ParkingResponse = z.infer<typeof parkingResponseSchema>;
 export type PublicParkingResponse = z.infer<typeof publicParkingResponseSchema>;
 export type PublicParkingListResponse = z.infer<typeof publicParkingListResponseSchema>;
 
-export const toParkingResponse = (parking: Parking): ParkingResponse => ({
-  id: parking.id,
-  title: parking.title,
-  description: parking.description,
-  image: parking.image,
-  address: parking.address,
-  hourlyRateCents: parking.hourlyRateCents,
-  currency: parking.currency,
-  capacity: parking.capacity,
-  lat: parking.lat,
-  lng: parking.lng,
-  isActive: parking.isActive,
-  ownerId: parking.ownerId,
-  neighborhood: parking.neighborhood,
-  timezone: parking.timezone || DEFAULT_TIMEZONE,
-  is24Hours: parking.is24Hours,
-  opensAt: parking.opensAt,
-  closesAt: parking.closesAt,
-  isListed: parking.isListed,
-  createdAt: parking.createdAt.toISOString(),
-  updatedAt: parking.updatedAt.toISOString(),
-});
+export const toParkingResponse = (parking: ParkingWithActiveSessionIds): ParkingResponse => {
+  const snapshot = deriveOwnerParkingSnapshot(parking);
+
+  return {
+    id: parking.id,
+    title: parking.title,
+    description: parking.description,
+    image: parking.image,
+    address: parking.address,
+    hourlyRateCents: parking.hourlyRateCents,
+    currency: parking.currency,
+    capacity: parking.capacity,
+    lat: parking.lat,
+    lng: parking.lng,
+    isActive: parking.isActive,
+    ownerId: parking.ownerId,
+    neighborhood: parking.neighborhood,
+    timezone: parking.timezone || DEFAULT_TIMEZONE,
+    is24Hours: parking.is24Hours,
+    opensAt: parking.opensAt,
+    closesAt: parking.closesAt,
+    isListed: parking.isListed,
+    ...snapshot,
+    createdAt: parking.createdAt.toISOString(),
+    updatedAt: parking.updatedAt.toISOString(),
+  };
+};
