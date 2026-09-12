@@ -2,6 +2,7 @@ import { Plus, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { PageHeader } from '../../components/domain/page-header.js';
 import { Button } from '../../components/ui/button.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { OwnerParkingPanel } from '../../features/parking/owner-parking-panel.js';
@@ -9,14 +10,10 @@ import { useOwnedParkingOperations } from '../../features/parking/use-owned-park
 import { cn } from '../../lib/cn.js';
 
 export function OwnerParkingsRoute() {
-  const { language, t } = useAppearance();
-  const es = language === 'es';
+  const { t } = useAppearance();
   const { parkings, parkingsQuery } = useOwnedParkingOperations();
-  const knownOccupancies = parkings.filter(
-    ({ activeSessionCount }) => activeSessionCount !== undefined,
-  );
-  const activeVehicles = knownOccupancies.reduce(
-    (total, { activeSessionCount }) => total + (activeSessionCount ?? 0),
+  const activeVehicles = parkings.reduce(
+    (total, { parking }) => total + parking.activeSessionCount,
     0,
   );
   const totalCapacity = parkings.reduce((total, { parking }) => total + parking.capacity, 0);
@@ -29,29 +26,12 @@ export function OwnerParkingsRoute() {
   }
 
   return (
-    <section className="owner-page space-y-9" aria-labelledby="owner-parkings-title">
-      <header className="border-b border-[#121417] pb-7">
-        <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-          <div className="max-w-2xl">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-[#6d695f]">
-              {es ? 'Tu red' : 'Your network'}
-            </p>
-            <h1
-              className="mt-3 font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] text-[#121417] sm:text-5xl"
-              id="owner-parkings-title"
-            >
-              {es ? 'Cocheras, sin vueltas.' : 'Facilities, made clear.'}
-            </h1>
-            <p className="mt-4 text-base leading-relaxed text-[#45423c]">
-              {es
-                ? 'Entrá a cada operación para administrar ingresos, plazas y estadías activas.'
-                : 'Open any facility to manage admissions, capacity, and active stays.'}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+    <section className="owner-page space-y-8" aria-labelledby="owner-parkings-title">
+      <PageHeader
+        actions={
+          <>
             <Button
-              aria-label={t('parkingOperation.refreshFacilities')}
-              className="border-[#121417] bg-white text-[#121417] hover:bg-[#f1eee7]"
+              aria-label={t('ownerParkings.refresh')}
               disabled={parkingsQuery.isFetching}
               onClick={() => void parkingsQuery.refetch()}
               size="sm"
@@ -61,21 +41,21 @@ export function OwnerParkingsRoute() {
                 aria-hidden="true"
                 className={cn('size-3.5', parkingsQuery.isFetching && 'animate-spin')}
               />
-              {es ? 'Actualizar' : 'Refresh'}
+              {t('ownerParkings.refresh')}
             </Button>
-            <Button
-              asChild
-              className="border-[#121417] bg-[#121417] text-white hover:bg-[#30312d]"
-              size="sm"
-            >
+            <Button asChild size="sm">
               <Link to="/app/parkings/new">
                 <Plus aria-hidden="true" className="size-4" />
-                {es ? 'Nueva cochera' : 'New facility'}
+                {t('ownerParkings.newFacility')}
               </Link>
             </Button>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+        description={t('ownerParkings.description')}
+        eyebrow={t('ownerParkings.eyebrow')}
+        id="owner-parkings-title"
+        title={t('ownerParkings.title')}
+      />
 
       {parkings.length === 0 ? (
         <EmptyState
@@ -83,76 +63,60 @@ export function OwnerParkingsRoute() {
             <Button asChild variant="primary">
               <Link to="/app/parkings/new">
                 <Plus aria-hidden="true" className="size-4" />
-                {es ? 'Crear cochera' : 'Create facility'}
+                {t('ownerParkings.createFacility')}
               </Link>
             </Button>
           }
-          title={es ? 'Todavía no hay cocheras' : 'No facilities yet'}
+          title={t('ownerParkings.emptyTitle')}
         >
-          {es
-            ? 'Creá la primera para empezar a registrar la operación.'
-            : 'Create your first one to start recording operations.'}
+          {t('ownerParkings.emptyDescription')}
         </EmptyState>
       ) : (
         <>
-          <div className="grid gap-px overflow-hidden rounded-[1.35rem] border border-[#121417] bg-[#121417] sm:grid-cols-3">
-            <NetworkMetric label={es ? 'Cocheras' : 'Facilities'} value={String(parkings.length)} />
+          <div
+            aria-label={t('ownerParkings.networkSummary')}
+            className="grid gap-px overflow-hidden rounded-[var(--radius-lg)] border border-border bg-border sm:grid-cols-3"
+          >
             <NetworkMetric
-              label={es ? 'Plazas totales' : 'Total spots'}
-              value={String(totalCapacity)}
+              label={t('ownerParkings.facilityCount')}
+              value={String(parkings.length)}
             />
+            <NetworkMetric label={t('ownerParkings.capacity')} value={String(totalCapacity)} />
             <NetworkMetric
-              label={es ? 'Vehículos dentro' : 'Vehicles inside'}
-              note={
-                knownOccupancies.length === parkings.length
-                  ? undefined
-                  : es
-                    ? 'actualizando'
-                    : 'updating'
-              }
+              label={t('ownerParkings.activeVehicles')}
               value={String(activeVehicles)}
             />
           </div>
 
           {parkingsQuery.isFetching ? (
-            <p
-              className="font-mono text-xs font-semibold uppercase tracking-wider text-[#6d695f]"
-              role="status"
-            >
-              {t('parkingOperation.refreshingFacilities')}
+            <p className="type-label text-foreground-muted" role="status">
+              {t('ownerParkings.refreshing')}
             </p>
           ) : null}
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {parkings.map(
-              ({ activeSessionCount, occupancyError, occupancyLoading, parking }, index) => (
-                <OwnerParkingPanel
-                  activeSessionCount={activeSessionCount}
-                  identifier={index + 1}
-                  key={parking.id}
-                  occupancyError={occupancyError}
-                  occupancyLoading={occupancyLoading}
-                  parking={parking}
-                />
-              ),
-            )}
-          </div>
+          <section aria-labelledby="owner-facility-list-title">
+            <h2 className="visually-hidden" id="owner-facility-list-title">
+              {t('ownerParkings.facilityList')}
+            </h2>
+            <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-surface">
+              {parkings.map(({ parking }, index) => (
+                <div className="border-b border-border-subtle last:border-b-0" key={parking.id}>
+                  <OwnerParkingPanel identifier={index + 1} parking={parking} />
+                </div>
+              ))}
+            </div>
+          </section>
         </>
       )}
     </section>
   );
 }
 
-function NetworkMetric({ label, note, value }: { label: string; note?: string; value: string }) {
+function NetworkMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-white p-5 text-[#121417]">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-        {label}
-      </p>
-      <p className="mt-4 font-display text-4xl font-bold leading-none tracking-[-0.06em] tabular-nums">
-        {value}
-      </p>
-      {note ? <p className="mt-2 text-xs font-semibold text-[#6d695f]">{note}</p> : null}
+    <div className="bg-surface p-5 text-foreground">
+      <p className="type-label text-foreground-muted">{label}</p>
+      <p className="mt-3 type-metric">{value}</p>
     </div>
   );
 }
@@ -160,12 +124,28 @@ function NetworkMetric({ label, note, value }: { label: string; note?: string; v
 function OwnerParkingsSkeleton() {
   const { t } = useAppearance();
   return (
-    <div className="space-y-8" aria-label={t('parkingOperation.refreshFacilities')}>
-      <Skeleton className="h-44 rounded-[1.75rem]" />
-      <Skeleton className="h-32 rounded-[1.35rem]" />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="space-y-8" aria-label={t('ownerParkings.refreshing')}>
+      <div className="space-y-4 border-b border-border-strong pb-7">
+        <Skeleton className="h-3 w-24 rounded-full" />
+        <Skeleton className="h-12 w-3/4 rounded-[var(--radius-md)]" />
+        <Skeleton className="h-5 w-full max-w-xl rounded-full" />
+      </div>
+      <div className="grid gap-px overflow-hidden rounded-[var(--radius-lg)] border border-border bg-border sm:grid-cols-3">
         {Array.from({ length: 3 }).map((_, index) => (
-          <Skeleton className="h-72 rounded-[1.5rem]" key={index} />
+          <Skeleton className="h-24 rounded-none border-0" key={index} />
+        ))}
+      </div>
+      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-surface">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div
+            className="grid gap-6 border-b border-border-subtle p-5 last:border-b-0 sm:p-6 md:grid-cols-[minmax(0,1.4fr)_minmax(12rem,1fr)] lg:grid-cols-[minmax(14rem,1.4fr)_minmax(12rem,1fr)_minmax(10rem,0.8fr)_auto]"
+            key={index}
+          >
+            <Skeleton className="h-24 rounded-[var(--radius-md)]" />
+            <Skeleton className="h-20 rounded-[var(--radius-md)]" />
+            <Skeleton className="h-16 rounded-[var(--radius-md)]" />
+            <Skeleton className="h-20 rounded-[var(--radius-md)]" />
+          </div>
         ))}
       </div>
     </div>

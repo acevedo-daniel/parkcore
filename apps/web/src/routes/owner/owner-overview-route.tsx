@@ -81,7 +81,7 @@ export function OwnerOverviewRoute() {
           },
         ];
       }
-      if (activeSessionCount !== undefined && activeSessionCount >= parking.capacity) {
+      if (activeSessionCount >= parking.capacity) {
         return [
           {
             description: t('overview.attentionFull'),
@@ -91,10 +91,7 @@ export function OwnerOverviewRoute() {
           },
         ];
       }
-      if (
-        activeSessionCount !== undefined &&
-        activeSessionCount / Math.max(1, parking.capacity) >= 0.8
-      ) {
+      if (activeSessionCount / Math.max(1, parking.capacity) >= 0.8) {
         return [
           {
             description: t('overview.attentionLimited'),
@@ -452,18 +449,9 @@ export function OwnerOverviewRoute() {
           </Link>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {parkings
-            .slice(0, 3)
-            .map(({ activeSessionCount, occupancyError, occupancyLoading, parking }, index) => (
-              <OwnerParkingPanel
-                activeSessionCount={activeSessionCount}
-                identifier={index + 1}
-                key={parking.id}
-                occupancyError={occupancyError}
-                occupancyLoading={occupancyLoading}
-                parking={parking}
-              />
-            ))}
+          {parkings.slice(0, 3).map(({ parking }, index) => (
+            <OwnerParkingPanel identifier={index + 1} key={parking.id} parking={parking} />
+          ))}
         </div>
       </section>
     </section>

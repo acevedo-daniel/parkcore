@@ -9,8 +9,9 @@ import { Button } from '../../components/ui/button.js';
 import { Dialog } from '../../components/ui/dialog.js';
 import { localizeApiError } from '../../lib/api/api-error.js';
 import { useToast } from '../../components/ui/toast-context.js';
+import { cn } from '../../lib/cn.js';
 
-export function DemoResetControl() {
+export function DemoResetControl({ compact = false }: { compact?: boolean } = {}) {
   const { t } = useAppearance();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -35,14 +36,18 @@ export function DemoResetControl() {
   return (
     <>
       <button
-        className="owner-nav-link owner-reset-demo flex min-h-10 w-full cursor-pointer items-center gap-3 rounded-[var(--radius-sm)] px-3.5 py-2 text-left text-sm font-medium text-foreground-secondary transition-colors hover:bg-[#f1eee7] hover:text-foreground"
+        aria-label={compact ? t('demo.restore') : undefined}
+        className={cn(
+          'owner-nav-link owner-reset-demo flex min-h-10 cursor-pointer items-center gap-3 rounded-[var(--radius-sm)] py-2 text-left text-sm font-medium text-foreground-secondary transition-colors hover:bg-surface-subtle hover:text-foreground',
+          compact ? 'size-10 justify-center px-0' : 'w-full px-3.5',
+        )}
         onClick={() => {
           setOpen(true);
         }}
         type="button"
       >
         <RotateCcw aria-hidden="true" className="shrink-0" size={16} />
-        <span>{t('demo.restore')}</span>
+        <span className={compact ? 'visually-hidden' : undefined}>{t('demo.restore')}</span>
       </button>
       <Dialog
         description={t('demo.restoreDescription')}

@@ -41,9 +41,11 @@ Driver information can be recorded as visit data during check-in, but drivers do
 ### Owner experience
 
 - Register and authenticate as an owner with a valid IANA timezone. The browser supplies its timezone when available, and the API falls back to `America/Argentina/Buenos_Aires`.
+- Use a responsive operations shell with persistent wide navigation and compact top and bottom navigation.
 - Manage the owner profile.
 - Create and edit owned parking facilities.
 - Activate or deactivate a parking.
+- Scan server-derived facility state, occupancy, capacity, publication, neighborhood, and address with separate operation, edit, and history actions.
 - View occupancy and active sessions.
 - Check vehicles in.
 - Complete or cancel active sessions.
