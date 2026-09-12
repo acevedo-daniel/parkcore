@@ -1,13 +1,26 @@
 import { prisma } from '../../config/prisma.js';
 import { Parking, Prisma } from '../../../prisma/generated/client.js';
 
+const activeParkingSessionsInclude = {
+  where: { status: 'ACTIVE' },
+  select: { id: true },
+} as const;
+
 const publicParkingInclude = {
   owner: { select: { kind: true } },
-  parkingSessions: { where: { status: 'ACTIVE' }, select: { id: true } },
+  parkingSessions: activeParkingSessionsInclude,
 } satisfies Prisma.ParkingInclude;
 
 export type PublicParkingRecord = Prisma.ParkingGetPayload<{
   include: typeof publicParkingInclude;
+}>;
+
+const ownerParkingInclude = {
+  parkingSessions: activeParkingSessionsInclude,
+} satisfies Prisma.ParkingInclude;
+
+export type OwnerParkingRecord = Prisma.ParkingGetPayload<{
+  include: typeof ownerParkingInclude;
 }>;
 
 const publicVisibilityWhere: Prisma.ParkingWhereInput = {
@@ -16,9 +29,10 @@ const publicVisibilityWhere: Prisma.ParkingWhereInput = {
   owner: { kind: { in: ['OWNER', 'SHOWCASE'] } },
 };
 
-export const create = async (data: Prisma.ParkingCreateInput): Promise<Parking> => {
+export const create = async (data: Prisma.ParkingCreateInput): Promise<OwnerParkingRecord> => {
   return await prisma.parking.create({
     data: data,
+    include: ownerParkingInclude,
   });
 };
 
@@ -35,9 +49,10 @@ export const findPublicById = async (id: string): Promise<PublicParkingRecord | 
   });
 };
 
-export const findByOwner = async (ownerId: string): Promise<Parking[]> => {
+export const findByOwner = async (ownerId: string): Promise<OwnerParkingRecord[]> => {
   return await prisma.parking.findMany({
     where: { ownerId },
+    include: ownerParkingInclude,
   });
 };
 
@@ -56,7 +71,7 @@ export interface CapacityUpdateBlocked {
 export const updateWithCapacityCheck = async (
   id: string,
   data: Prisma.ParkingUpdateInput,
-): Promise<Parking | CapacityUpdateBlocked | null> => {
+): Promise<OwnerParkingRecord | CapacityUpdateBlocked | null> => {
   return await prisma.$transaction(
     async (tx) => {
       const current = await tx.parking.findUnique({
@@ -74,7 +89,7 @@ export const updateWithCapacityCheck = async (
         if (requestedCapacity < activeCount) return { activeCount, kind: 'capacity-blocked' };
       }
 
-      return await tx.parking.update({ where: { id }, data });
+      return await tx.parking.update({ where: { id }, data, include: ownerParkingInclude });
     },
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
   );

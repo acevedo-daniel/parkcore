@@ -1875,6 +1875,24 @@ export interface components {
             closesAt: string | null;
             /** @description Whether the facility is publicly listed */
             isListed: boolean;
+            /** @description Current active sessions in this facility */
+            activeSessionCount: number;
+            /** @description Current available spaces */
+            availableSpaces: number;
+            /** @description Current occupancy percentage */
+            occupancyPercent: number;
+            /** @description Whether the facility schedule is open now */
+            isOpen: boolean;
+            /**
+             * @description Derived owner operational state
+             * @enum {string}
+             */
+            availabilityState: "AVAILABLE" | "LIMITED" | "FULL" | "CLOSED" | "PAUSED";
+            /**
+             * Format: date-time
+             * @description Next opening time as an ISO date-time
+             */
+            nextOpeningAt: string | null;
             /**
              * Format: date-time
              * @description Creation time

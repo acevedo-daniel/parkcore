@@ -17,7 +17,11 @@ const { mockPrisma, transactionClient } = vi.hoisted(() => {
 vi.mock('../../config/prisma.js', () => ({ prisma: mockPrisma }));
 
 import { buildParking } from '../../../tests/helpers/builders.js';
-import { findPublicCandidates, updateWithCapacityCheck } from './parking.repository.js';
+import {
+  findByOwner,
+  findPublicCandidates,
+  updateWithCapacityCheck,
+} from './parking.repository.js';
 
 describe('parking repository capacity updates', () => {
   beforeEach(() => {
@@ -52,6 +56,27 @@ describe('parking repository capacity updates', () => {
     expect(transactionClient.parking.update).toHaveBeenCalledWith({
       where: { id: 'parking-1' },
       data: { capacity: 4 },
+      include: {
+        parkingSessions: {
+          where: { status: 'ACTIVE' },
+          select: { id: true },
+        },
+      },
+    });
+  });
+
+  it('scopes owner snapshots and includes only active session identifiers', async () => {
+    mockPrisma.parking.findMany.mockResolvedValue([]);
+
+    await expect(findByOwner('owner-1')).resolves.toEqual([]);
+    expect(mockPrisma.parking.findMany).toHaveBeenCalledWith({
+      where: { ownerId: 'owner-1' },
+      include: {
+        parkingSessions: {
+          where: { status: 'ACTIVE' },
+          select: { id: true },
+        },
+      },
     });
   });
 

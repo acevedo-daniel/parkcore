@@ -706,6 +706,45 @@
             "type": "boolean",
             "description": "Whether the facility is publicly listed"
           },
+          "activeSessionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Current active sessions in this facility"
+          },
+          "availableSpaces": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Current available spaces"
+          },
+          "occupancyPercent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Current occupancy percentage"
+          },
+          "isOpen": {
+            "type": "boolean",
+            "description": "Whether the facility schedule is open now"
+          },
+          "availabilityState": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "LIMITED",
+              "FULL",
+              "CLOSED",
+              "PAUSED"
+            ],
+            "description": "Derived owner operational state"
+          },
+          "nextOpeningAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Next opening time as an ISO date-time"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time",
@@ -736,6 +775,12 @@
           "opensAt",
           "closesAt",
           "isListed",
+          "activeSessionCount",
+          "availableSpaces",
+          "occupancyPercent",
+          "isOpen",
+          "availabilityState",
+          "nextOpeningAt",
           "createdAt",
           "updatedAt"
         ],

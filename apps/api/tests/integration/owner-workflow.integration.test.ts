@@ -12,6 +12,12 @@ interface AuthResponse {
 
 interface ParkingResponse {
   id: string;
+  activeSessionCount: number;
+  availableSpaces: number;
+  occupancyPercent: number;
+  isOpen: boolean;
+  availabilityState: string;
+  nextOpeningAt: string | null;
 }
 
 interface VehicleSummary {
@@ -101,6 +107,14 @@ describe('owner workflow integration', () => {
 
     expect(createParkingResponse.status).toBe(201);
     const parking = createParkingResponse.body as unknown as ParkingResponse;
+    expect(parking).toMatchObject({
+      activeSessionCount: 0,
+      availableSpaces: 5,
+      occupancyPercent: 0,
+      isOpen: true,
+      availabilityState: 'AVAILABLE',
+      nextOpeningAt: null,
+    });
 
     const checkInResponse = await request(app)
       .post(`/parkings/${parking.id}/sessions/check-in`)
@@ -156,6 +170,34 @@ describe('owner workflow integration', () => {
     await expect(
       prisma.parkingSession.count({ where: { parkingId: parking.id, status: 'ACTIVE' } }),
     ).resolves.toBe(2);
+
+    const ownedParkingsResponse = await request(app)
+      .get('/parkings/me')
+      .set('Authorization', authorization);
+    expect(ownedParkingsResponse.status).toBe(200);
+    expect(ownedParkingsResponse.body).toEqual([
+      expect.objectContaining({
+        id: parking.id,
+        activeSessionCount: 2,
+        availableSpaces: 3,
+        occupancyPercent: 40,
+        isOpen: true,
+        availabilityState: 'AVAILABLE',
+        nextOpeningAt: null,
+      }),
+    ]);
+
+    const updateSnapshotResponse = await request(app)
+      .patch(`/parkings/${parking.id}`)
+      .set('Authorization', authorization)
+      .send({ title: `Updated Integration Parking ${suffix}` });
+    expect(updateSnapshotResponse.status).toBe(200);
+    expect(updateSnapshotResponse.body).toMatchObject({
+      activeSessionCount: 2,
+      availableSpaces: 3,
+      occupancyPercent: 40,
+      availabilityState: 'AVAILABLE',
+    });
 
     const capacityResponse = await request(app)
       .patch(`/parkings/${parking.id}`)
