@@ -149,15 +149,15 @@ export function OwnerLayout() {
           ) : null}
         </div>
       </aside>
-      <header className="owner-mobile-header sticky top-0 z-30 flex min-h-14 items-center justify-between gap-3 border-b border-border-strong bg-surface px-4 py-2 xl:hidden">
+      <header className="owner-mobile-header sticky top-0 z-30 flex min-h-14 items-center justify-between gap-1 border-b border-border-strong bg-surface px-3 py-2 xl:hidden">
         <Link
           className="brand-mark font-display text-base font-bold tracking-[-0.035em] text-foreground"
           to="/app"
         >
           PARKCORE
         </Link>
-        <div className="flex items-center gap-2">
-          <AppearanceControls />
+        <div className="flex items-center gap-1">
+          <AppearanceControls className="gap-1" />
           {user?.kind === 'DEMO' ? <DemoResetControl compact /> : null}
           <span className="type-label hidden sm:inline">{t('nav.operations')}</span>
           <button
