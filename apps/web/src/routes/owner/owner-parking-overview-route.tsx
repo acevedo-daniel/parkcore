@@ -296,6 +296,7 @@ export function OwnerParkingOverviewRoute() {
         <CheckInPanel
           error={checkInError}
           isSubmitting={checkInMutation.isPending}
+          parkingId={parking.id}
           onSubmit={async (input) => {
             if (!parking.isActive) {
               setCheckInError(t('parkingOperation.checkInInactive'));

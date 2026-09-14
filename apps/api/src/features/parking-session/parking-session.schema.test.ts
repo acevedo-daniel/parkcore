@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parkingSessionQuerySchema } from './parking-session.schema.js';
+import { parkingSessionQuerySchema, vehicleLookupQuerySchema } from './parking-session.schema.js';
 
 describe('parking session query schema', () => {
   it('normalizes plate filters and applies pagination and period defaults', () => {
@@ -21,5 +21,14 @@ describe('parking session query schema', () => {
 
   it('rejects arbitrary date-range filters', () => {
     expect(() => parkingSessionQuerySchema.parse({ dateFrom: '2026-02-01' })).toThrow();
+  });
+
+  it('normalizes returning vehicle lookup plates and requires five characters', () => {
+    expect(vehicleLookupQuerySchema.parse({ plate: ' ab-123 cd ' })).toEqual({
+      plate: 'AB123CD',
+    });
+    expect(() => vehicleLookupQuerySchema.parse({ plate: 'ab-12' })).toThrow();
+    expect(() => vehicleLookupQuerySchema.parse({ plate: '12345678901' })).toThrow();
+    expect(() => vehicleLookupQuerySchema.parse({ plate: '----' })).toThrow();
   });
 });

@@ -10,6 +10,7 @@ vi.mock('./parking-session.repository.js', () => ({
   findForExport: vi.fn(),
 }));
 vi.mock('../parking/parking.service.js', () => ({ findById: vi.fn() }));
+vi.mock('../vehicle/vehicle.service.js', () => ({ findByPlateForParking: vi.fn() }));
 
 import { Prisma, type ParkingSessionStatus } from '../../../prisma/generated/client.js';
 import {
@@ -19,6 +20,7 @@ import {
 } from '../../../tests/helpers/builders.js';
 import { ForbiddenError, NotFoundError } from '../../errors/index.js';
 import * as parkingService from '../parking/parking.service.js';
+import * as vehicleService from '../vehicle/vehicle.service.js';
 import * as parkingSessionRepository from './parking-session.repository.js';
 import type { ParkingSessionWithRelations } from './parking-session.repository.js';
 import type { CheckIn, ParkingSessionQuery } from './parking-session.schema.js';
@@ -31,6 +33,7 @@ import {
   getSessionById,
   getSessionsByParking,
   getParkingSessionsCsv,
+  lookupVehicle,
 } from './parking-session.service.js';
 
 const checkInDto: CheckIn = {
@@ -191,6 +194,56 @@ describe('parking session service', () => {
         message: 'Check-in conflict, try again',
         code: 'CHECK_IN_RACE',
       });
+    });
+  });
+
+  describe('lookupVehicle', () => {
+    it('returns only stable vehicle fields for the selected parking', async () => {
+      const vehicle = buildVehicle({
+        id: 'vehicle-1',
+        parkingId: 'parking-1',
+        plate: 'AB123CD',
+        type: 'MOTORCYCLE',
+        brand: 'Honda',
+        model: 'CB500',
+      });
+      vi.mocked(parkingService.findById).mockResolvedValue(
+        buildParking({ id: 'parking-1', ownerId: 'owner-1' }),
+      );
+      vi.mocked(vehicleService.findByPlateForParking).mockResolvedValue(vehicle);
+
+      await expect(lookupVehicle('owner-1', 'parking-1', { plate: 'ab-123 cd' })).resolves.toEqual({
+        vehicle: {
+          id: 'vehicle-1',
+          plate: 'AB123CD',
+          type: 'MOTORCYCLE',
+          brand: 'Honda',
+          model: 'CB500',
+        },
+      });
+      expect(vehicleService.findByPlateForParking).toHaveBeenCalledWith('parking-1', 'ab-123 cd');
+    });
+
+    it('returns a non-blocking null result when the parking has no matching vehicle', async () => {
+      vi.mocked(parkingService.findById).mockResolvedValue(
+        buildParking({ id: 'parking-1', ownerId: 'owner-1' }),
+      );
+      vi.mocked(vehicleService.findByPlateForParking).mockResolvedValue(null);
+
+      await expect(lookupVehicle('owner-1', 'parking-1', { plate: 'AB123CD' })).resolves.toEqual({
+        vehicle: null,
+      });
+    });
+
+    it('does not query a parking the operator does not own', async () => {
+      vi.mocked(parkingService.findById).mockResolvedValue(
+        buildParking({ id: 'parking-1', ownerId: 'owner-2' }),
+      );
+
+      await expect(
+        lookupVehicle('owner-1', 'parking-1', { plate: 'AB123CD' }),
+      ).rejects.toBeInstanceOf(ForbiddenError);
+      expect(vehicleService.findByPlateForParking).not.toHaveBeenCalled();
     });
   });
 

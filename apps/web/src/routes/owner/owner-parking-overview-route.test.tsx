@@ -12,11 +12,13 @@ const api = vi.hoisted(() => ({
   checkIn: vi.fn(),
   getActiveSessions: vi.fn(),
   getOwnedParkings: vi.fn(),
+  lookupVehicle: vi.fn(),
 }));
 
 vi.mock('../../lib/api/owner-api.js', () => api);
 
 function renderOverview() {
+  api.lookupVehicle.mockResolvedValue({ vehicle: null });
   const queryClient = new QueryClient({
     defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
   });
@@ -37,6 +39,7 @@ afterEach(() => {
   api.checkIn.mockReset();
   api.getActiveSessions.mockReset();
   api.getOwnedParkings.mockReset();
+  api.lookupVehicle.mockReset();
 });
 
 describe('parking operations', () => {

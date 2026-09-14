@@ -498,6 +498,25 @@
         ],
         "additionalProperties": false
       },
+      "VehicleLookupResponse": {
+        "type": "object",
+        "properties": {
+          "vehicle": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VehicleSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "vehicle"
+        ],
+        "additionalProperties": false
+      },
       "ParkingSessionListResponse": {
         "type": "object",
         "properties": {
@@ -1850,6 +1869,97 @@
           },
           "409": {
             "description": "This parking session is not active (SESSION_NOT_ACTIVE)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parkings/{parkingId}/sessions/vehicle-lookup": {
+      "get": {
+        "tags": [
+          "Parking Sessions"
+        ],
+        "summary": "Look up a returning vehicle",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Parking UUID"
+            },
+            "required": true,
+            "description": "Parking UUID",
+            "name": "parkingId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 5,
+              "maxLength": 10,
+              "description": "Normalized plate lookup term; lookup starts at five alphanumeric characters",
+              "example": "AB123CD"
+            },
+            "required": true,
+            "description": "Normalized plate lookup term; lookup starts at five alphanumeric characters",
+            "name": "plate",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parking-scoped stable vehicle metadata without visit data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleLookupResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - not the owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parking not found",
             "content": {
               "application/json": {
                 "schema": {

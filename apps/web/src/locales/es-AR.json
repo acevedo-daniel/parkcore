@@ -455,6 +455,11 @@
   "checkIn": {
     "plate": "Patente",
     "platePlaceholder": "AB123CD",
+    "lookupInvalid": "Ingresá al menos 5 letras o números para buscar un vehículo que vuelve.",
+    "lookupSearching": "Buscando esta patente…",
+    "lookupMatch": "Encontramos un vehículo que vuelve. Comprobá sus datos antes de iniciar la estadía.",
+    "lookupNoMatch": "No encontramos un vehículo anterior. Completá los datos para esta estadía.",
+    "lookupFailure": "No pudimos buscar esta patente. Podés seguir completando los datos del vehículo.",
     "plateHelp": "La patente se normaliza. Los vehículos conocidos se reutilizan dentro de esta cochera.",
     "vehicle": "Vehículo",
     "type": "Tipo",

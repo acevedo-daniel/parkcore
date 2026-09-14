@@ -148,6 +148,23 @@ describe('owner workflow integration', () => {
     expect(checkedIn.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     expect(checkedIn.endTime).toBeNull();
 
+    const vehicleLookupResponse = await request(app)
+      .get(`/parkings/${parking.id}/sessions/vehicle-lookup?plate=ab-123-cd`)
+      .set('Authorization', authorization);
+    expect(vehicleLookupResponse.status).toBe(200);
+    expect(vehicleLookupResponse.body).toEqual({
+      vehicle: {
+        id: checkedIn.vehicle.id,
+        plate: 'AB123CD',
+        type: 'CAR',
+        brand: 'Toyota',
+        model: 'Corolla',
+      },
+    });
+    expect(JSON.stringify(vehicleLookupResponse.body)).not.toMatch(
+      /customerName|customerPhone|notes|session/i,
+    );
+
     const secondCheckInResponse = await request(app)
       .post(`/parkings/${parking.id}/sessions/check-in`)
       .set('Authorization', authorization)
@@ -394,6 +411,29 @@ describe('owner workflow integration', () => {
     expect(firstSession.vehicle).toMatchObject({ plate: 'AB123CD', brand: 'Toyota' });
     expect(secondSession.vehicle).toMatchObject({ plate: 'AB123CD', brand: 'Honda' });
     expect(secondSession.vehicle.id).not.toBe(firstSession.vehicle.id);
+
+    const firstLookupResponse = await request(app)
+      .get(`/parkings/${firstParking.id}/sessions/vehicle-lookup?plate=AB-123-CD`)
+      .set('Authorization', authorization);
+    const secondLookupResponse = await request(app)
+      .get(`/parkings/${secondParking.id}/sessions/vehicle-lookup?plate=AB-123-CD`)
+      .set('Authorization', authorization);
+    expect(firstLookupResponse.status).toBe(200);
+    expect(secondLookupResponse.status).toBe(200);
+    const firstLookupBody = firstLookupResponse.body as { vehicle: VehicleSummary };
+    const secondLookupBody = secondLookupResponse.body as { vehicle: VehicleSummary };
+    expect(firstLookupBody.vehicle).toMatchObject({
+      id: firstSession.vehicle.id,
+      brand: 'Toyota',
+      model: 'Corolla',
+    });
+    expect(secondLookupBody.vehicle).toMatchObject({
+      id: secondSession.vehicle.id,
+      brand: 'Honda',
+      model: 'Civic',
+    });
+    expect(firstLookupBody.vehicle.id).not.toBe(secondSession.vehicle.id);
+    expect(secondLookupBody.vehicle.id).not.toBe(firstSession.vehicle.id);
 
     const firstHistoryResponse = await request(app)
       .get(`/parkings/${firstParking.id}/sessions?period=30d`)

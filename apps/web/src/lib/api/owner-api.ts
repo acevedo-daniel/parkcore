@@ -5,6 +5,7 @@ import { authenticatedApi } from './api-client.js';
 
 export type Parking = components['schemas']['ParkingResponse'];
 export type ParkingSession = components['schemas']['ParkingSessionResponse'];
+export type VehicleLookupResponse = components['schemas']['VehicleLookupResponse'];
 export type CreateParkingRequest = components['schemas']['CreateParkingRequest'];
 export type UpdateParkingRequest = components['schemas']['UpdateParkingRequest'];
 export type UpdateProfileRequest =
@@ -60,6 +61,18 @@ export async function getActiveSessions(
   );
   if (data) return data;
   return ownerError(error, response, 'Unable to load active sessions.');
+}
+
+export async function lookupVehicle(
+  parkingId: string,
+  plate: string,
+): Promise<VehicleLookupResponse> {
+  const { data, error, response } = await authenticatedApi.GET(
+    '/parkings/{parkingId}/sessions/vehicle-lookup',
+    { params: { path: { parkingId }, query: { plate } } },
+  );
+  if (data) return data;
+  return ownerError(error, response, 'Unable to look up this vehicle.');
 }
 
 export async function checkIn(parkingId: string, input: components['schemas']['CheckInRequest']) {

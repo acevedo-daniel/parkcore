@@ -57,6 +57,8 @@ Checkout and cancellation use conditional updates against `status = 'ACTIVE'`, s
 
 Vehicle lookup normalizes the plate and scopes the unique identity to `(plate, parkingId)`. Returning check-in updates only supplied stable vehicle metadata. Customer name, phone, and notes are stored on the new session and are not copied from prior visits.
 
+The authenticated returning-vehicle lookup lives under the parking-session resource and first verifies parking ownership. Its response is limited to the selected parking's vehicle identity and stable type, brand, and model fields; customer name, phone, notes, session history, and cross-parking data are not returned.
+
 Analytics asks the owner timezone boundary utility for network today and rolling 7-day or 30-day windows. Revenue is grouped by currency in both summaries and series, so ARS and USD are never arithmetically combined. Parking history derives its predefined periods from the parking timezone, calculates aggregates from the complete filtered set, and uses the same filters for its CSV export.
 
 ## Public discovery pipeline

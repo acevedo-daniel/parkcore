@@ -52,3 +52,10 @@ export const findOrCreateForAuthorizedParking = async (
     throw error;
   }
 };
+
+export const findByPlateForParking = async (
+  parkingId: string,
+  plate: string,
+): Promise<Vehicle | null> => {
+  return await vehicleRepository.findByPlate(normalizePlate(plate), parkingId);
+};

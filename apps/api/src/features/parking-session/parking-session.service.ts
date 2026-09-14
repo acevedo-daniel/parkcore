@@ -2,6 +2,7 @@ import { Prisma } from '../../../prisma/generated/client.js';
 import { ConflictError, ForbiddenError, NotFoundError } from '../../errors/index.js';
 import { type PaginationResult, createPaginatedResult } from '../../utils/pagination.js';
 import * as parkingService from '../parking/parking.service.js';
+import * as vehicleService from '../vehicle/vehicle.service.js';
 import * as parkingSessionRepository from './parking-session.repository.js';
 import { formatZonedIso, getLocalPeriodWindow } from '../../utils/timezone.js';
 import type {
@@ -11,9 +12,11 @@ import type {
   ParkingSessionActiveQuery,
   ParkingSessionQuery,
   ParkingSessionResponse,
+  VehicleLookupQuery,
+  VehicleLookupResponse,
   VisitData,
 } from './parking-session.schema.js';
-import { toParkingSessionResponse } from './parking-session.schema.js';
+import { toParkingSessionResponse, toVehicleSummary } from './parking-session.schema.js';
 
 const isSerializationConflict = (error: unknown): boolean => {
   if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034') {
@@ -98,6 +101,20 @@ export const checkIn = async (
     }
     throw error;
   }
+};
+
+export const lookupVehicle = async (
+  ownerId: string,
+  parkingId: string,
+  query: VehicleLookupQuery,
+): Promise<VehicleLookupResponse> => {
+  const parking = await parkingService.findById(parkingId);
+  if (parking.ownerId !== ownerId) {
+    throw new ForbiddenError("You don't have access to this parking");
+  }
+
+  const vehicle = await vehicleService.findByPlateForParking(parkingId, query.plate);
+  return { vehicle: vehicle ? toVehicleSummary(vehicle) : null };
 };
 
 export const checkOut = async (
