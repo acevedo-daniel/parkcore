@@ -59,7 +59,7 @@ pnpm --filter @parkcore/api demo:cleanup
 
 The default Playwright suite runs against a local production preview and intercepts API requests with contract-shaped responses. It therefore tests browser workflow independently from a live API/database.
 
-The local real-stack workflow uses a disposable PostgreSQL service on port `5433`, applies committed migrations, runs the deterministic seed, starts the API on port `3000`, and serves the built web application on port `4173`. The smoke test uses the deterministic seeded owner, creates a parking, completes a session through the actual API, and leaves no production data behind.
+The local real-stack workflow uses a disposable PostgreSQL service on port `5433`, applies committed migrations, runs the deterministic seed, starts the API on port `3000`, and serves the built web application on port `4173`. The browser journey opens an isolated DEMO sandbox, operates the canonical Central Corrientes facility with returning vehicle `CC004`, completes a stay through the actual API, verifies the receipt and history, and checks deterministic full, paused, and duplicate check-in states. It leaves no production data behind.
 
 Local real-stack runs start and stop their API and web processes through Playwright. Start and clean up the disposable database from the repository root:
 
@@ -156,7 +156,7 @@ pnpm --filter @parkcore/web test:e2e:local
 pnpm e2e:local:db:down
 ```
 
-This workflow uses local API and web processes with a disposable PostgreSQL service. It bootstraps committed migrations and deterministic seed data before running the critical owner journey. Do not use the regular development database for this command.
+This workflow uses local API and web processes with a disposable PostgreSQL service. It bootstraps committed migrations and deterministic seed data before running the critical isolated-demo journey from returning-vehicle lookup through check-in, occupancy, session detail, checkout, receipt, and history. Do not use the regular development database for this command.
 
 ### Deployed real-stack check
 

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
 import app from '../../app.js';
 import { prisma } from '../../src/config/prisma.js';
@@ -244,6 +244,22 @@ describe('owner workflow integration', () => {
       vehicle: { plate: 'AB123CD' },
     });
     expect(completed.endTime).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+
+    const repeatedCheckoutResponse = await request(app)
+      .post(`/sessions/${checkedIn.id}/check-out`)
+      .set('Authorization', authorization);
+    expect(repeatedCheckoutResponse.status).toBe(409);
+    expect(repeatedCheckoutResponse.body).toMatchObject({ code: 'SESSION_NOT_ACTIVE' });
+    const completedDetailResponse = await request(app)
+      .get(`/sessions/${checkedIn.id}`)
+      .set('Authorization', authorization);
+    expect(completedDetailResponse.status).toBe(200);
+    expect(completedDetailResponse.body).toMatchObject({
+      id: checkedIn.id,
+      endTime: completed.endTime,
+      status: 'COMPLETED',
+      totalAmountCents: completed.totalAmountCents,
+    });
 
     const rateUpdateResponse = await request(app)
       .patch(`/parkings/${parking.id}`)
@@ -583,6 +599,71 @@ describe('owner workflow integration', () => {
         where: { plate_parkingId: { plate: 'ZZ999ZZ', parkingId: parking.id } },
       }),
     ).resolves.toBeNull();
+  });
+
+  it('rejects check-in while a scheduled parking is closed at a fixed instant', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-09-11T12:00:00.000Z'));
+
+    try {
+      const suffix = randomUUID();
+      const registerResponse = await request(app)
+        .post('/auth/register')
+        .send({
+          email: `closed-parking-${suffix}@parkcore.test`,
+          password: 'Passw0rd!123',
+          name: 'Closed',
+          lastName: 'Parking',
+          timezone: 'America/Argentina/Buenos_Aires',
+        });
+      expect(registerResponse.status).toBe(201);
+      const auth = registerResponse.body as unknown as AuthResponse;
+      ownerId = auth.user.id;
+      const authorization = `Bearer ${auth.accessToken}`;
+
+      const parkingResponse = await request(app)
+        .post('/parkings')
+        .set('Authorization', authorization)
+        .send({
+          title: `Closed Parking ${suffix}`,
+          neighborhood: 'Downtown',
+          address: '123 Integration Street',
+          hourlyRateCents: 1500,
+          currency: 'USD',
+          capacity: 2,
+          lat: -34.6037,
+          lng: -58.3816,
+          timezone: 'America/Argentina/Buenos_Aires',
+          is24Hours: false,
+          opensAt: '10:00',
+          closesAt: '18:00',
+          isListed: false,
+        });
+      expect(parkingResponse.status).toBe(201);
+      const parking = parkingResponse.body as unknown as ParkingResponse;
+      expect(parking).toMatchObject({
+        availabilityState: 'CLOSED',
+        isOpen: false,
+        nextOpeningAt: '2026-09-11T13:00:00.000Z',
+      });
+
+      const closedCheckInResponse = await request(app)
+        .post(`/parkings/${parking.id}/sessions/check-in`)
+        .set('Authorization', authorization)
+        .send({ plate: 'CC-004', type: 'CAR' });
+      expect(closedCheckInResponse.status).toBe(409);
+      expect(closedCheckInResponse.body).toMatchObject({
+        code: 'PARKING_CLOSED',
+        details: { nextOpeningAt: '2026-09-11T13:00:00.000Z' },
+      });
+      await expect(
+        prisma.vehicle.findUnique({
+          where: { plate_parkingId: { plate: 'CC004', parkingId: parking.id } },
+        }),
+      ).resolves.toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('allows owner and active demo operations but blocks showcase mutations', async () => {
