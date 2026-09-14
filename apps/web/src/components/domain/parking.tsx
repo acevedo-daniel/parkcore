@@ -51,20 +51,31 @@ export function Metric({ label, value }: { label: string; value: string | number
 
 export function OccupancyMeter({
   active,
+  availableSpaces,
   capacity,
   compact = false,
+  occupancyPercent,
 }: {
   active: number;
+  availableSpaces?: number;
   capacity: number;
   compact?: boolean;
+  occupancyPercent?: number;
 }) {
   const { t, tPlural } = useAppearance();
-  const safeActive = Math.max(0, active);
   const safeCapacity = Math.max(0, capacity);
-  const percentage =
-    safeCapacity === 0 ? 0 : Math.min(100, Math.round((safeActive / safeCapacity) * 100));
+  const safeActive = Math.min(safeCapacity, Math.max(0, active));
+  const safeAvailable = Math.min(
+    safeCapacity,
+    Math.max(0, availableSpaces ?? safeCapacity - safeActive),
+  );
+  const percentage = Math.max(
+    0,
+    Math.min(100, occupancyPercent ?? (safeCapacity === 0 ? 0 : (safeActive / safeCapacity) * 100)),
+  );
+  const displayPercentage = Math.round(percentage);
   const threshold =
-    safeActive >= safeCapacity && safeCapacity > 0
+    safeAvailable === 0 && safeCapacity > 0
       ? 'full'
       : percentage >= 90
         ? 'critical'
@@ -81,7 +92,6 @@ export function OccupancyMeter({
         : threshold === 'warning'
           ? t('parking.elevatedOccupancy')
           : t('parking.optimalCapacity');
-  const available = Math.max(0, safeCapacity - safeActive);
   return (
     <div
       className={cn(
@@ -107,9 +117,9 @@ export function OccupancyMeter({
         aria-valuenow={safeActive}
         aria-valuetext={t('parking.occupancySummary', {
           active: safeActive,
-          available,
+          available: safeAvailable,
           capacity: safeCapacity,
-          percent: percentage,
+          percent: displayPercentage,
         })}
         className="capacity-gauge-track"
         role="progressbar"
@@ -117,8 +127,8 @@ export function OccupancyMeter({
         <div className="capacity-gauge-fill" style={{ width: `${String(percentage)}%` }} />
       </div>
       <p className="capacity-gauge-status">
-        <span aria-hidden="true">●</span> {status} · {available}{' '}
-        {tPlural(available, { one: 'parking.spot', other: 'parking.spots' })}{' '}
+        <span aria-hidden="true">●</span> {status} · {safeAvailable}{' '}
+        {tPlural(safeAvailable, { one: 'parking.spot', other: 'parking.spots' })}{' '}
         {t('parking.openSpots')}
       </p>
     </div>

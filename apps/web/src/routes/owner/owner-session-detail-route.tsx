@@ -23,6 +23,7 @@ import {
   type ParkingSession,
 } from '../../lib/api/owner-api.js';
 import { formatMoney } from '../../lib/format.js';
+import { invalidateOwnerMutationQueries } from '../../lib/query-invalidation.js';
 
 export function OwnerSessionDetailRoute() {
   const { language, locale, t } = useAppearance();
@@ -66,9 +67,11 @@ export function OwnerSessionDetailRoute() {
   const canOperate = session.status === 'ACTIVE';
 
   const refreshOperation = async () => {
-    await queryClient.invalidateQueries({ queryKey: ['parking-session', session.id] });
-    await queryClient.invalidateQueries({ queryKey: ['active-sessions', session.parkingId] });
-    await queryClient.invalidateQueries({ queryKey: ['parking-sessions', session.parkingId] });
+    await invalidateOwnerMutationQueries(queryClient, {
+      parking,
+      parkingId: session.parkingId,
+      sessionId: session.id,
+    });
   };
   const completeCheckout = async () => {
     setActionError(undefined);

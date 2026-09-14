@@ -17,15 +17,20 @@ export class ApiError extends Error {
 }
 
 export type ApiErrorStatusMessages = Partial<Record<number, MessageKey>>;
+export type ApiErrorCodeMessages = Partial<Record<string, MessageKey>>;
 
 export function localizeApiError(
   error: unknown,
   translate: Translator,
   fallback: MessageKey,
   statusMessages: ApiErrorStatusMessages = {},
+  codeMessages: ApiErrorCodeMessages = {},
 ) {
   if (!(error instanceof ApiError)) return translate('api.network');
   if (error.code === 'DEMO_EXPIRED') return translate('api.demoExpired');
+
+  const codeMessage = error.code ? codeMessages[error.code] : undefined;
+  if (codeMessage) return translate(codeMessage);
 
   const statusMessage = statusMessages[error.status];
   if (statusMessage) return translate(statusMessage);
