@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, History, MapPin, Pencil, Plus, Search } from 'lucide-react';
+import { ChevronLeft, History, MapPin, Pencil, Plus, RefreshCw, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 
@@ -14,18 +14,43 @@ import { Button } from '../../components/ui/button.js';
 import { Sheet } from '../../components/ui/dialog.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { useToast } from '../../components/ui/toast-context.js';
-import { localizeApiError } from '../../lib/api/api-error.js';
+import { localizeApiError, type ApiErrorCodeMessages } from '../../lib/api/api-error.js';
 import {
   checkIn,
   getActiveSessions,
   getOwnedParkings,
+  type Parking,
   type ParkingSession,
 } from '../../lib/api/owner-api.js';
 import { normalizePlate } from '../../lib/plate.js';
+import { invalidateOwnerMutationQueries } from '../../lib/query-invalidation.js';
 import { useDebouncedValue } from '../../lib/use-debounced-value.js';
+import type { Translator } from '../../lib/localization.js';
+
+const checkInErrorMessages: ApiErrorCodeMessages = {
+  CHECK_IN_RACE: 'parkingOperation.checkInRace',
+  PARKING_CLOSED: 'parkingOperation.checkInClosed',
+  PARKING_FULL: 'parkingOperation.checkInFull',
+  PARKING_INACTIVE: 'parkingOperation.checkInPaused',
+  VEHICLE_ALREADY_ACTIVE: 'parkingOperation.checkInDuplicate',
+};
+
+function canCheckIn(parking: Pick<Parking, 'availabilityState' | 'isActive' | 'isOpen'>) {
+  return (
+    parking.isActive &&
+    parking.isOpen &&
+    (parking.availabilityState === 'AVAILABLE' || parking.availabilityState === 'LIMITED')
+  );
+}
+
+function sortActiveSessions(sessions: ParkingSession[]) {
+  return [...sessions].sort(
+    (left, right) => new Date(left.startTime).getTime() - new Date(right.startTime).getTime(),
+  );
+}
 
 export function OwnerParkingOverviewRoute() {
-  const { t } = useAppearance();
+  const { locale, t } = useAppearance();
   const { parkingId } = useParams();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
@@ -50,6 +75,7 @@ export function OwnerParkingOverviewRoute() {
   const checkInMutation = useMutation({
     mutationFn: (input: Parameters<typeof checkIn>[1]) => checkIn(parkingId ?? '', input),
   });
+  const checkInAllowed = parking ? canCheckIn(parking) : false;
 
   useEffect(() => {
     const onShortcut = (event: KeyboardEvent) => {
@@ -59,7 +85,7 @@ export function OwnerParkingOverviewRoute() {
         event.metaKey ||
         event.ctrlKey ||
         event.altKey ||
-        !parking?.isActive ||
+        !checkInAllowed ||
         (target instanceof HTMLElement &&
           target.matches('input, textarea, select, [contenteditable="true"]'))
       ) {
@@ -72,7 +98,7 @@ export function OwnerParkingOverviewRoute() {
     return () => {
       window.removeEventListener('keydown', onShortcut);
     };
-  }, [parking?.isActive]);
+  }, [checkInAllowed]);
 
   if (parkingsQuery.isLoading) return <OwnerParkingOperationSkeleton />;
   if (parkingsQuery.isError || !parkingId) {
@@ -90,18 +116,26 @@ export function OwnerParkingOverviewRoute() {
     );
   }
 
-  const activeSessions = activeSessionsQuery.data;
-  const occupancy = occupancyQuery.data?.length ?? 0;
+  const activeSessions = sortActiveSessions(activeSessionsQuery.data ?? []);
+  const hasActiveSessionData = activeSessionsQuery.data !== undefined;
+  const activeSessionsLoading =
+    activeSessionsQuery.isLoading || (activeSessionsQuery.isPending && !hasActiveSessionData);
   const openCheckIn = () => {
-    if (parking.isActive) setCheckInOpen(true);
+    if (checkInAllowed) setCheckInOpen(true);
   };
+  const stateDescription = getOperationStateDescription(parking, t, locale);
+  const stateTitle = getOperationStateTitle(parking.availabilityState, t);
 
   return (
     <section className="owner-page space-y-9" aria-labelledby="parking-overview-title">
       <PageHeader
         actions={
           <>
-            <AvailabilityIndicator state={parking.isActive ? 'AVAILABLE' : 'PAUSED'} />
+            <AvailabilityIndicator
+              nextOpeningAt={parking.nextOpeningAt}
+              state={parking.availabilityState}
+              timezone={parking.timezone}
+            />
             <Button asChild size="sm" variant="outline">
               <Link
                 aria-label={t('parkingOperation.editAria', { title: parking.title })}
@@ -144,13 +178,16 @@ export function OwnerParkingOverviewRoute() {
                 className="font-display text-3xl font-bold leading-none tracking-[-0.055em]"
                 id="check-in-title"
               >
-                {t('parkingOperation.ready')}
+                {stateTitle}
               </h2>
-              <p className="mt-3 max-w-md text-sm leading-relaxed text-foreground-secondary">
-                {t('parkingOperation.readyDescription')}
+              <p
+                className="mt-3 max-w-md text-sm leading-relaxed text-foreground-secondary"
+                role="status"
+              >
+                {stateDescription}
               </p>
             </div>
-            <Button disabled={!parking.isActive} onClick={openCheckIn}>
+            <Button disabled={!checkInAllowed} onClick={openCheckIn}>
               <Plus aria-hidden="true" className="size-4" /> {t('parkingOperation.checkIn')}{' '}
               <kbd
                 aria-hidden="true"
@@ -160,11 +197,6 @@ export function OwnerParkingOverviewRoute() {
               </kbd>
             </Button>
           </div>
-          {!parking.isActive ? (
-            <p className="mt-6 border-t border-border pt-4 text-sm text-foreground-secondary">
-              {t('parkingOperation.reactivate')}
-            </p>
-          ) : null}
         </section>
 
         <section
@@ -174,19 +206,15 @@ export function OwnerParkingOverviewRoute() {
           <p className="type-label text-foreground-muted" id="capacity-title">
             {t('parkingOperation.capacity')}
           </p>
-          {occupancyQuery.isError ? (
-            <p className="mt-8 text-sm text-foreground-secondary">
-              {t('parkingOperation.occupancyUnavailable')}
-            </p>
-          ) : occupancyQuery.isLoading ? (
-            <p className="mt-8 text-sm text-foreground-secondary" role="status">
-              {t('parkingOperation.loadingCapacity')}
-            </p>
-          ) : (
-            <div className="mt-5">
-              <OccupancyMeter active={occupancy} capacity={parking.capacity} compact />
-            </div>
-          )}
+          <div className="mt-5">
+            <OccupancyMeter
+              active={parking.activeSessionCount}
+              availableSpaces={parking.availableSpaces}
+              capacity={parking.capacity}
+              compact
+              occupancyPercent={parking.occupancyPercent}
+            />
+          </div>
         </section>
       </div>
 
@@ -195,7 +223,7 @@ export function OwnerParkingOverviewRoute() {
           onCheckInAnother={() => {
             setCheckInSuccess(undefined);
             setCheckInError(undefined);
-            setCheckInOpen(true);
+            if (checkInAllowed) setCheckInOpen(true);
           }}
           parkingTitle={parking.title}
           session={checkInSuccess}
@@ -215,11 +243,24 @@ export function OwnerParkingOverviewRoute() {
               {t('parkingOperation.activeSessions')}
             </h2>
           </div>
-          <Button asChild className="self-start sm:self-auto" size="sm" variant="outline">
-            <Link to={`/app/parkings/${parking.id}/sessions`}>
-              <History aria-hidden="true" className="size-3.5" /> {t('parkingOperation.history')}
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-2 self-start sm:self-auto">
+            <Button
+              disabled={activeSessionsQuery.isFetching}
+              onClick={() => {
+                void activeSessionsQuery.refetch();
+              }}
+              size="sm"
+              variant="outline"
+            >
+              <RefreshCw aria-hidden="true" className="size-3.5" />
+              {t('parkingOperation.refreshActiveSessions')}
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link to={`/app/parkings/${parking.id}/sessions`}>
+                <History aria-hidden="true" className="size-3.5" /> {t('parkingOperation.history')}
+              </Link>
+            </Button>
+          </div>
         </div>
 
         <label className="relative mt-6 block max-w-md" htmlFor="active-session-plate">
@@ -245,13 +286,32 @@ export function OwnerParkingOverviewRoute() {
           </p>
         ) : null}
 
+        {activeSessionsQuery.isError && hasActiveSessionData ? (
+          <div
+            className="mt-4 flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+            role="alert"
+          >
+            <p className="text-sm font-semibold">{t('parkingOperation.staleActiveSessions')}</p>
+            <Button
+              className="self-start sm:self-auto"
+              onClick={() => {
+                void activeSessionsQuery.refetch();
+              }}
+              size="sm"
+              variant="secondary"
+            >
+              {t('parkingOperation.retryActiveSessions')}
+            </Button>
+          </div>
+        ) : null}
+
         <div className="mt-5">
-          {activeSessionsQuery.isLoading ? (
+          {activeSessionsLoading ? (
             <div className="grid gap-3">
               <Skeleton className="h-28 rounded-[var(--radius-lg)]" />
               <Skeleton className="h-28 rounded-[var(--radius-lg)]" />
             </div>
-          ) : activeSessionsQuery.isError ? (
+          ) : activeSessionsQuery.isError && !hasActiveSessionData ? (
             <ErrorState
               onRetry={() => {
                 void activeSessionsQuery.refetch();
@@ -259,20 +319,37 @@ export function OwnerParkingOverviewRoute() {
             >
               {t('api.loadActiveSessions')}
             </ErrorState>
-          ) : activeSessions?.length === 0 ? (
+          ) : activeSessions.length === 0 ? (
             <EmptyState
               action={
-                parking.isActive ? (
+                debouncedPlateSearch ? (
+                  <Button
+                    onClick={() => {
+                      setPlateSearch('');
+                    }}
+                    variant="secondary"
+                  >
+                    {t('parkingOperation.clearPlateSearch')}
+                  </Button>
+                ) : checkInAllowed ? (
                   <Button onClick={openCheckIn}>{t('parkingOperation.checkInVehicle')}</Button>
                 ) : undefined
               }
-              title={t('parkingOperation.noActiveSessions')}
+              title={t(
+                debouncedPlateSearch
+                  ? 'parkingOperation.noPlateResults'
+                  : 'parkingOperation.noActiveSessions',
+              )}
             >
-              {t('parkingOperation.noActiveSessionsDescription')}
+              {t(
+                debouncedPlateSearch
+                  ? 'parkingOperation.noPlateResultsDescription'
+                  : 'parkingOperation.noActiveSessionsDescription',
+              )}
             </EmptyState>
           ) : (
             <div className="grid gap-3">
-              {activeSessions?.map((session) => (
+              {activeSessions.map((session) => (
                 <SessionRow
                   key={session.id}
                   session={session}
@@ -288,35 +365,89 @@ export function OwnerParkingOverviewRoute() {
       <Sheet
         description={t('parkingOperation.sheetDescription')}
         onOpenChange={(open) => {
-          setCheckInOpen(open && parking.isActive);
+          setCheckInOpen(open);
         }}
-        open={parking.isActive && checkInOpen}
+        open={checkInOpen}
         title={t('parkingOperation.checkInVehicle')}
       >
         <CheckInPanel
           error={checkInError}
           isSubmitting={checkInMutation.isPending}
+          parkingId={parking.id}
           onSubmit={async (input) => {
-            if (!parking.isActive) {
-              setCheckInError(t('parkingOperation.checkInInactive'));
+            if (!checkInAllowed) {
+              setCheckInError(stateDescription);
               return;
             }
             setCheckInError(undefined);
             try {
               const session = await checkInMutation.mutateAsync(input);
-              await queryClient.invalidateQueries({ queryKey: ['active-sessions', parking.id] });
-              await queryClient.invalidateQueries({ queryKey: ['parking-sessions', parking.id] });
               setCheckInSuccess(session);
               showToast(t('parkingOperation.checkInSuccess', { plate: session.vehicle.plate }));
               setCheckInOpen(false);
+              try {
+                await invalidateOwnerMutationQueries(queryClient, {
+                  parking,
+                  parkingId: parking.id,
+                  sessionId: session.id,
+                });
+              } catch {
+                // The confirmed success state stays visible if a background refresh is degraded.
+              }
             } catch (reason) {
-              setCheckInError(localizeApiError(reason, t, 'api.startSession'));
+              setCheckInError(
+                localizeApiError(reason, t, 'api.startSession', {}, checkInErrorMessages),
+              );
             }
           }}
         />
       </Sheet>
     </section>
   );
+}
+
+function getOperationStateTitle(state: Parking['availabilityState'], translate: Translator) {
+  switch (state) {
+    case 'AVAILABLE':
+      return translate('parkingOperation.ready');
+    case 'LIMITED':
+      return translate('parkingOperation.limitedTitle');
+    case 'FULL':
+      return translate('parkingOperation.fullTitle');
+    case 'CLOSED':
+      return translate('parkingOperation.closedTitle');
+    case 'PAUSED':
+      return translate('parkingOperation.pausedTitle');
+  }
+}
+
+function getOperationStateDescription(
+  parking: Pick<Parking, 'availabilityState' | 'nextOpeningAt' | 'timezone'>,
+  translate: Translator,
+  locale: string,
+) {
+  switch (parking.availabilityState) {
+    case 'AVAILABLE':
+      return translate('parkingOperation.readyDescription');
+    case 'LIMITED':
+      return translate('parkingOperation.limitedDescription');
+    case 'FULL':
+      return translate('parkingOperation.fullDescription');
+    case 'CLOSED': {
+      const opening = parking.nextOpeningAt
+        ? new Intl.DateTimeFormat(locale, {
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: parking.timezone,
+          }).format(new Date(parking.nextOpeningAt))
+        : undefined;
+      return opening
+        ? translate('parkingOperation.closedDescription', { opening })
+        : translate('parkingOperation.closedDescriptionNoOpening');
+    }
+    case 'PAUSED':
+      return translate('parkingOperation.pausedDescription');
+  }
 }
 
 function OwnerParkingOperationSkeleton() {

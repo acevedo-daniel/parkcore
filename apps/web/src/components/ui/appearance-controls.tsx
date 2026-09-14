@@ -1,11 +1,17 @@
 import { useAppearance } from '../../app/appearance-provider.js';
 import { cn } from '../../lib/cn.js';
 
-export function AppearanceControls({ compact = false }: { compact?: boolean }) {
+export function AppearanceControls({
+  className,
+  compact = false,
+}: {
+  className?: string;
+  compact?: boolean;
+}) {
   const { locale, preference, setLanguage, setThemePreference, t } = useAppearance();
 
   return (
-    <div className={cn('flex items-center gap-2', compact && 'w-full justify-between')}>
+    <div className={cn('flex items-center gap-2', compact && 'w-full justify-between', className)}>
       <div
         aria-label={t('appearance.language')}
         className="flex items-center rounded-full border border-border bg-surface p-1 shadow-sm"

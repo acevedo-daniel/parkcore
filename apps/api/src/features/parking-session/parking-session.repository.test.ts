@@ -16,15 +16,28 @@ const { mockPrisma, mockTransaction } = vi.hoisted(() => {
 
 vi.mock('../../config/prisma.js', () => ({ prisma: mockPrisma }));
 
-import { buildParkingSession, buildVehicle } from '../../../tests/helpers/builders.js';
+import {
+  buildParking,
+  buildParkingSession,
+  buildVehicle,
+} from '../../../tests/helpers/builders.js';
 import {
   cancelIfActive,
   completeIfActive,
   createActiveIfAvailable,
+  findActiveByParking,
   findByParking,
 } from './parking-session.repository.js';
 
 const transactionClient = {
+  parking: {
+    findUnique: vi.fn(),
+  },
+  vehicle: {
+    findUnique: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+  },
   parkingSession: {
     count: vi.fn(),
     findFirst: vi.fn(),
@@ -51,6 +64,8 @@ const visitData = {
 describe('parking session repository', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    transactionClient.parking.findUnique.mockResolvedValue(buildParking());
+    transactionClient.vehicle.findUnique.mockResolvedValue(null);
     mockTransaction.mockImplementation(
       async (callback: (tx: typeof transactionClient) => unknown) => {
         return await callback(transactionClient);
@@ -58,39 +73,62 @@ describe('parking session repository', () => {
     );
   });
 
-  it('keeps capacity and active-vehicle checks in one serializable transaction', async () => {
+  it('keeps parking eligibility, vehicle identity, and session creation in one serializable transaction', async () => {
     const session = buildSessionWithVehicle();
     transactionClient.parkingSession.count.mockResolvedValue(0);
     transactionClient.parkingSession.findFirst.mockResolvedValue(null);
+    transactionClient.vehicle.create.mockResolvedValue({ id: 'vehicle-1' });
     transactionClient.parkingSession.create.mockResolvedValue(session);
 
     await expect(
-      createActiveIfAvailable('parking-1', 'vehicle-1', 20, 1500, 'USD', visitData),
+      createActiveIfAvailable('owner-1', 'parking-1', { plate: 'AB123CD', type: 'CAR' }, visitData),
     ).resolves.toEqual(session);
 
     expect(mockTransaction).toHaveBeenCalledWith(expect.any(Function), {
       isolationLevel: 'Serializable',
     });
+    expect(transactionClient.parking.findUnique).toHaveBeenCalledWith({
+      where: { id: 'parking-1' },
+      select: {
+        id: true,
+        ownerId: true,
+        isActive: true,
+        timezone: true,
+        is24Hours: true,
+        opensAt: true,
+        closesAt: true,
+        capacity: true,
+        hourlyRateCents: true,
+        currency: true,
+      },
+    });
+    expect(transactionClient.vehicle.findUnique).toHaveBeenCalledWith({
+      where: { plate_parkingId: { plate: 'AB123CD', parkingId: 'parking-1' } },
+      select: { id: true },
+    });
     expect(transactionClient.parkingSession.count).toHaveBeenCalledWith({
       where: { parkingId: 'parking-1', status: 'ACTIVE' },
     });
-    expect(transactionClient.parkingSession.findFirst).toHaveBeenCalledWith({
-      where: { parkingId: 'parking-1', vehicleId: 'vehicle-1', status: 'ACTIVE' },
+    expect(transactionClient.vehicle.create).toHaveBeenCalledWith({
+      data: { parkingId: 'parking-1', plate: 'AB123CD', type: 'CAR' },
+      select: { id: true },
     });
   });
 
   it('does not create a session when capacity or an active vehicle blocks check-in', async () => {
     transactionClient.parkingSession.count.mockResolvedValue(20);
     await expect(
-      createActiveIfAvailable('parking-1', 'vehicle-1', 20, 1500, 'USD', visitData),
-    ).resolves.toBe('parking-full');
+      createActiveIfAvailable('owner-1', 'parking-1', { plate: 'AB123CD' }, visitData),
+    ).resolves.toEqual({ kind: 'parking-full' });
 
     transactionClient.parkingSession.count.mockResolvedValue(0);
-    transactionClient.parkingSession.findFirst.mockResolvedValue(buildParkingSession());
+    transactionClient.vehicle.findUnique.mockResolvedValue({ id: 'vehicle-1' });
+    transactionClient.parkingSession.findFirst.mockResolvedValue({ id: 'session-1' });
     await expect(
-      createActiveIfAvailable('parking-1', 'vehicle-1', 20, 1500, 'USD', visitData),
-    ).resolves.toBe('vehicle-active');
+      createActiveIfAvailable('owner-1', 'parking-1', { plate: 'AB123CD' }, visitData),
+    ).resolves.toEqual({ kind: 'vehicle-active' });
     expect(transactionClient.parkingSession.create).not.toHaveBeenCalled();
+    expect(transactionClient.vehicle.create).not.toHaveBeenCalled();
   });
 
   it.each([0, 19])(
@@ -99,15 +137,105 @@ describe('parking session repository', () => {
       const session = buildSessionWithVehicle();
       transactionClient.parkingSession.count.mockResolvedValue(activeCount);
       transactionClient.parkingSession.findFirst.mockResolvedValue(null);
+      transactionClient.vehicle.create.mockResolvedValue({ id: 'vehicle-1' });
       transactionClient.parkingSession.create.mockResolvedValue(session);
 
       await expect(
-        createActiveIfAvailable('parking-1', 'vehicle-1', 20, 1500, 'USD', visitData),
+        createActiveIfAvailable('owner-1', 'parking-1', { plate: 'AB123CD' }, visitData),
       ).resolves.toEqual(session);
 
       expect(transactionClient.parkingSession.create).toHaveBeenCalledTimes(1);
     },
   );
+
+  it('updates only supplied stable metadata and snapshots the current parking price', async () => {
+    const session = buildSessionWithVehicle();
+    transactionClient.parking.findUnique.mockResolvedValue(
+      buildParking({ hourlyRateCents: 2750, currency: 'ARS' }),
+    );
+    transactionClient.vehicle.findUnique.mockResolvedValue({ id: 'vehicle-1' });
+    transactionClient.parkingSession.findFirst.mockResolvedValue(null);
+    transactionClient.parkingSession.count.mockResolvedValue(0);
+    transactionClient.vehicle.update.mockResolvedValue({ id: 'vehicle-1' });
+    transactionClient.parkingSession.create.mockResolvedValue(session);
+
+    await expect(
+      createActiveIfAvailable(
+        'owner-1',
+        'parking-1',
+        { plate: 'AB123CD', brand: 'Honda' },
+        visitData,
+      ),
+    ).resolves.toEqual(session);
+
+    expect(transactionClient.vehicle.update).toHaveBeenCalledWith({
+      where: { id: 'vehicle-1' },
+      data: { brand: 'Honda' },
+      select: { id: true },
+    });
+    const createCall = transactionClient.parkingSession.create.mock.calls[0]?.[0] as {
+      data: { hourlyRateCents: number; currency: string };
+    };
+    expect(createCall.data).toMatchObject({ hourlyRateCents: 2750, currency: 'ARS' });
+  });
+
+  it('returns duplicate-active before capacity and preserves the existing vehicle', async () => {
+    transactionClient.parking.findUnique.mockResolvedValue(buildParking({ capacity: 1 }));
+    transactionClient.vehicle.findUnique.mockResolvedValue({ id: 'vehicle-1' });
+    transactionClient.parkingSession.findFirst.mockResolvedValue({ id: 'session-1' });
+    transactionClient.parkingSession.count.mockResolvedValue(1);
+
+    await expect(
+      createActiveIfAvailable(
+        'owner-1',
+        'parking-1',
+        { plate: 'AB123CD', brand: 'Changed' },
+        visitData,
+      ),
+    ).resolves.toEqual({ kind: 'vehicle-active' });
+
+    expect(transactionClient.parkingSession.count).not.toHaveBeenCalled();
+    expect(transactionClient.vehicle.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects inactive or closed parking before mutating vehicle identity', async () => {
+    transactionClient.parking.findUnique.mockResolvedValue(buildParking({ isActive: false }));
+    await expect(
+      createActiveIfAvailable(
+        'owner-1',
+        'parking-1',
+        { plate: 'AB123CD', brand: 'Honda' },
+        visitData,
+      ),
+    ).resolves.toEqual({ kind: 'parking-inactive' });
+
+    transactionClient.parking.findUnique.mockResolvedValue(
+      buildParking({
+        is24Hours: false,
+        opensAt: '08:00',
+        closesAt: '18:00',
+        timezone: 'America/Argentina/Buenos_Aires',
+      }),
+    );
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-11T07:00:00.000Z'));
+    await expect(
+      createActiveIfAvailable(
+        'owner-1',
+        'parking-1',
+        { plate: 'AB123CD', brand: 'Honda' },
+        visitData,
+      ),
+    ).resolves.toEqual({
+      kind: 'parking-closed',
+      nextOpeningAt: new Date('2026-09-11T11:00:00.000Z'),
+    });
+    vi.useRealTimers();
+
+    expect(transactionClient.vehicle.findUnique).not.toHaveBeenCalled();
+    expect(transactionClient.vehicle.create).not.toHaveBeenCalled();
+    expect(transactionClient.vehicle.update).not.toHaveBeenCalled();
+  });
 
   it('filters historical sessions by normalized plate and parking-local period range', async () => {
     mockPrisma.parkingSession.findMany.mockResolvedValue([]);
@@ -135,6 +263,21 @@ describe('parking session repository', () => {
       expect.objectContaining({ where: expectedWhere, skip: 0, take: 10 }),
     );
     expect(mockPrisma.parkingSession.count).toHaveBeenCalledWith({ where: expectedWhere });
+  });
+
+  it('lists active sessions oldest first with a deterministic tie-breaker', async () => {
+    const sessions = [buildSessionWithVehicle()];
+    mockPrisma.parkingSession.findMany.mockResolvedValue(sessions);
+
+    await expect(findActiveByParking('parking-1')).resolves.toEqual(sessions);
+    const findManyCall = mockPrisma.parkingSession.findMany.mock.calls[0]?.[0] as {
+      where: { parkingId: string; status: string };
+      orderBy: { startTime: string }[];
+    };
+    expect(findManyCall).toMatchObject({
+      where: { parkingId: 'parking-1', status: 'ACTIVE' },
+      orderBy: [{ startTime: 'asc' }, { id: 'asc' }],
+    });
   });
 
   it('completes with one conditional ACTIVE transition', async () => {

@@ -111,7 +111,7 @@ export function SessionHistoryRow({
   const { locale, t } = useAppearance();
   const total =
     session.totalAmountCents === null
-      ? 'N/A'
+      ? t('common.notAvailable')
       : formatMoney(session.totalAmountCents, session.currency, locale);
   return (
     <Link
@@ -178,7 +178,8 @@ export function CheckoutSummary({ session, timezone }: { session: Session; timez
       <div className="flex items-center justify-between gap-4 border-b border-border py-3">
         <span className="type-label text-foreground-muted">{t('session.rate')}</span>
         <span className="type-operational">
-          {formatMoney(session.hourlyRateCents, session.currency, locale)} / H
+          {formatMoney(session.hourlyRateCents, session.currency, locale)} /{' '}
+          {t('session.perHourShort')}
         </span>
       </div>
       {chargedHours ? (
@@ -194,7 +195,9 @@ export function CheckoutSummary({ session, timezone }: { session: Session; timez
           {session.endTime ? t('session.confirmedTotal') : t('session.estimate')}
         </span>
         <strong className="font-display text-3xl font-bold leading-none tracking-[-0.055em] tabular-nums">
-          {total === undefined ? 'N/A' : formatMoney(total, session.currency, locale)}
+          {total === undefined
+            ? t('common.notAvailable')
+            : formatMoney(total, session.currency, locale)}
         </strong>
       </div>
     </section>
@@ -298,6 +301,75 @@ export function OperationalReceipt({
       </div>
       {parkingHref || historyHref ? (
         <div className="mt-6 flex flex-wrap gap-2">
+          {parkingHref ? (
+            <Button asChild size="sm" variant="secondary">
+              <Link to={parkingHref}>{t('session.returnToParking')}</Link>
+            </Button>
+          ) : null}
+          {historyHref ? (
+            <Button asChild size="sm" variant="ghost">
+              <Link to={historyHref}>{t('session.viewHistory')}</Link>
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+export function OperationalCancellation({
+  historyHref,
+  parkingHref,
+  parkingTitle,
+  session,
+  timezone,
+}: {
+  historyHref?: string;
+  parkingHref?: string;
+  parkingTitle?: string;
+  session: Session;
+  timezone?: string;
+}) {
+  const { locale, t } = useAppearance();
+  return (
+    <section
+      aria-label={t('session.cancelledRegion')}
+      className="rounded-[var(--radius-xl)] border border-warning-foreground bg-warning-surface p-6 text-warning-text sm:p-8"
+      role="region"
+    >
+      <div className="border-b border-warning-foreground/30 pb-5">
+        <p className="type-label">{t('session.terminalState')}</p>
+        <h2 className="mt-3 font-display text-3xl font-bold tracking-[-0.045em]">
+          {t('session.cancelledHeading')}
+        </h2>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed">
+          {t('session.cancelledDescription')}
+        </p>
+      </div>
+
+      <dl className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+        <ReceiptItem label={t('session.plate')} value={session.vehicle.plate} />
+        <ReceiptItem
+          label={t('session.parking')}
+          value={parkingTitle ?? t('common.notAvailable')}
+        />
+        <ReceiptItem
+          label={t('session.started')}
+          value={formatTimestamp(session.startTime, timezone, locale)}
+        />
+        <ReceiptItem
+          label={t('session.cancelledAt')}
+          value={
+            session.endTime
+              ? formatTimestamp(session.endTime, timezone, locale)
+              : t('common.notAvailable')
+          }
+        />
+        <ReceiptItem label={t('session.total')} value={t('session.notCharged')} />
+      </dl>
+
+      {parkingHref || historyHref ? (
+        <div className="mt-7 flex flex-wrap gap-2 border-t border-warning-foreground/30 pt-5">
           {parkingHref ? (
             <Button asChild size="sm" variant="secondary">
               <Link to={parkingHref}>{t('session.returnToParking')}</Link>

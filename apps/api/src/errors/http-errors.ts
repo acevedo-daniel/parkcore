@@ -1,4 +1,4 @@
-import { AppError } from './app-error.js';
+import { AppError, type AppErrorDetails } from './app-error.js';
 
 export class NotFoundError extends AppError {
   constructor(message = 'Resource not found') {
@@ -19,8 +19,8 @@ export class BadRequestError extends AppError {
 }
 
 export class ConflictError extends AppError {
-  constructor(message = 'Conflict') {
-    super(message, 409);
+  constructor(message = 'Conflict', code?: string, details?: AppErrorDetails) {
+    super(message, 409, true, code, details);
   }
 }
 

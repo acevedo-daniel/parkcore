@@ -257,7 +257,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description Conflict (vehicle already inside, parking full, parking inactive, or parking closed) */
+                /** @description Conflict with a stable check-in code: PARKING_INACTIVE, PARKING_CLOSED, PARKING_FULL, VEHICLE_ALREADY_ACTIVE, or CHECK_IN_RACE */
                 409: {
                     headers: {
                         [name: string]: unknown;
@@ -341,7 +341,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description This parking session is not active */
+                /** @description This parking session is not active (SESSION_NOT_ACTIVE) */
                 409: {
                     headers: {
                         [name: string]: unknown;
@@ -352,6 +352,84 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/parkings/{parkingId}/sessions/vehicle-lookup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Look up a returning vehicle */
+        get: {
+            parameters: {
+                query: {
+                    /** @description Normalized plate lookup term; lookup starts at five alphanumeric characters */
+                    plate: string;
+                };
+                header?: never;
+                path: {
+                    /** @description Parking UUID */
+                    parkingId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Parking-scoped stable vehicle metadata without visit data */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["VehicleLookupResponse"];
+                    };
+                };
+                /** @description Validation error */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden - not the owner */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Parking not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -714,7 +792,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description This parking session is not active */
+                /** @description This parking session is not active (SESSION_NOT_ACTIVE) */
                 409: {
                     headers: {
                         [name: string]: unknown;
@@ -1615,6 +1693,14 @@ export interface components {
             error: true;
             message: string;
             code?: string;
+            details?: components["schemas"]["ErrorDetails"];
+        };
+        ErrorDetails: {
+            /**
+             * Format: date-time
+             * @description Authoritative next opening time when a parking is currently closed
+             */
+            nextOpeningAt?: string | null;
         };
         RegisterRequest: {
             /**
@@ -1771,6 +1857,9 @@ export interface components {
              * @example Corolla
              */
             model?: string;
+        };
+        VehicleLookupResponse: {
+            vehicle: components["schemas"]["VehicleSummary"] | null;
         };
         ParkingSessionListResponse: {
             data: components["schemas"]["ParkingSessionResponse"][];

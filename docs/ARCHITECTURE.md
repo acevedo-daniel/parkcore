@@ -47,20 +47,17 @@ This separation keeps transport concerns away from persistence and makes the API
 
 PostgreSQL is the persistence source of truth. Prisma provides the schema, generated client, and committed forward migrations.
 
-The main operational concurrency boundary is check-in. Creating an active session:
+The main operational concurrency boundary is check-in. A serializable Prisma transaction reads the current parking ownership, active state, schedule, capacity, hourly rate, and currency, then normalizes and resolves the parking-scoped vehicle. It checks an existing vehicle's active session before checking capacity, so duplicate-active conflicts take precedence over full-capacity conflicts. Only after eligibility succeeds does the transaction create or update stable vehicle metadata and create the active session with the current rate and currency snapshot.
 
-1. counts current active sessions for the parking;
-2. rejects intake when capacity has been reached;
-3. verifies that the same parking/vehicle pair has no active session;
-4. creates the session with a rate and currency snapshot;
-
-inside a Prisma transaction using PostgreSQL `Serializable` isolation.
+The transaction owns both vehicle and session mutations. A rejected or serialization-conflicted check-in therefore cannot leave a new vehicle or stable metadata change behind. The service exposes stable conflict codes for `PARKING_INACTIVE`, `PARKING_CLOSED`, `PARKING_FULL`, `VEHICLE_ALREADY_ACTIVE`, and `CHECK_IN_RACE`; closed conflicts may include `details.nextOpeningAt`. Terminal checkout and cancellation conflicts use `SESSION_NOT_ACTIVE`.
 
 A partial unique database index on `(parkingId, vehicleId)` where `status = 'ACTIVE'` provides a second persistence-level guard against duplicate active sessions.
 
 Checkout and cancellation use conditional updates against `status = 'ACTIVE'`, so only one terminal transition can succeed. Both transitions persist `endTime`; cancellation persists no amount.
 
 Vehicle lookup normalizes the plate and scopes the unique identity to `(plate, parkingId)`. Returning check-in updates only supplied stable vehicle metadata. Customer name, phone, and notes are stored on the new session and are not copied from prior visits.
+
+The authenticated returning-vehicle lookup lives under the parking-session resource and first verifies parking ownership. Its response is limited to the selected parking's vehicle identity and stable type, brand, and model fields; customer name, phone, notes, session history, and cross-parking data are not returned.
 
 Analytics asks the owner timezone boundary utility for network today and rolling 7-day or 30-day windows. Revenue is grouped by currency in both summaries and series, so ARS and USD are never arithmetically combined. Parking history derives its predefined periods from the parking timezone, calculates aggregates from the complete filtered set, and uses the same filters for its CSV export.
 

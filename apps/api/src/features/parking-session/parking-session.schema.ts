@@ -89,6 +89,27 @@ export const parkingSessionActiveQuerySchema = z
   })
   .openapi('ParkingSessionActiveQuery');
 
+export const vehicleLookupQuerySchema = z
+  .strictObject({
+    plate: z
+      .string({ error: 'Required' })
+      .trim()
+      .transform(normalizePlate)
+      .pipe(
+        z
+          .string()
+          .min(5, { error: 'Min 5 alphanumeric characters' })
+          .max(10, { error: 'Max 10 alphanumeric characters' }),
+      )
+      .openapi({
+        description: 'Normalized plate lookup term; lookup starts at five alphanumeric characters',
+        example: 'AB123CD',
+        minLength: 5,
+        maxLength: 10,
+      }),
+  })
+  .openapi('VehicleLookupQuery');
+
 export const vehicleSummarySchema = z
   .strictObject({
     id: z.uuid().openapi({ description: 'Vehicle UUID' }),
@@ -106,6 +127,12 @@ export const vehicleSummarySchema = z
       .openapi({ description: 'Stable vehicle model confirmed at check-in' }),
   })
   .openapi('VehicleSummary');
+
+export const vehicleLookupResponseSchema = z
+  .strictObject({
+    vehicle: z.union([vehicleSummarySchema, z.null()]),
+  })
+  .openapi('VehicleLookupResponse');
 
 export const parkingSessionResponseSchema = z
   .strictObject({
@@ -168,9 +195,24 @@ export type CheckIn = z.infer<typeof checkInSchema>;
 export type ParkingSessionQuery = z.infer<typeof parkingSessionQuerySchema>;
 export type ParkingSessionFilter = z.infer<typeof parkingSessionFilterSchema>;
 export type ParkingSessionActiveQuery = z.infer<typeof parkingSessionActiveQuerySchema>;
+export type VehicleLookupQuery = z.infer<typeof vehicleLookupQuerySchema>;
+export type VehicleSummary = z.infer<typeof vehicleSummarySchema>;
+export type VehicleLookupResponse = z.infer<typeof vehicleLookupResponseSchema>;
 export type ParkingSessionResponse = z.infer<typeof parkingSessionResponseSchema>;
 export type ParkingSessionAggregate = z.infer<typeof parkingSessionAggregateSchema>;
 export type VisitData = Pick<CheckIn, 'customerName' | 'customerPhone' | 'notes'>;
+
+export function toVehicleSummary(
+  vehicle: Pick<Vehicle, 'id' | 'plate' | 'type' | 'brand' | 'model'>,
+): VehicleSummary {
+  return {
+    id: vehicle.id,
+    plate: vehicle.plate,
+    type: vehicle.type,
+    brand: vehicle.brand,
+    model: vehicle.model,
+  };
+}
 
 type ParkingSessionForResponse = Pick<
   ParkingSession,
@@ -210,12 +252,6 @@ export function toParkingSessionResponse(
     notes: session.notes,
     createdAt: session.createdAt.toISOString(),
     updatedAt: session.updatedAt.toISOString(),
-    vehicle: {
-      id: session.vehicle.id,
-      plate: session.vehicle.plate,
-      type: session.vehicle.type,
-      brand: session.vehicle.brand,
-      model: session.vehicle.model,
-    },
+    vehicle: toVehicleSummary(session.vehicle),
   };
 }

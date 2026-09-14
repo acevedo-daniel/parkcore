@@ -48,6 +48,7 @@ const requiredPaths = [
 const forbiddenPathPrefixes = ['/bookings', '/reviews'];
 const requiredSchemas = [
   'ErrorResponse',
+  'ErrorDetails',
   'AuthResponse',
   'UserResponse',
   'ParkingResponse',
@@ -60,6 +61,7 @@ const requiredSchemas = [
   'DemoResetResponse',
 ];
 const dateTimeFields: Record<string, string[]> = {
+  ErrorDetails: ['nextOpeningAt'],
   UserResponse: ['createdAt', 'updatedAt'],
   ParkingResponse: ['createdAt', 'updatedAt'],
   PublicParkingResponse: ['nextOpeningAt'],

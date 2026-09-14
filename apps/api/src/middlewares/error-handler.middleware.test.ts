@@ -13,7 +13,7 @@ vi.mock('../lib/logger.js', () => ({
 }));
 
 import { AppError } from '../errors/app-error.js';
-import { UnauthorizedError } from '../errors/http-errors.js';
+import { ConflictError, UnauthorizedError } from '../errors/http-errors.js';
 import { createMockRequest, createMockResponse } from '../../tests/helpers/mocks.js';
 import { errorHandler } from './error-handler.middleware.js';
 
@@ -58,6 +58,29 @@ describe('errorHandler middleware', () => {
       error: true,
       message: 'Demo access has expired',
       code: 'DEMO_EXPIRED',
+    });
+  });
+
+  it('includes structured operational details when an error provides them', () => {
+    const req = createMockRequest({ path: '/parkings/parking-1/sessions/check-in' });
+    const res = createMockResponse();
+    const next = vi.fn();
+
+    errorHandler(
+      new ConflictError('Parking is closed', 'PARKING_CLOSED', {
+        nextOpeningAt: '2026-09-11T11:00:00.000Z',
+      }),
+      req,
+      res,
+      next,
+    );
+
+    expect(res.status).toHaveBeenCalledWith(409);
+    expect(res.json).toHaveBeenCalledWith({
+      error: true,
+      message: 'Parking is closed',
+      code: 'PARKING_CLOSED',
+      details: { nextOpeningAt: '2026-09-11T11:00:00.000Z' },
     });
   });
 

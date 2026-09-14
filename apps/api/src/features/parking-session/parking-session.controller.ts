@@ -8,6 +8,7 @@ import {
   parkingSessionActiveQuerySchema,
   parkingSessionFilterSchema,
   parkingSessionQuerySchema,
+  vehicleLookupQuerySchema,
 } from './parking-session.schema.js';
 
 export const checkIn = async (req: Request, res: Response): Promise<void> => {
@@ -16,6 +17,14 @@ export const checkIn = async (req: Request, res: Response): Promise<void> => {
   const input = checkInSchema.parse(req.body);
   const session = await parkingSessionService.checkIn(userId, parkingId, input);
   res.status(201).json(session);
+};
+
+export const lookupVehicle = async (req: Request, res: Response): Promise<void> => {
+  const userId = getAuthenticatedUserId(req);
+  const { parkingId } = parkingParamsSchema.parse(req.params);
+  const query = vehicleLookupQuerySchema.parse(req.query);
+  const result = await parkingSessionService.lookupVehicle(userId, parkingId, query);
+  res.json(result);
 };
 
 export const checkOut = async (req: Request, res: Response): Promise<void> => {

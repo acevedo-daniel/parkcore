@@ -4,7 +4,7 @@ import { type PaginationResult, createPaginatedResult } from '../../utils/pagina
 import * as parkingService from '../parking/parking.service.js';
 import * as vehicleService from '../vehicle/vehicle.service.js';
 import * as parkingSessionRepository from './parking-session.repository.js';
-import { formatZonedIso, getLocalPeriodWindow, isParkingOpen } from '../../utils/timezone.js';
+import { formatZonedIso, getLocalPeriodWindow } from '../../utils/timezone.js';
 import type {
   CheckIn,
   ParkingSessionAggregate,
@@ -12,9 +12,11 @@ import type {
   ParkingSessionActiveQuery,
   ParkingSessionQuery,
   ParkingSessionResponse,
+  VehicleLookupQuery,
+  VehicleLookupResponse,
   VisitData,
 } from './parking-session.schema.js';
-import { toParkingSessionResponse } from './parking-session.schema.js';
+import { toParkingSessionResponse, toVehicleSummary } from './parking-session.schema.js';
 
 const isSerializationConflict = (error: unknown): boolean => {
   if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034') {
@@ -28,35 +30,32 @@ const isSerializationConflict = (error: unknown): boolean => {
     : false;
 };
 
+const isVehicleIdentityUniqueConflict = (error: unknown): boolean => {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
+    return false;
+  }
+
+  const target = error.meta?.target;
+  if (Array.isArray(target)) {
+    const targetText = target
+      .filter((value): value is string => typeof value === 'string')
+      .join('.');
+    return targetText.includes('plate') && targetText.includes('parkingId');
+  }
+  return typeof target === 'string' && target.includes('plate') && target.includes('parkingId');
+};
+
 export const checkIn = async (
   ownerId: string,
   parkingId: string,
   dto: CheckIn,
 ): Promise<ParkingSessionResponse> => {
-  const parking = await parkingService.findById(parkingId);
-  if (parking.ownerId !== ownerId)
-    throw new ForbiddenError("You don't have access to this parking");
-  if (!parking.isActive) throw new ConflictError('Parking is inactive');
-  if (
-    !isParkingOpen(
-      {
-        timezone: parking.timezone,
-        is24Hours: parking.is24Hours,
-        opensAt: parking.opensAt,
-        closesAt: parking.closesAt,
-      },
-      new Date(),
-    )
-  ) {
-    throw new ConflictError('Parking is closed');
-  }
-
-  const vehicle = await vehicleService.findOrCreateForAuthorizedParking(parkingId, {
+  const vehicleInput = {
     plate: dto.plate,
     ...(dto.type !== undefined ? { type: dto.type } : {}),
     ...(dto.brand !== undefined ? { brand: dto.brand } : {}),
     ...(dto.model !== undefined ? { model: dto.model } : {}),
-  });
+  };
   const visitData: VisitData = {
     customerName: dto.customerName,
     customerPhone: dto.customerPhone,
@@ -64,26 +63,58 @@ export const checkIn = async (
   };
 
   try {
-    const session = await parkingSessionRepository.createActiveIfAvailable(
+    const result = await parkingSessionRepository.createActiveIfAvailable(
+      ownerId,
       parkingId,
-      vehicle.id,
-      parking.capacity,
-      parking.hourlyRateCents,
-      parking.currency,
+      vehicleInput,
       visitData,
     );
-    if (session === 'parking-full') throw new ConflictError('Parking is full');
-    if (session === 'vehicle-active') throw new ConflictError('Vehicle is already in the parking');
-    return toParkingSessionResponse(session);
+    if (!('kind' in result)) return toParkingSessionResponse(result);
+
+    if (result.kind === 'parking-not-found') throw new NotFoundError('Parking not found');
+    if (result.kind === 'parking-forbidden') {
+      throw new ForbiddenError("You don't have access to this parking");
+    }
+    if (result.kind === 'parking-inactive') {
+      throw new ConflictError('Parking is inactive', 'PARKING_INACTIVE');
+    }
+    if (result.kind === 'parking-closed') {
+      throw new ConflictError(
+        'Parking is closed',
+        'PARKING_CLOSED',
+        result.nextOpeningAt ? { nextOpeningAt: result.nextOpeningAt.toISOString() } : undefined,
+      );
+    }
+    if (result.kind === 'parking-full') {
+      throw new ConflictError('Parking is full', 'PARKING_FULL');
+    }
+    throw new ConflictError('Vehicle is already in the parking', 'VEHICLE_ALREADY_ACTIVE');
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-      throw new ConflictError('Vehicle is already in the parking');
+      if (isVehicleIdentityUniqueConflict(error)) {
+        throw new ConflictError('Check-in conflict, try again', 'CHECK_IN_RACE');
+      }
+      throw new ConflictError('Vehicle is already in the parking', 'VEHICLE_ALREADY_ACTIVE');
     }
     if (isSerializationConflict(error)) {
-      throw new ConflictError('Check-in conflict, try again');
+      throw new ConflictError('Check-in conflict, try again', 'CHECK_IN_RACE');
     }
     throw error;
   }
+};
+
+export const lookupVehicle = async (
+  ownerId: string,
+  parkingId: string,
+  query: VehicleLookupQuery,
+): Promise<VehicleLookupResponse> => {
+  const parking = await parkingService.findById(parkingId);
+  if (parking.ownerId !== ownerId) {
+    throw new ForbiddenError("You don't have access to this parking");
+  }
+
+  const vehicle = await vehicleService.findByPlateForParking(parkingId, query.plate);
+  return { vehicle: vehicle ? toVehicleSummary(vehicle) : null };
 };
 
 export const checkOut = async (
@@ -105,7 +136,9 @@ export const checkOut = async (
     endTime,
     totalAmountCents,
   );
-  if (!completedSession) throw new ConflictError('This parking session is not active');
+  if (!completedSession) {
+    throw new ConflictError('This parking session is not active', 'SESSION_NOT_ACTIVE');
+  }
   return toParkingSessionResponse(completedSession);
 };
 
@@ -273,6 +306,8 @@ export const cancelSession = async (
   }
 
   const cancelledSession = await parkingSessionRepository.cancelIfActive(sessionId);
-  if (!cancelledSession) throw new ConflictError('This parking session is not active');
+  if (!cancelledSession) {
+    throw new ConflictError('This parking session is not active', 'SESSION_NOT_ACTIVE');
+  }
   return toParkingSessionResponse(cancelledSession);
 };

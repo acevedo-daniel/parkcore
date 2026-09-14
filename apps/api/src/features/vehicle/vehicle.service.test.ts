@@ -12,7 +12,7 @@ import { ConflictError } from '../../errors/index.js';
 import * as vehicleRepository from './vehicle.repository.js';
 import { normalizePlate } from './plate-normalization.js';
 import { type VehicleIdentityInput, vehicleIdentitySchema } from './vehicle.schema.js';
-import { findOrCreateForAuthorizedParking } from './vehicle.service.js';
+import { findByPlateForParking, findOrCreateForAuthorizedParking } from './vehicle.service.js';
 
 const identityInput: VehicleIdentityInput = { plate: 'AB123CD', type: 'CAR' };
 
@@ -39,6 +39,14 @@ describe('vehicle service', () => {
     expect(vehicleRepository.findByPlate).toHaveBeenCalledWith('AB123CD', 'parking-1');
     expect(vehicleRepository.updateStableMetadata).not.toHaveBeenCalled();
     expect(vehicleRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('finds a vehicle by its normalized plate within one parking', async () => {
+    const vehicle = buildVehicle({ plate: 'AB123CD', parkingId: 'parking-1' });
+    vi.mocked(vehicleRepository.findByPlate).mockResolvedValue(vehicle);
+
+    await expect(findByPlateForParking('parking-1', ' ab-123 cd ')).resolves.toEqual(vehicle);
+    expect(vehicleRepository.findByPlate).toHaveBeenCalledWith('AB123CD', 'parking-1');
   });
 
   it('updates only stable metadata explicitly supplied by a returning vehicle', async () => {

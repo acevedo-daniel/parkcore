@@ -1,19 +1,16 @@
 import type { components } from '@parkcore/api-client';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useMemo, type SyntheticEvent } from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect, useMemo, useRef, useState, type SyntheticEvent } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { lookupVehicle } from '../../lib/api/owner-api.js';
 import type { Translator } from '../../lib/localization.js';
+import { normalizePlate } from '../../lib/plate.js';
+import { useDebouncedValue } from '../../lib/use-debounced-value.js';
 import { Button } from '../ui/button.js';
 import { Field, Input, Select, Textarea } from '../ui/field.js';
-
-const normalizePlate = (plate: string) =>
-  plate
-    .trim()
-    .toUpperCase()
-    .replaceAll(/[^A-Z0-9]/g, '');
 
 function createCheckInFormSchema(t: Translator) {
   return z.object({
@@ -53,6 +50,7 @@ function createCheckInFormSchema(t: Translator) {
 
 type CheckInForm = z.infer<ReturnType<typeof createCheckInFormSchema>>;
 type CheckInRequest = components['schemas']['CheckInRequest'];
+type LookupState = 'loading' | 'match' | 'no-match' | 'error';
 
 const controlClassName =
   'h-12 w-full rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3.5 text-foreground shadow-xs focus:border-primary focus:ring-2 focus:ring-focus-ring';
@@ -61,10 +59,12 @@ export function CheckInPanel({
   error,
   isSubmitting,
   onSubmit,
+  parkingId,
 }: {
   error?: string;
   isSubmitting?: boolean;
   onSubmit: (input: CheckInRequest) => void | Promise<void>;
+  parkingId?: string;
 }) {
   const { t } = useAppearance();
   const schema = useMemo(() => createCheckInFormSchema(t), [t]);
@@ -82,12 +82,99 @@ export function CheckInPanel({
   });
   const {
     formState: { errors },
+    getValues,
     handleSubmit,
     register,
+    setValue,
   } = form;
+  const normalizedPlate = normalizePlate(useWatch({ control: form.control, name: 'plate' }));
+  const debouncedPlate = useDebouncedValue(normalizedPlate, 300);
+  const [lookupResult, setLookupResult] = useState<{
+    parkingId: string;
+    plate: string;
+    state: LookupState;
+  }>();
+  const lookupRequestVersion = useRef(0);
+  const prefilledVehicle = useRef<{ parkingId: string; plate: string } | null>(null);
+
   useEffect(() => {
     if (Object.keys(form.formState.errors).length > 0) void form.trigger();
   }, [form, t]);
+
+  useEffect(() => {
+    lookupRequestVersion.current += 1;
+    const prefill = prefilledVehicle.current;
+    if (prefill && (prefill.parkingId !== parkingId || prefill.plate !== normalizedPlate)) {
+      setValue('type', 'CAR');
+      setValue('brand', '');
+      setValue('model', '');
+      prefilledVehicle.current = null;
+    }
+  }, [normalizedPlate, parkingId, setValue]);
+
+  useEffect(() => {
+    if (!parkingId || debouncedPlate.length < 5) return;
+
+    const requestVersion = ++lookupRequestVersion.current;
+    let isCurrent = true;
+
+    const isCurrentLookup = () =>
+      isCurrent &&
+      lookupRequestVersion.current === requestVersion &&
+      normalizePlate(getValues('plate')) === debouncedPlate;
+
+    const loadingTimer = window.setTimeout(() => {
+      if (isCurrentLookup()) {
+        setLookupResult({ parkingId, plate: debouncedPlate, state: 'loading' });
+      }
+    });
+
+    void lookupVehicle(parkingId, debouncedPlate)
+      .then((result) => {
+        window.clearTimeout(loadingTimer);
+        if (!isCurrentLookup()) return;
+        if (result.vehicle) {
+          setValue('type', result.vehicle.type);
+          setValue('brand', result.vehicle.brand ?? '');
+          setValue('model', result.vehicle.model ?? '');
+          prefilledVehicle.current = { parkingId, plate: debouncedPlate };
+          setLookupResult({ parkingId, plate: debouncedPlate, state: 'match' });
+        } else {
+          prefilledVehicle.current = null;
+          setLookupResult({ parkingId, plate: debouncedPlate, state: 'no-match' });
+        }
+      })
+      .catch(() => {
+        window.clearTimeout(loadingTimer);
+        if (isCurrentLookup()) {
+          setLookupResult({ parkingId, plate: debouncedPlate, state: 'error' });
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+      window.clearTimeout(loadingTimer);
+    };
+  }, [debouncedPlate, getValues, parkingId, setValue]);
+
+  const currentLookupState =
+    lookupResult && lookupResult.parkingId === parkingId && lookupResult.plate === normalizedPlate
+      ? lookupResult.state
+      : undefined;
+  const lookupMessage =
+    parkingId && normalizedPlate.length > 0
+      ? normalizedPlate.length < 5
+        ? t('checkIn.lookupInvalid')
+        : currentLookupState === 'loading'
+          ? t('checkIn.lookupSearching')
+          : currentLookupState === 'match'
+            ? t('checkIn.lookupMatch')
+            : currentLookupState === 'no-match'
+              ? t('checkIn.lookupNoMatch')
+              : currentLookupState === 'error'
+                ? t('checkIn.lookupFailure')
+                : undefined
+      : undefined;
 
   const submit = async (values: CheckInForm) => {
     const optional = (value: string) => value.trim() || undefined;
@@ -120,6 +207,11 @@ export function CheckInPanel({
         />
       </Field>
       <p className="text-sm leading-relaxed text-foreground-secondary">{t('checkIn.plateHelp')}</p>
+      {lookupMessage ? (
+        <p className="text-sm leading-relaxed text-foreground-secondary" role="status">
+          {lookupMessage}
+        </p>
+      ) : null}
 
       <FormDivider label={t('checkIn.vehicle')} />
       <div className="grid gap-5 sm:grid-cols-2">

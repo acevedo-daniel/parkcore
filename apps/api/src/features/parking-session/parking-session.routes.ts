@@ -5,6 +5,7 @@ import * as parkingSessionController from './parking-session.controller.js';
 export const parkingSessionsRouter = Router({ mergeParams: true });
 parkingSessionsRouter.use(requireAuth, requireOperator);
 parkingSessionsRouter.post('/check-in', parkingSessionController.checkIn);
+parkingSessionsRouter.get('/vehicle-lookup', parkingSessionController.lookupVehicle);
 parkingSessionsRouter.get('/active', parkingSessionController.listActive);
 parkingSessionsRouter.get('/export.csv', parkingSessionController.exportCsv);
 parkingSessionsRouter.get('/', parkingSessionController.findAll);

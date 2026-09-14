@@ -9,6 +9,8 @@ import {
   parkingSessionParamsSchema,
   parkingSessionQuerySchema,
   parkingSessionResponseSchema,
+  vehicleLookupQuerySchema,
+  vehicleLookupResponseSchema,
 } from './parking-session.schema.js';
 
 export function registerParkingSessionDocs(registry: OpenAPIRegistry): void {
@@ -32,7 +34,7 @@ export function registerParkingSessionDocs(registry: OpenAPIRegistry): void {
       403: errorResponse('Forbidden - not the owner'),
       404: errorResponse('Parking not found'),
       409: errorResponse(
-        'Conflict (vehicle already inside, parking full, parking inactive, or parking closed)',
+        'Conflict with a stable check-in code: PARKING_INACTIVE, PARKING_CLOSED, PARKING_FULL, VEHICLE_ALREADY_ACTIVE, or CHECK_IN_RACE',
       ),
     },
   });
@@ -53,7 +55,26 @@ export function registerParkingSessionDocs(registry: OpenAPIRegistry): void {
       401: errorResponse('Unauthorized'),
       403: errorResponse('Forbidden - not the owner'),
       404: errorResponse('Parking session not found'),
-      409: errorResponse('This parking session is not active'),
+      409: errorResponse('This parking session is not active (SESSION_NOT_ACTIVE)'),
+    },
+  });
+
+  registry.registerPath({
+    method: 'get',
+    path: '/parkings/{parkingId}/sessions/vehicle-lookup',
+    tags: ['Parking Sessions'],
+    summary: 'Look up a returning vehicle',
+    security: [{ bearerAuth: [] }],
+    request: { params: parkingParamsSchema, query: vehicleLookupQuerySchema },
+    responses: {
+      200: {
+        description: 'Parking-scoped stable vehicle metadata without visit data',
+        content: { 'application/json': { schema: vehicleLookupResponseSchema } },
+      },
+      400: errorResponse('Validation error'),
+      401: errorResponse('Unauthorized'),
+      403: errorResponse('Forbidden - not the owner'),
+      404: errorResponse('Parking not found'),
     },
   });
 
@@ -145,7 +166,7 @@ export function registerParkingSessionDocs(registry: OpenAPIRegistry): void {
       401: errorResponse('Unauthorized'),
       403: errorResponse('Forbidden - not the owner'),
       404: errorResponse('Parking session not found'),
-      409: errorResponse('This parking session is not active'),
+      409: errorResponse('This parking session is not active (SESSION_NOT_ACTIVE)'),
     },
   });
 }
