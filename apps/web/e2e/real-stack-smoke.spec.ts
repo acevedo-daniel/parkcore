@@ -410,11 +410,11 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
   await expect(page).toHaveURL(new RegExp(`/app/parkings/${central.id}/sessions$`));
   const historySearch = page.getByLabel('Search plate', { exact: true });
   await historySearch.fill('CC004');
-  const historySession = page.getByRole('link', { name: 'Open session for CC004' }).first();
-  await expect(historySession).toBeVisible();
-  await expect(historySession).toContainText('Completed');
-  await expect(historySession).toContainText(expectedStart);
-  await expect(historySession).toContainText(expectedTotal);
+  const historySessionLink = page.getByRole('link', { name: 'Open session for CC004' }).first();
+  await expect(historySessionLink).toBeVisible();
+  await expect(historySessionLink).toContainText('Completed');
+  await expect(historySessionLink).toContainText(expectedStart);
+  await expect(historySessionLink).toContainText(expectedTotal);
 
   const historyResponse = await page.request.get(
     `${apiBaseUrl}/parkings/${central.id}/sessions?period=30d&plate=CC004`,
@@ -424,15 +424,14 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
   const history = (await historyResponse.json()) as SessionHistorySnapshot;
   expect(history.timezone).toBe(central.timezone);
   expect(history.aggregate.completedSessions).toBeGreaterThanOrEqual(1);
-  expect(history.data).toContainEqual(
-    expect.objectContaining({
-      currency: 'ARS',
-      id: sessionId,
-      status: 'COMPLETED',
-      totalAmountCents: completed.totalAmountCents,
-      vehicle: { plate: 'CC004' },
-    }),
-  );
+  const historyApiSession = history.data.find((item) => item.id === sessionId);
+  expect(historyApiSession).toBeDefined();
+  if (!historyApiSession) throw new Error(`History did not return session ${sessionId}.`);
+  expect(historyApiSession.currency).toBe('ARS');
+  expect(historyApiSession.id).toBe(sessionId);
+  expect(historyApiSession.status).toBe('COMPLETED');
+  expect(historyApiSession.totalAmountCents).toBe(completed.totalAmountCents);
+  expect(historyApiSession.vehicle.plate).toBe('CC004');
 
   await page.goto(`/app/parkings/${full.id}`);
   await expect(

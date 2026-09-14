@@ -15,7 +15,7 @@ describe('persistence contract integration', () => {
 
   it('stores non-owner identities and scheduled ARS parking without implicit listing', async () => {
     const suffix = randomUUID();
-    const expiresAt = new Date('2026-09-11T16:00:00.000Z');
+    const expiresAt = new Date('2099-09-11T16:00:00.000Z');
     const showcase = await prisma.user.create({
       data: {
         kind: 'SHOWCASE',
