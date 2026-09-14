@@ -7,14 +7,21 @@ import { useAppearance } from '../../app/appearance-provider.js';
 import { Plate } from '../../components/domain/plate.js';
 import {
   CheckoutSummary,
+  OperationalCancellation,
   OperationalReceipt,
   OperationalTimestamp,
 } from '../../components/domain/session.js';
+import { SessionStatus } from '../../components/domain/status.js';
 import { Button } from '../../components/ui/button.js';
 import { Dialog } from '../../components/ui/dialog.js';
 import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { useToast } from '../../components/ui/toast-context.js';
-import { localizeApiError } from '../../lib/api/api-error.js';
+import {
+  ApiError,
+  getApiErrorCode,
+  localizeApiError,
+  type ApiErrorCodeMessages,
+} from '../../lib/api/api-error.js';
 import {
   cancelParkingSession,
   checkOut,
@@ -23,11 +30,22 @@ import {
   type ParkingSession,
 } from '../../lib/api/owner-api.js';
 import { formatMoney } from '../../lib/format.js';
+import type { Locale, Translator } from '../../lib/localization.js';
 import { invalidateOwnerMutationQueries } from '../../lib/query-invalidation.js';
 
+const sessionErrorMessages: ApiErrorCodeMessages = {
+  SESSION_NOT_ACTIVE: 'session.stateChanged',
+};
+
+function isSessionStateConflict(error: unknown) {
+  return (
+    getApiErrorCode(error) === 'SESSION_NOT_ACTIVE' ||
+    (error instanceof ApiError && error.status === 409)
+  );
+}
+
 export function OwnerSessionDetailRoute() {
-  const { language, locale, t } = useAppearance();
-  const es = language === 'es';
+  const { locale, t } = useAppearance();
   const { sessionId } = useParams();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
@@ -57,6 +75,18 @@ export function OwnerSessionDetailRoute() {
       </ErrorState>
     );
   }
+  if (parkingsQuery.isError) {
+    return (
+      <ErrorState
+        onRetry={() => {
+          void sessionQuery.refetch();
+          void parkingsQuery.refetch();
+        }}
+      >
+        {t('api.loadParkings')}
+      </ErrorState>
+    );
+  }
   const session = resolvedSession ?? sessionQuery.data;
   if (!session) {
     return (
@@ -64,6 +94,19 @@ export function OwnerSessionDetailRoute() {
     );
   }
   const parking = parkingsQuery.data?.find((item) => item.id === session.parkingId);
+  if (!parking) {
+    return (
+      <ErrorState
+        onRetry={() => {
+          void sessionQuery.refetch();
+          void parkingsQuery.refetch();
+        }}
+        title={t('parkingOperation.unavailableTitle')}
+      >
+        {t('api.parkingUnavailable')}
+      </ErrorState>
+    );
+  }
   const canOperate = session.status === 'ACTIVE';
 
   const refreshOperation = async () => {
@@ -73,16 +116,32 @@ export function OwnerSessionDetailRoute() {
       sessionId: session.id,
     });
   };
+  const reconcileStateConflict = async () => {
+    const [freshSession] = await Promise.all([
+      sessionQuery.refetch().catch(() => undefined),
+      parkingsQuery.refetch().catch(() => undefined),
+    ]);
+    if (freshSession?.data) setResolvedSession(freshSession.data);
+    setCheckoutOpen(false);
+    setCancelOpen(false);
+  };
+  const handleActionError = async (
+    reason: unknown,
+    fallback: 'api.checkoutSession' | 'api.cancelSession',
+  ) => {
+    if (isSessionStateConflict(reason)) await reconcileStateConflict();
+    setActionError(localizeApiError(reason, t, fallback, {}, sessionErrorMessages));
+  };
   const completeCheckout = async () => {
     setActionError(undefined);
     try {
       const completedSession = await checkoutMutation.mutateAsync();
       setResolvedSession(completedSession);
-      await refreshOperation();
       showToast(t('session.checkedOut'));
       setCheckoutOpen(false);
+      await refreshOperation().catch(() => undefined);
     } catch (reason) {
-      setActionError(localizeApiError(reason, t, 'api.checkoutSession'));
+      await handleActionError(reason, 'api.checkoutSession');
     }
   };
   const cancelSession = async () => {
@@ -90,11 +149,11 @@ export function OwnerSessionDetailRoute() {
     try {
       const cancelledSession = await cancelMutation.mutateAsync();
       setResolvedSession(cancelledSession);
-      await refreshOperation();
       showToast(t('session.cancelled'));
       setCancelOpen(false);
+      await refreshOperation().catch(() => undefined);
     } catch (reason) {
-      setActionError(localizeApiError(reason, t, 'api.cancelSession'));
+      await handleActionError(reason, 'api.cancelSession');
     }
   };
 
@@ -105,45 +164,22 @@ export function OwnerSessionDetailRoute() {
           className="inline-flex items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
           to={`/app/parkings/${session.parkingId}`}
         >
-          <ChevronLeft aria-hidden="true" className="size-4" />{' '}
-          {es ? 'Operación de cochera' : 'Parking operation'}
+          <ChevronLeft aria-hidden="true" className="size-4" /> {t('session.operation')}
         </Link>
         <div className="mt-7 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
             <p className="type-label text-foreground-muted">
-              {session.status === 'ACTIVE'
-                ? es
-                  ? 'Estadía activa'
-                  : 'Active session'
-                : session.status === 'COMPLETED'
-                  ? es
-                    ? 'Estadía finalizada'
-                    : 'Completed session'
-                  : es
-                    ? 'Estadía cancelada'
-                    : 'Cancelled session'}
+              {getSessionStateTitle(session.status, t)}
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-4">
               <Plate plate={session.vehicle.plate} />
-              <span className="rounded-full border border-border-strong px-3 py-1.5 text-xs font-bold">
-                {session.status === 'ACTIVE'
-                  ? es
-                    ? 'Activa'
-                    : 'Active'
-                  : session.status === 'COMPLETED'
-                    ? es
-                      ? 'Completada'
-                      : 'Completed'
-                    : es
-                      ? 'Cancelada'
-                      : 'Cancelled'}
-              </span>
+              <SessionStatus status={session.status} />
             </div>
             <h1
               className="mt-5 font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] sm:text-5xl"
               id="session-detail-title"
             >
-              {session.vehicle.type.replaceAll('_', ' ')}
+              {getVehicleTypeLabel(session.vehicle.type, t)}
             </h1>
           </div>
           {canOperate ? (
@@ -174,55 +210,46 @@ export function OwnerSessionDetailRoute() {
       <div className="grid gap-4 lg:grid-cols-3">
         <DetailCard
           entries={[
-            [es ? 'Tipo' : 'Type', session.vehicle.type.replaceAll('_', ' ')],
-            [es ? 'Marca' : 'Brand', session.vehicle.brand ?? 'N/A'],
-            [es ? 'Modelo' : 'Model', session.vehicle.model ?? 'N/A'],
+            [t('session.type'), getVehicleTypeLabel(session.vehicle.type, t)],
+            [t('session.brand'), session.vehicle.brand ?? t('common.notAvailable')],
+            [t('session.model'), session.vehicle.model ?? t('common.notAvailable')],
           ]}
-          title={es ? 'Vehículo' : 'Vehicle'}
+          title={t('session.vehicle')}
         />
         <DetailCard
           entries={[
-            [es ? 'Cliente' : 'Customer', session.customerName ?? 'N/A'],
-            [es ? 'Teléfono' : 'Phone', session.customerPhone ?? 'N/A'],
-            [es ? 'Notas' : 'Notes', session.notes ?? 'N/A'],
+            [t('session.customer'), session.customerName ?? t('common.notAvailable')],
+            [t('session.phone'), session.customerPhone ?? t('common.notAvailable')],
+            [t('session.notes'), session.notes ?? t('common.notAvailable')],
           ]}
-          title={es ? 'Visita' : 'Visit'}
+          title={t('session.visit')}
         />
         <section className="rounded-[var(--radius-lg)] border border-border bg-surface p-5">
-          <p className="type-label text-foreground-muted">{es ? 'Cochera' : 'Parking'}</p>
+          <p className="type-label text-foreground-muted">{t('session.parking')}</p>
           <dl className="mt-5 space-y-4">
-            <DetailItem label={es ? 'Cochera' : 'Facility'}>
-              {parking ? (
-                <Link
-                  className="font-bold underline decoration-accent decoration-4 underline-offset-4"
-                  to={`/app/parkings/${parking.id}`}
-                >
-                  {parking.title}
-                </Link>
-              ) : (
-                session.parkingId
-              )}
+            <DetailItem label={t('session.facility')}>
+              <Link
+                className="font-bold underline decoration-accent decoration-4 underline-offset-4"
+                to={`/app/parkings/${parking.id}`}
+              >
+                {parking.title}
+              </Link>
             </DetailItem>
-            {parking ? (
-              <DetailItem label={es ? 'Dirección' : 'Address'}>
-                <span className="flex items-start gap-1.5">
-                  <MapPin aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
-                  {parking.address}
-                </span>
-              </DetailItem>
-            ) : null}
-            <DetailItem label={es ? 'Ingreso' : 'Started'}>
-              <OperationalTimestamp value={session.startTime} timezone={parking?.timezone} />
+            <DetailItem label={t('session.address')}>
+              <span className="flex items-start gap-1.5">
+                <MapPin aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
+                {parking.address}
+              </span>
             </DetailItem>
-            <DetailItem label={es ? 'Tarifa registrada' : 'Rate snapshot'}>
-              {formatMoney(session.hourlyRateCents, session.currency, locale)} / H
+            <DetailItem label={t('session.started')}>
+              <OperationalTimestamp value={session.startTime} timezone={parking.timezone} />
             </DetailItem>
-            <DetailItem label={es ? 'Total' : 'Total'}>
-              {session.totalAmountCents === null
-                ? es
-                  ? 'Pendiente de cobro'
-                  : 'Pending checkout'
-                : formatMoney(session.totalAmountCents, session.currency, locale)}
+            <DetailItem label={t('session.rateSnapshot')}>
+              {formatMoney(session.hourlyRateCents, session.currency, locale)} /{' '}
+              {t('session.perHourShort')}
+            </DetailItem>
+            <DetailItem label={t('session.total')}>
+              {formatSessionTotal(session, t, locale)}
             </DetailItem>
           </dl>
         </section>
@@ -230,29 +257,24 @@ export function OwnerSessionDetailRoute() {
 
       {session.status === 'COMPLETED' ? (
         <OperationalReceipt
-          historyHref={parking ? `/app/parkings/${parking.id}/sessions` : undefined}
-          parkingHref={parking ? `/app/parkings/${parking.id}` : undefined}
-          parkingTitle={parking?.title}
+          historyHref={`/app/parkings/${parking.id}/sessions`}
+          parkingHref={`/app/parkings/${parking.id}`}
+          parkingTitle={parking.title}
           session={session}
-          timezone={parking?.timezone}
+          timezone={parking.timezone}
         />
       ) : null}
       {session.status === 'CANCELLED' ? (
-        <section
-          aria-label={es ? 'Estadía cancelada' : 'Cancelled session'}
-          className="rounded-[var(--radius-lg)] border border-warning-foreground bg-warning-surface p-6 text-warning-text"
-        >
-          <p className="type-label">{es ? 'Estado terminal' : 'Terminal state'}</p>
-          <h2 className="mt-3 font-display text-2xl font-bold">
-            {es ? 'Esta estadía fue cancelada.' : 'This session was cancelled.'}
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed">
-            {es
-              ? 'No se cobró esta estadía y no se puede volver a modificar.'
-              : 'This session was not charged and cannot be changed again.'}
-          </p>
-        </section>
+        <OperationalCancellation
+          historyHref={`/app/parkings/${parking.id}/sessions`}
+          parkingHref={`/app/parkings/${parking.id}`}
+          parkingTitle={parking.title}
+          session={session}
+          timezone={parking.timezone}
+        />
       ) : null}
+
+      {actionError && !checkoutOpen && !cancelOpen ? <ActionError message={actionError} /> : null}
 
       <Dialog
         closeLabel={t('session.checkoutClose')}
@@ -265,18 +287,11 @@ export function OwnerSessionDetailRoute() {
           <div className="flex items-center justify-between gap-4">
             <Plate plate={session.vehicle.plate} />
             <span className="text-sm font-semibold text-foreground-secondary">
-              {session.vehicle.type.replaceAll('_', ' ')}
+              {getVehicleTypeLabel(session.vehicle.type, t)}
             </span>
           </div>
-          <CheckoutSummary session={session} timezone={parking?.timezone} />
-          {actionError ? (
-            <p
-              className="rounded-[var(--radius-md)] border border-danger-foreground bg-danger-surface p-3 text-sm font-semibold text-danger-text"
-              role="alert"
-            >
-              {actionError}
-            </p>
-          ) : null}
+          <CheckoutSummary session={session} timezone={parking.timezone} />
+          {actionError ? <ActionError message={actionError} /> : null}
           <Button
             disabled={checkoutMutation.isPending}
             fullWidth
@@ -299,14 +314,7 @@ export function OwnerSessionDetailRoute() {
           <p className="border-l-4 border-accent pl-4 text-sm leading-relaxed text-foreground-secondary">
             {t('session.availableAfterCancel')}
           </p>
-          {actionError ? (
-            <p
-              className="rounded-[var(--radius-md)] border border-danger-foreground bg-danger-surface p-3 text-sm font-semibold text-danger-text"
-              role="alert"
-            >
-              {actionError}
-            </p>
-          ) : null}
+          {actionError ? <ActionError message={actionError} /> : null}
           <Button
             disabled={cancelMutation.isPending}
             fullWidth
@@ -317,6 +325,41 @@ export function OwnerSessionDetailRoute() {
         </div>
       </Dialog>
     </section>
+  );
+}
+
+function getSessionStateTitle(status: ParkingSession['status'], translate: Translator) {
+  return status === 'ACTIVE'
+    ? translate('session.activeTitle')
+    : status === 'COMPLETED'
+      ? translate('session.completedTitle')
+      : translate('session.cancelledTitle');
+}
+
+function getVehicleTypeLabel(type: ParkingSession['vehicle']['type'], translate: Translator) {
+  return type === 'CAR'
+    ? translate('checkIn.car')
+    : type === 'MOTORCYCLE'
+      ? translate('checkIn.motorcycle')
+      : translate('checkIn.largeVehicle');
+}
+
+function formatSessionTotal(session: ParkingSession, translate: Translator, locale: Locale) {
+  if (session.status === 'CANCELLED') return translate('session.notCharged');
+  if (session.totalAmountCents === null) {
+    return translate('session.pendingCheckout');
+  }
+  return formatMoney(session.totalAmountCents, session.currency, locale);
+}
+
+function ActionError({ message }: { message: string }) {
+  return (
+    <p
+      className="rounded-[var(--radius-md)] border border-danger-foreground bg-danger-surface p-3 text-sm font-semibold text-danger-text"
+      role="alert"
+    >
+      {message}
+    </p>
   );
 }
 
