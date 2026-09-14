@@ -1,6 +1,6 @@
 import type { components, paths } from '@parkcore/api-client';
 
-import { ApiError, getApiErrorCode, getApiErrorMessage } from './api-error.js';
+import { ApiError, getApiErrorCode, getApiErrorDetails, getApiErrorMessage } from './api-error.js';
 import { authenticatedApi } from './api-client.js';
 
 export type Parking = components['schemas']['ParkingResponse'];
@@ -18,7 +18,12 @@ export interface ActiveSessionQuery {
 }
 
 function ownerError(error: unknown, response: Response, fallback: string): never {
-  throw new ApiError(getApiErrorMessage(error, fallback), response.status, getApiErrorCode(error));
+  throw new ApiError(
+    getApiErrorMessage(error, fallback),
+    response.status,
+    getApiErrorCode(error),
+    getApiErrorDetails(error),
+  );
 }
 
 export async function getOwnedParkings(): Promise<Parking[]> {

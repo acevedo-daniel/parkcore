@@ -162,6 +162,7 @@ describe('owner workflow integration', () => {
     expect(activeResponse.status).toBe(200);
     const activeSessions = activeResponse.body as unknown as SessionResponse[];
     expect(activeSessions).toHaveLength(2);
+    expect(activeSessions.map((session) => session.id)).toEqual([checkedIn.id, secondCheckedIn.id]);
     expect(
       activeSessions.some(
         (session) => session.id === checkedIn.id && session.vehicle.id === checkedIn.vehicle.id,
@@ -227,6 +228,12 @@ describe('owner workflow integration', () => {
     });
     expect(completed.endTime).toMatch(/^\d{4}-\d{2}-\d{2}T/);
 
+    const rateUpdateResponse = await request(app)
+      .patch(`/parkings/${parking.id}`)
+      .set('Authorization', authorization)
+      .send({ hourlyRateCents: 3000 });
+    expect(rateUpdateResponse.status).toBe(200);
+
     const returningCheckInResponse = await request(app)
       .post(`/parkings/${parking.id}/sessions/check-in`)
       .set('Authorization', authorization)
@@ -266,6 +273,7 @@ describe('owner workflow integration', () => {
       .patch(`/sessions/${returningCheckIn.id}/cancel`)
       .set('Authorization', authorization);
     expect(repeatedCancelResponse.status).toBe(409);
+    expect(repeatedCancelResponse.body).toMatchObject({ code: 'SESSION_NOT_ACTIVE' });
 
     const cancelResponse = await request(app)
       .patch(`/sessions/${secondCheckedIn.id}/cancel`)
@@ -450,6 +458,91 @@ describe('owner workflow integration', () => {
     await expect(
       prisma.parkingSession.count({ where: { parkingId: parking.id, status: 'ACTIVE' } }),
     ).resolves.toBe(1);
+    await expect(prisma.vehicle.count({ where: { parkingId: parking.id } })).resolves.toBe(1);
+  });
+
+  it('returns stable blocked check-in codes without mutating vehicles', async () => {
+    const suffix = randomUUID();
+    const registerResponse = await request(app)
+      .post('/auth/register')
+      .send({
+        email: `blocked-check-in-${suffix}@parkcore.test`,
+        password: 'Passw0rd!123',
+        name: 'Blocked',
+        lastName: 'CheckIn',
+        timezone: 'America/Argentina/Buenos_Aires',
+      });
+    expect(registerResponse.status).toBe(201);
+    const auth = registerResponse.body as unknown as AuthResponse;
+    ownerId = auth.user.id;
+    const authorization = `Bearer ${auth.accessToken}`;
+
+    const parkingResponse = await request(app)
+      .post('/parkings')
+      .set('Authorization', authorization)
+      .send({
+        title: `Blocked Check-In Parking ${suffix}`,
+        neighborhood: 'Downtown',
+        address: '123 Integration Street',
+        hourlyRateCents: 1500,
+        currency: 'USD',
+        capacity: 1,
+        lat: -34.6037,
+        lng: -58.3816,
+      });
+    expect(parkingResponse.status).toBe(201);
+    const parking = parkingResponse.body as unknown as ParkingResponse;
+
+    const firstCheckInResponse = await request(app)
+      .post(`/parkings/${parking.id}/sessions/check-in`)
+      .set('Authorization', authorization)
+      .send({ plate: 'AB-123-CD', brand: 'Toyota', model: 'Corolla' });
+    expect(firstCheckInResponse.status).toBe(201);
+
+    const duplicateResponse = await request(app)
+      .post(`/parkings/${parking.id}/sessions/check-in`)
+      .set('Authorization', authorization)
+      .send({ plate: 'AB 123 CD', brand: 'Honda', model: 'Civic' });
+    expect(duplicateResponse.status).toBe(409);
+    expect(duplicateResponse.body).toMatchObject({
+      code: 'VEHICLE_ALREADY_ACTIVE',
+    });
+
+    await expect(
+      prisma.vehicle.findUniqueOrThrow({
+        where: { plate_parkingId: { plate: 'AB123CD', parkingId: parking.id } },
+      }),
+    ).resolves.toMatchObject({ brand: 'Toyota', model: 'Corolla' });
+
+    const fullResponse = await request(app)
+      .post(`/parkings/${parking.id}/sessions/check-in`)
+      .set('Authorization', authorization)
+      .send({ plate: 'XY-456-ZZ', brand: 'Ford', model: 'Focus' });
+    expect(fullResponse.status).toBe(409);
+    expect(fullResponse.body).toMatchObject({ code: 'PARKING_FULL' });
+    await expect(
+      prisma.vehicle.findUnique({
+        where: { plate_parkingId: { plate: 'XY456ZZ', parkingId: parking.id } },
+      }),
+    ).resolves.toBeNull();
+
+    const pausedResponse = await request(app)
+      .patch(`/parkings/${parking.id}`)
+      .set('Authorization', authorization)
+      .send({ isActive: false });
+    expect(pausedResponse.status).toBe(200);
+
+    const inactiveCheckInResponse = await request(app)
+      .post(`/parkings/${parking.id}/sessions/check-in`)
+      .set('Authorization', authorization)
+      .send({ plate: 'ZZ-999-ZZ', brand: 'Honda' });
+    expect(inactiveCheckInResponse.status).toBe(409);
+    expect(inactiveCheckInResponse.body).toMatchObject({ code: 'PARKING_INACTIVE' });
+    await expect(
+      prisma.vehicle.findUnique({
+        where: { plate_parkingId: { plate: 'ZZ999ZZ', parkingId: parking.id } },
+      }),
+    ).resolves.toBeNull();
   });
 
   it('allows owner and active demo operations but blocks showcase mutations', async () => {

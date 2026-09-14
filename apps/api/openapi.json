@@ -182,12 +182,29 @@
           },
           "code": {
             "type": "string"
+          },
+          "details": {
+            "$ref": "#/components/schemas/ErrorDetails"
           }
         },
         "required": [
           "error",
           "message"
         ],
+        "additionalProperties": false
+      },
+      "ErrorDetails": {
+        "type": "object",
+        "properties": {
+          "nextOpeningAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Authoritative next opening time when a parking is currently closed"
+          }
+        },
         "additionalProperties": false
       },
       "RegisterRequest": {
@@ -1744,7 +1761,7 @@
             }
           },
           "409": {
-            "description": "Conflict (vehicle already inside, parking full, parking inactive, or parking closed)",
+            "description": "Conflict with a stable check-in code: PARKING_INACTIVE, PARKING_CLOSED, PARKING_FULL, VEHICLE_ALREADY_ACTIVE, or CHECK_IN_RACE",
             "content": {
               "application/json": {
                 "schema": {
@@ -1832,7 +1849,7 @@
             }
           },
           "409": {
-            "description": "This parking session is not active",
+            "description": "This parking session is not active (SESSION_NOT_ACTIVE)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2321,7 +2338,7 @@
             }
           },
           "409": {
-            "description": "This parking session is not active",
+            "description": "This parking session is not active (SESSION_NOT_ACTIVE)",
             "content": {
               "application/json": {
                 "schema": {

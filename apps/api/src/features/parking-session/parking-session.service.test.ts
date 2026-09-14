@@ -10,7 +10,6 @@ vi.mock('./parking-session.repository.js', () => ({
   findForExport: vi.fn(),
 }));
 vi.mock('../parking/parking.service.js', () => ({ findById: vi.fn() }));
-vi.mock('../vehicle/vehicle.service.js', () => ({ findOrCreateForAuthorizedParking: vi.fn() }));
 
 import { Prisma, type ParkingSessionStatus } from '../../../prisma/generated/client.js';
 import {
@@ -18,9 +17,8 @@ import {
   buildParkingSession,
   buildVehicle,
 } from '../../../tests/helpers/builders.js';
-import { ConflictError, ForbiddenError, NotFoundError } from '../../errors/index.js';
+import { ForbiddenError, NotFoundError } from '../../errors/index.js';
 import * as parkingService from '../parking/parking.service.js';
-import * as vehicleService from '../vehicle/vehicle.service.js';
 import * as parkingSessionRepository from './parking-session.repository.js';
 import type { ParkingSessionWithRelations } from './parking-session.repository.js';
 import type { CheckIn, ParkingSessionQuery } from './parking-session.schema.js';
@@ -83,8 +81,6 @@ describe('parking session service', () => {
         customerPhone: checkInDto.customerPhone,
         notes: checkInDto.notes,
       });
-      vi.mocked(parkingService.findById).mockResolvedValue(buildParking());
-      vi.mocked(vehicleService.findOrCreateForAuthorizedParking).mockResolvedValue(vehicle);
       vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockResolvedValue(session);
 
       await expect(checkIn('owner-1', 'parking-1', checkInDto)).resolves.toMatchObject({
@@ -92,16 +88,10 @@ describe('parking session service', () => {
         vehicle: { id: vehicle.id },
         customerName: 'Jane Doe',
       });
-      expect(vehicleService.findOrCreateForAuthorizedParking).toHaveBeenCalledWith('parking-1', {
-        plate: 'ABC123',
-        type: 'CAR',
-      });
       expect(parkingSessionRepository.createActiveIfAvailable).toHaveBeenCalledWith(
+        'owner-1',
         'parking-1',
-        vehicle.id,
-        20,
-        200000,
-        'USD',
+        { plate: 'ABC123', type: 'CAR' },
         {
           customerName: 'Jane Doe',
           customerPhone: '+1234567890',
@@ -111,46 +101,49 @@ describe('parking session service', () => {
     });
 
     it('rejects inactive parkings and parking capacity or active-vehicle conflicts', async () => {
-      vi.mocked(parkingService.findById).mockResolvedValue(buildParking({ isActive: false }));
-      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toThrow(
-        'Parking is inactive',
-      );
+      vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockResolvedValue({
+        kind: 'parking-inactive',
+      });
+      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toMatchObject({
+        message: 'Parking is inactive',
+        code: 'PARKING_INACTIVE',
+      });
 
-      vi.mocked(parkingService.findById).mockResolvedValue(buildParking());
-      vi.mocked(vehicleService.findOrCreateForAuthorizedParking).mockResolvedValue(buildVehicle());
-      vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockResolvedValue('parking-full');
-      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toThrow('Parking is full');
+      vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockResolvedValue({
+        kind: 'parking-full',
+      });
+      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toMatchObject({
+        message: 'Parking is full',
+        code: 'PARKING_FULL',
+      });
 
-      vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockResolvedValue(
-        'vehicle-active',
-      );
-      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toThrow(
-        'Vehicle is already in the parking',
-      );
+      vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockResolvedValue({
+        kind: 'vehicle-active',
+      });
+      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toMatchObject({
+        message: 'Vehicle is already in the parking',
+        code: 'VEHICLE_ALREADY_ACTIVE',
+      });
     });
 
     it('rejects check-in while a scheduled parking is closed', async () => {
-      vi.useFakeTimers();
-      vi.setSystemTime(new Date('2026-09-11T07:00:00.000Z'));
-      vi.mocked(parkingService.findById).mockResolvedValue(
-        buildParking({
-          is24Hours: false,
-          opensAt: '08:00',
-          closesAt: '18:00',
-          timezone: 'America/Argentina/Buenos_Aires',
-        }),
-      );
+      const nextOpeningAt = new Date('2026-09-11T11:00:00.000Z');
+      vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockResolvedValue({
+        kind: 'parking-closed',
+        nextOpeningAt,
+      });
 
-      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toThrow(
-        'Parking is closed',
-      );
-      expect(vehicleService.findOrCreateForAuthorizedParking).not.toHaveBeenCalled();
+      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toMatchObject({
+        message: 'Parking is closed',
+        code: 'PARKING_CLOSED',
+        details: { nextOpeningAt: nextOpeningAt.toISOString() },
+      });
     });
 
     it('rejects a non-owner and persistence conflicts', async () => {
-      vi.mocked(parkingService.findById).mockResolvedValue(
-        buildParking({ ownerId: 'other-owner' }),
-      );
+      vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockResolvedValue({
+        kind: 'parking-forbidden',
+      });
       await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toBeInstanceOf(
         ForbiddenError,
       );
@@ -161,19 +154,19 @@ describe('parking session service', () => {
           code: 'P2034',
         },
       ) as Prisma.PrismaClientKnownRequestError;
-      vi.mocked(parkingService.findById).mockResolvedValue(buildParking());
-      vi.mocked(vehicleService.findOrCreateForAuthorizedParking).mockResolvedValue(buildVehicle());
       vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockRejectedValue(conflict);
-      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toThrow(
-        'Check-in conflict',
-      );
+      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toMatchObject({
+        message: 'Check-in conflict, try again',
+        code: 'CHECK_IN_RACE',
+      });
 
       vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockRejectedValue({
         cause: { originalCode: '40001' },
       });
-      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toThrow(
-        'Check-in conflict',
-      );
+      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toMatchObject({
+        message: 'Check-in conflict, try again',
+        code: 'CHECK_IN_RACE',
+      });
 
       const duplicateActiveSession = Object.assign(
         Object.create(Prisma.PrismaClientKnownRequestError.prototype),
@@ -182,9 +175,22 @@ describe('parking session service', () => {
       vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockRejectedValue(
         duplicateActiveSession,
       );
-      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toThrow(
-        'Vehicle is already in the parking',
+      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toMatchObject({
+        message: 'Vehicle is already in the parking',
+        code: 'VEHICLE_ALREADY_ACTIVE',
+      });
+
+      const vehicleIdentityConflict = Object.assign(
+        Object.create(Prisma.PrismaClientKnownRequestError.prototype),
+        { code: 'P2002', meta: { target: ['plate', 'parkingId'] } },
+      ) as Prisma.PrismaClientKnownRequestError;
+      vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockRejectedValue(
+        vehicleIdentityConflict,
       );
+      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toMatchObject({
+        message: 'Check-in conflict, try again',
+        code: 'CHECK_IN_RACE',
+      });
     });
   });
 
@@ -262,7 +268,9 @@ describe('parking session service', () => {
         );
         vi.mocked(parkingSessionRepository.completeIfActive).mockResolvedValue(null);
 
-        await expect(checkOut('owner-1', 'session-1')).rejects.toBeInstanceOf(ConflictError);
+        await expect(checkOut('owner-1', 'session-1')).rejects.toMatchObject({
+          code: 'SESSION_NOT_ACTIVE',
+        });
       },
     );
 
@@ -292,7 +300,9 @@ describe('parking session service', () => {
         );
         vi.mocked(parkingSessionRepository.cancelIfActive).mockResolvedValue(null);
 
-        await expect(cancelSession('owner-1', 'session-1')).rejects.toBeInstanceOf(ConflictError);
+        await expect(cancelSession('owner-1', 'session-1')).rejects.toMatchObject({
+          code: 'SESSION_NOT_ACTIVE',
+        });
       },
     );
   });

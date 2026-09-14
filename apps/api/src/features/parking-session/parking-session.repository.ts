@@ -1,10 +1,8 @@
-import {
-  Prisma,
-  type Currency,
-  type ParkingSessionStatus,
-} from '../../../prisma/generated/client.js';
+import { Prisma, type ParkingSessionStatus } from '../../../prisma/generated/client.js';
 import { prisma } from '../../config/prisma.js';
-import type { ParkingSessionFilter, VisitData } from './parking-session.schema.js';
+import { getScheduleState } from '../../utils/timezone.js';
+import { normalizePlate } from '../vehicle/plate-normalization.js';
+import type { CheckIn, ParkingSessionFilter, VisitData } from './parking-session.schema.js';
 
 const vehicleSummarySelect = {
   id: true,
@@ -43,6 +41,19 @@ const parkingSessionHistoryAggregateSelect = {
   totalAmountCents: true,
 } as const satisfies Prisma.ParkingSessionSelect;
 
+const checkInParkingSelect = {
+  id: true,
+  ownerId: true,
+  isActive: true,
+  timezone: true,
+  is24Hours: true,
+  opensAt: true,
+  closesAt: true,
+  capacity: true,
+  hourlyRateCents: true,
+  currency: true,
+} as const satisfies Prisma.ParkingSelect;
+
 export type ParkingSessionWithVehicle = Prisma.ParkingSessionGetPayload<{
   select: typeof parkingSessionWithVehicleSelect;
 }>;
@@ -55,7 +66,13 @@ export type ParkingSessionHistoryAggregateRow = Prisma.ParkingSessionGetPayload<
   select: typeof parkingSessionHistoryAggregateSelect;
 }>;
 
-export type CheckInBlockedReason = 'parking-full' | 'vehicle-active';
+export type CheckInBlockedReason =
+  | { kind: 'parking-not-found' }
+  | { kind: 'parking-forbidden' }
+  | { kind: 'parking-inactive' }
+  | { kind: 'parking-closed'; nextOpeningAt: Date | null }
+  | { kind: 'parking-full' }
+  | { kind: 'vehicle-active' };
 
 export const findById = async (id: string): Promise<ParkingSessionWithRelations | null> => {
   return await prisma.parkingSession.findUnique({
@@ -74,7 +91,7 @@ export const findActiveByParking = async (
       status: 'ACTIVE',
       ...(options.plate ? { vehicle: { plate: { contains: options.plate } } } : {}),
     },
-    orderBy: { startTime: 'desc' },
+    orderBy: [{ startTime: 'asc' }, { id: 'asc' }],
     select: parkingSessionWithVehicleSelect,
   });
 };
@@ -139,32 +156,81 @@ export const findForExport = async (
 };
 
 export const createActiveIfAvailable = async (
+  ownerId: string,
   parkingId: string,
-  vehicleId: string,
-  capacity: number,
-  hourlyRateCents: number,
-  currency: Currency,
+  vehicleInput: Pick<CheckIn, 'plate' | 'type' | 'brand' | 'model'>,
   visitData: VisitData,
 ): Promise<ParkingSessionWithVehicle | CheckInBlockedReason> => {
   return await prisma.$transaction(
     async (tx) => {
-      const activeCount = await tx.parkingSession.count({ where: { parkingId, status: 'ACTIVE' } });
-      if (activeCount >= capacity) return 'parking-full';
-
-      const activeSession = await tx.parkingSession.findFirst({
-        where: { parkingId, vehicleId, status: 'ACTIVE' },
+      const parking = await tx.parking.findUnique({
+        where: { id: parkingId },
+        select: checkInParkingSelect,
       });
-      if (activeSession) return 'vehicle-active';
+      if (!parking) return { kind: 'parking-not-found' };
+      if (parking.ownerId !== ownerId) return { kind: 'parking-forbidden' };
+
+      const now = new Date();
+      if (!parking.isActive) return { kind: 'parking-inactive' };
+
+      const schedule = getScheduleState(
+        {
+          timezone: parking.timezone,
+          is24Hours: parking.is24Hours,
+          opensAt: parking.opensAt,
+          closesAt: parking.closesAt,
+        },
+        now,
+      );
+      if (!schedule.isOpen) {
+        return { kind: 'parking-closed', nextOpeningAt: schedule.nextOpeningAt };
+      }
+
+      const plate = normalizePlate(vehicleInput.plate);
+      const existingVehicle = await tx.vehicle.findUnique({
+        where: { plate_parkingId: { plate, parkingId } },
+        select: { id: true },
+      });
+
+      if (existingVehicle) {
+        const activeSession = await tx.parkingSession.findFirst({
+          where: { parkingId, vehicleId: existingVehicle.id, status: 'ACTIVE' },
+          select: { id: true },
+        });
+        if (activeSession) return { kind: 'vehicle-active' };
+      }
+
+      const activeCount = await tx.parkingSession.count({ where: { parkingId, status: 'ACTIVE' } });
+      if (activeCount >= parking.capacity) return { kind: 'parking-full' };
+
+      const stableMetadata = {
+        ...(vehicleInput.type !== undefined ? { type: vehicleInput.type } : {}),
+        ...(vehicleInput.brand !== undefined ? { brand: vehicleInput.brand } : {}),
+        ...(vehicleInput.model !== undefined ? { model: vehicleInput.model } : {}),
+      };
+
+      const vehicle = existingVehicle
+        ? Object.keys(stableMetadata).length > 0
+          ? await tx.vehicle.update({
+              where: { id: existingVehicle.id },
+              data: stableMetadata,
+              select: { id: true },
+            })
+          : existingVehicle
+        : await tx.vehicle.create({
+            data: { parkingId, plate, ...stableMetadata },
+            select: { id: true },
+          });
 
       return await tx.parkingSession.create({
         data: {
-          startTime: new Date(),
+          startTime: now,
           status: 'ACTIVE',
-          hourlyRateCents,
-          currency,
+          hourlyRateCents: parking.hourlyRateCents,
+          currency: parking.currency,
           ...visitData,
           parking: { connect: { id: parkingId } },
-          vehicle: { connect: { id: vehicleId } },
+          vehicle: { connect: { id: vehicle.id } },
         },
         select: parkingSessionWithVehicleSelect,
       });

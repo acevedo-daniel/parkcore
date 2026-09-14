@@ -257,7 +257,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description Conflict (vehicle already inside, parking full, parking inactive, or parking closed) */
+                /** @description Conflict with a stable check-in code: PARKING_INACTIVE, PARKING_CLOSED, PARKING_FULL, VEHICLE_ALREADY_ACTIVE, or CHECK_IN_RACE */
                 409: {
                     headers: {
                         [name: string]: unknown;
@@ -341,7 +341,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description This parking session is not active */
+                /** @description This parking session is not active (SESSION_NOT_ACTIVE) */
                 409: {
                     headers: {
                         [name: string]: unknown;
@@ -714,7 +714,7 @@ export interface paths {
                         "application/json": components["schemas"]["ErrorResponse"];
                     };
                 };
-                /** @description This parking session is not active */
+                /** @description This parking session is not active (SESSION_NOT_ACTIVE) */
                 409: {
                     headers: {
                         [name: string]: unknown;
@@ -1615,6 +1615,14 @@ export interface components {
             error: true;
             message: string;
             code?: string;
+            details?: components["schemas"]["ErrorDetails"];
+        };
+        ErrorDetails: {
+            /**
+             * Format: date-time
+             * @description Authoritative next opening time when a parking is currently closed
+             */
+            nextOpeningAt?: string | null;
         };
         RegisterRequest: {
             /**

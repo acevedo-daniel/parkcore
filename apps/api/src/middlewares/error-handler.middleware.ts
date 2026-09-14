@@ -100,6 +100,7 @@ export const errorHandler = (err: unknown, req: Request, res: Response, next: Ne
       error: true,
       message: normalizedError.message,
       ...(normalizedError.code ? { code: normalizedError.code } : {}),
+      ...(normalizedError.details ? { details: normalizedError.details } : {}),
     });
   }
 

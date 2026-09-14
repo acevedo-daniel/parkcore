@@ -1,10 +1,15 @@
 import type { MessageKey, Translator } from '../localization.js';
 
+export interface ApiErrorDetails {
+  nextOpeningAt?: string | null;
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,
     readonly status: number,
     readonly code?: string,
+    readonly details?: ApiErrorDetails,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -43,6 +48,21 @@ export function getApiErrorCode(error: unknown) {
     return error.code;
   }
   return undefined;
+}
+
+export function getApiErrorDetails(error: unknown): ApiErrorDetails | undefined {
+  if (typeof error !== 'object' || error === null || !('details' in error)) {
+    return undefined;
+  }
+
+  const details = error.details;
+  if (typeof details !== 'object' || details === null || !('nextOpeningAt' in details)) {
+    return undefined;
+  }
+
+  const nextOpeningAt = details.nextOpeningAt;
+  if (nextOpeningAt !== null && typeof nextOpeningAt !== 'string') return undefined;
+  return { nextOpeningAt };
 }
 
 export function getApiErrorMessage(error: unknown, fallback: string) {

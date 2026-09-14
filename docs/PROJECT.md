@@ -97,6 +97,8 @@ ParkCore 1.0 intentionally does not include:
 
 Protected owner parking responses also expose the server-derived operational snapshot: active session count, free capacity, occupancy percentage, schedule open state, availability state including `PAUSED`, and the next opening when the facility is scheduled and currently closed. The snapshot is calculated from active sessions scoped to the facility and is returned by owner listing, create, and update operations.
 
+Check-in eligibility is evaluated again at the database write boundary. The API returns stable conflict codes for inactive, closed, full, duplicate-active, and concurrent check-in outcomes; a closed response may include the parking-local next opening timestamp. A rejected check-in does not create a vehicle or change its stable metadata.
+
 A parking also owns its configured capacity, hourly rate, currency, location, and the vehicles and sessions associated with that facility.
 
 The canonical SHOWCASE identity is a stable, non-credentialed account created by database setup. It owns six fictional Buenos Aires facilities: five listed active facilities used by public discovery and one paused unlisted facility retained as operational proof. The `showcase:refresh` maintenance command rebases its time-dependent sessions around an optional reference time without changing facility or asset identity. SHOWCASE data is read-only through the application and is always marked as fictional demonstration data in public responses.
