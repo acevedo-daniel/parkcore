@@ -1037,9 +1037,7 @@ test('covers owner management, history, profile, and recovery interactions', asy
       await page.goto(editParkingRoute.path);
       await expect(page.getByLabel(/capacity|capacidad/i)).toBeVisible();
       await page.getByLabel(/capacity|capacidad/i).fill('4');
-      await page
-        .getByRole('button', { name: /save changes|guardar cambios/i })
-        .click();
+      await page.getByRole('button', { name: /save changes|guardar cambios/i }).click();
       await expect(page.getByRole('alert')).toContainText(
         /capacity cannot be reduced|capacidad no puede reducirse/i,
       );
@@ -1053,14 +1051,12 @@ test('covers owner management, history, profile, and recovery interactions', asy
       api.setScenario('success');
       await page.goto(`${historyRoute.path}?page=2&period=30d`);
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-      await expect(page.getByRole('link', { name: /open session|abrir estad/i }).first()).toBeVisible();
+      await expect(
+        page.getByRole('link', { name: /open session|abrir estad/i }).first(),
+      ).toBeVisible();
 
-      await page
-        .getByLabel(/status|estado/i)
-        .selectOption('COMPLETED');
-      await expect
-        .poll(() => new URL(page.url()).searchParams.get('status'))
-        .toBe('COMPLETED');
+      await page.getByLabel(/status|estado/i).selectOption('COMPLETED');
+      await expect.poll(() => new URL(page.url()).searchParams.get('status')).toBe('COMPLETED');
       await expect.poll(() => new URL(page.url()).searchParams.get('page')).toBeNull();
 
       api.setScenario('export-error');
@@ -1071,9 +1067,7 @@ test('covers owner management, history, profile, and recovery interactions', asy
       );
 
       api.setScenario('success');
-      await exportAlert
-        .getByRole('button', { name: /retry export|reintentar exportaci/i })
-        .click();
+      await exportAlert.getByRole('button', { name: /retry export|reintentar exportaci/i }).click();
       await expect(page.locator('#history-export-status')).toContainText(
         /filtered history downloaded|historial filtrado descargado/i,
       );
@@ -1095,9 +1089,7 @@ test('covers owner management, history, profile, and recovery interactions', asy
         .getByRole('button', { name: state.locale === 'en-US' ? 'Spanish' : 'Inglés' })
         .click();
       await expect(name).toHaveValue('Updated owner');
-      await profileMain
-        .getByRole('button', { name: /save changes|guardar cambios/i })
-        .click();
+      await profileMain.getByRole('button', { name: /save changes|guardar cambios/i }).click();
       await expect(profileMain.getByRole('status')).toContainText(
         /profile was updated|datos se actualizaron/i,
       );
@@ -1110,9 +1102,13 @@ test('covers owner management, history, profile, and recovery interactions', asy
         theme: nextTheme,
       });
       await page.goto(profileRoute.path);
-      await expect(page.getByRole('heading', { name: /demo session|sesi.n de demostraci.n/i })).toBeVisible();
+      await expect(
+        page.getByRole('heading', { name: /demo session|sesi.n de demostraci.n/i }),
+      ).toBeVisible();
       await expect(page.getByLabel(/email|correo electr.nico/i)).toHaveCount(0);
-      await expect(page.getByRole('button', { name: /restore demo data|restaurar datos/i })).toBeVisible();
+      await expect(
+        page.getByRole('button', { name: /restore demo data|restaurar datos/i }),
+      ).toBeVisible();
 
       await page.getByRole('button', { name: /restore demo data|restaurar datos/i }).click();
       const resetDialog = page.getByRole('dialog');
