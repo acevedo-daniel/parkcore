@@ -94,6 +94,15 @@ const ROUTES = [
   ownerNotFoundRoute,
 ] as const satisfies readonly RouteFixture[];
 
+const PUBLIC_ROUTES = [
+  landingRoute,
+  catalogRoute,
+  detailRoute,
+  loginRoute,
+  registerRoute,
+  publicNotFoundRoute,
+] as const satisfies readonly RouteFixture[];
+
 const owner: User = {
   createdAt: '2026-08-17T09:00:00.000Z',
   demoExpiresAt: null,
@@ -468,6 +477,7 @@ async function expectMobileNavigationDoesNotCoverContent(page: Page, label: stri
   if ((await navigation.count()) === 0 || !(await navigation.isVisible())) return;
 
   await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = 'auto';
     window.scrollTo(0, document.documentElement.scrollHeight);
   });
 
@@ -480,9 +490,9 @@ async function expectMobileNavigationDoesNotCoverContent(page: Page, label: stri
     const navigationBox = mobileNavigation.getBoundingClientRect();
     const paddingBottom = Number.parseFloat(getComputedStyle(main).paddingBottom) || 0;
     return {
-      contentBottom: mainBox.bottom - paddingBottom,
+      contentBottom: mainBox.bottom + window.scrollY - paddingBottom,
       navigationHeight: navigationBox.height,
-      navigationTop: navigationBox.top,
+      navigationTop: navigationBox.top + window.scrollY,
       paddingBottom,
     };
   });
@@ -653,6 +663,27 @@ test('opens every P0 and P1 route in both shells and locales at authored viewpor
   expect(api.unexpectedRequests).toEqual([]);
 });
 
+test('keeps public and authentication routes within every viewport in both themes', async ({
+  page,
+}) => {
+  test.setTimeout(420_000);
+  const api = await installHardeningApiMock(page);
+
+  for (const locale of ['es-AR', 'en-US'] as const) {
+    for (const theme of ['light', 'dark'] as const) {
+      for (const route of PUBLIC_ROUTES) {
+        for (const viewport of VIEWPORTS) {
+          await test.step(`${route.name} ${locale} ${theme} ${viewport.name}`, async () => {
+            await visitFixture(page, route, viewport, locale, theme);
+          });
+        }
+      }
+    }
+  }
+
+  expect(api.unexpectedRequests).toEqual([]);
+});
+
 test('passes the serious and critical axe gate across route, shell, locale, and theme fixtures', async ({
   page,
 }) => {
@@ -761,6 +792,27 @@ test('covers deterministic loading, empty, error, blocked, and degraded states',
   api.setScenario('success');
   await catalogError.getByRole('button').click();
   await expect(page.locator('a[href="/parkings/parking-1"]').first()).toBeVisible();
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  const faqTrigger = page.getByRole('button', { name: /do i need to download an app/i });
+  await expect(faqTrigger).toHaveAttribute('aria-controls', /faq-.*-answer/);
+  await faqTrigger.press('Enter');
+  await expect(faqTrigger).toHaveAttribute('aria-expanded', 'false');
+
+  await page.goto(detailRoute.path);
+  await expect(page.getByText('Fictional parking with demonstration data')).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Parking image not available' })).toBeVisible();
+
+  await page.goto(loginRoute.path);
+  await expect(page.getByLabel('Email')).toHaveAttribute('autocomplete', 'email');
+  await expect(page.getByLabel('Password')).toHaveAttribute('autocomplete', 'current-password');
+  await page.getByRole('button', { name: 'Show password' }).click();
+  await expect(page.getByLabel('Password')).toHaveAttribute('type', 'text');
+
+  await page.goto(registerRoute.path);
+  await expect(page.getByLabel('First name')).toHaveAttribute('autocomplete', 'given-name');
+  await expect(page.getByLabel('Last name')).toHaveAttribute('autocomplete', 'family-name');
 
   api.setScenario('blocked');
   await configureBrowserState(page, { authenticated: true, locale: 'en-US', theme: 'light' });
