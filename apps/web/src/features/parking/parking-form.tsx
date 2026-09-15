@@ -1,14 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useMemo } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../../components/ui/button.js';
+import { Combobox, type ComboboxOption } from '../../components/ui/combobox.js';
 import { Field, Input, Select, Textarea } from '../../components/ui/field.js';
 import { Switch } from '../../components/ui/switch.js';
 import type { CreateParkingRequest, Parking } from '../../lib/api/owner-api.js';
 import type { Translator } from '../../lib/localization.js';
+import { getTimezoneOptions } from '../../lib/timezones.js';
 
 function createParkingFormSchema(t: Translator) {
   return z
@@ -78,12 +80,12 @@ function createParkingFormSchema(t: Translator) {
 
 type ParkingFormValues = z.infer<ReturnType<typeof createParkingFormSchema>>;
 
-function defaults(parking?: Parking) {
+function defaults(parking?: Parking, defaultTimezone?: string) {
   return {
     address: parking?.address ?? '',
     capacity: parking?.capacity ?? 1,
     closesAt: parking?.closesAt ?? '',
-    currency: parking?.currency ?? 'USD',
+    currency: parking?.currency ?? 'ARS',
     description: parking?.description ?? '',
     hourlyRate: parking ? parking.hourlyRateCents / 100 : 1,
     image: parking?.image ?? '',
@@ -95,7 +97,8 @@ function defaults(parking?: Parking) {
     neighborhood: parking?.neighborhood ?? '',
     opensAt: parking?.opensAt ?? '',
     title: parking?.title ?? '',
-    timezone: parking?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timezone:
+      parking?.timezone ?? defaultTimezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
   };
 }
 
@@ -120,23 +123,41 @@ function toRequest(values: ParkingFormValues): CreateParkingRequest {
 }
 
 export function ParkingForm({
+  defaultTimezone,
   error,
   isSubmitting,
+  onDirtyChange,
   onSubmit,
   parking,
 }: {
+  defaultTimezone?: string;
   error?: string;
   isSubmitting?: boolean;
+  onDirtyChange?: (dirty: boolean) => void;
   onSubmit: (input: CreateParkingRequest & { isActive?: boolean }) => Promise<void> | void;
   parking?: Parking;
 }) {
   const { t } = useAppearance();
+  const [imageLoadFailed, setImageLoadFailed] = useState(false);
   const schema = useMemo(() => createParkingFormSchema(t), [t]);
+  const timezoneOptions = useMemo<readonly ComboboxOption[]>(
+    () => getTimezoneOptions().map((timezone) => ({ label: timezone, value: timezone })),
+    [],
+  );
   const form = useForm<ParkingFormValues>({
-    defaultValues: defaults(parking),
+    defaultValues: defaults(parking, defaultTimezone),
     resolver: zodResolver(schema),
   });
   const is24Hours = useWatch({ control: form.control, name: 'is24Hours' });
+  const currency = useWatch({ control: form.control, name: 'currency' });
+  const image = useWatch({ control: form.control, name: 'image' });
+  const imageRegistration = form.register('image');
+  const { errors, isDirty } = form.formState;
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
+
   useEffect(() => {
     if (Object.keys(form.formState.errors).length > 0) void form.trigger();
   }, [form, t]);
@@ -147,51 +168,86 @@ export function ParkingForm({
 
   return (
     <form
-      className="parking-form grid gap-5 lg:grid-cols-2"
+      className="parking-form grid gap-8 lg:grid-cols-2"
       noValidate
       onSubmit={(event) => {
         void submit(event);
       }}
     >
-      <fieldset className="space-y-5 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:p-6 lg:col-span-2">
-        <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-          {t('parkingForm.general')}
-        </legend>
-        <Field
-          error={form.formState.errors.title?.message}
-          htmlFor="parking-title"
-          label={t('parkingForm.title')}
-        >
+      <FormSection
+        description={t('parkingForm.generalDescription')}
+        title={t('parkingForm.general')}
+        wide
+      >
+        <Field error={errors.title?.message} htmlFor="parking-title" label={t('parkingForm.title')}>
           <Input id="parking-title" {...form.register('title')} />
         </Field>
         <Field
-          error={form.formState.errors.neighborhood?.message}
+          error={errors.neighborhood?.message}
           htmlFor="parking-neighborhood"
           label={t('parkingForm.neighborhood')}
         >
           <Input id="parking-neighborhood" {...form.register('neighborhood')} />
         </Field>
         <Field
-          error={form.formState.errors.description?.message}
+          error={errors.description?.message}
           htmlFor="parking-description"
           label={t('parkingForm.description')}
         >
           <Textarea id="parking-description" rows={4} {...form.register('description')} />
         </Field>
         <Field
-          error={form.formState.errors.image?.message}
+          error={errors.image?.message}
           htmlFor="parking-image"
           label={t('parkingForm.imageUrl')}
         >
-          <Input id="parking-image" inputMode="url" type="url" {...form.register('image')} />
+          <Input
+            id="parking-image"
+            inputMode="url"
+            type="url"
+            {...imageRegistration}
+            onChange={(event) => {
+              setImageLoadFailed(false);
+              void imageRegistration.onChange(event);
+            }}
+          />
         </Field>
-      </fieldset>
-      <fieldset className="space-y-5 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:p-6">
-        <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-          {t('parkingForm.location')}
-        </legend>
+        {image ? (
+          <figure className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-surface-subtle">
+            {imageLoadFailed ? (
+              <div
+                aria-live="polite"
+                className="flex min-h-32 items-center justify-center px-5 py-8 text-center text-sm font-medium text-danger-text"
+                role="status"
+              >
+                {t('parkingForm.imageLoadFailed')}
+              </div>
+            ) : (
+              <img
+                alt={t('parkingForm.imagePreview')}
+                className="max-h-64 w-full object-cover"
+                onError={() => {
+                  setImageLoadFailed(true);
+                }}
+                onLoad={() => {
+                  setImageLoadFailed(false);
+                }}
+                src={image}
+              />
+            )}
+            <figcaption className="border-t border-border-subtle px-4 py-2 text-xs text-foreground-muted">
+              {t('parkingForm.imagePreview')}
+            </figcaption>
+          </figure>
+        ) : null}
+      </FormSection>
+
+      <FormSection
+        description={t('parkingForm.locationDescription')}
+        title={t('parkingForm.location')}
+      >
         <Field
-          error={form.formState.errors.address?.message}
+          error={errors.address?.message}
           htmlFor="parking-address"
           label={t('parkingForm.address')}
         >
@@ -199,7 +255,7 @@ export function ParkingForm({
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
-            error={form.formState.errors.lat?.message}
+            error={errors.lat?.message}
             htmlFor="parking-lat"
             label={t('parkingForm.latitude')}
           >
@@ -212,7 +268,7 @@ export function ParkingForm({
             />
           </Field>
           <Field
-            error={form.formState.errors.lng?.message}
+            error={errors.lng?.message}
             htmlFor="parking-lng"
             label={t('parkingForm.longitude')}
           >
@@ -225,18 +281,46 @@ export function ParkingForm({
             />
           </Field>
         </div>
-        <Field
-          error={form.formState.errors.timezone?.message}
-          htmlFor="parking-timezone"
-          label={t('parkingForm.timezone')}
-        >
-          <Input id="parking-timezone" {...form.register('timezone')} />
-        </Field>
-      </fieldset>
-      <fieldset className="space-y-5 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:p-6">
-        <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-          {t('parkingForm.hours')}
-        </legend>
+        <Controller
+          control={form.control}
+          name="timezone"
+          render={({ field, fieldState }) => {
+            const options = timezoneOptions.some((option) => option.value === field.value)
+              ? timezoneOptions
+              : [...timezoneOptions, { label: field.value, value: field.value }];
+            const messageId = 'parking-timezone-message';
+            return (
+              <div className="space-y-1.5">
+                <Combobox
+                  aria-describedby={messageId}
+                  aria-invalid={fieldState.error ? true : undefined}
+                  id="parking-timezone"
+                  label={t('parkingForm.timezone')}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                  }}
+                  options={options}
+                  value={field.value}
+                />
+                {fieldState.error ? (
+                  <p className="field-error text-sm font-medium text-danger-text" id={messageId}>
+                    {fieldState.error.message}
+                  </p>
+                ) : (
+                  <p
+                    className="field-help text-sm leading-relaxed text-foreground-muted"
+                    id={messageId}
+                  >
+                    {t('parkingForm.timezoneHelp')}
+                  </p>
+                )}
+              </div>
+            );
+          }}
+        />
+      </FormSection>
+
+      <FormSection description={t('parkingForm.hoursDescription')} title={t('parkingForm.hours')}>
         <Switch
           description={t('parkingForm.open24HoursDescription')}
           id="parking-24-hours"
@@ -246,14 +330,14 @@ export function ParkingForm({
         {!is24Hours ? (
           <div className="grid gap-4 sm:grid-cols-2">
             <Field
-              error={form.formState.errors.opensAt?.message}
+              error={errors.opensAt?.message}
               htmlFor="parking-opens-at"
               label={t('parkingForm.opening')}
             >
               <Input id="parking-opens-at" type="time" {...form.register('opensAt')} />
             </Field>
             <Field
-              error={form.formState.errors.closesAt?.message}
+              error={errors.closesAt?.message}
               htmlFor="parking-closes-at"
               label={t('parkingForm.closing')}
             >
@@ -261,14 +345,15 @@ export function ParkingForm({
             </Field>
           </div>
         ) : null}
-      </fieldset>
-      <fieldset className="space-y-5 rounded-[1.5rem] border border-[#121417]/12 bg-[#f5f5f5] p-5 sm:p-6">
-        <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-          {t('parkingForm.operations')}
-        </legend>
+      </FormSection>
+
+      <FormSection
+        description={t('parkingForm.operationsDescription')}
+        title={t('parkingForm.operations')}
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
-            error={form.formState.errors.capacity?.message}
+            error={errors.capacity?.message}
             htmlFor="parking-capacity"
             label={t('parkingForm.capacity')}
           >
@@ -280,9 +365,9 @@ export function ParkingForm({
             />
           </Field>
           <Field
-            error={form.formState.errors.hourlyRate?.message}
+            error={errors.hourlyRate?.message}
             htmlFor="parking-rate"
-            label={t('parkingForm.hourlyRate', { currency: 'USD' })}
+            label={t('parkingForm.hourlyRate', { currency })}
           >
             <Input
               id="parking-rate"
@@ -299,33 +384,38 @@ export function ParkingForm({
             <option value="USD">USD</option>
           </Select>
         </Field>
-      </fieldset>
+      </FormSection>
+
       {parking ? (
-        <fieldset className="space-y-3 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:p-6 lg:col-span-2">
-          <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-            {t('parkingForm.availability')}
-          </legend>
+        <FormSection
+          description={t('parkingForm.availabilityDescription')}
+          title={t('parkingForm.availability')}
+          wide
+        >
           <Switch
             description={t('parkingForm.acceptCheckInsDescription')}
             id="parking-active"
             label={t('parkingForm.acceptCheckIns')}
             {...form.register('isActive')}
           />
-        </fieldset>
+        </FormSection>
       ) : null}
-      <fieldset className="space-y-3 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:p-6 lg:col-span-2">
-        <legend className="px-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6d695f]">
-          {t('parkingForm.publication')}
-        </legend>
+
+      <FormSection
+        description={t('parkingForm.publicationDescription')}
+        title={t('parkingForm.publication')}
+        wide
+      >
         <Switch
           description={t('parkingForm.visibleInDirectoryDescription')}
           id="parking-listed"
           label={t('parkingForm.visibleInDirectory')}
           {...form.register('isListed')}
         />
-      </fieldset>
+      </FormSection>
+
       {error ? (
-        <p className="form-error" role="alert">
+        <p className="form-error lg:col-span-2" role="alert">
           {error}
         </p>
       ) : null}
@@ -341,5 +431,29 @@ export function ParkingForm({
             : t('parkingForm.create')}
       </Button>
     </form>
+  );
+}
+
+function FormSection({
+  children,
+  description,
+  title,
+  wide = false,
+}: {
+  children: ReactNode;
+  description: string;
+  title: string;
+  wide?: boolean;
+}) {
+  return (
+    <fieldset
+      className={`space-y-5 border-b border-border-subtle pb-8 ${wide ? 'lg:col-span-2' : ''}`}
+    >
+      <legend className="px-0 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-foreground-muted">
+        {title}
+      </legend>
+      <p className="max-w-2xl text-sm leading-relaxed text-foreground-secondary">{description}</p>
+      {children}
+    </fieldset>
   );
 }

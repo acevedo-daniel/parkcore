@@ -18,6 +18,8 @@ vi.mock('../../lib/api/owner-api.js', () => api);
 
 type SessionList = components['schemas']['ParkingSessionListResponse'];
 
+let restoreDownloadMocks: (() => void) | undefined;
+
 function sessionList(
   data: SessionList['data'],
   meta: Partial<SessionList['meta']> = {},
@@ -58,6 +60,9 @@ function renderHistory(initialEntry = '/app/parkings/parking-1/sessions') {
 }
 
 afterEach(() => {
+  vi.restoreAllMocks();
+  restoreDownloadMocks?.();
+  restoreDownloadMocks = undefined;
   api.getOwnedParkings.mockReset();
   api.getParkingSessionsCsv.mockReset();
   api.getParkingSessions.mockReset();
@@ -99,7 +104,7 @@ describe('parking session history pagination', () => {
           { hasPreviousPage: true, page: 2, totalPages: 2 },
         ),
       );
-    renderHistory('/app/parkings/parking-1/sessions?status=COMPLETED');
+    renderHistory('/app/parkings/parking-1/sessions?plate=ab-123&period=7d&status=COMPLETED');
 
     await screen.findByRole('link', { name: 'Open session for AB123CD' });
     await user.click(screen.getByRole('button', { name: 'Next' }));
@@ -107,8 +112,9 @@ describe('parking session history pagination', () => {
     expect(await screen.findByText('$31.00')).toBeTruthy();
     expect(api.getParkingSessions).toHaveBeenLastCalledWith('parking-1', {
       page: 2,
+      plate: 'AB123',
       status: 'COMPLETED',
-      period: '30d',
+      period: '7d',
     });
   });
 
@@ -124,7 +130,9 @@ describe('parking session history pagination', () => {
         }),
       )
       .mockResolvedValueOnce(sessionList([]));
-    renderHistory('/app/parkings/parking-1/sessions?page=2&status=COMPLETED');
+    renderHistory(
+      '/app/parkings/parking-1/sessions?page=2&plate=ab-123&period=7d&status=COMPLETED',
+    );
 
     await screen.findByRole('link', { name: 'Open session for AB123CD' });
     await user.selectOptions(screen.getByLabelText('Status'), 'CANCELLED');
@@ -132,8 +140,117 @@ describe('parking session history pagination', () => {
     expect(await screen.findByText('No sessions found')).toBeTruthy();
     expect(api.getParkingSessions).toHaveBeenLastCalledWith('parking-1', {
       page: 1,
+      plate: 'AB123',
       status: 'CANCELLED',
-      period: '30d',
+      period: '7d',
+    });
+  });
+
+  it('shows the filtered aggregate in separate currencies and the parking timezone', async () => {
+    api.getOwnedParkings.mockResolvedValue([parkingFixture()]);
+    const response = sessionList([
+      parkingSessionFixture({ status: 'CANCELLED', totalAmountCents: null }),
+    ]);
+    response.aggregate = {
+      totalSessions: 3,
+      activeSessions: 1,
+      completedSessions: 1,
+      cancelledSessions: 1,
+      revenueByCurrency: [
+        { currency: 'ARS', revenueCents: 2500 },
+        { currency: 'USD', revenueCents: 1550 },
+      ],
+    };
+    api.getParkingSessions.mockResolvedValue(response);
+
+    renderHistory('/app/parkings/parking-1/sessions?period=today');
+
+    expect(await screen.findByText('Filtered summary')).toBeTruthy();
+    expect(screen.getByText('America/Argentina/Buenos_Aires')).toBeTruthy();
+    expect(screen.getByText(/ARS.*25\.00/)).toBeTruthy();
+    expect(screen.getByText(/\$15\.50/)).toBeTruthy();
+    expect(screen.getByText('No charge')).toBeTruthy();
+  });
+
+  it('exports the same normalized filters and announces the completed download', async () => {
+    const user = userEvent.setup();
+    api.getOwnedParkings.mockResolvedValue([parkingFixture()]);
+    api.getParkingSessions.mockResolvedValue(sessionList([parkingSessionFixture()]));
+    api.getParkingSessionsCsv.mockResolvedValue('plate,status\r\nAB123CD,COMPLETED');
+    const downloadMocks = mockDownload();
+    const clickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => undefined);
+
+    renderHistory('/app/parkings/parking-1/sessions?plate=ab-123&period=7d&status=COMPLETED');
+    await screen.findByRole('link', { name: 'Open session for AB123CD' });
+
+    await user.click(screen.getByRole('button', { name: 'Export CSV' }));
+
+    expect(await screen.findByText('Filtered history downloaded.')).toBeTruthy();
+    expect(api.getParkingSessionsCsv).toHaveBeenCalledWith('parking-1', {
+      plate: 'AB123',
+      period: '7d',
+      status: 'COMPLETED',
+    });
+    expect(downloadMocks.createObjectUrl).toHaveBeenCalledTimes(1);
+    expect(downloadMocks.revokeObjectUrl).toHaveBeenCalledWith('blob:history');
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('announces an export error and retries the same filtered request', async () => {
+    const user = userEvent.setup();
+    api.getOwnedParkings.mockResolvedValue([parkingFixture()]);
+    api.getParkingSessions.mockResolvedValue(sessionList([parkingSessionFixture()]));
+    api.getParkingSessionsCsv
+      .mockRejectedValueOnce(new Error('export failed'))
+      .mockResolvedValueOnce('plate,status\r\nAB123CD,COMPLETED');
+    mockDownload();
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+
+    renderHistory('/app/parkings/parking-1/sessions?plate=ab-123&period=7d&status=COMPLETED');
+    await screen.findByRole('link', { name: 'Open session for AB123CD' });
+
+    await user.click(screen.getByRole('button', { name: 'Export CSV' }));
+    expect((await screen.findByRole('alert')).textContent).toContain(
+      'We could not export this filtered history. Try again.',
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Retry export' }));
+    expect(await screen.findByText('Filtered history downloaded.')).toBeTruthy();
+    expect(api.getParkingSessionsCsv).toHaveBeenCalledTimes(2);
+    expect(api.getParkingSessionsCsv).toHaveBeenLastCalledWith('parking-1', {
+      plate: 'AB123',
+      period: '7d',
+      status: 'COMPLETED',
     });
   });
 });
+
+function mockDownload() {
+  const createObjectUrlDescriptor = Object.getOwnPropertyDescriptor(URL, 'createObjectURL');
+  const revokeObjectUrlDescriptor = Object.getOwnPropertyDescriptor(URL, 'revokeObjectURL');
+  const createObjectUrl = vi.fn(() => 'blob:history');
+  const revokeObjectUrl = vi.fn();
+  Object.defineProperty(URL, 'createObjectURL', {
+    configurable: true,
+    value: createObjectUrl,
+  });
+  Object.defineProperty(URL, 'revokeObjectURL', {
+    configurable: true,
+    value: revokeObjectUrl,
+  });
+  restoreDownloadMocks = () => {
+    if (createObjectUrlDescriptor) {
+      Object.defineProperty(URL, 'createObjectURL', createObjectUrlDescriptor);
+    } else {
+      Reflect.deleteProperty(URL, 'createObjectURL');
+    }
+    if (revokeObjectUrlDescriptor) {
+      Object.defineProperty(URL, 'revokeObjectURL', revokeObjectUrlDescriptor);
+    } else {
+      Reflect.deleteProperty(URL, 'revokeObjectURL');
+    }
+  };
+  return { createObjectUrl, revokeObjectUrl };
+}

@@ -25,5 +25,9 @@ describe('localizeApiError', () => {
     expect(error.details).toEqual(details);
     expect(getApiErrorDetails({ details })).toEqual(details);
     expect(getApiErrorDetails({ details: { nextOpeningAt: 42 } })).toBeUndefined();
+    expect(getApiErrorDetails({ details: { activeSessionCount: 3 } })).toEqual({
+      activeSessionCount: 3,
+    });
+    expect(getApiErrorDetails({ details: { activeSessionCount: -1 } })).toBeUndefined();
   });
 });

@@ -111,30 +111,58 @@ export function SessionHistoryRow({
   const { locale, t } = useAppearance();
   const total =
     session.totalAmountCents === null
-      ? t('common.notAvailable')
+      ? session.status === 'CANCELLED'
+        ? t('session.notCharged')
+        : t('common.notAvailable')
       : formatMoney(session.totalAmountCents, session.currency, locale);
+  const vehicleType = getVehicleTypeLabel(session.vehicle.type, t);
   return (
     <Link
       aria-label={t('session.openFor', { plate: session.vehicle.plate })}
-      className="session-history-row"
+      className="session-history-row group grid gap-x-4 gap-y-4 border-b border-border-subtle py-5 text-foreground transition-colors duration-200 hover:bg-surface-subtle focus-visible:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring md:grid-cols-[minmax(10rem,1.25fr)_minmax(9rem,1fr)_minmax(7rem,0.9fr)_minmax(8rem,auto)_auto] md:items-center"
       to={to}
     >
-      <OperationalTimestamp
-        label={t('session.date')}
-        value={session.startTime}
-        timezone={timezone}
-      />
-      <Plate plate={session.vehicle.plate} />
-      {session.endTime ? (
-        <span className="session-history-duration type-operational">
-          {formatDuration(session.startTime, session.endTime, locale)}
-        </span>
-      ) : (
-        <ElapsedDuration startTime={session.startTime} />
-      )}
-      <SessionStatus status={session.status} />
-      <span className="type-operational">{total}</span>
-      <ArrowUpRight aria-hidden="true" size={18} />
+      <div className="min-w-0">
+        <p className="type-label text-foreground-muted md:hidden">{t('session.plate')}</p>
+        <div className="mt-1 flex items-center gap-3 md:mt-0">
+          <Plate plate={session.vehicle.plate} />
+          <span className="truncate text-xs font-semibold text-foreground-secondary">
+            {vehicleType}
+          </span>
+        </div>
+      </div>
+      <div>
+        <p className="type-label text-foreground-muted md:hidden">{t('session.date')}</p>
+        <div className="mt-1 text-sm font-semibold md:mt-0">
+          <OperationalTimestamp value={session.startTime} timezone={timezone} />
+        </div>
+      </div>
+      <div>
+        <p className="type-label text-foreground-muted md:hidden">{t('session.elapsed')}</p>
+        <div className="mt-1 text-sm font-semibold md:mt-0">
+          {session.endTime ? (
+            <span className="type-operational">
+              {formatDuration(session.startTime, session.endTime, locale)}
+            </span>
+          ) : (
+            <ElapsedDuration startTime={session.startTime} />
+          )}
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-4 md:block">
+        <p className="type-label text-foreground-muted md:hidden">{t('parkingHistory.status')}</p>
+        <SessionStatus status={session.status} />
+      </div>
+      <div className="flex items-center justify-between gap-4 md:justify-end">
+        <div className="text-right">
+          <p className="type-label text-foreground-muted md:hidden">{t('session.total')}</p>
+          <span className="type-operational">{total}</span>
+        </div>
+        <ArrowUpRight
+          aria-hidden="true"
+          className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+        />
+      </div>
     </Link>
   );
 }

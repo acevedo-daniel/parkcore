@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
@@ -9,99 +9,95 @@ import { Button } from '../../components/ui/button.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { Field, Input, Select } from '../../components/ui/field.js';
 import { formatMoney } from '../../lib/format.js';
+import {
+  getOwnedParkings,
+  getParkingSessions,
+  getParkingSessionsCsv,
+  type ParkingSession,
+  type ParkingSessionFilter,
+} from '../../lib/api/owner-api.js';
 import { normalizePlate } from '../../lib/plate.js';
 import { useDebouncedValue } from '../../lib/use-debounced-value.js';
 import {
-  getOwnedParkings,
-  getParkingSessionsCsv,
-  getParkingSessions,
-  type ParkingSession,
-} from '../../lib/api/owner-api.js';
+  parkingHistorySearchParamsFromState,
+  parseParkingHistoryUrlState,
+  type ParkingHistoryUrlState,
+} from './parking-history-query.js';
 
 type SessionFilter = 'ALL' | ParkingSession['status'];
-type HistoryPeriod = 'today' | '7d' | '30d';
+type ExportStatus = 'idle' | 'pending' | 'success' | 'error';
+type ExportResult = { key: string; status: Exclude<ExportStatus, 'idle'> } | null;
+type HistorySearchUpdater = (changes: Partial<ParkingHistoryUrlState>, replace?: boolean) => void;
+
+function toSessionFilter(state: ParkingHistoryUrlState): ParkingSessionFilter {
+  return {
+    period: state.period,
+    ...(state.status ? { status: state.status } : {}),
+    ...(state.plate ? { plate: state.plate } : {}),
+  };
+}
 
 export function OwnerParkingHistoryRoute() {
-  const { language, locale, t } = useAppearance();
-  const es = language === 'es';
+  const { locale, t } = useAppearance();
   const { parkingId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const rawPage = Number(searchParams.get('page'));
-  const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
-  const rawStatus = searchParams.get('status');
-  const filter: SessionFilter =
-    rawStatus === 'ACTIVE' || rawStatus === 'COMPLETED' || rawStatus === 'CANCELLED'
-      ? rawStatus
-      : 'ALL';
-  const rawPeriod = searchParams.get('period');
-  const period: HistoryPeriod =
-    rawPeriod === 'today' || rawPeriod === '7d' || rawPeriod === '30d' ? rawPeriod : '30d';
-  const urlPlate = normalizePlate(searchParams.get('plate') ?? '');
-  const [plateInput, setPlateInput] = useState(urlPlate);
-  const [exporting, setExporting] = useState(false);
-  const [exportError, setExportError] = useState(false);
-  const debouncedPlate = useDebouncedValue(normalizePlate(plateInput), 250);
-  const updateSearch = (next: {
-    page?: number;
-    plate?: string;
-    status?: SessionFilter;
-    period?: HistoryPeriod;
-  }) => {
-    const params = new URLSearchParams(searchParams);
-    if (next.status === undefined || next.status === 'ALL') params.delete('status');
-    else params.set('status', next.status);
-    if (next.page === undefined || next.page <= 1) params.delete('page');
-    else params.set('page', String(next.page));
-    if (next.plate === undefined || next.plate.length === 0) params.delete('plate');
-    else params.set('plate', next.plate);
-    if (next.period === undefined || next.period === '30d') params.delete('period');
-    else params.set('period', next.period);
-    setSearchParams(params);
-  };
+  const historyState = useMemo(() => parseParkingHistoryUrlState(searchParams), [searchParams]);
+  const canonicalSearchParams = useMemo(
+    () => parkingHistorySearchParamsFromState(historyState),
+    [historyState],
+  );
+  const rawSearch = searchParams.toString();
+  const canonicalSearch = canonicalSearchParams.toString();
+  const [exportResult, setExportResult] = useState<ExportResult>(null);
 
   useEffect(() => {
-    if (debouncedPlate === urlPlate) return;
-    const params = new URLSearchParams(searchParams);
-    if (debouncedPlate) params.set('plate', debouncedPlate);
-    else params.delete('plate');
-    params.delete('page');
-    setSearchParams(params);
-  }, [debouncedPlate, searchParams, setSearchParams, urlPlate]);
+    if (rawSearch === canonicalSearch) return;
+    setSearchParams(canonicalSearchParams, { replace: true });
+  }, [canonicalSearch, canonicalSearchParams, rawSearch, setSearchParams]);
+
+  const updateSearch = useCallback(
+    (changes: Partial<ParkingHistoryUrlState>, replace = false) => {
+      setSearchParams(parkingHistorySearchParamsFromState({ ...historyState, ...changes }), {
+        replace,
+      });
+    },
+    [historyState, setSearchParams],
+  );
+
   const parkingsQuery = useQuery({ queryKey: ['owned-parkings'], queryFn: getOwnedParkings });
   const parking = parkingsQuery.data?.find((item) => item.id === parkingId);
+  const sessionFilter = useMemo<ParkingSessionFilter>(
+    () => toSessionFilter(historyState),
+    [historyState],
+  );
   const sessionsQuery = useQuery({
     enabled: Boolean(parkingId),
-    queryKey: ['parking-sessions', parkingId, filter, period, debouncedPlate, page],
+    queryKey: ['parking-sessions', parkingId, historyState.page, sessionFilter],
     queryFn: () =>
       getParkingSessions(parkingId ?? '', {
-        page,
-        period,
-        ...(filter === 'ALL' ? {} : { status: filter }),
-        ...(debouncedPlate ? { plate: debouncedPlate } : {}),
+        page: historyState.page,
+        ...sessionFilter,
       }),
-    placeholderData: (previousData) => previousData,
   });
+  const exportStatus: ExportStatus =
+    exportResult?.key === canonicalSearch ? exportResult.status : 'idle';
 
   const exportHistory = async () => {
-    if (!parkingId) return;
-    setExporting(true);
-    setExportError(false);
+    if (!parkingId || exportStatus === 'pending') return;
+    setExportResult({ key: canonicalSearch, status: 'pending' });
     try {
-      const csv = await getParkingSessionsCsv(parkingId, {
-        period,
-        ...(filter === 'ALL' ? {} : { status: filter }),
-        ...(debouncedPlate ? { plate: debouncedPlate } : {}),
-      });
+      const csv = await getParkingSessionsCsv(parkingId, sessionFilter);
       const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
       const anchor = document.createElement('a');
       anchor.href = url;
       anchor.download = `${parking?.title ?? 'parking'}-history.csv`;
+      document.body.append(anchor);
       anchor.click();
+      anchor.remove();
       URL.revokeObjectURL(url);
+      setExportResult({ key: canonicalSearch, status: 'success' });
     } catch {
-      setExportError(true);
-    } finally {
-      setExporting(false);
+      setExportResult({ key: canonicalSearch, status: 'error' });
     }
   };
 
@@ -127,22 +123,25 @@ export function OwnerParkingHistoryRoute() {
       </ErrorState>
     );
   }
+
   const sessions = sessionsQuery.data?.data ?? [];
   const pagination = sessionsQuery.data?.meta;
   const aggregate = sessionsQuery.data?.aggregate;
+  const historyTimezone = sessionsQuery.data?.timezone ?? parking.timezone;
+  const exporting = exportStatus === 'pending';
 
   return (
-    <section className="owner-page space-y-7" aria-labelledby="history-title">
+    <section aria-labelledby="history-title" className="owner-page space-y-7">
       <PageHeader
         actions={
-          <Button disabled={exporting} onClick={() => void exportHistory()} variant="outline">
-            {exporting
-              ? es
-                ? 'Exportando...'
-                : 'Exporting...'
-              : es
-                ? 'Exportar CSV'
-                : 'Export CSV'}
+          <Button
+            aria-busy={exporting}
+            aria-describedby={exportStatus === 'pending' ? 'history-export-status' : undefined}
+            disabled={exporting}
+            onClick={() => void exportHistory()}
+            variant="outline"
+          >
+            {exporting ? t('parkingHistory.exporting') : t('parkingHistory.export')}
           </Button>
         }
         backAction={
@@ -150,145 +149,175 @@ export function OwnerParkingHistoryRoute() {
             className="inline-flex items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
             to={`/app/parkings/${parking.id}`}
           >
-            {es ? 'Volver a la cochera' : 'Back to parking'}
+            {t('parkingHistory.backToParking')}
           </Link>
         }
+        description={t('parkingHistory.description')}
         eyebrow={parking.title}
         id="history-title"
-        title={es ? 'Historial de estadías' : 'Session history'}
+        title={t('parkingHistory.title')}
       />
-      <div className="grid gap-4 rounded-[1.5rem] border border-[#121417]/12 bg-[#f5f5f5] p-5 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_12rem_12rem_auto] sm:p-6">
-        <Field htmlFor="session-plate" label={es ? 'Buscar patente' : 'Search plate'}>
-          <Input
-            id="session-plate"
-            onChange={(event) => {
-              setPlateInput(event.target.value);
-            }}
-            placeholder="AB123CD"
-            value={plateInput}
-          />
-        </Field>
-        <Field htmlFor="session-status" label={es ? 'Estado' : 'Status'}>
-          <Select
-            id="session-status"
-            value={filter}
-            onChange={(event) => {
-              updateSearch({
-                page: 1,
-                plate: debouncedPlate,
-                status: event.target.value as SessionFilter,
-              });
-            }}
-          >
-            <option value="ALL">{es ? 'Todas las estadías' : 'All sessions'}</option>
-            <option value="ACTIVE">{es ? 'Activas' : 'Active'}</option>
-            <option value="COMPLETED">{es ? 'Finalizadas' : 'Completed'}</option>
-            <option value="CANCELLED">{es ? 'Canceladas' : 'Cancelled'}</option>
-          </Select>
-        </Field>
-        <Field htmlFor="session-period" label={es ? 'Período' : 'Period'}>
-          <Select
-            id="session-period"
-            value={period}
-            onChange={(event) => {
-              updateSearch({
-                page: 1,
-                period: event.target.value as HistoryPeriod,
-                plate: debouncedPlate,
-                status: filter,
-              });
-            }}
-          >
-            <option value="today">{es ? 'Hoy' : 'Today'}</option>
-            <option value="7d">{es ? '7 días' : '7 days'}</option>
-            <option value="30d">{es ? '30 días' : '30 days'}</option>
-          </Select>
-        </Field>
-        <Button
-          className="self-end rounded-full"
-          type="button"
-          variant="secondary"
-          onClick={() => {
-            void sessionsQuery.refetch();
-          }}
-        >
-          {es ? 'Actualizar' : 'Refresh'}
-        </Button>
+
+      <div className="flex flex-col gap-2 border-b border-border-subtle pb-5 sm:flex-row sm:items-baseline sm:justify-between">
+        <div>
+          <p className="type-label text-foreground-muted">{t('parkingHistory.timezone')}</p>
+          <p className="mt-1 type-operational">{historyTimezone}</p>
+        </div>
+        <p className="max-w-2xl text-sm leading-relaxed text-foreground-secondary">
+          {t('parkingHistory.timezoneDescription', { timezone: historyTimezone })}
+        </p>
       </div>
-      {exportError ? (
-        <ErrorState onRetry={() => void exportHistory()}>{t('api.exportHistory')}</ErrorState>
-      ) : null}
-      {aggregate ? (
-        <section className="grid gap-4 rounded-[1.5rem] border border-[#121417]/12 bg-white p-5 sm:grid-cols-4 sm:p-6">
-          <HistoryMetric label={es ? 'Total' : 'Total'} value={String(aggregate.totalSessions)} />
-          <HistoryMetric
-            label={es ? 'Finalizadas' : 'Completed'}
-            value={String(aggregate.completedSessions)}
-          />
-          <HistoryMetric
-            label={es ? 'Canceladas' : 'Cancelled'}
-            value={String(aggregate.cancelledSessions)}
-          />
-          <div>
-            <p className="type-label text-foreground-muted">{es ? 'Ingresos' : 'Revenue'}</p>
-            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-sm font-bold">
-              {aggregate.revenueByCurrency.length > 0
-                ? aggregate.revenueByCurrency.map(({ currency, revenueCents }) => (
-                    <span key={currency}>{formatMoney(revenueCents, currency, locale)}</span>
-                  ))
-                : 'N/A'}
-            </div>
-          </div>
-        </section>
-      ) : null}
-      {sessionsQuery.isFetching ? (
-        <p className="query-status" role="status">
-          {es ? 'Actualizando historial…' : 'Refreshing history…'}
+
+      <HistoryFilters
+        key={historyState.plate ?? ''}
+        historyState={historyState}
+        isFetching={sessionsQuery.isFetching}
+        onRefresh={() => {
+          void sessionsQuery.refetch();
+        }}
+        updateSearch={updateSearch}
+      />
+
+      {exportStatus === 'pending' || exportStatus === 'success' ? (
+        <p
+          aria-live="polite"
+          className="text-sm font-semibold text-foreground-secondary"
+          id="history-export-status"
+          role="status"
+        >
+          {exportStatus === 'pending'
+            ? t('parkingHistory.exporting')
+            : t('parkingHistory.exported')}
         </p>
       ) : null}
-      {sessions.length === 0 ? (
-        <EmptyState title={es ? 'No encontramos estadías' : 'No sessions found'}>
-          {es ? 'Probá con otro estado o una patente distinta.' : 'Try a different status filter.'}
-        </EmptyState>
-      ) : (
-        <div className="session-history-list">
-          {sessions.map((session) => (
-            <SessionHistoryRow
-              key={session.id}
-              session={session}
-              timezone={parking.timezone}
-              to={`/app/sessions/${session.id}`}
-            />
-          ))}
+      {exportStatus === 'error' ? (
+        <div
+          aria-live="assertive"
+          className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-danger-foreground bg-danger-surface p-4 text-danger-text sm:flex-row sm:items-center sm:justify-between"
+          role="alert"
+        >
+          <p className="text-sm font-semibold">{t('parkingHistory.exportError')}</p>
+          <Button onClick={() => void exportHistory()} type="button" variant="secondary">
+            {t('parkingHistory.retryExport')}
+          </Button>
         </div>
-      )}
+      ) : null}
+
+      {aggregate ? (
+        <section
+          aria-labelledby="history-summary-title"
+          className="border-b border-border-subtle pb-7"
+        >
+          <h2 className="type-label text-foreground-muted" id="history-summary-title">
+            {t('parkingHistory.summary')}
+          </h2>
+          <dl className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+            <HistoryMetric
+              label={t('parkingHistory.total')}
+              value={String(aggregate.totalSessions)}
+            />
+            <HistoryMetric
+              label={t('parkingHistory.activeCount')}
+              value={String(aggregate.activeSessions)}
+            />
+            <HistoryMetric
+              label={t('parkingHistory.completedCount')}
+              value={String(aggregate.completedSessions)}
+            />
+            <HistoryMetric
+              label={t('parkingHistory.cancelledCount')}
+              value={String(aggregate.cancelledSessions)}
+            />
+            <HistoryMetric
+              label={t('parkingHistory.revenue')}
+              value={
+                aggregate.revenueByCurrency.length > 0 ? (
+                  <span className="flex flex-wrap gap-x-3 gap-y-1">
+                    {aggregate.revenueByCurrency.map(({ currency, revenueCents }) => (
+                      <span key={currency}>{formatMoney(revenueCents, currency, locale)}</span>
+                    ))}
+                  </span>
+                ) : (
+                  t('parkingHistory.noRevenue')
+                )
+              }
+            />
+          </dl>
+        </section>
+      ) : null}
+
+      {sessionsQuery.isFetching ? (
+        <p className="query-status" role="status">
+          {t('parkingHistory.refreshing')}
+        </p>
+      ) : null}
+
+      <section aria-labelledby="history-results-title">
+        <div className="flex items-baseline justify-between gap-4 border-b border-border-subtle pb-4">
+          <h2 className="type-label text-foreground-muted" id="history-results-title">
+            {t('parkingHistory.results')}
+          </h2>
+        </div>
+        {sessions.length === 0 ? (
+          <div className="mt-5">
+            <EmptyState title={t('parkingHistory.emptyTitle')}>
+              {t('parkingHistory.emptyDescription')}
+            </EmptyState>
+          </div>
+        ) : (
+          <>
+            <div className="mt-4 hidden grid-cols-[minmax(10rem,1.25fr)_minmax(9rem,1fr)_minmax(7rem,0.9fr)_minmax(8rem,auto)_auto] gap-x-4 border-b border-border-subtle px-1 py-3 md:grid">
+              <span className="type-label text-foreground-muted">{t('session.plate')}</span>
+              <span className="type-label text-foreground-muted">{t('session.date')}</span>
+              <span className="type-label text-foreground-muted">{t('session.elapsed')}</span>
+              <span className="type-label text-foreground-muted">{t('parkingHistory.status')}</span>
+              <span className="type-label text-right text-foreground-muted">
+                {t('session.total')}
+              </span>
+            </div>
+            <ul className="session-history-list list-none">
+              {sessions.map((session) => (
+                <li key={session.id}>
+                  <SessionHistoryRow
+                    session={session}
+                    timezone={historyTimezone}
+                    to={`/app/sessions/${session.id}`}
+                  />
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </section>
+
       {pagination ? (
         <nav
-          aria-label={es ? 'Paginación del historial' : 'Session history pagination'}
-          className="flex flex-wrap items-center justify-between gap-3 border-t border-[#121417]/12 pt-5"
+          aria-label={t('parkingHistory.pagination')}
+          className="flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle pt-5"
         >
           <Button
             disabled={!pagination.hasPreviousPage}
+            onClick={() => {
+              updateSearch({ page: pagination.page - 1 });
+            }}
             type="button"
             variant="secondary"
-            onClick={() => {
-              updateSearch({ page: pagination.page - 1, plate: debouncedPlate, status: filter });
-            }}
           >
-            {es ? 'Anterior' : 'Previous'}
+            {t('parkingHistory.previous')}
           </Button>
           <span className="type-operational" aria-live="polite">
-            {es ? 'Página' : 'Page'} {pagination.page} {es ? 'de' : 'of'} {pagination.totalPages}
+            {t('parkingHistory.page')} {pagination.page} {t('parkingHistory.of')}{' '}
+            {Math.max(1, pagination.totalPages)}
           </span>
           <Button
             disabled={!pagination.hasNextPage}
+            onClick={() => {
+              updateSearch({ page: pagination.page + 1 });
+            }}
             type="button"
             variant="secondary"
-            onClick={() => {
-              updateSearch({ page: pagination.page + 1, plate: debouncedPlate, status: filter });
-            }}
           >
-            {es ? 'Siguiente' : 'Next'}
+            {t('parkingHistory.next')}
           </Button>
         </nav>
       ) : null}
@@ -296,11 +325,93 @@ export function OwnerParkingHistoryRoute() {
   );
 }
 
-function HistoryMetric({ label, value }: { label: string; value: string }) {
+function HistoryMetric({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div>
-      <p className="type-label text-foreground-muted">{label}</p>
-      <p className="mt-2 type-metric">{value}</p>
+      <dt className="type-label text-foreground-muted">{label}</dt>
+      <dd className="mt-2 type-metric">{value}</dd>
     </div>
+  );
+}
+
+function HistoryFilters({
+  historyState,
+  isFetching,
+  onRefresh,
+  updateSearch,
+}: {
+  historyState: ParkingHistoryUrlState;
+  isFetching: boolean;
+  onRefresh: () => void;
+  updateSearch: HistorySearchUpdater;
+}) {
+  const { t } = useAppearance();
+  const [plateInput, setPlateInput] = useState(historyState.plate ?? '');
+  const debouncedPlate = useDebouncedValue(normalizePlate(plateInput), 250);
+
+  useEffect(() => {
+    if (debouncedPlate === (historyState.plate ?? '')) return;
+    updateSearch({ page: 1, plate: debouncedPlate || undefined });
+  }, [debouncedPlate, historyState.plate, updateSearch]);
+
+  return (
+    <section aria-labelledby="history-filters-title" className="border-b border-border-subtle pb-7">
+      <h2 className="type-label text-foreground-muted" id="history-filters-title">
+        {t('parkingHistory.filters')}
+      </h2>
+      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_12rem_12rem_auto]">
+        <Field htmlFor="session-plate" label={t('parkingHistory.plate')}>
+          <Input
+            id="session-plate"
+            onChange={(event) => {
+              setPlateInput(event.target.value);
+            }}
+            placeholder={t('parkingHistory.platePlaceholder')}
+            value={plateInput}
+          />
+        </Field>
+        <Field htmlFor="session-status" label={t('parkingHistory.status')}>
+          <Select
+            id="session-status"
+            value={historyState.status ?? 'ALL'}
+            onChange={(event) => {
+              const value = event.target.value as SessionFilter;
+              updateSearch({ page: 1, status: value === 'ALL' ? undefined : value });
+            }}
+          >
+            <option value="ALL">{t('parkingHistory.allStatuses')}</option>
+            <option value="ACTIVE">{t('parkingHistory.active')}</option>
+            <option value="COMPLETED">{t('parkingHistory.completed')}</option>
+            <option value="CANCELLED">{t('parkingHistory.cancelled')}</option>
+          </Select>
+        </Field>
+        <Field htmlFor="session-period" label={t('parkingHistory.period')}>
+          <Select
+            id="session-period"
+            value={historyState.period}
+            onChange={(event) => {
+              updateSearch({
+                page: 1,
+                period: event.target.value as ParkingHistoryUrlState['period'],
+              });
+            }}
+          >
+            <option value="today">{t('parkingHistory.today')}</option>
+            <option value="7d">{t('parkingHistory.sevenDays')}</option>
+            <option value="30d">{t('parkingHistory.thirtyDays')}</option>
+          </Select>
+        </Field>
+        <Button
+          aria-busy={isFetching}
+          className="self-end rounded-full"
+          disabled={isFetching}
+          onClick={onRefresh}
+          type="button"
+          variant="secondary"
+        >
+          {isFetching ? t('parkingHistory.refreshing') : t('parkingHistory.refresh')}
+        </Button>
+      </div>
+    </section>
   );
 }

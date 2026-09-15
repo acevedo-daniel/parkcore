@@ -1,14 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { ParkingForm } from '../../features/parking/parking-form.js';
 import { Button } from '../../components/ui/button.js';
 import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
-import { localizeApiError } from '../../lib/api/api-error.js';
 import { getOwnedParkings, updateParking } from '../../lib/api/owner-api.js';
+import { UnsavedChangesPrompt } from '../../components/ui/unsaved-changes-prompt.js';
 import { useToast } from '../../components/ui/toast-context.js';
+import { localizeParkingMutationError } from './parking-route-errors.js';
 
 export function OwnerEditParkingRoute() {
   const { t } = useAppearance();
@@ -17,6 +18,8 @@ export function OwnerEditParkingRoute() {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const [error, setError] = useState<string>();
+  const [isDirty, setIsDirty] = useState(false);
+  const allowNavigationRef = useRef(false);
   const parkingsQuery = useQuery({ queryKey: ['owned-parkings'], queryFn: getOwnedParkings });
   const mutation = useMutation({
     mutationFn: (input: Parameters<typeof updateParking>[1]) =>
@@ -55,6 +58,8 @@ export function OwnerEditParkingRoute() {
           variant="secondary"
           type="button"
           onClick={() => {
+            allowNavigationRef.current = true;
+            setIsDirty(false);
             void navigate(`/app/parkings/${parking.id}`);
           }}
         >
@@ -64,18 +69,25 @@ export function OwnerEditParkingRoute() {
       <ParkingForm
         error={error}
         isSubmitting={mutation.isPending}
+        onDirtyChange={setIsDirty}
         parking={parking}
         onSubmit={async (input) => {
           setError(undefined);
           try {
             await mutation.mutateAsync(input);
+            allowNavigationRef.current = true;
+            setIsDirty(false);
             await queryClient.invalidateQueries({ queryKey: ['owned-parkings'] });
             showToast(t('parkingRoute.updated'));
             await navigate(`/app/parkings/${parking.id}`, { replace: true });
           } catch (reason) {
-            setError(localizeApiError(reason, t, 'api.updateParking'));
+            setError(localizeParkingMutationError(reason, t, 'api.updateParking'));
           }
         }}
+      />
+      <UnsavedChangesPrompt
+        allowNavigationRef={allowNavigationRef}
+        when={isDirty && !mutation.isPending}
       />
     </section>
   );
