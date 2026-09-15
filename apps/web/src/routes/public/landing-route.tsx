@@ -110,12 +110,12 @@ export function LandingRoute() {
     <div className="landing-page overflow-hidden bg-canvas text-foreground">
       <section className="bg-accent text-accent-foreground">
         <div className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-12 lg:items-center lg:gap-16 lg:px-8 lg:py-24">
-          <div className="lg:col-span-7">
+          <div className="min-w-0 lg:col-span-7">
             <p className="type-label inline-flex items-center gap-2 rounded-full border border-accent-strong bg-accent/70 px-3 py-1.5 text-accent-foreground">
               <span aria-hidden="true" className="size-1.5 rounded-full bg-accent-foreground" />
               {t('public.landing.heroEyebrow')}
             </p>
-            <h1 className="mt-7 max-w-3xl font-display text-5xl font-bold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-[5.1rem]">
+            <h1 className="mt-7 min-w-0 max-w-full break-words font-display text-5xl font-bold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-[5.1rem]">
               {t('public.landing.heroTitle')}
             </h1>
             <p className="mt-7 max-w-xl text-lg font-medium leading-relaxed text-accent-foreground/85 sm:text-xl">
@@ -305,6 +305,7 @@ export function LandingRoute() {
                   key={faq.id}
                 >
                   <button
+                    aria-controls={`faq-${faq.id}-answer`}
                     aria-expanded={isOpen}
                     className="flex w-full items-center justify-between gap-5 p-5 text-left font-display text-base font-bold transition-colors hover:bg-surface-hover sm:p-6"
                     onClick={() => {
@@ -318,11 +319,16 @@ export function LandingRoute() {
                       className={cn('size-5 shrink-0 transition-transform', isOpen && 'rotate-180')}
                     />
                   </button>
-                  {isOpen ? (
-                    <p className="parkcore-reveal border-t border-border-subtle px-5 pb-6 pt-4 text-sm leading-relaxed text-foreground-secondary sm:px-6">
-                      {t(faq.answer)}
-                    </p>
-                  ) : null}
+                  <p
+                    className={cn(
+                      'border-t border-border-subtle px-5 pb-6 pt-4 text-sm leading-relaxed text-foreground-secondary',
+                      isOpen && 'parkcore-reveal',
+                    )}
+                    hidden={!isOpen}
+                    id={`faq-${faq.id}-answer`}
+                  >
+                    {t(faq.answer)}
+                  </p>
                 </div>
               );
             })}
@@ -395,7 +401,10 @@ function FeaturedFacilities({
     return (
       <div
         aria-label={t('public.landing.loadingFacilities')}
-        className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3"
+        aria-busy="true"
+        aria-live="polite"
+        className="mt-12 grid gap-5 md:grid-cols-2 wide:grid-cols-3"
+        role="status"
       >
         {Array.from({ length: 3 }, (_, index) => (
           <div
@@ -432,7 +441,11 @@ function FeaturedFacilities({
   const facilities = query.data?.data ?? [];
   if (facilities.length === 0) {
     return (
-      <div className="mt-12 rounded-[var(--radius-xl)] border border-dashed border-border-strong bg-surface-subtle p-8 text-center">
+      <div
+        aria-live="polite"
+        className="mt-12 rounded-[var(--radius-xl)] border border-dashed border-border-strong bg-surface-subtle p-8 text-center"
+        role="status"
+      >
         <p className="type-label text-foreground-muted">{t('public.landing.emptyEyebrow')}</p>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-foreground-secondary">
           {t('public.landing.emptyDescription')}
@@ -448,7 +461,7 @@ function FeaturedFacilities({
   }
 
   return (
-    <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+    <div className="mt-12 grid gap-5 md:grid-cols-2 wide:grid-cols-3">
       {facilities.map((parking) => (
         <ParkingDiscoveryCard key={parking.id} parking={parking} to={`/parkings/${parking.id}`} />
       ))}

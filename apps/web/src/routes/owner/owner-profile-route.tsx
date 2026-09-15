@@ -45,7 +45,7 @@ type SaveStatus = 'idle' | 'success';
 
 export function OwnerProfileRoute() {
   const { user } = useAuth();
-  if (!user) return <Skeleton className="owner-form-skeleton" />;
+  if (!user) return <Skeleton className="min-h-96 w-full" />;
   return <OwnerProfileContent user={user} />;
 }
 
@@ -148,7 +148,9 @@ function OwnerProfileContent({ user }: { user: User }) {
                   label={t('profile.name')}
                 >
                   <Input
+                    autoComplete="given-name"
                     id="profile-name"
+                    required
                     {...form.register('name', { onChange: clearSaveFeedback })}
                   />
                 </Field>
@@ -158,7 +160,9 @@ function OwnerProfileContent({ user }: { user: User }) {
                   label={t('profile.lastName')}
                 >
                   <Input
+                    autoComplete="family-name"
                     id="profile-last-name"
+                    required
                     {...form.register('lastName', { onChange: clearSaveFeedback })}
                   />
                 </Field>
@@ -168,6 +172,7 @@ function OwnerProfileContent({ user }: { user: User }) {
                   label={t('profile.email')}
                 >
                   <Input
+                    autoComplete="email"
                     aria-readonly="true"
                     id="profile-email"
                     readOnly
@@ -290,7 +295,7 @@ function OwnerProfileContent({ user }: { user: User }) {
 
 function DemoSessionDisclosure({ locale, t, user }: { locale: Locale; t: Translator; user: User }) {
   return (
-    <div className="mt-4 flex flex-col gap-5 rounded-[var(--radius-lg)] border border-accent-foreground/30 bg-accent-soft p-5 text-accent-foreground sm:flex-row sm:items-start sm:justify-between sm:p-6">
+    <div className="mt-4 flex flex-col gap-5 rounded-[var(--radius-lg)] border border-accent-foreground/30 bg-accent-soft p-5 text-foreground sm:flex-row sm:items-start sm:justify-between sm:p-6">
       <div className="flex items-start gap-3">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
           <UserRound aria-hidden="true" className="size-5" />

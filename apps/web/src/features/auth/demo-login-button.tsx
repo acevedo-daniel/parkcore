@@ -35,8 +35,9 @@ export function DemoLoginButton({
   };
 
   return (
-    <div className="stack-tight">
+    <div className="flex flex-col gap-2">
       <Button
+        aria-busy={isSubmitting}
         className={className}
         disabled={isSubmitting}
         onClick={() => void startDemo()}
@@ -46,7 +47,7 @@ export function DemoLoginButton({
         {isSubmitting ? t('demo.opening') : (children ?? t('demo.try'))}
       </Button>
       {error ? (
-        <p className="form-error" role="alert">
+        <p className="text-sm font-medium text-danger-text" role="alert">
           {error}
         </p>
       ) : null}

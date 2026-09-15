@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, Clock, MapPin, ReceiptText } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
@@ -35,6 +35,7 @@ interface ParkingCalculatorWidgetProps {
 
 export function ParkingCalculatorWidget({ className, parking }: ParkingCalculatorWidgetProps) {
   const { locale, t } = useAppearance();
+  const titleId = useId();
   const [selectedId, setSelectedId] = useState('');
   const [selectedDuration, setSelectedDuration] = useState<DurationOptionId>('two-hours');
 
@@ -55,7 +56,8 @@ export function ParkingCalculatorWidget({ className, parking }: ParkingCalculato
     availableFacilities[0];
 
   return (
-    <div
+    <section
+      aria-labelledby={titleId}
       className={cn(
         'relative w-full max-w-[460px] rounded-[var(--radius-xl)] border border-border bg-surface-raised p-6 text-foreground shadow-hover sm:p-8',
         className,
@@ -64,7 +66,7 @@ export function ParkingCalculatorWidget({ className, parking }: ParkingCalculato
       <div className="mb-5 flex items-start justify-between gap-4 border-b border-border-subtle pb-5">
         <div>
           <p className="type-label text-foreground-muted">{t('calculator.eyebrow')}</p>
-          <h2 className="mt-2 font-display text-xl font-bold tracking-[-0.03em]">
+          <h2 className="mt-2 font-display text-xl font-bold tracking-[-0.03em]" id={titleId}>
             {t('calculator.title')}
           </h2>
         </div>
@@ -82,20 +84,25 @@ export function ParkingCalculatorWidget({ className, parking }: ParkingCalculato
         >
           {t('calculator.errorDescription')}
           <Link
-            className="mt-4 inline-flex text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4"
+            className="mt-4 inline-flex min-h-[var(--touch-target-min)] items-center rounded-sm text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4"
             to="/parkings"
           >
             {t('calculator.browseAction')}
           </Link>
         </ErrorState>
       ) : availableFacilities.length === 0 ? (
-        <div className="rounded-[var(--radius-lg)] border border-dashed border-border-strong bg-surface-subtle p-5">
+        <div
+          aria-atomic="true"
+          aria-live="polite"
+          className="rounded-[var(--radius-lg)] border border-dashed border-border-strong bg-surface-subtle p-5"
+          role="status"
+        >
           <p className="type-label text-foreground-muted">{t('calculator.emptyEyebrow')}</p>
           <p className="mt-2 text-sm leading-relaxed text-foreground-secondary">
             {t('calculator.emptyDescription')}
           </p>
           <Link
-            className="mt-4 inline-flex text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4"
+            className="mt-4 inline-flex min-h-[var(--touch-target-min)] items-center rounded-sm text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4"
             to="/parkings"
           >
             {t('calculator.emptyAction')}
@@ -112,14 +119,20 @@ export function ParkingCalculatorWidget({ className, parking }: ParkingCalculato
           selectedId={parking?.id ?? selectedFacility.id}
         />
       )}
-    </div>
+    </section>
   );
 }
 
 function CalculatorLoading() {
   const { t } = useAppearance();
   return (
-    <div aria-label={t('calculator.loadingLabel')} aria-live="polite">
+    <div
+      aria-atomic="true"
+      aria-busy="true"
+      aria-label={t('calculator.loadingLabel')}
+      aria-live="polite"
+      role="status"
+    >
       <p className="mb-3 text-sm font-medium text-foreground-secondary">
         {t('calculator.loadingMessage')}
       </p>
@@ -214,8 +227,8 @@ function CalculatorForm({
         </div>
       </div>
 
-      <div className="mt-3 rounded-[var(--radius-lg)] border border-border bg-surface-subtle p-4">
-        <div className="mb-3 flex items-center justify-between">
+      <fieldset className="mt-3 rounded-[var(--radius-lg)] border border-border bg-surface-subtle p-4">
+        <legend className="mb-3 flex w-full items-center justify-between gap-3">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
             <Clock aria-hidden="true" className="size-3.5" />
             {t('calculator.estimatedStay')}
@@ -223,12 +236,13 @@ function CalculatorForm({
           <span className="font-mono text-xs font-bold tabular-nums text-foreground">
             {durationSummary}
           </span>
-        </div>
+        </legend>
         <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-5">
           {DURATION_OPTIONS.map((option) => (
             <button
+              aria-pressed={selectedDuration === option.id}
               className={cn(
-                'min-h-10 cursor-pointer rounded-[var(--radius-sm)] px-1 py-2 text-center text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring',
+                'min-h-[var(--touch-target-min)] cursor-pointer rounded-[var(--radius-sm)] px-1 py-2 text-center text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring',
                 selectedDuration === option.id
                   ? 'bg-primary text-primary-foreground'
                   : 'border border-border bg-surface text-foreground hover:bg-accent hover:text-accent-foreground',
@@ -266,11 +280,11 @@ function CalculatorForm({
             </Field>
           </div>
         ) : null}
-      </div>
+      </fieldset>
 
       <div className="my-5 px-1 text-xs">
-        <div className="flex items-baseline justify-between border-t border-border-subtle pt-4">
-          <div>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-2 border-t border-border-subtle pt-4">
+          <div className="min-w-0">
             <span className="block text-xs font-semibold text-foreground">
               {t('calculator.estimateLabel')}
             </span>
@@ -284,9 +298,10 @@ function CalculatorForm({
             </span>
           </div>
           <span
+            aria-atomic="true"
             aria-live="polite"
             className={cn(
-              'font-display text-3xl font-bold tracking-tight tabular-nums text-foreground',
+              'max-w-full font-display text-3xl font-bold tracking-tight tabular-nums text-foreground',
               !estimate && 'max-w-40 text-right text-base leading-tight text-foreground-secondary',
             )}
           >

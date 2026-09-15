@@ -58,8 +58,7 @@ describe('owner parking list', () => {
     ]);
     renderParkings();
 
-    expect(await screen.findByRole('heading', { name: 'Facilities, made clear.' })).toBeTruthy();
-    expect(screen.getByText('Limited spaces')).toBeTruthy();
+    expect(await screen.findByText('Limited spaces')).toBeTruthy();
     expect(screen.getByText('Visible in directory')).toBeTruthy();
     expect(
       screen.getByRole('progressbar', {

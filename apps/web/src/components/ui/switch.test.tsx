@@ -26,6 +26,7 @@ describe('Switch', () => {
 
     const control = screen.getByRole<HTMLInputElement>('switch', { name: 'Open 24 hours' });
     expect(control.getAttribute('aria-describedby')).toBe(`${control.id}-description`);
+    expect(control.closest('label')?.className).toContain('min-h-[var(--touch-target-min)]');
     expect(control.checked).toBe(false);
 
     await user.tab();

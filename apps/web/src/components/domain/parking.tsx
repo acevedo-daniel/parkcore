@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { cn } from '../../lib/cn.js';
-import { formatMoney } from '../../lib/format.js';
+import { formatMoney, formatNumber } from '../../lib/format.js';
 import { ParkingStatus } from './status.js';
 
 type Parking = components['schemas']['ParkingResponse'];
@@ -62,7 +62,7 @@ export function OccupancyMeter({
   compact?: boolean;
   occupancyPercent?: number;
 }) {
-  const { t, tPlural } = useAppearance();
+  const { locale, t, tPlural } = useAppearance();
   const safeCapacity = Math.max(0, capacity);
   const safeActive = Math.min(safeCapacity, Math.max(0, active));
   const safeAvailable = Math.min(
@@ -74,6 +74,10 @@ export function OccupancyMeter({
     Math.min(100, occupancyPercent ?? (safeCapacity === 0 ? 0 : (safeActive / safeCapacity) * 100)),
   );
   const displayPercentage = Math.round(percentage);
+  const formattedActive = formatNumber(safeActive, locale);
+  const formattedAvailable = formatNumber(safeAvailable, locale);
+  const formattedCapacity = formatNumber(safeCapacity, locale);
+  const formattedPercentage = formatNumber(displayPercentage, locale);
   const threshold =
     safeAvailable === 0 && safeCapacity > 0
       ? 'full'
@@ -104,31 +108,37 @@ export function OccupancyMeter({
       <div className="capacity-gauge-heading">
         <span className="type-label">{t('parking.occupancyGauge')}</span>
         <span className="type-operational">
-          {safeActive} / {safeCapacity} {t('parking.inside')}
+          {formattedActive} / {formattedCapacity} {t('parking.inside')}
         </span>
       </div>
       <div
         aria-label={t('parkingOperation.occupancyLabel', {
-          active: safeActive,
-          capacity: safeCapacity,
+          active: formattedActive,
+          capacity: formattedCapacity,
         })}
         aria-valuemax={safeCapacity}
         aria-valuemin={0}
         aria-valuenow={safeActive}
         aria-valuetext={t('parking.occupancySummary', {
-          active: safeActive,
-          available: safeAvailable,
-          capacity: safeCapacity,
-          percent: displayPercentage,
+          active: formattedActive,
+          available: formattedAvailable,
+          capacity: formattedCapacity,
+          percent: formattedPercentage,
         })}
         className="capacity-gauge-track"
         role="progressbar"
       >
         <div className="capacity-gauge-fill" style={{ width: `${String(percentage)}%` }} />
       </div>
-      <p className="capacity-gauge-status">
-        <span aria-hidden="true">●</span> {status} · {safeAvailable}{' '}
-        {tPlural(safeAvailable, { one: 'parking.spot', other: 'parking.spots' })}{' '}
+      <p className="capacity-gauge-status break-words">
+        <span aria-hidden="true">●</span> {status} · {formattedAvailable}{' '}
+        {tPlural(
+          safeAvailable,
+          { one: 'parking.spot', other: 'parking.spots' },
+          {
+            count: formattedAvailable,
+          },
+        )}{' '}
         {t('parking.openSpots')}
       </p>
     </div>

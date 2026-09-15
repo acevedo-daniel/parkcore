@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import type { PublicParking } from '../../lib/api/public-api.js';
-import { formatMoney } from '../../lib/format.js';
+import { formatMoney, formatNumber } from '../../lib/format.js';
 import { AvailabilityIndicator } from './availability-indicator.js';
 import { PublicParkingImage } from './public-parking-image.js';
 
@@ -14,11 +14,13 @@ interface ParkingDiscoveryCardProps {
 
 export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps) {
   const { locale, t } = useAppearance();
+  const availabilityId = `parking-${parking.id}-availability`;
 
   return (
     <Link
       aria-label={`${t('parking.open')} ${parking.title}`}
-      className="group flex h-full flex-col overflow-hidden rounded-[var(--radius-xl)] border border-border bg-surface text-foreground shadow-xs transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-border-strong hover:shadow-hover focus-visible:outline-none"
+      aria-describedby={availabilityId}
+      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-[var(--radius-xl)] border border-border bg-surface text-foreground shadow-xs transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-border-strong hover:shadow-hover focus-visible:outline-none"
       to={to}
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-surface-emphasis">
@@ -29,32 +31,33 @@ export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps)
         />
         <AvailabilityIndicator
           className="absolute left-4 top-4 bg-surface/95 backdrop-blur-sm"
+          id={availabilityId}
           state={parking.availabilityState}
           timezone={parking.timezone}
           nextOpeningAt={parking.nextOpeningAt}
         />
       </div>
 
-      <div className="flex flex-1 flex-col p-5 sm:p-6">
+      <div className="flex min-w-0 flex-1 flex-col p-5 sm:p-6">
         <div className="flex-1">
-          <h2 className="font-display text-2xl font-bold leading-tight tracking-[-0.03em]">
+          <h2 className="max-w-full break-words font-display text-2xl font-bold leading-tight tracking-[-0.03em]">
             {parking.title}
           </h2>
           {parking.isShowcase ? (
-            <span className="mt-2 inline-flex rounded-full border border-accent-strong bg-accent-soft px-2.5 py-1 text-[10px] font-bold text-accent-foreground">
+            <span className="mt-2 inline-flex rounded-full border border-accent-strong bg-accent-soft px-2.5 py-1 text-[10px] font-bold text-foreground">
               {t('parking.demo')}
             </span>
           ) : null}
-          <p className="mt-2 text-sm font-semibold text-foreground-secondary">
+          <p className="max-w-full break-words text-sm font-semibold text-foreground-secondary">
             {parking.neighborhood}
           </p>
-          <p className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-foreground-secondary">
+          <p className="mt-3 flex min-w-0 items-start gap-2 text-sm leading-relaxed text-foreground-secondary">
             <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-foreground" />
-            {parking.address}
+            <span className="min-w-0 break-words">{parking.address}</span>
           </p>
         </div>
 
-        <div className="mt-8 flex items-end justify-between gap-4 border-t border-border-subtle pt-5">
+        <div className="mt-8 flex flex-wrap items-end justify-between gap-4 border-t border-border-subtle pt-5">
           <span>
             <span className="block text-xs font-medium text-foreground-muted">
               {t('parking.hourlyRate')}
@@ -66,8 +69,8 @@ export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps)
           </span>
           <span className="text-right text-xs font-semibold text-foreground-secondary">
             {t('parking.availableSpaces', {
-              available: parking.availableSpaces,
-              capacity: parking.capacity,
+              available: formatNumber(parking.availableSpaces, locale),
+              capacity: formatNumber(parking.capacity, locale),
             })}
           </span>
           <span className="inline-flex items-center gap-1 text-xs font-bold">

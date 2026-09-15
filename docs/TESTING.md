@@ -16,9 +16,10 @@ Local real-stack browser checks run against disposable services. Deployed real-s
 | ------------------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
 | API tests                 | Domain rules, authorization, validation, error behavior, persistence, rate limiting, and session transitions | Vitest + Supertest in `apps/api/src/**/*.test.ts` and `apps/api/tests` |
 | Web tests                 | Forms, route behavior, loading/error states, UI interactions, and Spanish/English shared-workflow parity     | Vitest + Testing Library in `apps/web/src/**/*.test.{ts,tsx}`          |
-| Localization parity       | Detect missing or extra nested keys between supported locale catalogs                                        | `pnpm locales:check`                                                   |
+| Localization parity       | Detect missing or extra keys, blank values, and interpolation drift between locale catalogs                  | `pnpm locales:check`                                                   |
 | Contract check            | Detect drift between the API OpenAPI artifact and generated browser client                                   | `pnpm contract:check`                                                  |
 | Mocked browser workflows  | Verify public discovery and owner workflows against contract-shaped mocked responses                         | Playwright in `apps/web/e2e`                                           |
+| Browser hardening matrix  | Verify every P0/P1 route across both shells, locales, themes, exact responsive viewports, focus, and axe     | `pnpm --filter @parkcore/web test:e2e:hardening`                       |
 | Local real-stack workflow | Exercise the local preview, API, and PostgreSQL persistence boundary                                         | `pnpm --filter @parkcore/web test:e2e:local`                           |
 | Remote real-stack checks  | Exercise the deployed web application and its configured API                                                 | Playwright real-stack configuration; run explicitly                    |
 | Remote API smoke          | Verify deployed API liveness and optional remote behavior                                                    | `pnpm --filter @parkcore/api smoke:remote`                             |
@@ -148,6 +149,20 @@ pnpm --filter @parkcore/web test:e2e
 
 This is the deterministic mocked browser workflow used for fast UI-level feedback. It covers public landing discovery, the started-hour estimator, URL-backed directory filters, SHOWCASE disclosure, directions attributes, auth entry and autofill semantics, isolated demo entry, public not-found recovery, loading/empty/error/retry/filter-validation states, and the responsive light/dark screenshot matrix. The existing owner workflow continues to cover language switching, explicit and system appearance changes, form-state preservation, reduced-motion behavior, keyboard navigation, dialog and sheet focus restoration, and the representative owner success path.
 
+### Browser hardening matrix
+
+```bash
+pnpm --filter @parkcore/web test:e2e:hardening
+```
+
+The hardening command builds and serves the web application through the local production preview, then intercepts only the local API origin with deterministic, contract-shaped fixtures. It never requires a remote URL, production credentials, or personal data. The suite opens every P0/P1 route in the public and owner shells at 360x800, 390x844, 768x1024, 1024x900, 1280x900, and 1440x960 for both `es-AR` and `en-US`. It also exercises public and owner not-found recovery, light and dark themes, loading, empty, error, blocked, degraded, form, table, chart, sheet, and dialog states.
+
+The axe gate scans the rendered `body` of each required route fixture at compact and wide representative sizes in both locales and themes. Only `serious` and `critical` axe impacts block the command. Responsive assertions cover document overflow, fixed mobile-navigation clearance, focused controls, visible focus indicators, overlay bounds, focus containment, Escape handling, and focus restoration. The preference fixtures cover stored light and dark values, system-light and system-dark first render, and operating-system transitions while system mode is selected. Localization parity also rejects blank strings and interpolation placeholder mismatches, while `pnpm text:check` remains the authored em dash gate.
+
+Failure traces, screenshots, videos, and the HTML report are retained under `apps/web/test-results/hardening/` and `apps/web/playwright-report/hardening/`. These are generated diagnostics and must not be committed. The deployed responsive command below remains an explicit remote check because local mocked verification cannot prove deployed CSS, browser, CDN, or API behavior.
+
+Before release, manually verify the canonical keyboard journey from public landing through directory, detail, login, owner operation, check-in, checkout, history, and profile. Include skip links, landmarks, tab order, combobox Arrow and Escape behavior, overlay focus containment and return, form error focus, autofill, 200 percent zoom, reduced motion, longest Spanish and English labels, screen-reader names for landmarks and status regions, and fixed-navigation clearance for focused content.
+
 ### Local real-stack workflow
 
 ```bash
@@ -186,8 +201,9 @@ The browser-QA command runs the real-stack workflow across Chromium, Firefox, an
 3. **Tests / Web**: browser-facing unit and component tests;
 4. **Contract**: generated API/client drift detection;
 5. **E2E**: local real-stack Playwright browser workflow with PostgreSQL and failure diagnostics;
-6. **Production**: deployable API, client, and web builds;
-7. **CI Gate**: the stable required check that fails when any verification job fails, is cancelled, or is skipped.
+6. **E2E / Web**: credential-free deterministic browser hardening matrix with responsive, accessibility, theme, and localization checks;
+7. **Production**: deployable API, client, and web builds;
+8. **CI Gate**: the stable required check that fails when any verification job fails, is cancelled, or is skipped.
 
 CI runs for pushes and pull requests targeting `main`.
 

@@ -1,5 +1,14 @@
 import { Check, ChevronsUpDown } from 'lucide-react';
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type FocusEventHandler,
+} from 'react';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { cn } from '../../lib/cn.js';
@@ -13,6 +22,7 @@ export interface ComboboxOption {
 export interface ComboboxProps {
   'aria-describedby'?: string;
   'aria-invalid'?: boolean | 'false' | 'true';
+  'aria-required'?: boolean | 'false' | 'true';
   className?: string;
   defaultValue?: string;
   disabled?: boolean;
@@ -21,6 +31,7 @@ export interface ComboboxProps {
   label: string;
   name?: string;
   onChange?: (value: string) => void;
+  onBlur?: FocusEventHandler<HTMLInputElement>;
   onValueChange?: (value: string, option: ComboboxOption) => void;
   options: readonly ComboboxOption[];
   placeholder?: string;
@@ -28,30 +39,46 @@ export interface ComboboxProps {
 }
 
 const controlClassName =
-  'control parkcore-field flex h-[var(--control-height-md)] w-full items-center justify-between gap-3 rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3.5 text-left text-sm font-medium text-foreground outline-none transition-colors placeholder:text-foreground-muted focus-within:border-primary focus-within:bg-surface focus-visible:ring-2 focus-visible:ring-focus-ring disabled:cursor-not-allowed disabled:bg-disabled-surface disabled:text-disabled-foreground disabled:opacity-100';
+  'control parkcore-field flex h-[var(--control-height-md)] min-w-0 w-full items-center justify-between gap-3 rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3.5 text-left text-sm font-medium text-foreground outline-none transition-colors placeholder:text-foreground-muted focus-within:border-primary focus-within:bg-surface focus-visible:ring-2 focus-visible:ring-focus-ring disabled:cursor-not-allowed disabled:bg-disabled-surface disabled:text-disabled-foreground disabled:opacity-100';
 
-export function Combobox({
-  'aria-describedby': ariaDescribedBy,
-  'aria-invalid': ariaInvalid,
-  className,
-  defaultValue,
-  disabled = false,
-  emptyLabel,
-  id,
-  label,
-  name,
-  onChange,
-  onValueChange,
-  options,
-  placeholder,
-  value,
-}: ComboboxProps) {
+export const Combobox = forwardRef<HTMLInputElement, ComboboxProps>(function Combobox(
+  {
+    'aria-describedby': ariaDescribedBy,
+    'aria-invalid': ariaInvalid,
+    'aria-required': ariaRequired,
+    className,
+    defaultValue,
+    disabled = false,
+    emptyLabel,
+    id,
+    label,
+    name,
+    onChange,
+    onBlur,
+    onValueChange,
+    options,
+    placeholder,
+    value,
+  },
+  forwardedRef,
+) {
   const { t } = useAppearance();
   const generatedId = useId();
   const inputId = id ?? `combobox-${generatedId}`;
   const listboxId = `${inputId}-listbox`;
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const setInputRef = useCallback(
+    (node: HTMLInputElement | null) => {
+      inputRef.current = node;
+      if (typeof forwardedRef === 'function') {
+        forwardedRef(node);
+      } else if (forwardedRef) {
+        forwardedRef.current = node;
+      }
+    },
+    [forwardedRef],
+  );
   const isControlled = value !== undefined;
   const [internalValue, setInternalValue] = useState(defaultValue ?? '');
   const selectedValue = isControlled ? value : internalValue;
@@ -151,11 +178,13 @@ export function Combobox({
           aria-describedby={ariaDescribedBy}
           aria-expanded={isOpen}
           aria-invalid={ariaInvalid}
+          aria-required={ariaRequired}
           aria-labelledby={`${inputId}-label`}
           className="min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-foreground-muted"
           disabled={disabled}
           id={inputId}
-          onBlur={() => {
+          onBlur={(event) => {
+            onBlur?.(event);
             window.setTimeout(() => {
               if (!rootRef.current?.contains(document.activeElement)) close();
             }, 0);
@@ -200,13 +229,13 @@ export function Combobox({
             }
           }}
           placeholder={placeholder}
-          ref={inputRef}
+          ref={setInputRef}
           role="combobox"
           value={inputValue}
         />
         <button
           aria-label={label}
-          className="shrink-0 text-foreground-muted outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+          className="min-h-[var(--touch-target-min)] min-w-[var(--touch-target-min)] shrink-0 text-foreground-muted outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
           disabled={disabled}
           onClick={() => {
             if (isOpen) close(false);
@@ -243,7 +272,7 @@ export function Combobox({
                   aria-disabled={option.disabled ? true : undefined}
                   aria-selected={isSelected}
                   className={cn(
-                    'flex min-h-10 w-full items-center justify-between gap-3 rounded-[var(--radius-sm)] px-3 py-2 text-left font-medium text-foreground outline-none transition-colors',
+                    'flex min-h-[var(--touch-target-min)] w-full items-center justify-between gap-3 rounded-[var(--radius-sm)] px-3 py-2 text-left font-medium text-foreground outline-none transition-colors',
                     isActive && 'bg-surface-hover',
                     isSelected && 'font-bold',
                     option.disabled && 'cursor-not-allowed opacity-50',
@@ -270,4 +299,5 @@ export function Combobox({
       ) : null}
     </div>
   );
-}
+});
+Combobox.displayName = 'Combobox';

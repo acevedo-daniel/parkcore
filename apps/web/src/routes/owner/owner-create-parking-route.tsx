@@ -23,15 +23,16 @@ export function OwnerCreateParkingRoute() {
   const mutation = useMutation({ mutationFn: createParking });
 
   return (
-    <section className="owner-page stack-owner" aria-labelledby="create-parking-title">
-      <header className="owner-page-header">
-        <div>
+    <section className="owner-page space-y-8" aria-labelledby="create-parking-title">
+      <header className="flex flex-col justify-between gap-5 border-b border-border-strong pb-7 sm:flex-row sm:items-end">
+        <div className="min-w-0">
           <p className="type-label">{t('parkingRoute.management')}</p>
           <h1 className="type-page-title" id="create-parking-title">
             {t('parkingRoute.createTitle')}
           </h1>
         </div>
         <Button
+          className="shrink-0 self-start"
           variant="secondary"
           type="button"
           onClick={() => {

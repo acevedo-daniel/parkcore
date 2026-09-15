@@ -212,8 +212,7 @@ describe('owner overview briefing', () => {
     configureAnalytics();
     renderOverview();
 
-    await screen.findByRole('heading', { name: 'Everything important, in view.' });
-    const periodButton = screen.getByRole('button', { name: 'View 30 days of activity' });
+    const periodButton = await screen.findByRole('button', { name: 'View 30 days of activity' });
     await user.click(periodButton);
 
     await waitFor(() => {

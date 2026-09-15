@@ -21,7 +21,7 @@ export function AppearanceControls({
           aria-label={t('appearance.languageSpanish')}
           aria-pressed={locale === 'es-AR'}
           className={cn(
-            'rounded-full px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] transition-colors',
+            'min-h-[var(--touch-target-min)] min-w-10 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] transition-colors',
             locale === 'es-AR'
               ? 'bg-primary text-primary-foreground'
               : 'text-foreground hover:bg-accent hover:text-accent-foreground',
@@ -37,7 +37,7 @@ export function AppearanceControls({
           aria-label={t('appearance.languageEnglish')}
           aria-pressed={locale === 'en-US'}
           className={cn(
-            'rounded-full px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] transition-colors',
+            'min-h-[var(--touch-target-min)] min-w-10 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] transition-colors',
             locale === 'en-US'
               ? 'bg-primary text-primary-foreground'
               : 'text-foreground hover:bg-accent hover:text-accent-foreground',
@@ -56,7 +56,7 @@ export function AppearanceControls({
         <span className="visually-hidden">{t('appearance.theme')}</span>
         <select
           aria-label={t('appearance.theme')}
-          className="h-9 rounded-[var(--radius-pill)] border border-border bg-surface px-3 text-xs font-semibold text-foreground outline-none transition-colors hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-focus-ring"
+          className="min-h-[var(--touch-target-min)] rounded-[var(--radius-pill)] border border-border bg-surface px-3 text-xs font-semibold text-foreground outline-none transition-colors hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-focus-ring"
           onChange={(event) => {
             setThemePreference(event.target.value as 'system' | 'light' | 'dark');
           }}

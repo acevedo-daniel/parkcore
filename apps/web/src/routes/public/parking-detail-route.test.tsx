@@ -189,6 +189,6 @@ describe('public parking detail', () => {
     api.getPublicParking.mockReturnValue(new Promise(() => undefined));
     renderParkingDetail();
 
-    expect(screen.getByLabelText('Loading parking')).toBeTruthy();
+    expect(screen.getByRole('status', { name: 'Loading parking' })).toBeTruthy();
   });
 });

@@ -55,6 +55,21 @@ function renderWithAuth(
 }
 
 describe('authentication forms', () => {
+  it('exposes browser autofill semantics for login and registration fields', () => {
+    const { unmount } = renderWithAuth(<LoginForm onSuccess={vi.fn()} />);
+
+    expect(screen.getByLabelText('Email').getAttribute('autocomplete')).toBe('email');
+    expect(screen.getByLabelText('Password').getAttribute('autocomplete')).toBe('current-password');
+
+    unmount();
+    renderWithAuth(<RegisterForm onSuccess={vi.fn()} />);
+
+    expect(screen.getByLabelText('First name').getAttribute('autocomplete')).toBe('given-name');
+    expect(screen.getByLabelText('Last name').getAttribute('autocomplete')).toBe('family-name');
+    expect(screen.getByLabelText('Email').getAttribute('autocomplete')).toBe('email');
+    expect(screen.getByLabelText('Password').getAttribute('autocomplete')).toBe('new-password');
+  });
+
   it('keeps login validation inline before calling the backend', async () => {
     const user = userEvent.setup();
     const { value } = renderWithAuth(<LoginForm onSuccess={vi.fn()} />);
@@ -112,6 +127,9 @@ describe('authentication forms', () => {
 
     expect(password).toHaveProperty('type', 'text');
     expect(password).toHaveProperty('value', 'password123');
+    expect(
+      screen.getByRole('button', { name: 'Hide password' }).getAttribute('aria-controls'),
+    ).toBe('password');
     expect(screen.getByRole('button', { name: 'Hide password' }).getAttribute('aria-pressed')).toBe(
       'true',
     );

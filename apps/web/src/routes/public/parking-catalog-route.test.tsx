@@ -77,7 +77,7 @@ describe('public parking catalog', () => {
     api.getPublicParkings.mockReturnValue(new Promise(() => undefined));
     renderCatalog();
 
-    expect(screen.getByLabelText('Loading parkings')).toBeTruthy();
+    expect(screen.getByRole('status', { name: 'Loading parkings' })).toBeTruthy();
   });
 
   it('renders active parkings returned by the typed API boundary', async () => {

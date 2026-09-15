@@ -80,6 +80,8 @@ describe('ParkingForm', () => {
     renderForm('en-US');
 
     const timezone = screen.getByRole('combobox', { name: 'Timezone' });
+    expect(timezone.getAttribute('aria-required')).toBe('true');
+    expect(screen.getByLabelText('Name')).toHaveProperty('required', true);
     await user.click(timezone);
     await user.keyboard('{ArrowDown}{Enter}');
 

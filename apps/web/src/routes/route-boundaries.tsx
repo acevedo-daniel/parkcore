@@ -43,7 +43,7 @@ function RouteRecovery({ notFound, owner }: { notFound: boolean; owner: boolean 
       <div
         className={
           owner
-            ? 'max-w-xl rounded-[var(--radius-xl)] border border-accent-foreground/30 bg-accent-soft p-7 shadow-hover sm:p-10'
+            ? 'w-full min-w-0 max-w-xl rounded-[var(--radius-xl)] border border-accent-foreground/30 bg-accent-soft p-7 shadow-hover sm:p-10'
             : 'mx-auto w-full max-w-3xl rounded-[var(--radius-xl)] border border-border-strong bg-surface p-8 shadow-hover sm:p-10'
         }
       >
@@ -59,11 +59,18 @@ function RouteRecovery({ notFound, owner }: { notFound: boolean; owner: boolean 
         <p className="mt-5 max-w-xl text-base leading-relaxed text-foreground-secondary">
           {t(notFound ? 'route.error.notFoundDescription' : 'route.error.description')}
         </p>
-        <Button asChild className="mt-7 rounded-full" variant="primary">
-          <Link to={owner ? '/app' : '/'}>
-            {t(owner ? 'route.error.ownerAction' : 'route.error.publicAction')}
-          </Link>
-        </Button>
+        <div className="mt-7 flex flex-wrap gap-2">
+          <Button asChild className="rounded-full" variant="primary">
+            <Link to={owner ? '/app' : '/'}>
+              {t(owner ? 'route.error.ownerAction' : 'route.error.publicAction')}
+            </Link>
+          </Button>
+          {owner ? (
+            <Button asChild className="rounded-full" variant="secondary">
+              <Link to="/app/parkings">{t('route.error.ownerParkingsAction')}</Link>
+            </Button>
+          ) : null}
+        </div>
       </div>
     </section>
   );

@@ -68,6 +68,9 @@ describe('OwnerRouteErrorBoundary', () => {
     ).toBeTruthy();
     expect(screen.queryByText('raw owner failure')).toBeNull();
     expect(screen.getByRole('link', { name: 'Go to overview' }).getAttribute('href')).toBe('/app');
+    expect(screen.getByRole('link', { name: 'View parkings' }).getAttribute('href')).toBe(
+      '/app/parkings',
+    );
     expect(screen.getByRole('alert').querySelector('div')?.className).toContain('bg-accent-soft');
   });
 });

@@ -64,8 +64,14 @@ describe('ParkingCalculatorWidget', () => {
     expect(screen.getByRole('button', { name: '4 horas' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '8 horas' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Personalizado' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '2 horas' }).getAttribute('aria-pressed')).toBe(
+      'true',
+    );
 
     await user.click(screen.getByRole('button', { name: 'Personalizado' }));
+    expect(screen.getByRole('button', { name: 'Personalizado' }).getAttribute('aria-pressed')).toBe(
+      'true',
+    );
     const durationInput = screen.getByLabelText('Duración en minutos');
     expect(screen.getByText('Completá la duración para estimar')).toBeTruthy();
 
@@ -142,6 +148,6 @@ describe('ParkingCalculatorWidget', () => {
     api.getPublicParkings.mockReturnValue(new Promise(() => undefined));
     renderCalculator();
 
-    expect(screen.getByLabelText('Cargando cocheras')).toBeTruthy();
+    expect(screen.getByRole('status', { name: 'Cargando cocheras' })).toBeTruthy();
   });
 });

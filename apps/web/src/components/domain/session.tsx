@@ -63,12 +63,14 @@ export function SessionRow({
   return (
     <Link
       aria-label={t('session.openFor', { plate: session.vehicle.plate })}
-      className="group grid gap-4 border-b border-border-subtle bg-surface py-5 text-foreground transition-colors duration-200 hover:bg-surface-hover lg:grid-cols-[minmax(9rem,1.1fr)_minmax(7rem,0.8fr)_minmax(8rem,1fr)_auto] lg:items-center"
+      className="group grid min-w-0 gap-4 border-b border-border-subtle bg-surface py-5 text-foreground transition-colors duration-200 hover:bg-surface-hover lg:grid-cols-[minmax(9rem,1.1fr)_minmax(7rem,0.8fr)_minmax(8rem,1fr)_auto] lg:items-center"
       to={to}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 items-center gap-3">
         <Plate plate={session.vehicle.plate} />
-        <span className="text-xs font-semibold text-foreground-secondary">{vehicleType}</span>
+        <span className="min-w-0 break-words text-xs font-semibold text-foreground-secondary">
+          {vehicleType}
+        </span>
       </div>
       <div>
         <p className="type-label text-foreground-muted">{t('session.arrived')}</p>
@@ -88,7 +90,7 @@ export function SessionRow({
           )}
         </div>
       </div>
-      <div className="flex items-center justify-between gap-4 lg:justify-end">
+      <div className="flex min-w-0 items-center justify-between gap-4 lg:justify-end">
         <SessionStatus status={session.status} />
         <ArrowUpRight
           aria-hidden="true"
@@ -119,7 +121,7 @@ export function SessionHistoryRow({
   return (
     <Link
       aria-label={t('session.openFor', { plate: session.vehicle.plate })}
-      className="session-history-row group grid gap-x-4 gap-y-4 border-b border-border-subtle py-5 text-foreground transition-colors duration-200 hover:bg-surface-subtle focus-visible:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring md:grid-cols-[minmax(10rem,1.25fr)_minmax(9rem,1fr)_minmax(7rem,0.9fr)_minmax(8rem,auto)_auto] md:items-center"
+      className="session-history-row group grid min-w-0 gap-x-4 gap-y-4 border-b border-border-subtle py-5 text-foreground transition-colors duration-200 hover:bg-surface-subtle focus-visible:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring md:grid-cols-[minmax(10rem,1.25fr)_minmax(9rem,1fr)_minmax(7rem,0.9fr)_minmax(8rem,auto)_auto] md:items-center"
       to={to}
     >
       <div className="min-w-0">
@@ -258,7 +260,7 @@ export function OperationalReceipt({
   return (
     <section
       aria-label={t('session.operationalReceipt')}
-      className="rounded-[var(--radius-xl)] border border-success-foreground bg-success-surface p-6 text-foreground sm:p-8"
+      className="min-w-0 rounded-[var(--radius-xl)] border border-success-foreground bg-success-surface p-6 text-foreground sm:p-8"
     >
       <div className="flex flex-col justify-between gap-5 border-b border-success-foreground/30 pb-5 sm:flex-row sm:items-start">
         <div>
@@ -362,7 +364,7 @@ export function OperationalCancellation({
   return (
     <section
       aria-label={t('session.cancelledRegion')}
-      className="rounded-[var(--radius-xl)] border border-warning-foreground bg-warning-surface p-6 text-warning-text sm:p-8"
+      className="min-w-0 rounded-[var(--radius-xl)] border border-warning-foreground bg-warning-surface p-6 text-warning-text sm:p-8"
       role="region"
     >
       <div className="border-b border-warning-foreground/30 pb-5">
@@ -427,9 +429,9 @@ function getVehicleTypeLabel(
 
 function ReceiptItem({ label, value }: { label: string; value: string }) {
   return (
-    <div>
+    <div className="min-w-0">
       <dt className="type-label text-foreground-muted">{label}</dt>
-      <dd className="mt-1 text-sm font-semibold leading-relaxed">{value}</dd>
+      <dd className="mt-1 break-words text-sm font-semibold leading-relaxed">{value}</dd>
     </div>
   );
 }

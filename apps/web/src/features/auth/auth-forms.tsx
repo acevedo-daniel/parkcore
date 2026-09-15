@@ -57,16 +57,16 @@ export function AuthFormFrame({
   const { t } = useAppearance();
   return (
     <section aria-labelledby="auth-title" className="min-h-full bg-canvas py-12 sm:py-20">
-      <div className="mx-auto grid max-w-5xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:items-stretch lg:px-8">
-        <div className="hidden rounded-[3rem_3rem_7rem_3rem] bg-surface-inverse p-10 text-foreground-on-inverse shadow-hover lg:flex lg:flex-col lg:justify-between">
+      <div className="mx-auto grid max-w-5xl gap-8 px-4 sm:px-6 wide:grid-cols-2 wide:items-stretch wide:px-8">
+        <div className="hidden min-w-0 rounded-[3rem_3rem_7rem_3rem] bg-surface-inverse p-10 text-foreground-on-inverse shadow-hover wide:flex wide:flex-col wide:justify-between">
           <div>
             <Link
-              className="inline-flex items-center gap-2 font-display text-xl font-black tracking-tight text-foreground-on-inverse"
+              className="inline-flex min-h-[var(--touch-target-min)] items-center gap-2 rounded-sm font-display text-xl font-black tracking-tight text-foreground-on-inverse"
               to="/"
             >
               PARKCORE
             </Link>
-            <p className="mt-16 text-xs font-bold tracking-[0.12em] text-accent uppercase">
+            <p className="mt-16 text-xs font-bold tracking-[0.12em] text-foreground-on-inverse uppercase">
               {eyebrow}
             </p>
             <p
@@ -83,19 +83,19 @@ export function AuthFormFrame({
             {t('auth.frame.footer')}
           </p>
         </div>
-        <div className="rounded-[2rem_2rem_4.5rem_2rem] border border-border bg-surface p-6 shadow-hover sm:p-8 lg:p-10">
+        <div className="min-w-0 rounded-[2rem_2rem_4.5rem_2rem] border border-border bg-surface p-6 shadow-hover sm:p-8 wide:p-10">
           <div>
             <Link
-              className="inline-flex items-center gap-2 font-display text-lg font-black tracking-tight text-foreground lg:hidden"
+              className="inline-flex min-h-[var(--touch-target-min)] items-center gap-2 rounded-sm font-display text-lg font-black tracking-tight text-foreground wide:hidden"
               to="/"
             >
               PARKCORE
             </Link>
-            <p className="mt-10 text-xs font-bold tracking-[0.12em] text-foreground-muted uppercase lg:mt-0">
+            <p className="mt-10 text-xs font-bold tracking-[0.12em] text-foreground-muted uppercase wide:mt-0">
               {eyebrow}
             </p>
             <h1
-              className="mt-3 font-display text-3xl font-black tracking-[-0.04em] text-foreground lg:text-4xl"
+              className="mt-3 max-w-full break-words font-display text-3xl font-black tracking-[-0.04em] text-foreground wide:text-4xl"
               id="auth-title"
             >
               {title}
@@ -141,6 +141,7 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <form
+      aria-busy={form.formState.isSubmitting}
       className="auth-form"
       noValidate
       onSubmit={(event) => {
@@ -221,6 +222,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <form
+      aria-busy={form.formState.isSubmitting}
       className="auth-form"
       noValidate
       onSubmit={(event) => {
@@ -232,7 +234,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         htmlFor="name"
         label={t('auth.fields.firstName')}
       >
-        <Input autoComplete="name" autoFocus id="name" {...form.register('name')} />
+        <Input autoComplete="given-name" autoFocus id="name" {...form.register('name')} />
       </Field>
       <Field
         error={form.formState.errors.lastName?.message}
@@ -347,6 +349,7 @@ function PasswordField({
           type={isVisible ? 'text' : 'password'}
         />
         <button
+          aria-controls={htmlFor}
           aria-label={t(isVisible ? 'auth.actions.hidePassword' : 'auth.actions.showPassword')}
           aria-pressed={isVisible}
           className="absolute inset-y-0 right-0 inline-flex size-11 items-center justify-center rounded-[var(--radius-sm)] text-foreground-secondary transition-colors hover:bg-surface-hover hover:text-foreground focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-1 focus-visible:ring-offset-focus-ring-offset"

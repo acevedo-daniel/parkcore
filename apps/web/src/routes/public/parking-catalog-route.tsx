@@ -12,6 +12,7 @@ import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.j
 import { Input } from '../../components/ui/field.js';
 import { getPublicParkings, type PublicParkingQuery } from '../../lib/api/public-api.js';
 import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
+import { formatNumber } from '../../lib/format.js';
 import {
   PARKING_CATALOG_PAGE_SIZE,
   parseCatalogRate,
@@ -25,7 +26,7 @@ function getFormText(formData: FormData, name: string) {
 }
 
 export function ParkingCatalogRoute() {
-  const { t, tPlural } = useAppearance();
+  const { locale, t, tPlural } = useAppearance();
   const [searchParams, setSearchParams] = useSearchParams();
   const [filterError, setFilterError] = useState<string>();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -127,12 +128,18 @@ export function ParkingCatalogRoute() {
   };
 
   return (
-    <section className="min-h-full bg-canvas pb-20 pt-10 sm:pb-28 sm:pt-16">
+    <section
+      aria-labelledby="public-catalog-title"
+      className="min-h-full bg-canvas pb-20 pt-10 sm:pb-28 sm:pt-16"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <header className="grid gap-8 border-b border-border-subtle pb-10 lg:grid-cols-12 lg:items-end">
-          <div className="lg:col-span-7">
+          <div className="min-w-0 lg:col-span-7">
             <p className="type-label text-foreground-muted">{t('public.catalog.eyebrow')}</p>
-            <h1 className="mt-4 font-display text-4xl font-bold leading-[1.02] tracking-[-0.05em] sm:text-5xl lg:text-6xl">
+            <h1
+              className="mt-4 max-w-full break-words font-display text-4xl font-bold leading-[1.02] tracking-[-0.05em] sm:text-5xl lg:text-6xl"
+              id="public-catalog-title"
+            >
               {t('public.catalog.title')}
             </h1>
           </div>
@@ -143,6 +150,8 @@ export function ParkingCatalogRoute() {
 
         <div className="mt-8 md:hidden">
           <Button
+            aria-expanded={mobileFiltersOpen}
+            aria-haspopup="dialog"
             className="w-full rounded-full"
             onClick={() => {
               setMobileFiltersOpen(true);
@@ -229,16 +238,21 @@ export function ParkingCatalogRoute() {
         ) : null}
         {parkingQuery.data && !parkingQuery.isError ? (
           <p className="mt-8 text-sm font-semibold text-foreground-secondary" role="status">
-            {tPlural(parkingQuery.data.meta.total, {
-              one: 'public.catalog.resultCountOne',
-              other: 'public.catalog.resultCountOther',
-            })}
+            {tPlural(
+              parkingQuery.data.meta.total,
+              {
+                one: 'public.catalog.resultCountOne',
+                other: 'public.catalog.resultCountOther',
+              },
+              { count: formatNumber(parkingQuery.data.meta.total, locale) },
+            )}
           </p>
         ) : null}
         {!parkingQuery.isLoading && !parkingQuery.isError && parkingQuery.data?.data.length ? (
           <div
             aria-label={t('public.catalog.results')}
-            className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3"
+            className="mt-10 grid gap-5 md:grid-cols-2 wide:grid-cols-3"
+            role="region"
           >
             {parkingQuery.data.data.map((parking) => (
               <ParkingDiscoveryCard
@@ -266,8 +280,8 @@ export function ParkingCatalogRoute() {
             </Button>
             <span aria-live="polite" className="text-sm font-medium text-foreground-secondary">
               {t('public.catalog.page', {
-                page: parkingQuery.data.meta.page,
-                totalPages: parkingQuery.data.meta.totalPages,
+                page: formatNumber(parkingQuery.data.meta.page, locale),
+                totalPages: formatNumber(parkingQuery.data.meta.totalPages, locale),
               })}
             </span>
             <Button
@@ -305,6 +319,8 @@ function CatalogFilters({
   const { t } = useAppearance();
   return (
     <form
+      aria-describedby={filterError ? `${idPrefix}-filter-error` : undefined}
+      aria-label={t('public.catalog.filterAction')}
       className="grid gap-4 rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-xs md:grid-cols-2 md:items-end lg:grid-cols-12 lg:p-6"
       noValidate
       onSubmit={onSubmit}
@@ -352,7 +368,11 @@ function CatalogFilters({
         {t('public.catalog.applyFilters')}
       </Button>
       {filterError ? (
-        <p className="text-sm font-medium text-danger-text lg:col-span-full" role="alert">
+        <p
+          className="text-sm font-medium text-danger-text lg:col-span-full"
+          id={`${idPrefix}-filter-error`}
+          role="alert"
+        >
           {filterError}
         </p>
       ) : null}
@@ -365,7 +385,10 @@ function CatalogSkeleton() {
   return (
     <div
       aria-label={t('public.catalog.loading')}
-      className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3"
+      aria-busy="true"
+      aria-live="polite"
+      className="mt-10 grid gap-5 md:grid-cols-2 wide:grid-cols-3"
+      role="status"
     >
       {Array.from({ length: 6 }, (_, index) => (
         <div

@@ -44,7 +44,7 @@ export function CheckInSuccess({
       </div>
       <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-success-foreground/30 pt-5">
         <Plate plate={session.vehicle.plate} />
-        <p className="text-sm font-semibold text-foreground-secondary">
+        <p className="min-w-0 break-words text-sm font-semibold text-foreground-secondary">
           {formatTimestamp(session.startTime, timezone, locale)} · {parkingTitle}
         </p>
       </div>

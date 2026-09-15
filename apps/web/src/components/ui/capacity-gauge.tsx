@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import { useAppearance } from '../../app/appearance-provider.js';
+import { formatNumber } from '../../lib/format.js';
 import { cn } from '../../lib/cn.js';
 import { Badge } from './badge.js';
 
@@ -13,13 +15,18 @@ export interface CapacityGaugeProps extends React.HTMLAttributes<HTMLDivElement>
 export function CapacityGauge({
   active,
   capacity,
-  label = 'Occupancy gauge',
+  label,
   size = 'default',
   className,
   ...props
 }: CapacityGaugeProps) {
-  const percentage = capacity === 0 ? 0 : Math.min(100, Math.round((active / capacity) * 100));
-  const isLocked = active >= capacity;
+  const { locale, t, tPlural } = useAppearance();
+  const resolvedLabel = label ?? t('parking.occupancyGauge');
+  const safeCapacity = Math.max(0, capacity);
+  const safeActive = Math.min(safeCapacity, Math.max(0, active));
+  const percentage =
+    safeCapacity === 0 ? 0 : Math.min(100, Math.round((safeActive / safeCapacity) * 100));
+  const isLocked = safeCapacity > 0 && safeActive >= safeCapacity;
 
   const threshold: 'neutral' | 'warning' | 'critical' | 'full' = isLocked
     ? 'full'
@@ -32,14 +39,14 @@ export function CapacityGauge({
           : 'neutral';
 
   const statusText = isLocked
-    ? 'Intake locked · facility full'
+    ? t('parking.intakeLocked')
     : percentage >= 95
-      ? 'Critical capacity · nearly full'
+      ? t('parking.nearlyFull')
       : percentage >= 90
-        ? 'Critical capacity'
+        ? t('parking.criticalCapacity')
         : percentage >= 70
-          ? 'Elevated occupancy'
-          : 'Optimal capacity';
+          ? t('parking.elevatedOccupancy')
+          : t('parking.optimalCapacity');
 
   const badgeVariant = isLocked
     ? 'destructive'
@@ -49,7 +56,11 @@ export function CapacityGauge({
         ? 'warning'
         : 'success';
 
-  const available = Math.max(0, capacity - active);
+  const available = Math.max(0, safeCapacity - safeActive);
+  const formattedActive = formatNumber(safeActive, locale);
+  const formattedAvailable = formatNumber(available, locale);
+  const formattedCapacity = formatNumber(safeCapacity, locale);
+  const formattedPercentage = formatNumber(percentage, locale);
 
   return (
     <div
@@ -63,24 +74,33 @@ export function CapacityGauge({
       {...props}
     >
       <div className="flex items-center justify-between gap-2 mb-2.5">
-        <span className="text-xs font-semibold uppercase tracking-wider text-foreground-secondary font-mono">
-          {label}
+        <span className="font-mono text-xs font-semibold uppercase tracking-wider text-foreground-secondary">
+          {resolvedLabel}
         </span>
         <div className="flex items-center gap-2">
           <Badge variant={badgeVariant} dot size="sm">
-            {percentage}%
+            {formattedPercentage}%
           </Badge>
           <span className="font-mono text-xs sm:text-sm font-bold tabular-nums text-foreground">
-            {active} / {capacity}
+            {formattedActive} / {formattedCapacity}
           </span>
         </div>
       </div>
 
       <div
-        aria-label={`${String(active)} of ${String(capacity)} spots occupied`}
-        aria-valuemax={capacity}
+        aria-label={t('parkingOperation.occupancyLabel', {
+          active: formattedActive,
+          capacity: formattedCapacity,
+        })}
+        aria-valuemax={safeCapacity}
         aria-valuemin={0}
-        aria-valuenow={active}
+        aria-valuenow={safeActive}
+        aria-valuetext={t('parking.occupancySummary', {
+          active: formattedActive,
+          available: formattedAvailable,
+          capacity: formattedCapacity,
+          percent: formattedPercentage,
+        })}
         className={cn(
           'capacity-gauge-track relative w-full overflow-hidden rounded-full bg-surface-subtle',
           size === 'sm' && 'h-2',
@@ -102,8 +122,8 @@ export function CapacityGauge({
         />
       </div>
 
-      <div className="mt-2.5 flex items-center justify-between text-xs text-foreground-secondary">
-        <p className="flex items-center gap-1.5 font-medium">
+      <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-foreground-secondary">
+        <p className="flex min-w-0 items-center gap-1.5 break-words font-medium">
           <span
             className={cn(
               'size-1.5 rounded-full shrink-0',
@@ -118,7 +138,14 @@ export function CapacityGauge({
           {statusText}
         </p>
         <span className="font-mono text-foreground-muted tabular-nums">
-          {available} {available === 1 ? 'spot' : 'spots'} left
+          {tPlural(
+            available,
+            { one: 'parking.spot', other: 'parking.spots' },
+            {
+              count: formattedAvailable,
+            },
+          )}{' '}
+          {t('parking.openSpots')}
         </span>
       </div>
     </div>

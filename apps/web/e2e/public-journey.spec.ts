@@ -402,17 +402,21 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
     /\/parkings\?search=central&currency=USD&minRate=10\.00&maxRate=20\.00&availableNow=true$/,
   );
   await expect(page.getByRole('link', { name: 'Open Showcase Central' })).toBeVisible();
-  expect(
-    api.requests.some(
-      (request) =>
-        request.startsWith('GET /parkings?') &&
-        request.includes('search=central') &&
-        request.includes('currency=USD') &&
-        request.includes('minHourlyRateCents=1000') &&
-        request.includes('maxHourlyRateCents=2000') &&
-        request.includes('availableNow=true'),
-    ),
-  ).toBe(true);
+  await expect
+    .poll(
+      () =>
+        api.requests.some(
+          (request) =>
+            request.startsWith('GET /parkings?') &&
+            request.includes('search=central') &&
+            request.includes('currency=USD') &&
+            request.includes('minHourlyRateCents=1000') &&
+            request.includes('maxHourlyRateCents=2000') &&
+            request.includes('availableNow=true'),
+        ),
+      { timeout: 10_000 },
+    )
+    .toBe(true);
 
   await page.getByLabel('Min. rate (USD)').fill('20');
   await page.getByLabel('Max. rate (USD)').fill('10');

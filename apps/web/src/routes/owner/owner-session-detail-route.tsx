@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Ban, Check, ChevronLeft, MapPin } from 'lucide-react';
+import { Ban, Check, ChevronLeft, MapPin, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 
@@ -62,29 +62,42 @@ export function OwnerSessionDetailRoute() {
   const checkoutMutation = useMutation({ mutationFn: () => checkOut(sessionId ?? '') });
   const cancelMutation = useMutation({ mutationFn: () => cancelParkingSession(sessionId ?? '') });
 
+  const hasSessionSnapshot = Boolean(sessionQuery.data ?? resolvedSession);
+  const hasParkingsSnapshot = parkingsQuery.data !== undefined;
+
   if (sessionQuery.isLoading || parkingsQuery.isLoading) return <SessionDetailSkeleton />;
-  if (sessionQuery.isError || !sessionId) {
+  if ((sessionQuery.isError && !hasSessionSnapshot) || !sessionId) {
     return (
-      <ErrorState
-        onRetry={() => {
-          void sessionQuery.refetch();
-          void parkingsQuery.refetch();
-        }}
-      >
-        {t('api.loadSession')}
-      </ErrorState>
+      <section className="owner-page" aria-labelledby="session-detail-error-title">
+        <h1 className="visually-hidden" id="session-detail-error-title">
+          {t('session.operation')}
+        </h1>
+        <ErrorState
+          onRetry={() => {
+            void sessionQuery.refetch();
+            void parkingsQuery.refetch();
+          }}
+        >
+          {t('api.loadSession')}
+        </ErrorState>
+      </section>
     );
   }
-  if (parkingsQuery.isError) {
+  if (parkingsQuery.isError && !hasParkingsSnapshot) {
     return (
-      <ErrorState
-        onRetry={() => {
-          void sessionQuery.refetch();
-          void parkingsQuery.refetch();
-        }}
-      >
-        {t('api.loadParkings')}
-      </ErrorState>
+      <section className="owner-page" aria-labelledby="session-detail-error-title">
+        <h1 className="visually-hidden" id="session-detail-error-title">
+          {t('session.operation')}
+        </h1>
+        <ErrorState
+          onRetry={() => {
+            void sessionQuery.refetch();
+            void parkingsQuery.refetch();
+          }}
+        >
+          {t('api.loadParkings')}
+        </ErrorState>
+      </section>
     );
   }
   const session = resolvedSession ?? sessionQuery.data;
@@ -96,18 +109,25 @@ export function OwnerSessionDetailRoute() {
   const parking = parkingsQuery.data?.find((item) => item.id === session.parkingId);
   if (!parking) {
     return (
-      <ErrorState
-        onRetry={() => {
-          void sessionQuery.refetch();
-          void parkingsQuery.refetch();
-        }}
-        title={t('parkingOperation.unavailableTitle')}
-      >
-        {t('api.parkingUnavailable')}
-      </ErrorState>
+      <section className="owner-page" aria-labelledby="session-detail-error-title">
+        <h1 className="visually-hidden" id="session-detail-error-title">
+          {t('session.operation')}
+        </h1>
+        <ErrorState
+          onRetry={() => {
+            void sessionQuery.refetch();
+            void parkingsQuery.refetch();
+          }}
+          title={t('parkingOperation.unavailableTitle')}
+        >
+          {t('api.parkingUnavailable')}
+        </ErrorState>
+      </section>
     );
   }
   const canOperate = session.status === 'ACTIVE';
+  const hasStaleSessionData = sessionQuery.isError && Boolean(sessionQuery.data);
+  const hasStaleParkingData = parkingsQuery.isError && Boolean(parkingsQuery.data);
 
   const refreshOperation = async () => {
     await invalidateOwnerMutationQueries(queryClient, {
@@ -161,13 +181,13 @@ export function OwnerSessionDetailRoute() {
     <section className="owner-page space-y-9" aria-labelledby="session-detail-title">
       <header className="border-b border-border-strong pb-7">
         <Link
-          className="inline-flex items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
+          className="inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
           to={`/app/parkings/${session.parkingId}`}
         >
           <ChevronLeft aria-hidden="true" className="size-4" /> {t('session.operation')}
         </Link>
         <div className="mt-7 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-          <div>
+          <div className="min-w-0">
             <p className="type-label text-foreground-muted">
               {getSessionStateTitle(session.status, t)}
             </p>
@@ -176,14 +196,14 @@ export function OwnerSessionDetailRoute() {
               <SessionStatus status={session.status} />
             </div>
             <h1
-              className="mt-5 font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] sm:text-5xl"
+              className="mt-5 break-words font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] sm:text-5xl"
               id="session-detail-title"
             >
               {getVehicleTypeLabel(session.vehicle.type, t)}
             </h1>
           </div>
           {canOperate ? (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex min-w-0 flex-wrap gap-2">
               <Button
                 variant="primary"
                 onClick={() => {
@@ -207,6 +227,35 @@ export function OwnerSessionDetailRoute() {
         </div>
       </header>
 
+      {hasStaleSessionData || hasStaleParkingData ? (
+        <div
+          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+          role="alert"
+        >
+          <p className="break-words text-sm font-semibold">{t('session.staleData')}</p>
+          <Button
+            className="self-start sm:self-auto"
+            disabled={sessionQuery.isFetching || parkingsQuery.isFetching}
+            onClick={() => {
+              void sessionQuery.refetch();
+              void parkingsQuery.refetch();
+            }}
+            size="sm"
+            variant="secondary"
+          >
+            <RefreshCw
+              aria-hidden="true"
+              className={
+                sessionQuery.isFetching || parkingsQuery.isFetching
+                  ? 'size-3.5 animate-spin'
+                  : 'size-3.5'
+              }
+            />
+            {t('session.retryData')}
+          </Button>
+        </div>
+      ) : null}
+
       <div className="grid gap-4 lg:grid-cols-3">
         <DetailCard
           entries={[
@@ -224,7 +273,7 @@ export function OwnerSessionDetailRoute() {
           ]}
           title={t('session.visit')}
         />
-        <section className="rounded-[var(--radius-lg)] border border-border bg-surface p-5">
+        <section className="min-w-0 rounded-[var(--radius-lg)] border border-border bg-surface p-5">
           <p className="type-label text-foreground-muted">{t('session.parking')}</p>
           <dl className="mt-5 space-y-4">
             <DetailItem label={t('session.facility')}>
@@ -355,7 +404,7 @@ function formatSessionTotal(session: ParkingSession, translate: Translator, loca
 function ActionError({ message }: { message: string }) {
   return (
     <p
-      className="rounded-[var(--radius-md)] border border-danger-foreground bg-danger-surface p-3 text-sm font-semibold text-danger-text"
+      className="break-words rounded-[var(--radius-md)] border border-danger-foreground bg-danger-surface p-3 text-sm font-semibold text-danger-text"
       role="alert"
     >
       {message}
@@ -365,7 +414,7 @@ function ActionError({ message }: { message: string }) {
 
 function DetailCard({ entries, title }: { entries: [string, string][]; title: string }) {
   return (
-    <section className="rounded-[var(--radius-lg)] border border-border bg-surface p-5">
+    <section className="min-w-0 rounded-[var(--radius-lg)] border border-border bg-surface p-5">
       <p className="type-label text-foreground-muted">{title}</p>
       <dl className="mt-5 space-y-4">
         {entries.map(([label, value]) => (
@@ -380,9 +429,9 @@ function DetailCard({ entries, title }: { entries: [string, string][]; title: st
 
 function DetailItem({ children, label }: { children: React.ReactNode; label: string }) {
   return (
-    <div>
+    <div className="min-w-0">
       <dt className="type-label text-foreground-muted">{label}</dt>
-      <dd className="mt-1 text-sm font-semibold leading-relaxed">{children}</dd>
+      <dd className="mt-1 min-w-0 break-words text-sm font-semibold leading-relaxed">{children}</dd>
     </div>
   );
 }
@@ -390,7 +439,8 @@ function DetailItem({ children, label }: { children: React.ReactNode; label: str
 function SessionDetailSkeleton() {
   const { t } = useAppearance();
   return (
-    <div className="space-y-8" aria-label={t('api.loadSession')}>
+    <div aria-busy="true" aria-label={t('api.loadSession')} className="space-y-8" role="status">
+      <h1 className="visually-hidden">{t('session.operation')}</h1>
       <Skeleton className="h-56 rounded-[var(--radius-xl)]" />
       <div className="grid gap-4 lg:grid-cols-3">
         <Skeleton className="h-64 rounded-[var(--radius-lg)]" />

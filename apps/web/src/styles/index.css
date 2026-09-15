@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 
 @theme inline {
+  --breakpoint-wide: 75rem;
   --font-sans: var(--font-sans);
   --font-display: var(--font-display);
   --font-mono: var(--font-mono);
@@ -405,7 +406,7 @@
     background: var(--canvas);
     line-height: var(--leading-normal);
     scroll-behavior: smooth;
-    scroll-padding-top: 1.5rem;
+    scroll-padding-top: max(1.5rem, calc(5rem + env(safe-area-inset-top, 0px)));
   }
 
   body {
@@ -484,6 +485,11 @@
     transform: translateY(0) scale(0.98);
   }
 
+  .icon-button {
+    min-width: var(--touch-target-min);
+    min-height: var(--touch-target-min);
+  }
+
   .parkcore-raised-action {
     box-shadow: var(--shadow-xs);
   }
@@ -500,8 +506,8 @@
 
   .parkcore-toast-viewport {
     position: fixed;
-    right: 1rem;
-    bottom: 1rem;
+    right: max(1rem, env(safe-area-inset-right, 0px));
+    bottom: max(1rem, env(safe-area-inset-bottom, 0px));
     z-index: 100;
     display: flex;
     width: min(calc(100vw - 2rem), 24rem);
@@ -572,6 +578,14 @@
   }
   .skip-link:focus-visible {
     transform: translateY(0);
+  }
+
+  .owner-mobile-nav {
+    height: calc(4rem + env(safe-area-inset-bottom, 0px));
+    min-height: 4rem;
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
   }
 
   .visually-hidden {
@@ -675,11 +689,11 @@
   .button-danger {
     border-color: var(--danger);
     background: var(--danger);
-    color: #ffffff;
+    color: var(--danger-on-solid);
     box-shadow: var(--shadow-xs);
   }
   .button-danger:hover:not(:disabled) {
-    background: #dc2626;
+    background: color-mix(in srgb, var(--danger) 90%, var(--danger-on-solid));
     transform: translateY(-1px);
   }
   .button-quiet {

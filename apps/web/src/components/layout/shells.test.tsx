@@ -87,9 +87,16 @@ describe('application shells', () => {
     expect(navigation.textContent).toContain('Inicio');
     expect(navigation.textContent).toContain('Cocheras');
     expect(navigation.textContent).not.toContain('Payments');
-    expect(screen.getByRole('complementary').className).toContain('xl:flex');
-    expect(screen.getByRole('banner').className).toContain('xl:hidden');
-    expect(screen.getByRole('navigation', { name: 'Navegación de operador, móvil' })).toBeTruthy();
+    expect(screen.getByRole('complementary').className).toContain('wide:flex');
+    expect(screen.getByRole('banner').className).toContain('wide:hidden');
+    const mobileNavigation = screen.getByRole('navigation', {
+      name: 'Navegación de operador, móvil',
+    });
+    expect(mobileNavigation.className).toContain('wide:hidden');
+    expect(mobileNavigation.className).toContain('owner-mobile-nav');
+    expect(screen.getByRole('main').className).toContain(
+      'pb-[calc(6rem+env(safe-area-inset-bottom,0px))]',
+    );
     expect(screen.getAllByRole('combobox', { name: 'Apariencia' })).toHaveLength(2);
     expect(document.title).toBe('ParkCore | Operaciones');
   });

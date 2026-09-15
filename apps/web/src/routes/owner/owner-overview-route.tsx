@@ -17,7 +17,7 @@ import { OwnerParkingPanel } from '../../features/parking/owner-parking-panel.js
 import { useOwnedParkingOperations } from '../../features/parking/use-owned-parking-operations.js';
 import { getActiveSessions } from '../../lib/api/owner-api.js';
 import { cn } from '../../lib/cn.js';
-import { formatMoney } from '../../lib/format.js';
+import { formatMoney, formatNumber } from '../../lib/format.js';
 import type { Locale } from '../../lib/localization.js';
 import { deriveOwnerAttentionItems } from './owner-overview-attention.js';
 
@@ -34,6 +34,7 @@ function formatBarDate(date: string, locale: Locale): string {
 
 export function OwnerOverviewRoute() {
   const { locale, t, tPlural } = useAppearance();
+  const formatCount = (value: number) => formatNumber(value, locale);
   const [days, setDays] = useState<7 | 30>(7);
   const [activeBarIndex, setActiveBarIndex] = useState<number | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<'ARS' | 'USD'>('USD');
@@ -92,6 +93,7 @@ export function OwnerOverviewRoute() {
   const activityIsLoading = revenueQuery.isPending || volumeQuery.isPending;
   const activityHasError = revenueQuery.isError || volumeQuery.isError;
   const attentionQueryHasError = activeSessionQueries.some((query) => query.isError);
+  const facilitiesSnapshotIsStale = parkingsQuery.isError && Boolean(parkingsQuery.data);
 
   const fallbackNetwork = parkings.reduce(
     (totals, { parking }) => ({
@@ -117,7 +119,7 @@ export function OwnerOverviewRoute() {
   const completedToday = summaryQuery.isPending
     ? t('overview.loadingValue')
     : summary
-      ? String(summary.completedToday)
+      ? formatCount(summary.completedToday)
       : t('common.notAvailable');
 
   const attentionItems = deriveOwnerAttentionItems(
@@ -134,7 +136,9 @@ export function OwnerOverviewRoute() {
         : item.state === 'LIMITED'
           ? t('overview.attentionLimited')
           : item.state === 'LONG_RUNNING'
-            ? t('overview.attentionLongRunning', { hours: item.durationHours ?? 8 })
+            ? t('overview.attentionLongRunning', {
+                hours: formatCount(item.durationHours ?? 8),
+              })
             : t('overview.attentionPaused'),
   }));
 
@@ -161,26 +165,38 @@ export function OwnerOverviewRoute() {
   };
 
   if (parkingsQuery.isLoading) return <OwnerOverviewSkeleton />;
-  if (parkingsQuery.isError) {
+  if (parkingsQuery.isError && !parkingsQuery.data) {
     return (
-      <ErrorState onRetry={() => void parkingsQuery.refetch()}>{t('api.loadParkings')}</ErrorState>
+      <section className="owner-page" aria-labelledby="overview-error-title">
+        <h1 className="visually-hidden" id="overview-error-title">
+          {t('overview.title')}
+        </h1>
+        <ErrorState onRetry={() => void parkingsQuery.refetch()}>
+          {t('api.loadParkings')}
+        </ErrorState>
+      </section>
     );
   }
   if (parkings.length === 0) {
     return (
-      <EmptyState
-        action={
-          <Button asChild variant="primary">
-            <Link to="/app/parkings/new">
-              <Plus aria-hidden="true" className="size-4" />
-              {t('overview.newFacility')}
-            </Link>
-          </Button>
-        }
-        title={t('overview.emptyTitle')}
-      >
-        {t('overview.emptyDescription')}
-      </EmptyState>
+      <section className="owner-page" aria-labelledby="overview-empty-title">
+        <h1 className="visually-hidden" id="overview-empty-title">
+          {t('overview.title')}
+        </h1>
+        <EmptyState
+          action={
+            <Button asChild variant="primary">
+              <Link to="/app/parkings/new">
+                <Plus aria-hidden="true" className="size-4" />
+                {t('overview.newFacility')}
+              </Link>
+            </Button>
+          }
+          title={t('overview.emptyTitle')}
+        >
+          {t('overview.emptyDescription')}
+        </EmptyState>
+      </section>
     );
   }
 
@@ -216,7 +232,29 @@ export function OwnerOverviewRoute() {
         title={t('overview.title')}
       />
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
+      {facilitiesSnapshotIsStale ? (
+        <div
+          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+          role="alert"
+        >
+          <p className="break-words text-sm font-semibold">{t('overview.facilitiesStale')}</p>
+          <Button
+            className="self-start sm:self-auto"
+            disabled={parkingsQuery.isFetching}
+            onClick={() => void parkingsQuery.refetch()}
+            size="sm"
+            variant="secondary"
+          >
+            <RefreshCw
+              aria-hidden="true"
+              className={cn('size-3.5', parkingsQuery.isFetching && 'animate-spin')}
+            />
+            {t('overview.retryFacilities')}
+          </Button>
+        </div>
+      ) : null}
+
+      <div className="grid gap-5 wide:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
         <section
           className="rounded-[var(--radius-xl)] border border-border bg-surface p-6 shadow-xs sm:p-8"
           aria-labelledby="network-now-title"
@@ -226,26 +264,30 @@ export function OwnerOverviewRoute() {
             className="mt-4 max-w-2xl font-display text-3xl font-bold leading-tight tracking-[-0.045em] sm:text-4xl"
             id="network-now-title"
           >
-            {tPlural(activeVehicles, {
-              one: 'overview.networkStatementOne',
-              other: 'overview.networkStatementOther',
-            })}
+            {tPlural(
+              activeVehicles,
+              {
+                one: 'overview.networkStatementOne',
+                other: 'overview.networkStatementOther',
+              },
+              { count: formatCount(activeVehicles) },
+            )}
           </h2>
           <p className="mt-3 max-w-xl text-base leading-relaxed text-foreground-secondary">
             {t('overview.networkCapacityStatement', {
-              free: freeSpaces,
-              receiving: receivingFacilities,
-              total: totalFacilities,
+              free: formatCount(freeSpaces),
+              receiving: formatCount(receivingFacilities),
+              total: formatCount(totalFacilities),
             })}
           </p>
 
           <dl className="mt-8 grid grid-cols-2 gap-x-5 gap-y-6 border-t border-border-subtle pt-5 sm:grid-cols-4">
             <SummaryMetric
               label={t('overview.networkActiveVehicles')}
-              value={String(activeVehicles)}
+              value={formatCount(activeVehicles)}
             />
-            <SummaryMetric label={t('overview.freeSpaces')} value={String(freeSpaces)} />
-            <SummaryMetric label={t('overview.capacity')} value={String(totalCapacity)} />
+            <SummaryMetric label={t('overview.freeSpaces')} value={formatCount(freeSpaces)} />
+            <SummaryMetric label={t('overview.capacity')} value={formatCount(totalCapacity)} />
             <SummaryMetric label={t('overview.completedToday')} value={completedToday} />
           </dl>
 
@@ -253,16 +295,24 @@ export function OwnerOverviewRoute() {
             <p className="type-label text-foreground-muted">{t('overview.facilityState')}</p>
             <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm font-semibold text-foreground-secondary">
               <span>
-                {tPlural(activeFacilities, {
-                  one: 'overview.enabledFacilitiesOne',
-                  other: 'overview.enabledFacilitiesOther',
-                })}
+                {tPlural(
+                  activeFacilities,
+                  {
+                    one: 'overview.enabledFacilitiesOne',
+                    other: 'overview.enabledFacilitiesOther',
+                  },
+                  { count: formatCount(activeFacilities) },
+                )}
               </span>
               <span>
-                {tPlural(pausedFacilities, {
-                  one: 'overview.pausedFacilitiesOne',
-                  other: 'overview.pausedFacilitiesOther',
-                })}
+                {tPlural(
+                  pausedFacilities,
+                  {
+                    one: 'overview.pausedFacilitiesOne',
+                    other: 'overview.pausedFacilitiesOther',
+                  },
+                  { count: formatCount(pausedFacilities) },
+                )}
               </span>
             </div>
           </div>
@@ -364,7 +414,7 @@ export function OwnerOverviewRoute() {
             />
           </Link>
         </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 wide:grid-cols-3">
           {parkings.slice(0, 3).map(({ parking }, index) => (
             <OwnerParkingPanel identifier={index + 1} key={parking.id} parking={parking} />
           ))}
@@ -407,7 +457,7 @@ export function OwnerOverviewRoute() {
                   aria-label={t('overview.periodOption', { days: period })}
                   aria-pressed={days === period}
                   className={cn(
-                    'rounded-full px-3 py-2 font-mono text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset',
+                    'min-h-[var(--touch-target-min)] rounded-full px-3 py-2 font-mono text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset',
                     days === period
                       ? 'bg-accent text-accent-foreground'
                       : 'text-foreground-secondary hover:bg-surface-hover hover:text-foreground',
@@ -433,7 +483,7 @@ export function OwnerOverviewRoute() {
                   <button
                     aria-pressed={displayCurrency === currency}
                     className={cn(
-                      'rounded-full border px-3 py-2 font-mono text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset',
+                      'min-h-[var(--touch-target-min)] rounded-full border px-3 py-2 font-mono text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset',
                       displayCurrency === currency
                         ? 'border-accent bg-accent text-accent-foreground'
                         : 'border-border-strong text-foreground-secondary hover:bg-surface-hover hover:text-foreground',
@@ -503,7 +553,7 @@ export function OwnerOverviewRoute() {
                         aria-label={t('overview.chartPoint', {
                           date: dateLabel,
                           revenue: revenueLabel,
-                          sessions: point.completedSessions,
+                          sessions: formatCount(point.completedSessions),
                         })}
                         aria-pressed={isActive}
                         className="group relative flex h-full min-w-0 flex-1 items-end focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset"
@@ -551,7 +601,7 @@ export function OwnerOverviewRoute() {
                     {t('overview.chartPoint', {
                       date: formatBarDate(point.date, locale),
                       revenue: formatMoney(revenueForCurrency(point), displayCurrency, locale),
-                      sessions: point.completedSessions,
+                      sessions: formatCount(point.completedSessions),
                     })}
                   </li>
                 ))}
@@ -565,11 +615,14 @@ export function OwnerOverviewRoute() {
                       value={formatMoney(total, currency, locale)}
                     />
                   ))}
-                  <SummaryValue label={t('overview.completedStays')} value={String(totalStays)} />
+                  <SummaryValue
+                    label={t('overview.completedStays')}
+                    value={formatCount(totalStays)}
+                  />
                 </div>
                 {activeBarIndex !== null && chartPoints[activeBarIndex] ? (
                   <div aria-live="polite" className="text-sm text-foreground-secondary">
-                    <span className="font-mono text-xs uppercase tracking-wider text-accent-foreground">
+                    <span className="font-mono text-xs uppercase tracking-wider text-foreground-secondary">
                       {t('overview.selectedDay', {
                         date: formatBarDate(chartPoints[activeBarIndex].date, locale),
                       })}
@@ -581,7 +634,7 @@ export function OwnerOverviewRoute() {
                           displayCurrency,
                           locale,
                         ),
-                        sessions: chartPoints[activeBarIndex].completedSessions,
+                        sessions: formatCount(chartPoints[activeBarIndex].completedSessions),
                       })}
                     </p>
                   </div>
@@ -613,18 +666,18 @@ function AnalyticsNotice({ onRetry }: { onRetry: () => void }) {
 
 function SummaryMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div>
+    <div className="min-w-0">
       <dt className="type-label text-foreground-muted">{label}</dt>
-      <dd className="mt-2 type-metric">{value}</dd>
+      <dd className="mt-2 break-words type-metric">{value}</dd>
     </div>
   );
 }
 
 function SummaryValue({ label, value }: { label: string; value: string }) {
   return (
-    <div>
+    <div className="min-w-0">
       <p className="type-label text-foreground-muted">{label}</p>
-      <p className="mt-1 font-mono text-lg font-bold tabular-nums">{value}</p>
+      <p className="mt-1 break-words font-mono text-lg font-bold tabular-nums">{value}</p>
     </div>
   );
 }
@@ -633,13 +686,14 @@ function OwnerOverviewSkeleton() {
   const { t } = useAppearance();
 
   return (
-    <div aria-busy="true" aria-label={t('overview.loading')} className="space-y-10">
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
+    <div aria-busy="true" aria-label={t('overview.loading')} className="space-y-10" role="status">
+      <h1 className="visually-hidden">{t('overview.title')}</h1>
+      <div className="grid gap-5 wide:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
         <Skeleton className="h-72 rounded-[var(--radius-xl)]" />
         <Skeleton className="h-72 rounded-[var(--radius-xl)]" />
       </div>
       <Skeleton className="h-80 rounded-[var(--radius-xl)]" />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 wide:grid-cols-3">
         <Skeleton className="h-40 rounded-[var(--radius-lg)]" />
         <Skeleton className="h-40 rounded-[var(--radius-lg)]" />
         <Skeleton className="h-40 rounded-[var(--radius-lg)]" />

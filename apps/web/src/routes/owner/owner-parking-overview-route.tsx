@@ -22,6 +22,7 @@ import {
   type Parking,
   type ParkingSession,
 } from '../../lib/api/owner-api.js';
+import { cn } from '../../lib/cn.js';
 import { normalizePlate } from '../../lib/plate.js';
 import { invalidateOwnerMutationQueries } from '../../lib/query-invalidation.js';
 import { useDebouncedValue } from '../../lib/use-debounced-value.js';
@@ -101,18 +102,29 @@ export function OwnerParkingOverviewRoute() {
   }, [checkInAllowed]);
 
   if (parkingsQuery.isLoading) return <OwnerParkingOperationSkeleton />;
-  if (parkingsQuery.isError || !parkingId) {
+  const hasParkingSnapshot = parkingsQuery.data !== undefined;
+  if ((parkingsQuery.isError && !hasParkingSnapshot) || !parkingId) {
     return (
-      <ErrorState onRetry={() => void parkingsQuery.refetch()}>
-        {t('parkingOperation.loadError')}
-      </ErrorState>
+      <section className="owner-page" aria-labelledby="parking-overview-error-title">
+        <h1 className="visually-hidden" id="parking-overview-error-title">
+          {t('parkingOperation.eyebrow')}
+        </h1>
+        <ErrorState onRetry={() => void parkingsQuery.refetch()}>
+          {t('parkingOperation.loadError')}
+        </ErrorState>
+      </section>
     );
   }
   if (!parking) {
     return (
-      <ErrorState title={t('parkingOperation.unavailableTitle')}>
-        {t('api.parkingUnavailable')}
-      </ErrorState>
+      <section className="owner-page" aria-labelledby="parking-overview-error-title">
+        <h1 className="visually-hidden" id="parking-overview-error-title">
+          {t('parkingOperation.unavailableTitle')}
+        </h1>
+        <ErrorState title={t('parkingOperation.unavailableTitle')}>
+          {t('api.parkingUnavailable')}
+        </ErrorState>
+      </section>
     );
   }
 
@@ -123,6 +135,7 @@ export function OwnerParkingOverviewRoute() {
   const openCheckIn = () => {
     if (checkInAllowed) setCheckInOpen(true);
   };
+  const facilitySnapshotIsStale = parkingsQuery.isError && hasParkingSnapshot;
   const stateDescription = getOperationStateDescription(parking, t, locale);
   const stateTitle = getOperationStateTitle(parking.availabilityState, t);
 
@@ -136,6 +149,19 @@ export function OwnerParkingOverviewRoute() {
               state={parking.availabilityState}
               timezone={parking.timezone}
             />
+            <Button
+              aria-label={t('parkingOperation.refreshFacility')}
+              disabled={parkingsQuery.isFetching}
+              onClick={() => void parkingsQuery.refetch()}
+              size="sm"
+              variant="outline"
+            >
+              <RefreshCw
+                aria-hidden="true"
+                className={cn('size-3.5', parkingsQuery.isFetching && 'animate-spin')}
+              />
+              {t('parkingOperation.refreshFacility')}
+            </Button>
             <Button asChild size="sm" variant="outline">
               <Link
                 aria-label={t('parkingOperation.editAria', { title: parking.title })}
@@ -148,7 +174,7 @@ export function OwnerParkingOverviewRoute() {
         }
         backAction={
           <Link
-            className="inline-flex items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
+            className="inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
             to="/app/parkings"
           >
             <ChevronLeft aria-hidden="true" className="size-4" />
@@ -156,9 +182,9 @@ export function OwnerParkingOverviewRoute() {
           </Link>
         }
         description={
-          <span className="flex items-start gap-2">
+          <span className="flex min-w-0 items-start gap-2">
             <MapPin aria-hidden="true" className="mt-1 size-4 shrink-0" />
-            {parking.address}
+            <span className="break-words">{parking.address}</span>
           </span>
         }
         eyebrow={t('parkingOperation.eyebrow')}
@@ -166,13 +192,35 @@ export function OwnerParkingOverviewRoute() {
         title={parking.title}
       />
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
+      {facilitySnapshotIsStale ? (
+        <div
+          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+          role="alert"
+        >
+          <p className="break-words text-sm font-semibold">{t('parkingOperation.staleFacility')}</p>
+          <Button
+            className="self-start sm:self-auto"
+            disabled={parkingsQuery.isFetching}
+            onClick={() => void parkingsQuery.refetch()}
+            size="sm"
+            variant="secondary"
+          >
+            <RefreshCw
+              aria-hidden="true"
+              className={cn('size-3.5', parkingsQuery.isFetching && 'animate-spin')}
+            />
+            {t('parkingOperation.refreshFacility')}
+          </Button>
+        </div>
+      ) : null}
+
+      <div className="grid gap-4 wide:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
         <section
           className="rounded-[var(--radius-xl)] border border-border bg-surface-emphasis p-6 text-foreground sm:p-8"
           aria-labelledby="check-in-title"
         >
           <p className="type-label text-foreground-muted">{t('parkingOperation.arrivals')}</p>
-          <div className="mt-6 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+          <div className="mt-6 flex min-w-0 flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <div>
               <h2
                 className="font-display text-3xl font-bold leading-none tracking-[-0.055em]"
@@ -181,7 +229,7 @@ export function OwnerParkingOverviewRoute() {
                 {stateTitle}
               </h2>
               <p
-                className="mt-3 max-w-md text-sm leading-relaxed text-foreground-secondary"
+                className="mt-3 max-w-md break-words text-sm leading-relaxed text-foreground-secondary"
                 role="status"
               >
                 {stateDescription}
@@ -366,6 +414,7 @@ export function OwnerParkingOverviewRoute() {
         description={t('parkingOperation.sheetDescription')}
         onOpenChange={(open) => {
           setCheckInOpen(open);
+          if (!open) setCheckInError(undefined);
         }}
         open={checkInOpen}
         title={t('parkingOperation.checkInVehicle')}
@@ -453,9 +502,15 @@ function getOperationStateDescription(
 function OwnerParkingOperationSkeleton() {
   const { t } = useAppearance();
   return (
-    <div className="space-y-8" aria-label={t('parkingOperation.loading')}>
+    <div
+      aria-busy="true"
+      aria-label={t('parkingOperation.loading')}
+      className="space-y-8"
+      role="status"
+    >
+      <h1 className="visually-hidden">{t('parkingOperation.eyebrow')}</h1>
       <Skeleton className="h-48 rounded-[var(--radius-xl)]" />
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
+      <div className="grid gap-4 wide:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
         <Skeleton className="h-64 rounded-[var(--radius-xl)]" />
         <Skeleton className="h-64 rounded-[var(--radius-xl)]" />
       </div>
