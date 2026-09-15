@@ -44,8 +44,21 @@ type ProfileValues = z.infer<ReturnType<typeof createProfileSchema>>;
 type SaveStatus = 'idle' | 'success';
 
 export function OwnerProfileRoute() {
+  const { t } = useAppearance();
   const { user } = useAuth();
-  if (!user) return <Skeleton className="min-h-96 w-full" />;
+  if (!user) {
+    return (
+      <section aria-labelledby="profile-loading-title" className="owner-page space-y-6">
+        <h1 className="visually-hidden" id="profile-loading-title">
+          {t('profile.title')}
+        </h1>
+        <p className="visually-hidden" role="status">
+          {t('profile.loading')}
+        </p>
+        <Skeleton className="min-h-96 w-full" />
+      </section>
+    );
+  }
   return <OwnerProfileContent user={user} />;
 }
 
@@ -122,6 +135,7 @@ function OwnerProfileContent({ user }: { user: User }) {
       />
 
       <form
+        aria-busy={mutation.isPending}
         className="space-y-8"
         noValidate
         onSubmit={(event) => {
@@ -215,13 +229,16 @@ function OwnerProfileContent({ user }: { user: User }) {
                     <Combobox
                       aria-describedby={messageId}
                       aria-invalid={fieldState.error ? true : undefined}
+                      aria-required="true"
                       id="profile-timezone"
                       label={t('profile.timezone')}
+                      onBlur={field.onBlur}
                       onValueChange={(value) => {
                         clearSaveFeedback();
                         field.onChange(value);
                       }}
                       options={options}
+                      ref={field.ref}
                       value={field.value}
                     />
                     <p
@@ -295,12 +312,12 @@ function OwnerProfileContent({ user }: { user: User }) {
 
 function DemoSessionDisclosure({ locale, t, user }: { locale: Locale; t: Translator; user: User }) {
   return (
-    <div className="mt-4 flex flex-col gap-5 rounded-[var(--radius-lg)] border border-accent-foreground/30 bg-accent-soft p-5 text-foreground sm:flex-row sm:items-start sm:justify-between sm:p-6">
-      <div className="flex items-start gap-3">
+    <div className="mt-4 flex min-w-0 flex-col gap-5 rounded-[var(--radius-lg)] border border-accent-foreground/30 bg-accent-soft p-5 text-foreground sm:flex-row sm:items-start sm:justify-between sm:p-6">
+      <div className="flex min-w-0 items-start gap-3">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
           <UserRound aria-hidden="true" className="size-5" />
         </span>
-        <div>
+        <div className="min-w-0">
           <h2 className="type-section-title" id="profile-account-title">
             {t('profile.demoSession')}
           </h2>
@@ -309,10 +326,10 @@ function DemoSessionDisclosure({ locale, t, user }: { locale: Locale; t: Transla
           </p>
         </div>
       </div>
-      <div className="shrink-0 sm:text-right">
+      <div className="min-w-0 shrink-0 sm:text-right">
         <p className="type-label">{t('profile.demoExpires')}</p>
         {user.demoExpiresAt ? (
-          <time className="mt-2 block type-operational" dateTime={user.demoExpiresAt}>
+          <time className="mt-2 block break-words type-operational" dateTime={user.demoExpiresAt}>
             {formatDemoExpiry(user.demoExpiresAt, user.timezone, locale)}
           </time>
         ) : (

@@ -27,7 +27,7 @@ export function OwnerCreateParkingRoute() {
       <header className="flex flex-col justify-between gap-5 border-b border-border-strong pb-7 sm:flex-row sm:items-end">
         <div className="min-w-0">
           <p className="type-label">{t('parkingRoute.management')}</p>
-          <h1 className="type-page-title" id="create-parking-title">
+          <h1 className="break-words type-page-title" id="create-parking-title">
             {t('parkingRoute.createTitle')}
           </h1>
         </div>

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -170,6 +170,29 @@ describe('parking session history pagination', () => {
     expect(screen.getByText(/ARS.*25\.00/)).toBeTruthy();
     expect(screen.getByText(/\$15\.50/)).toBeTruthy();
     expect(screen.getByText('No charge')).toBeTruthy();
+  });
+
+  it('keeps cached history visible and offers a retry after a refresh error', async () => {
+    const user = userEvent.setup();
+    api.getOwnedParkings.mockResolvedValue([parkingFixture()]);
+    api.getParkingSessions
+      .mockResolvedValueOnce(sessionList([parkingSessionFixture()]))
+      .mockRejectedValueOnce(new Error('history unavailable'))
+      .mockResolvedValueOnce(sessionList([parkingSessionFixture({ id: 'session-2' })]));
+    renderHistory();
+
+    await screen.findByRole('link', { name: 'Open session for AB123CD' });
+    await user.click(screen.getByRole('button', { name: 'Refresh history' }));
+
+    const staleAlert = await screen.findByRole('alert');
+    expect(staleAlert.textContent).toContain('This history may be out of date.');
+    expect(screen.getByRole('link', { name: 'Open session for AB123CD' })).toBeTruthy();
+
+    await user.click(within(staleAlert).getByRole('button', { name: 'Refresh history' }));
+    await waitFor(() => {
+      expect(api.getParkingSessions).toHaveBeenCalledTimes(3);
+    });
+    expect(screen.queryByText('This history may be out of date.')).toBeNull();
   });
 
   it('exports the same normalized filters and announces the completed download', async () => {

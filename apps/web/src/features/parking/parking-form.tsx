@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -19,7 +19,7 @@ function createParkingFormSchema(t: Translator) {
         .string()
         .trim()
         .min(5, t('validation.parkingAddressMin', { count: 5 }))
-        .max(200),
+        .max(200, t('validation.parkingAddressMax', { count: 200 })),
       capacity: z
         .number({ error: t('validation.number') })
         .int(t('validation.parkingCapacityInteger'))
@@ -49,13 +49,13 @@ function createParkingFormSchema(t: Translator) {
         .string()
         .trim()
         .min(2, t('validation.parkingNeighborhoodMin', { count: 2 }))
-        .max(100),
+        .max(100, t('validation.parkingNeighborhoodMax', { count: 100 })),
       opensAt: z.string(),
       title: z
         .string()
         .trim()
         .min(5, t('validation.parkingTitleMin', { count: 5 }))
-        .max(100),
+        .max(100, t('validation.parkingTitleMax', { count: 100 })),
       timezone: z.string().trim().min(1, t('validation.parkingTimezone')),
     })
     .superRefine((values, context) => {
@@ -147,6 +147,7 @@ export function ParkingForm({
   const form = useForm<ParkingFormValues>({
     defaultValues: defaults(parking, defaultTimezone),
     resolver: zodResolver(schema),
+    shouldFocusError: true,
   });
   const is24Hours = useWatch({ control: form.control, name: 'is24Hours' });
   const currency = useWatch({ control: form.control, name: 'currency' });
@@ -168,6 +169,7 @@ export function ParkingForm({
 
   return (
     <form
+      aria-busy={isSubmitting}
       className="parking-form grid gap-8 lg:grid-cols-2"
       noValidate
       onSubmit={(event) => {
@@ -465,14 +467,22 @@ function FormSection({
   title: string;
   wide?: boolean;
 }) {
+  const descriptionId = useId();
+
   return (
     <fieldset
+      aria-describedby={descriptionId}
       className={`space-y-5 border-b border-border-subtle pb-8 ${wide ? 'lg:col-span-2' : ''}`}
     >
-      <legend className="px-0 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-foreground-muted">
+      <legend className="break-words px-0 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-foreground-muted">
         {title}
       </legend>
-      <p className="max-w-2xl text-sm leading-relaxed text-foreground-secondary">{description}</p>
+      <p
+        className="max-w-2xl break-words text-sm leading-relaxed text-foreground-secondary"
+        id={descriptionId}
+      >
+        {description}
+      </p>
       {children}
     </fieldset>
   );

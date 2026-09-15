@@ -26,31 +26,55 @@ export function OwnerEditParkingRoute() {
       updateParking(parkingId ?? '', input),
   });
 
-  if (parkingsQuery.isLoading) return <Skeleton className="min-h-96 w-full" />;
-  if (parkingsQuery.isError || !parkingId)
+  if (parkingsQuery.isLoading) {
     return (
-      <ErrorState
-        onRetry={() => {
-          void parkingsQuery.refetch();
-        }}
-      >
-        {t('parkingRoute.loadError')}
-      </ErrorState>
+      <section aria-labelledby="edit-parking-loading-title" className="owner-page space-y-6">
+        <h1 className="visually-hidden" id="edit-parking-loading-title">
+          {t('parkingRoute.editTitle')}
+        </h1>
+        <p className="visually-hidden" role="status">
+          {t('parkingRoute.loading')}
+        </p>
+        <Skeleton className="min-h-96 w-full" />
+      </section>
+    );
+  }
+  if ((parkingsQuery.isError && parkingsQuery.data === undefined) || !parkingId)
+    return (
+      <section aria-labelledby="edit-parking-error-title" className="owner-page">
+        <h1 className="visually-hidden" id="edit-parking-error-title">
+          {t('parkingRoute.editTitle')}
+        </h1>
+        <ErrorState
+          onRetry={() => {
+            void parkingsQuery.refetch();
+          }}
+        >
+          {t('parkingRoute.loadError')}
+        </ErrorState>
+      </section>
     );
   const parking = parkingsQuery.data?.find((item) => item.id === parkingId);
   if (!parking)
     return (
-      <ErrorState title={t('parkingOperation.unavailableTitle')}>
-        {t('api.parkingUnavailable')}
-      </ErrorState>
+      <section aria-labelledby="edit-parking-unavailable-title" className="owner-page">
+        <h1 className="visually-hidden" id="edit-parking-unavailable-title">
+          {t('parkingRoute.editTitle')}
+        </h1>
+        <ErrorState title={t('parkingOperation.unavailableTitle')}>
+          {t('api.parkingUnavailable')}
+        </ErrorState>
+      </section>
     );
+
+  const hasStaleData = parkingsQuery.isError;
 
   return (
     <section className="owner-page space-y-8" aria-labelledby="edit-parking-title">
       <header className="flex flex-col justify-between gap-5 border-b border-border-strong pb-7 sm:flex-row sm:items-end">
         <div className="min-w-0">
           <p className="type-label">{t('parkingRoute.management')}</p>
-          <h1 className="type-page-title" id="edit-parking-title">
+          <h1 className="break-words type-page-title" id="edit-parking-title">
             {t('parkingRoute.editTitle')}
           </h1>
         </div>
@@ -86,6 +110,24 @@ export function OwnerEditParkingRoute() {
           }
         }}
       />
+      {hasStaleData ? (
+        <div
+          className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+          role="alert"
+        >
+          <p className="break-words text-sm font-semibold">{t('parkingRoute.stale')}</p>
+          <Button
+            className="shrink-0 self-start sm:self-auto"
+            onClick={() => {
+              void parkingsQuery.refetch();
+            }}
+            type="button"
+            variant="secondary"
+          >
+            {t('parkingRoute.retryStale')}
+          </Button>
+        </div>
+      ) : null}
       <UnsavedChangesPrompt
         allowNavigationRef={allowNavigationRef}
         when={isDirty && !mutation.isPending}

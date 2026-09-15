@@ -8,7 +8,7 @@ import { SessionHistoryRow } from '../../components/domain/session.js';
 import { Button } from '../../components/ui/button.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { Field, Input, Select } from '../../components/ui/field.js';
-import { formatMoney } from '../../lib/format.js';
+import { formatMoney, formatNumber } from '../../lib/format.js';
 import {
   getOwnedParkings,
   getParkingSessions,
@@ -102,25 +102,49 @@ export function OwnerParkingHistoryRoute() {
   };
 
   if (parkingsQuery.isLoading || sessionsQuery.isLoading) {
-    return <Skeleton className="owner-list-skeleton" />;
-  }
-  if (parkingsQuery.isError || sessionsQuery.isError || !parkingId) {
     return (
-      <ErrorState
-        onRetry={() => {
-          void parkingsQuery.refetch();
-          void sessionsQuery.refetch();
-        }}
-      >
-        {t('api.loadParkingHistory')}
-      </ErrorState>
+      <section aria-labelledby="history-loading-title" className="owner-page space-y-6">
+        <h1 className="visually-hidden" id="history-loading-title">
+          {t('parkingHistory.title')}
+        </h1>
+        <p className="visually-hidden" role="status">
+          {t('parkingHistory.loading')}
+        </p>
+        <Skeleton className="owner-list-skeleton" />
+      </section>
+    );
+  }
+  if (
+    !parkingId ||
+    (parkingsQuery.isError && parkingsQuery.data === undefined) ||
+    (sessionsQuery.isError && sessionsQuery.data === undefined)
+  ) {
+    return (
+      <section aria-labelledby="history-error-title" className="owner-page">
+        <h1 className="visually-hidden" id="history-error-title">
+          {t('parkingHistory.title')}
+        </h1>
+        <ErrorState
+          onRetry={() => {
+            void parkingsQuery.refetch();
+            void sessionsQuery.refetch();
+          }}
+        >
+          {t('api.loadParkingHistory')}
+        </ErrorState>
+      </section>
     );
   }
   if (!parking) {
     return (
-      <ErrorState title={t('parkingOperation.unavailableTitle')}>
-        {t('api.parkingUnavailable')}
-      </ErrorState>
+      <section aria-labelledby="history-unavailable-title" className="owner-page">
+        <h1 className="visually-hidden" id="history-unavailable-title">
+          {t('parkingHistory.title')}
+        </h1>
+        <ErrorState title={t('parkingOperation.unavailableTitle')}>
+          {t('api.parkingUnavailable')}
+        </ErrorState>
+      </section>
     );
   }
 
@@ -129,6 +153,7 @@ export function OwnerParkingHistoryRoute() {
   const aggregate = sessionsQuery.data?.aggregate;
   const historyTimezone = sessionsQuery.data?.timezone ?? parking.timezone;
   const exporting = exportStatus === 'pending';
+  const hasStaleData = parkingsQuery.isError || sessionsQuery.isError;
 
   return (
     <section aria-labelledby="history-title" className="owner-page space-y-7">
@@ -178,6 +203,26 @@ export function OwnerParkingHistoryRoute() {
         updateSearch={updateSearch}
       />
 
+      {hasStaleData ? (
+        <div
+          className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+          role="alert"
+        >
+          <p className="break-words text-sm font-semibold">{t('parkingHistory.stale')}</p>
+          <Button
+            className="shrink-0 self-start sm:self-auto"
+            onClick={() => {
+              void parkingsQuery.refetch();
+              void sessionsQuery.refetch();
+            }}
+            type="button"
+            variant="secondary"
+          >
+            {t('parkingHistory.retryStale')}
+          </Button>
+        </div>
+      ) : null}
+
       {exportStatus === 'pending' || exportStatus === 'success' ? (
         <p
           aria-live="polite"
@@ -214,19 +259,19 @@ export function OwnerParkingHistoryRoute() {
           <dl className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
             <HistoryMetric
               label={t('parkingHistory.total')}
-              value={String(aggregate.totalSessions)}
+              value={formatNumber(aggregate.totalSessions, locale)}
             />
             <HistoryMetric
               label={t('parkingHistory.activeCount')}
-              value={String(aggregate.activeSessions)}
+              value={formatNumber(aggregate.activeSessions, locale)}
             />
             <HistoryMetric
               label={t('parkingHistory.completedCount')}
-              value={String(aggregate.completedSessions)}
+              value={formatNumber(aggregate.completedSessions, locale)}
             />
             <HistoryMetric
               label={t('parkingHistory.cancelledCount')}
-              value={String(aggregate.cancelledSessions)}
+              value={formatNumber(aggregate.cancelledSessions, locale)}
             />
             <HistoryMetric
               label={t('parkingHistory.revenue')}
@@ -307,9 +352,9 @@ export function OwnerParkingHistoryRoute() {
           >
             {t('parkingHistory.previous')}
           </Button>
-          <span className="type-operational" aria-live="polite">
-            {t('parkingHistory.page')} {pagination.page} {t('parkingHistory.of')}{' '}
-            {Math.max(1, pagination.totalPages)}
+          <span aria-live="polite" className="type-operational">
+            {t('parkingHistory.page')} {formatNumber(pagination.page, locale)}{' '}
+            {t('parkingHistory.of')} {formatNumber(Math.max(1, pagination.totalPages), locale)}
           </span>
           <Button
             disabled={!pagination.hasNextPage}

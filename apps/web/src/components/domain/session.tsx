@@ -128,20 +128,20 @@ export function SessionHistoryRow({
         <p className="type-label text-foreground-muted md:hidden">{t('session.plate')}</p>
         <div className="mt-1 flex items-center gap-3 md:mt-0">
           <Plate plate={session.vehicle.plate} />
-          <span className="truncate text-xs font-semibold text-foreground-secondary">
+          <span className="min-w-0 break-words text-xs font-semibold text-foreground-secondary">
             {vehicleType}
           </span>
         </div>
       </div>
-      <div>
+      <div className="min-w-0">
         <p className="type-label text-foreground-muted md:hidden">{t('session.date')}</p>
-        <div className="mt-1 text-sm font-semibold md:mt-0">
+        <div className="mt-1 min-w-0 break-words text-sm font-semibold md:mt-0">
           <OperationalTimestamp value={session.startTime} timezone={timezone} />
         </div>
       </div>
-      <div>
+      <div className="min-w-0">
         <p className="type-label text-foreground-muted md:hidden">{t('session.elapsed')}</p>
-        <div className="mt-1 text-sm font-semibold md:mt-0">
+        <div className="mt-1 min-w-0 break-words text-sm font-semibold md:mt-0">
           {session.endTime ? (
             <span className="type-operational">
               {formatDuration(session.startTime, session.endTime, locale)}

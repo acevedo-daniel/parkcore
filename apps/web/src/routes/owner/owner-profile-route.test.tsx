@@ -101,6 +101,9 @@ describe('owner profile route', () => {
     await user.type(name, 'Grace');
     await user.clear(lastName);
     await user.type(lastName, 'Hopper');
+    expect(screen.getByRole('combobox', { name: 'Timezone' }).getAttribute('aria-required')).toBe(
+      'true',
+    );
     await user.click(screen.getByRole('combobox', { name: 'Timezone' }));
     await user.click(screen.getByRole('option', { name: 'Europe/Madrid' }));
     await user.click(screen.getByRole('button', { name: 'Save changes' }));

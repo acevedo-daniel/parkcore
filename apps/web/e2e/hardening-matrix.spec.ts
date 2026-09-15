@@ -15,7 +15,10 @@ type Scenario =
   | 'degraded'
   | 'empty'
   | 'error'
+  | 'export-error'
+  | 'history-error'
   | 'loading'
+  | 'management-error'
   | 'owner-empty'
   | 'owner-error'
   | 'paused'
@@ -133,6 +136,15 @@ const owner: User = {
   photoUrl: null,
   timezone: 'America/Argentina/Buenos_Aires',
   updatedAt: '2026-08-17T09:00:00.000Z',
+};
+
+const demoUser: User = {
+  ...owner,
+  demoExpiresAt: '2099-01-15T18:30:00.000Z',
+  email: null,
+  kind: 'DEMO',
+  lastName: null,
+  name: null,
 };
 
 const publicParking: PublicParking = {
@@ -315,6 +327,8 @@ function blockedParking(): Parking {
 async function installHardeningApiMock(page: Page) {
   let scenario: Scenario = 'success';
   let catalogErrorAttempts = 0;
+  let exportErrorAttempts = 0;
+  let profileUser: User = owner;
   let pendingResolvers: (() => void)[] = [];
   const unexpectedRequests: string[] = [];
 
@@ -324,6 +338,9 @@ async function installHardeningApiMock(page: Page) {
       contentType: 'application/json',
       status,
     });
+  };
+  const respondText = async (route: Route, body: string, status = 200) => {
+    await route.fulfill({ body, contentType: 'text/csv', status });
   };
 
   await page.route('http://localhost:3000/**', async (route) => {
@@ -356,7 +373,7 @@ async function installHardeningApiMock(page: Page) {
     }
 
     if (method === 'GET' && url.pathname === '/users/me') {
-      await respond(route, owner);
+      await respond(route, profileUser);
       return;
     }
 
@@ -398,7 +415,24 @@ async function installHardeningApiMock(page: Page) {
     }
 
     if (method === 'GET' && url.pathname === '/parkings/parking-1/sessions') {
+      if (scenario === 'history-error') {
+        await respond(route, { error: true, message: 'Simulated history failure.' }, 503);
+        return;
+      }
       await respond(route, sessionList([completedSession, activeSession]));
+      return;
+    }
+
+    if (method === 'GET' && url.pathname === '/parkings/parking-1/sessions/export.csv') {
+      if (scenario === 'export-error' && exportErrorAttempts < 1) {
+        exportErrorAttempts += 1;
+        await respond(route, { error: true, message: 'Simulated export failure.' }, 503);
+        return;
+      }
+      await respondText(
+        route,
+        'plate,vehicleType,brand,model,startTime,endTime,durationMinutes,status,hourlyRate,currency,totalAmount,timezone\r\nAB123CD,CAR,Toyota,Corolla,2026-08-17T09:30:00-03:00,2026-08-17T10:45:00-03:00,75,COMPLETED,1550,USD,3100,America/Argentina/Buenos_Aires',
+      );
       return;
     }
 
@@ -449,6 +483,36 @@ async function installHardeningApiMock(page: Page) {
       return;
     }
 
+    if (method === 'PATCH' && url.pathname === '/parkings/parking-1') {
+      if (scenario === 'management-error') {
+        await respond(
+          route,
+          {
+            code: 'CAPACITY_BELOW_ACTIVE',
+            details: { activeSessionCount: 3 },
+            error: true,
+            message: 'Capacity conflict.',
+          },
+          409,
+        );
+        return;
+      }
+      await respond(route, ownerParking);
+      return;
+    }
+
+    if (method === 'PATCH' && url.pathname === '/users/me') {
+      const body = request.postDataJSON() as Partial<User>;
+      profileUser = { ...profileUser, ...body, updatedAt: '2026-08-17T10:00:00.000Z' };
+      await respond(route, profileUser);
+      return;
+    }
+
+    if (method === 'POST' && url.pathname === '/demo/reset') {
+      await respond(route, { restored: true });
+      return;
+    }
+
     unexpectedRequests.push(`${method} ${url.pathname}${url.search}`);
     await respond(
       route,
@@ -468,6 +532,10 @@ async function installHardeningApiMock(page: Page) {
     setScenario: (nextScenario: Scenario) => {
       scenario = nextScenario;
       catalogErrorAttempts = 0;
+      exportErrorAttempts = 0;
+    },
+    setProfileKind: (kind: User['kind']) => {
+      profileUser = kind === 'DEMO' ? demoUser : owner;
     },
     unexpectedRequests,
   };
@@ -915,6 +983,188 @@ test('covers deterministic loading, empty, error, blocked, and degraded states',
   await page.goto(ownerParkingRoute.path);
   await expect(page.getByRole('heading', { name: 'Parking paused' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Check in', exact: true })).toBeDisabled();
+
+  expect(api.unexpectedRequests).toEqual([]);
+});
+
+test('covers owner management, history, profile, and recovery interactions', async ({ page }) => {
+  test.setTimeout(240_000);
+  const api = await installHardeningApiMock(page);
+
+  for (const state of [
+    { locale: 'es-AR', theme: 'light' },
+    { locale: 'en-US', theme: 'dark' },
+  ] as const) {
+    await test.step(`${state.locale} ${state.theme} management`, async () => {
+      api.setProfileKind('OWNER');
+      api.setScenario('success');
+      await page.setViewportSize({ height: VIEWPORTS[0].height, width: VIEWPORTS[0].width });
+      await configureBrowserState(page, {
+        authenticated: true,
+        locale: state.locale,
+        theme: state.theme,
+      });
+      await page.goto(createParkingRoute.path);
+
+      const createButton = page.getByRole('button', {
+        name: /create parking|crear cochera/i,
+      });
+      await createButton.click();
+      await expect(page.locator('[aria-invalid="true"]').first()).toBeFocused();
+
+      const imageInput = page.getByLabel(/image url|url de imagen/i);
+      await imageInput.fill('https://example.com/invalid-parking.jpg');
+      const image = page.getByRole('img', { name: /facility image preview|vista previa/i });
+      await image.dispatchEvent('error');
+      await expect(page.getByRole('status')).toContainText(
+        /could not load this image|no pudimos cargar esta imagen/i,
+      );
+
+      await page.getByLabel(/name|nombre/i).fill('Temporary facility');
+      const mobileParkingsLink = page
+        .locator('.owner-mobile-nav')
+        .getByRole('link', { name: /parkings|cocheras/i });
+      await mobileParkingsLink.click();
+      const dirtyDialog = page.getByRole('dialog');
+      await expect(dirtyDialog).toBeVisible();
+      await expect(dirtyDialog).toContainText(/unsaved changes|cambios sin guardar/i);
+      await dirtyDialog
+        .getByRole('button', { name: /leave without saving|salir sin guardar/i })
+        .click();
+      await expect(page).toHaveURL(/\/app\/parkings$/);
+
+      api.setScenario('management-error');
+      await page.goto(editParkingRoute.path);
+      await expect(page.getByLabel(/capacity|capacidad/i)).toBeVisible();
+      await page.getByLabel(/capacity|capacidad/i).fill('4');
+      await page
+        .getByRole('button', { name: /save changes|guardar cambios/i })
+        .click();
+      await expect(page.getByRole('alert')).toContainText(
+        /capacity cannot be reduced|capacidad no puede reducirse/i,
+      );
+
+      api.setScenario('success');
+      await page.getByRole('button', { name: /save changes|guardar cambios/i }).click();
+      await expect(page).toHaveURL(/\/app\/parkings\/parking-1$/);
+    });
+
+    await test.step(`${state.locale} ${state.theme} history`, async () => {
+      api.setScenario('success');
+      await page.goto(`${historyRoute.path}?page=2&period=30d`);
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      await expect(page.getByRole('link', { name: /open session|abrir estad/i }).first()).toBeVisible();
+
+      await page
+        .getByLabel(/status|estado/i)
+        .selectOption('COMPLETED');
+      await expect
+        .poll(() => new URL(page.url()).searchParams.get('status'))
+        .toBe('COMPLETED');
+      await expect.poll(() => new URL(page.url()).searchParams.get('page')).toBeNull();
+
+      api.setScenario('export-error');
+      await page.getByRole('button', { name: /export csv|exportar csv/i }).click();
+      const exportAlert = page.getByRole('alert');
+      await expect(exportAlert).toContainText(
+        /could not export this filtered history|no pudimos exportar este historial/i,
+      );
+
+      api.setScenario('success');
+      await exportAlert
+        .getByRole('button', { name: /retry export|reintentar exportaci/i })
+        .click();
+      await expect(page.locator('#history-export-status')).toContainText(
+        /filtered history downloaded|historial filtrado descargado/i,
+      );
+    });
+
+    await test.step(`${state.locale} ${state.theme} profile and recovery`, async () => {
+      api.setProfileKind('OWNER');
+      await page.goto(profileRoute.path);
+      const profileMain = page.locator('main');
+      const name = profileMain.getByLabel(/name|nombre/i);
+      await name.fill('Updated owner');
+
+      const profileTheme = profileMain.getByRole('combobox', { name: /theme|apariencia/i });
+      const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
+      await profileTheme.selectOption(nextTheme);
+      await expect(page.locator('html')).toHaveAttribute('data-theme', nextTheme);
+
+      await profileMain
+        .getByRole('button', { name: state.locale === 'en-US' ? 'Spanish' : 'Inglés' })
+        .click();
+      await expect(name).toHaveValue('Updated owner');
+      await profileMain
+        .getByRole('button', { name: /save changes|guardar cambios/i })
+        .click();
+      await expect(profileMain.getByRole('status')).toContainText(
+        /profile was updated|datos se actualizaron/i,
+      );
+
+      api.setProfileKind('DEMO');
+      api.setScenario('success');
+      await configureBrowserState(page, {
+        authenticated: true,
+        locale: state.locale,
+        theme: nextTheme,
+      });
+      await page.goto(profileRoute.path);
+      await expect(page.getByRole('heading', { name: /demo session|sesi.n de demostraci.n/i })).toBeVisible();
+      await expect(page.getByLabel(/email|correo electr.nico/i)).toHaveCount(0);
+      await expect(page.getByRole('button', { name: /restore demo data|restaurar datos/i })).toBeVisible();
+
+      await page.getByRole('button', { name: /restore demo data|restaurar datos/i }).click();
+      const resetDialog = page.getByRole('dialog');
+      await expect(resetDialog).toBeVisible();
+      await resetDialog
+        .getByRole('button', { name: /^(restore demo data|restaurar datos)$/i })
+        .click();
+      await expect(page).toHaveURL(/\/app$/);
+
+      api.setProfileKind('OWNER');
+      await configureBrowserState(page, {
+        authenticated: true,
+        locale: state.locale,
+        theme: nextTheme,
+      });
+      await page.goto('/app/hardening-owner-not-found');
+      const recoveryLink = page.getByRole('link', {
+        name: /go to overview|ir al resumen/i,
+      });
+      await expect(recoveryLink).toBeVisible();
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex');
+      await expectVisibleFocus(recoveryLink, `${state.locale} ${state.theme} owner recovery`);
+    });
+  }
+
+  expect(api.unexpectedRequests).toEqual([]);
+});
+
+test('recovers management and history query failures with route context', async ({ page }) => {
+  test.setTimeout(120_000);
+  const api = await installHardeningApiMock(page);
+
+  await page.setViewportSize({ height: VIEWPORTS[1].height, width: VIEWPORTS[1].width });
+  await configureBrowserState(page, { authenticated: true, locale: 'en-US', theme: 'light' });
+
+  api.setScenario('owner-error');
+  await page.goto(editParkingRoute.path);
+  const editError = page.locator('[data-slot="error-state"]');
+  await expect(editError).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  api.setScenario('success');
+  await editError.getByRole('button').click();
+  await expect(page.getByLabel('Name')).toBeVisible();
+
+  api.setScenario('history-error');
+  await page.goto(historyRoute.path);
+  const historyError = page.locator('[data-slot="error-state"]');
+  await expect(historyError).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  api.setScenario('success');
+  await historyError.getByRole('button').click();
+  await expect(page.getByRole('link', { name: 'Open session for AB123CD' })).toBeVisible();
 
   expect(api.unexpectedRequests).toEqual([]);
 });
