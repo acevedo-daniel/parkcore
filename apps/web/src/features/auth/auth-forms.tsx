@@ -66,7 +66,7 @@ export function AuthFormFrame({
             >
               PARKCORE
             </Link>
-            <p className="mt-16 text-xs font-bold tracking-[0.12em] text-accent uppercase">
+            <p className="mt-16 text-xs font-bold tracking-[0.12em] text-foreground-on-inverse uppercase">
               {eyebrow}
             </p>
             <p

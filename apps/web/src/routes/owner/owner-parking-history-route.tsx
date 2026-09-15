@@ -146,7 +146,7 @@ export function OwnerParkingHistoryRoute() {
         }
         backAction={
           <Link
-            className="inline-flex items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
+            className="inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
             to={`/app/parkings/${parking.id}`}
           >
             {t('parkingHistory.backToParking')}
@@ -232,9 +232,11 @@ export function OwnerParkingHistoryRoute() {
               label={t('parkingHistory.revenue')}
               value={
                 aggregate.revenueByCurrency.length > 0 ? (
-                  <span className="flex flex-wrap gap-x-3 gap-y-1">
+                  <span className="flex min-w-0 flex-wrap gap-x-3 gap-y-1">
                     {aggregate.revenueByCurrency.map(({ currency, revenueCents }) => (
-                      <span key={currency}>{formatMoney(revenueCents, currency, locale)}</span>
+                      <span className="min-w-0 break-words" key={currency}>
+                        {formatMoney(revenueCents, currency, locale)}
+                      </span>
                     ))}
                   </span>
                 ) : (
@@ -275,7 +277,7 @@ export function OwnerParkingHistoryRoute() {
                 {t('session.total')}
               </span>
             </div>
-            <ul className="session-history-list list-none">
+            <ul className="session-history-list m-0 list-none p-0">
               {sessions.map((session) => (
                 <li key={session.id}>
                   <SessionHistoryRow
@@ -327,9 +329,9 @@ export function OwnerParkingHistoryRoute() {
 
 function HistoryMetric({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div>
+    <div className="min-w-0">
       <dt className="type-label text-foreground-muted">{label}</dt>
-      <dd className="mt-2 type-metric">{value}</dd>
+      <dd className="mt-2 min-w-0 break-words type-metric">{value}</dd>
     </div>
   );
 }

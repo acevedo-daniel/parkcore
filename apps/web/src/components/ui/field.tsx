@@ -3,7 +3,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn.js';
 
 const controlClassName =
-  'control parkcore-field w-full rounded-[var(--radius-md)] border border-border bg-surface-subtle text-sm font-medium text-foreground outline-none transition-colors placeholder:text-foreground-muted focus:border-primary focus:bg-surface focus-visible:ring-2 focus-visible:ring-focus-ring disabled:cursor-not-allowed disabled:bg-disabled-surface disabled:text-disabled-foreground disabled:opacity-100';
+  'control parkcore-field min-w-0 w-full rounded-[var(--radius-md)] border border-border bg-surface-subtle text-sm font-medium text-foreground outline-none transition-colors placeholder:text-foreground-muted focus:border-primary focus:bg-surface focus-visible:ring-2 focus-visible:ring-focus-ring disabled:cursor-not-allowed disabled:bg-disabled-surface disabled:text-disabled-foreground disabled:opacity-100';
 
 export interface FieldProps {
   children: React.ReactNode;
@@ -120,7 +120,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     return (
       <label
         className={cn(
-          'checkbox flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-surface-subtle px-3.5 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-surface-hover',
+          'checkbox flex min-h-[var(--touch-target-min)] cursor-pointer items-center gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-surface-subtle px-3.5 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-surface-hover',
           disabled && 'cursor-not-allowed opacity-60',
         )}
         data-slot="checkbox"

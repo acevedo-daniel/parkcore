@@ -24,7 +24,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
       <div className="space-y-2" data-slot="switch">
         <label
           className={cn(
-            'group flex cursor-pointer items-start gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-surface-subtle px-3.5 py-3 text-sm text-foreground transition-colors hover:bg-surface-hover',
+            'group flex min-h-[var(--touch-target-min)] cursor-pointer items-start gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-surface-subtle px-3.5 py-3 text-sm text-foreground transition-colors hover:bg-surface-hover',
             disabled && 'cursor-not-allowed opacity-60',
           )}
           htmlFor={switchId}

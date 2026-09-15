@@ -26,7 +26,7 @@ export function OwnerEditParkingRoute() {
       updateParking(parkingId ?? '', input),
   });
 
-  if (parkingsQuery.isLoading) return <Skeleton className="owner-form-skeleton" />;
+  if (parkingsQuery.isLoading) return <Skeleton className="min-h-96 w-full" />;
   if (parkingsQuery.isError || !parkingId)
     return (
       <ErrorState
@@ -46,15 +46,16 @@ export function OwnerEditParkingRoute() {
     );
 
   return (
-    <section className="owner-page stack-owner" aria-labelledby="edit-parking-title">
-      <header className="owner-page-header">
-        <div>
+    <section className="owner-page space-y-8" aria-labelledby="edit-parking-title">
+      <header className="flex flex-col justify-between gap-5 border-b border-border-strong pb-7 sm:flex-row sm:items-end">
+        <div className="min-w-0">
           <p className="type-label">{t('parkingRoute.management')}</p>
           <h1 className="type-page-title" id="edit-parking-title">
             {t('parkingRoute.editTitle')}
           </h1>
         </div>
         <Button
+          className="shrink-0 self-start"
           variant="secondary"
           type="button"
           onClick={() => {

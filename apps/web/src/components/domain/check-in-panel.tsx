@@ -129,7 +129,7 @@ export function CheckInPanel({
       }
     });
 
-    void lookupVehicle(parkingId, debouncedPlate)
+    void Promise.resolve(lookupVehicle(parkingId, debouncedPlate))
       .then((result) => {
         window.clearTimeout(loadingTimer);
         if (!isCurrentLookup()) return;

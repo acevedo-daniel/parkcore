@@ -55,6 +55,21 @@ function renderWithAuth(
 }
 
 describe('authentication forms', () => {
+  it('exposes browser autofill semantics for login and registration fields', () => {
+    const { unmount } = renderWithAuth(<LoginForm onSuccess={vi.fn()} />);
+
+    expect(screen.getByLabelText('Email').getAttribute('autocomplete')).toBe('email');
+    expect(screen.getByLabelText('Password').getAttribute('autocomplete')).toBe('current-password');
+
+    unmount();
+    renderWithAuth(<RegisterForm onSuccess={vi.fn()} />);
+
+    expect(screen.getByLabelText('First name').getAttribute('autocomplete')).toBe('name');
+    expect(screen.getByLabelText('Last name').getAttribute('autocomplete')).toBe('family-name');
+    expect(screen.getByLabelText('Email').getAttribute('autocomplete')).toBe('email');
+    expect(screen.getByLabelText('Password').getAttribute('autocomplete')).toBe('new-password');
+  });
+
   it('keeps login validation inline before calling the backend', async () => {
     const user = userEvent.setup();
     const { value } = renderWithAuth(<LoginForm onSuccess={vi.fn()} />);

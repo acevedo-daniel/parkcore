@@ -154,6 +154,25 @@ describe('AppearanceProvider', () => {
     });
   });
 
+  it('preserves route form state while language and appearance change', async () => {
+    const user = userEvent.setup();
+    render(
+      <AppearanceProvider>
+        <input aria-label="Draft value" defaultValue="" />
+        <AppearanceControls />
+      </AppearanceProvider>,
+    );
+
+    const draft = screen.getByRole('textbox', { name: 'Draft value' });
+    await user.type(draft, 'keep this draft');
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Apariencia' }), 'dark');
+    await user.click(screen.getByRole('button', { name: 'Inglés' }));
+
+    expect((draft as HTMLInputElement).value).toBe('keep this draft');
+    expect(document.documentElement.dataset.theme).toBe('dark');
+    expect(document.documentElement.lang).toBe('en-US');
+  });
+
   it('removes the system listener when the provider unmounts', () => {
     const { unmount } = renderAppearance();
 

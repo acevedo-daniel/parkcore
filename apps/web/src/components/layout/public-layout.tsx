@@ -27,7 +27,7 @@ function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
           key={link.to}
           className={({ isActive }: NavLinkRenderProps) =>
             cn(
-              'public-nav-link rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px',
+              'public-nav-link flex min-h-[var(--touch-target-min)] items-center rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px',
               isActive
                 ? 'is-active bg-surface-subtle text-foreground'
                 : 'text-foreground-secondary hover:bg-surface-subtle hover:text-foreground',
@@ -59,7 +59,7 @@ function PublicMobileMenu() {
       </DialogPrimitive.Trigger>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="public-menu-overlay fixed inset-0 z-50 bg-overlay-backdrop backdrop-blur-xs animate-in fade-in" />
-        <DialogPrimitive.Content className="public-menu-content fixed inset-y-0 right-0 z-50 flex w-full max-w-xs flex-col justify-between border-l border-border bg-surface p-6 shadow-dialog animate-in slide-in-from-right">
+        <DialogPrimitive.Content className="public-menu-content fixed inset-y-0 right-0 z-50 flex w-full max-w-xs flex-col justify-between overflow-x-hidden overflow-y-auto border-l border-border bg-surface p-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] pt-[max(1.5rem,env(safe-area-inset-top,0px))] shadow-dialog animate-in slide-in-from-right">
           <div>
             <header className="public-menu-header mb-6 flex items-center justify-between border-b border-border-subtle pb-4">
               <DialogPrimitive.Title className="brand-mark font-display text-lg font-extrabold tracking-tight text-foreground">
@@ -82,7 +82,7 @@ function PublicMobileMenu() {
             <nav aria-label={t('nav.public')} className="public-mobile-links flex flex-col gap-2">
               <DialogPrimitive.Close asChild>
                 <Link
-                  className="rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-surface-subtle"
+                  className="flex min-h-[var(--touch-target-min)] items-center rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-surface-subtle"
                   to="/parkings"
                 >
                   {t('nav.parkings')}
@@ -90,7 +90,7 @@ function PublicMobileMenu() {
               </DialogPrimitive.Close>
               <DialogPrimitive.Close asChild>
                 <Link
-                  className="rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-surface-subtle"
+                  className="flex min-h-[var(--touch-target-min)] items-center rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-surface-subtle"
                   to="/#como-funciona"
                 >
                   {t('nav.howItWorks')}
@@ -98,7 +98,7 @@ function PublicMobileMenu() {
               </DialogPrimitive.Close>
               <DialogPrimitive.Close asChild>
                 <Link
-                  className="rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-surface-subtle"
+                  className="flex min-h-[var(--touch-target-min)] items-center rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-surface-subtle"
                   to="/login"
                 >
                   {t('nav.signIn')}
@@ -144,7 +144,7 @@ export function PublicLayout() {
           <div className="flex items-center gap-10">
             <Link
               aria-label={t('shell.publicHome')}
-              className="brand-mark group flex items-center gap-2 font-display text-xl font-black tracking-tight text-foreground sm:text-2xl"
+              className="brand-mark group flex min-h-[var(--touch-target-min)] items-center gap-2 font-display text-xl font-black tracking-tight text-foreground sm:text-2xl"
               to="/"
             >
               <span>PARKCORE</span>
@@ -153,7 +153,7 @@ export function PublicLayout() {
             {/* Desktop Navigation */}
             <nav
               aria-label={t('nav.public')}
-              className="public-desktop-nav hidden md:flex items-center"
+              className="public-desktop-nav hidden wide:flex items-center"
             >
               <PublicLinks />
             </nav>
@@ -161,14 +161,14 @@ export function PublicLayout() {
 
           {/* Right actions: language, appearance, sign in, and demo */}
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="public-header-tools hidden md:flex items-center">
+            <div className="public-header-tools hidden wide:flex items-center">
               <AppearanceControls />
             </div>
 
             <NavLink
               className={({ isActive }: NavLinkRenderProps) =>
                 cn(
-                  'public-nav-link hidden rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px md:inline-flex',
+                  'public-nav-link hidden min-h-[var(--touch-target-min)] rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px wide:inline-flex',
                   isActive
                     ? 'is-active bg-surface-subtle text-foreground'
                     : 'text-foreground-secondary hover:bg-surface-subtle hover:text-foreground',
@@ -183,10 +183,10 @@ export function PublicLayout() {
               onSuccess={() => {
                 void navigate('/app', { replace: true });
               }}
-              className="hidden rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground md:inline-flex"
+              className="hidden rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground wide:inline-flex"
             />
 
-            <div className="public-mobile-nav md:hidden">
+            <div className="public-mobile-nav wide:hidden">
               <PublicMobileMenu />
             </div>
           </div>

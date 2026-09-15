@@ -215,6 +215,8 @@ for (const token of [
   assert.equal(themeTokens[`color-${token}`], `var(--${token})`, `theme color ${token}`);
 }
 
+assert.equal(themeTokens['breakpoint-wide'], '75rem', 'wide breakpoint');
+
 for (const token of [
   'font-sans',
   'font-display',

@@ -8,7 +8,7 @@ import { IconButton } from './button.js';
 export interface DialogProps {
   children: ReactNode;
   closeLabel?: string;
-  description?: string;
+  description: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
@@ -50,18 +50,16 @@ function DialogHeader({
       className="flex items-start justify-between gap-5 border-b border-border-strong pb-5"
       data-slot="dialog-header"
     >
-      <div>
+      <div className="min-w-0">
         <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground-muted">
           {t('dialog.eyebrow')}
         </p>
-        <DialogPrimitive.Title className="mt-3 font-display text-3xl font-bold leading-none tracking-[-0.055em] text-foreground">
+        <DialogPrimitive.Title className="mt-3 break-words font-display text-3xl font-bold leading-none tracking-[-0.055em] text-foreground">
           {title}
         </DialogPrimitive.Title>
-        {description ? (
-          <DialogPrimitive.Description className="mt-3 max-w-xl text-sm leading-relaxed text-foreground-secondary">
-            {description}
-          </DialogPrimitive.Description>
-        ) : null}
+        <DialogPrimitive.Description className="mt-3 max-w-xl break-words text-sm leading-relaxed text-foreground-secondary">
+          {description}
+        </DialogPrimitive.Description>
       </div>
       <DialogPrimitive.Close asChild>
         <IconButton
@@ -94,7 +92,7 @@ export function Dialog({
       <DialogPrimitive.Portal>
         <DialogOverlay />
         <DialogPrimitive.Content
-          className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto overscroll-contain rounded-[var(--radius-xl)] border border-border-strong bg-surface-raised p-6 text-foreground shadow-dialog focus:outline-none sm:p-8"
+          className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[var(--radius-xl)] border border-border-strong bg-surface-raised p-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] text-foreground shadow-dialog focus:outline-none sm:p-8"
           data-slot="dialog-content"
           onCloseAutoFocus={restoreFocus}
         >
@@ -120,7 +118,7 @@ export function Sheet({
       <DialogPrimitive.Portal>
         <DialogOverlay />
         <DialogPrimitive.Content
-          className="fixed inset-y-0 right-0 z-50 h-dvh max-h-dvh w-full max-w-2xl overflow-y-auto overscroll-contain border-l border-border-strong bg-surface-raised p-6 text-foreground shadow-dialog focus:outline-none sm:rounded-l-[var(--radius-xl)] sm:p-8"
+          className="fixed inset-y-0 right-0 z-50 h-dvh max-h-dvh w-full max-w-2xl overflow-x-hidden overflow-y-auto overscroll-contain border-l border-border-strong bg-surface-raised p-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] text-foreground shadow-dialog focus:outline-none sm:rounded-l-[var(--radius-xl)] sm:p-8"
           data-slot="sheet-content"
           onCloseAutoFocus={restoreFocus}
         >

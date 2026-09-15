@@ -209,6 +209,46 @@ jobs:
             apps/web/playwright-report/local-real-stack/
           if-no-files-found: ignore
 
+  hardening_e2e:
+    name: E2E / Web
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build API client
+        run: pnpm --filter @parkcore/api-client build
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @parkcore/web exec playwright install --with-deps chromium
+
+      - name: Run browser hardening matrix
+        run: pnpm --filter @parkcore/web test:e2e:hardening
+
+      - name: Upload browser hardening diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-e2e-hardening-diagnostics
+          path: |
+            apps/web/test-results/hardening/
+            apps/web/playwright-report/hardening/
+          if-no-files-found: ignore
+
   production:
     name: Production
     runs-on: ubuntu-latest
@@ -245,6 +285,7 @@ jobs:
       - web_tests
       - contract
       - real_stack_e2e
+      - hardening_e2e
       - production
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -257,6 +298,7 @@ jobs:
           WEB_RESULT: ${{ needs.web_tests.result }}
           CONTRACT_RESULT: ${{ needs.contract.result }}
           E2E_RESULT: ${{ needs.real_stack_e2e.result }}
+          E2E_WEB_RESULT: ${{ needs.hardening_e2e.result }}
           PRODUCTION_RESULT: ${{ needs.production.result }}
         run: |
           test "$QUALITY_RESULT" = "success"
@@ -264,4 +306,5 @@ jobs:
           test "$WEB_RESULT" = "success"
           test "$CONTRACT_RESULT" = "success"
           test "$E2E_RESULT" = "success"
+          test "$E2E_WEB_RESULT" = "success"
           test "$PRODUCTION_RESULT" = "success"

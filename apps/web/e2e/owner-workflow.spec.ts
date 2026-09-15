@@ -252,7 +252,7 @@ test('signs in, creates a parking, checks in, and completes a parking session', 
   await page.getByRole('textbox', { name: 'Password' }).fill('password123');
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page).toHaveURL(/\/app$/);
-  await page.getByRole('link', { name: 'Create parking' }).click();
+  await page.getByRole('link', { name: 'New facility' }).click();
 
   await page.getByLabel('Name').fill('North Garage');
   await page.getByLabel('Neighborhood').fill('Downtown');
@@ -260,6 +260,7 @@ test('signs in, creates a parking, checks in, and completes a parking session', 
   await page.getByLabel('Latitude').fill('-34.61');
   await page.getByLabel('Longitude').fill('-58.38');
   await page.getByLabel('Capacity').fill('20');
+  await page.getByLabel('Currency').selectOption('USD');
   await page.getByLabel('Hourly rate (USD)').fill('18.5');
   await page.getByRole('button', { name: 'Create parking' }).click();
   await expect(page).toHaveURL(/\/app\/parkings\/parking-1$/);

@@ -84,7 +84,7 @@ export function ParkingDetailRoute() {
     <article className="min-h-full bg-canvas pb-20 pt-10 text-foreground sm:pb-28 sm:pt-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link
-          className="inline-flex items-center gap-2 rounded-sm text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset"
+          className="inline-flex min-h-[var(--touch-target-min)] items-center gap-2 rounded-sm text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset"
           to="/parkings"
         >
           <ArrowLeft aria-hidden="true" className="size-4" />
@@ -94,7 +94,7 @@ export function ParkingDetailRoute() {
         <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:items-start">
           <header className="lg:col-span-7">
             {parking.isShowcase ? (
-              <span className="mb-4 inline-flex rounded-full border border-accent-strong bg-accent-soft px-3 py-1.5 text-xs font-bold text-accent-foreground">
+              <span className="mb-4 inline-flex rounded-full border border-accent-strong bg-accent-soft px-3 py-1.5 text-xs font-bold text-foreground">
                 {t('parking.demo')}
               </span>
             ) : null}
@@ -173,7 +173,7 @@ export function ParkingDetailRoute() {
               </a>
             </div>
             {parking.isShowcase ? (
-              <p className="mt-5 rounded-2xl bg-accent-soft p-4 text-sm font-medium leading-relaxed text-accent-foreground">
+              <p className="mt-5 rounded-2xl bg-accent-soft p-4 text-sm font-medium leading-relaxed text-foreground">
                 {t('public.detail.showcaseDisclosure')}
               </p>
             ) : null}
@@ -192,7 +192,7 @@ export function ParkingDetailRoute() {
             />
           </div>
 
-          <div className="grid min-w-0 gap-6 md:col-span-5 md:col-start-8 xl:col-span-4 xl:col-start-9">
+          <div className="grid min-w-0 gap-6 md:col-span-5 md:col-start-8 wide:col-span-4 wide:col-start-9">
             <section className="min-w-0 rounded-[2rem] border border-border bg-surface p-6 sm:p-7">
               <p className="type-label text-foreground-muted">{t('public.detail.about')}</p>
               <p className="mt-4 text-base leading-relaxed text-foreground-secondary">
@@ -220,7 +220,7 @@ function ParkingDetailSkeleton() {
         <div className="mt-5 h-6 max-w-lg rounded bg-surface-emphasis" />
         <div className="mt-12 grid gap-8 md:grid-cols-12">
           <div className="aspect-[16/10] rounded-[2.5rem] bg-surface-emphasis md:col-span-7" />
-          <div className="min-h-64 rounded-[2rem] bg-surface-emphasis md:col-span-5 md:col-start-8 xl:col-span-4 xl:col-start-9" />
+          <div className="min-h-64 rounded-[2rem] bg-surface-emphasis md:col-span-5 md:col-start-8 wide:col-span-4 wide:col-start-9" />
         </div>
       </div>
     </div>

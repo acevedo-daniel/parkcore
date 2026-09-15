@@ -55,7 +55,14 @@ export function PublicParkingImage({
           variant === 'card' ? 'max-w-52' : 'max-w-64 bg-surface p-5 text-foreground shadow-xs',
         )}
       >
-        <p className="type-label text-accent">{t('parking.fallbackEyebrow')}</p>
+        <p
+          className={cn(
+            'type-label',
+            variant === 'card' ? 'text-foreground-on-inverse' : 'text-foreground-muted',
+          )}
+        >
+          {t('parking.fallbackEyebrow')}
+        </p>
         <p className="mt-2 font-display text-lg font-bold leading-tight">
           {t('parking.fallbackMessage')}
         </p>

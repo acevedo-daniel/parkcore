@@ -17,7 +17,12 @@ function DialogHarness() {
       >
         Open checkout
       </Button>
-      <Dialog onOpenChange={setOpen} open={open} title="Complete checkout">
+      <Dialog
+        description="Review the total before completing the checkout."
+        onOpenChange={setOpen}
+        open={open}
+        title="Complete checkout"
+      >
         <Button>Complete checkout</Button>
       </Dialog>
     </>
@@ -35,7 +40,12 @@ function SheetHarness() {
       >
         Open filters
       </Button>
-      <Sheet onOpenChange={setOpen} open={open} title="Filter facilities">
+      <Sheet
+        description="Choose which facilities should be visible."
+        onOpenChange={setOpen}
+        open={open}
+        title="Filter facilities"
+      >
         <Button>Apply filters</Button>
       </Sheet>
     </>
@@ -51,6 +61,7 @@ describe('Dialog', () => {
     await user.click(trigger);
     const dialog = await screen.findByRole('dialog', { name: 'Complete checkout' });
     expect(dialog).toBeTruthy();
+    expect(dialog.getAttribute('aria-describedby')).not.toBeNull();
     await waitFor(() => {
       expect(document.activeElement).toBe(
         screen.getByRole('button', { name: 'Close Complete checkout' }),
@@ -75,7 +86,8 @@ describe('Dialog', () => {
 
     const trigger = screen.getByRole('button', { name: 'Open filters' });
     await user.click(trigger);
-    expect(await screen.findByRole('dialog', { name: 'Filter facilities' })).toBeTruthy();
+    const dialog = await screen.findByRole('dialog', { name: 'Filter facilities' });
+    expect(dialog.getAttribute('aria-describedby')).not.toBeNull();
 
     await user.keyboard('{Escape}');
     await waitFor(() => {

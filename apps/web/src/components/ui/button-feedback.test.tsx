@@ -26,6 +26,9 @@ describe('core UI feedback and actions', () => {
     const onClick = vi.fn();
     render(<Button onClick={onClick}>Start operation</Button>);
 
+    expect(screen.getByRole('button', { name: 'Start operation' }).className).toContain(
+      'min-h-[var(--touch-target-min)]',
+    );
     await user.tab();
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Start operation' }));
     await user.keyboard('{Enter}');

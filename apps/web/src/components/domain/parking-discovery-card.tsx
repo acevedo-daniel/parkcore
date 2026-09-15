@@ -41,7 +41,7 @@ export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps)
             {parking.title}
           </h2>
           {parking.isShowcase ? (
-            <span className="mt-2 inline-flex rounded-full border border-accent-strong bg-accent-soft px-2.5 py-1 text-[10px] font-bold text-accent-foreground">
+            <span className="mt-2 inline-flex rounded-full border border-accent-strong bg-accent-soft px-2.5 py-1 text-[10px] font-bold text-foreground">
               {t('parking.demo')}
             </span>
           ) : null}

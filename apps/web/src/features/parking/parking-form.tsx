@@ -180,14 +180,24 @@ export function ParkingForm({
         wide
       >
         <Field error={errors.title?.message} htmlFor="parking-title" label={t('parkingForm.title')}>
-          <Input id="parking-title" {...form.register('title')} />
+          <Input
+            autoComplete="organization"
+            id="parking-title"
+            required
+            {...form.register('title')}
+          />
         </Field>
         <Field
           error={errors.neighborhood?.message}
           htmlFor="parking-neighborhood"
           label={t('parkingForm.neighborhood')}
         >
-          <Input id="parking-neighborhood" {...form.register('neighborhood')} />
+          <Input
+            autoComplete="address-level2"
+            id="parking-neighborhood"
+            required
+            {...form.register('neighborhood')}
+          />
         </Field>
         <Field
           error={errors.description?.message}
@@ -251,7 +261,12 @@ export function ParkingForm({
           htmlFor="parking-address"
           label={t('parkingForm.address')}
         >
-          <Input id="parking-address" {...form.register('address')} />
+          <Input
+            autoComplete="street-address"
+            id="parking-address"
+            required
+            {...form.register('address')}
+          />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
@@ -294,12 +309,15 @@ export function ParkingForm({
                 <Combobox
                   aria-describedby={messageId}
                   aria-invalid={fieldState.error ? true : undefined}
+                  aria-required="true"
                   id="parking-timezone"
                   label={t('parkingForm.timezone')}
+                  onBlur={field.onBlur}
                   onValueChange={(value) => {
                     field.onChange(value);
                   }}
                   options={options}
+                  ref={field.ref}
                   value={field.value}
                 />
                 {fieldState.error ? (
@@ -334,14 +352,14 @@ export function ParkingForm({
               htmlFor="parking-opens-at"
               label={t('parkingForm.opening')}
             >
-              <Input id="parking-opens-at" type="time" {...form.register('opensAt')} />
+              <Input id="parking-opens-at" required type="time" {...form.register('opensAt')} />
             </Field>
             <Field
               error={errors.closesAt?.message}
               htmlFor="parking-closes-at"
               label={t('parkingForm.closing')}
             >
-              <Input id="parking-closes-at" type="time" {...form.register('closesAt')} />
+              <Input id="parking-closes-at" required type="time" {...form.register('closesAt')} />
             </Field>
           </div>
         ) : null}
@@ -361,6 +379,7 @@ export function ParkingForm({
               id="parking-capacity"
               min="1"
               type="number"
+              required
               {...form.register('capacity', { valueAsNumber: true })}
             />
           </Field>
@@ -374,12 +393,13 @@ export function ParkingForm({
               min="0.01"
               step="0.01"
               type="number"
+              required
               {...form.register('hourlyRate', { valueAsNumber: true })}
             />
           </Field>
         </div>
         <Field htmlFor="parking-currency" label={t('parkingForm.currency')}>
-          <Select id="parking-currency" {...form.register('currency')}>
+          <Select id="parking-currency" required {...form.register('currency')}>
             <option value="ARS">ARS</option>
             <option value="USD">USD</option>
           </Select>

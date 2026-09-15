@@ -216,7 +216,7 @@ export function OwnerOverviewRoute() {
         title={t('overview.title')}
       />
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
+      <div className="grid gap-5 wide:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
         <section
           className="rounded-[var(--radius-xl)] border border-border bg-surface p-6 shadow-xs sm:p-8"
           aria-labelledby="network-now-title"
@@ -364,7 +364,7 @@ export function OwnerOverviewRoute() {
             />
           </Link>
         </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 wide:grid-cols-3">
           {parkings.slice(0, 3).map(({ parking }, index) => (
             <OwnerParkingPanel identifier={index + 1} key={parking.id} parking={parking} />
           ))}
@@ -634,12 +634,12 @@ function OwnerOverviewSkeleton() {
 
   return (
     <div aria-busy="true" aria-label={t('overview.loading')} className="space-y-10">
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
+      <div className="grid gap-5 wide:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
         <Skeleton className="h-72 rounded-[var(--radius-xl)]" />
         <Skeleton className="h-72 rounded-[var(--radius-xl)]" />
       </div>
       <Skeleton className="h-80 rounded-[var(--radius-xl)]" />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 wide:grid-cols-3">
         <Skeleton className="h-40 rounded-[var(--radius-lg)]" />
         <Skeleton className="h-40 rounded-[var(--radius-lg)]" />
         <Skeleton className="h-40 rounded-[var(--radius-lg)]" />

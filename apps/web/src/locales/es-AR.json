@@ -715,6 +715,7 @@
       "title": "No pudimos abrir esta vista.",
       "description": "Probá de nuevo o volvé al inicio de esta experiencia.",
       "ownerAction": "Ir al resumen",
+      "ownerParkingsAction": "Ver cocheras",
       "publicAction": "Ir al inicio"
     }
   },

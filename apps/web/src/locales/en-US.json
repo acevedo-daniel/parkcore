@@ -715,6 +715,7 @@
       "title": "We could not open this view.",
       "description": "Try again or return to the start of this experience.",
       "ownerAction": "Go to overview",
+      "ownerParkingsAction": "View parkings",
       "publicAction": "Go home"
     }
   },

@@ -46,8 +46,8 @@ describe('Field', () => {
     expect(inputRef.current).toBe(screen.getByRole('textbox', { name: '' }));
     expect(screen.getByRole('textbox', { name: 'Notes' })).toBeTruthy();
     expect(screen.getByRole('combobox', { name: 'Currency' })).toBeTruthy();
-    expect(screen.getByRole<HTMLInputElement>('checkbox', { name: 'Available now' }).disabled).toBe(
-      true,
-    );
+    const checkbox = screen.getByRole<HTMLInputElement>('checkbox', { name: 'Available now' });
+    expect(checkbox.disabled).toBe(true);
+    expect(checkbox.closest('label')?.className).toContain('min-h-[var(--touch-target-min)]');
   });
 });

@@ -166,7 +166,7 @@ export function OwnerParkingOverviewRoute() {
         title={parking.title}
       />
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
+      <div className="grid gap-4 wide:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
         <section
           className="rounded-[var(--radius-xl)] border border-border bg-surface-emphasis p-6 text-foreground sm:p-8"
           aria-labelledby="check-in-title"
@@ -455,7 +455,7 @@ function OwnerParkingOperationSkeleton() {
   return (
     <div className="space-y-8" aria-label={t('parkingOperation.loading')}>
       <Skeleton className="h-48 rounded-[var(--radius-xl)]" />
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
+      <div className="grid gap-4 wide:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
         <Skeleton className="h-64 rounded-[var(--radius-xl)]" />
         <Skeleton className="h-64 rounded-[var(--radius-xl)]" />
       </div>

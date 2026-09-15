@@ -20,6 +20,36 @@ test('reports missing and extra nested keys', () => {
         extra: ['nested.other'],
         locale: 'en-US',
         missing: ['nested.value'],
+        blank: [],
+        placeholderMismatch: [],
+      },
+    ],
+  );
+});
+
+test('reports blank values and interpolation placeholder mismatches', () => {
+  assert.deepEqual(
+    compareCatalogKeys({
+      'es-AR': {
+        common: { greeting: 'Hola, {{name}}', retry: 'Reintentar' },
+      },
+      'en-US': {
+        common: { greeting: 'Hello, {{count}}', retry: '  ' },
+      },
+    }),
+    [
+      {
+        blank: ['common.retry'],
+        extra: [],
+        locale: 'en-US',
+        missing: [],
+        placeholderMismatch: [
+          {
+            expected: ['name'],
+            key: 'common.greeting',
+            received: ['count'],
+          },
+        ],
       },
     ],
   );

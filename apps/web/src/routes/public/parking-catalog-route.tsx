@@ -238,7 +238,7 @@ export function ParkingCatalogRoute() {
         {!parkingQuery.isLoading && !parkingQuery.isError && parkingQuery.data?.data.length ? (
           <div
             aria-label={t('public.catalog.results')}
-            className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3"
+            className="mt-10 grid gap-5 md:grid-cols-2 wide:grid-cols-3"
           >
             {parkingQuery.data.data.map((parking) => (
               <ParkingDiscoveryCard
@@ -365,7 +365,7 @@ function CatalogSkeleton() {
   return (
     <div
       aria-label={t('public.catalog.loading')}
-      className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3"
+      className="mt-10 grid gap-5 md:grid-cols-2 wide:grid-cols-3"
     >
       {Array.from({ length: 6 }, (_, index) => (
         <div
