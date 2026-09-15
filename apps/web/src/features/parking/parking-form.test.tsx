@@ -1,8 +1,9 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { AppearanceProvider } from '../../app/appearance-provider.js';
+import { parkingFixture } from '../../test/fixtures.js';
 import { ParkingForm } from './parking-form.js';
 
 function renderForm(
@@ -55,6 +56,7 @@ describe('ParkingForm', () => {
         expect.objectContaining({
           address: 'Av. Corrientes 1234',
           capacity: 1,
+          currency: 'ARS',
           hourlyRateCents: 100,
           is24Hours: true,
           title: 'Central Parking',
@@ -71,5 +73,40 @@ describe('ParkingForm', () => {
 
     expect(screen.getByRole('button', { name: 'Saving…' }).getAttribute('disabled')).not.toBeNull();
     expect(screen.getByRole('alert').textContent).toContain('We could not create this facility.');
+  });
+
+  it('shows a localized image preview failure and keeps timezone selection accessible', async () => {
+    const user = userEvent.setup();
+    renderForm('en-US');
+
+    const timezone = screen.getByRole('combobox', { name: 'Timezone' });
+    await user.click(timezone);
+    await user.keyboard('{ArrowDown}{Enter}');
+
+    const imageInput = screen.getByLabelText('Image URL');
+    await user.type(imageInput, 'https://example.com/parking.jpg');
+    const image = await screen.findByRole('img', { name: 'Facility image preview' });
+    expect(image.getAttribute('src')).toBe('https://example.com/parking.jpg');
+
+    fireEvent.error(image);
+
+    expect((await screen.findByRole('status')).textContent).toContain(
+      'We could not load this image. Review the URL or leave it empty.',
+    );
+  });
+
+  it('keeps operational and publication switches independent while editing', () => {
+    renderForm('en-US', {
+      parking: parkingFixture({ isActive: false, isListed: true }),
+    });
+
+    expect(screen.getByRole('switch', { name: 'Accept new check-ins' })).toHaveProperty(
+      'checked',
+      false,
+    );
+    expect(screen.getByRole('switch', { name: 'Visible in directory' })).toHaveProperty(
+      'checked',
+      true,
+    );
   });
 });

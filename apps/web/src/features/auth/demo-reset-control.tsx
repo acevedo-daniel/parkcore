@@ -9,9 +9,8 @@ import { Button } from '../../components/ui/button.js';
 import { Dialog } from '../../components/ui/dialog.js';
 import { localizeApiError } from '../../lib/api/api-error.js';
 import { useToast } from '../../components/ui/toast-context.js';
-import { cn } from '../../lib/cn.js';
 
-export function DemoResetControl({ compact = false }: { compact?: boolean } = {}) {
+export function DemoResetControl() {
   const { t } = useAppearance();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -35,35 +34,41 @@ export function DemoResetControl({ compact = false }: { compact?: boolean } = {}
 
   return (
     <>
-      <button
-        aria-label={compact ? t('demo.restore') : undefined}
-        className={cn(
-          'owner-nav-link owner-reset-demo flex min-h-10 cursor-pointer items-center gap-3 rounded-[var(--radius-sm)] py-2 text-left text-sm font-medium text-foreground-secondary transition-colors hover:bg-surface-subtle hover:text-foreground',
-          compact ? 'size-10 justify-center px-0' : 'w-full px-3.5',
-        )}
+      <Button
         onClick={() => {
           setOpen(true);
         }}
         type="button"
+        variant="destructive"
       >
-        <RotateCcw aria-hidden="true" className="shrink-0" size={16} />
-        <span className={compact ? 'visually-hidden' : undefined}>{t('demo.restore')}</span>
-      </button>
+        <RotateCcw aria-hidden="true" className="size-4" />
+        {t('demo.restore')}
+      </Button>
       <Dialog
         description={t('demo.restoreDescription')}
-        onOpenChange={setOpen}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
+          if (!nextOpen) setError(undefined);
+        }}
         open={open}
         title={t('demo.restoreTitle')}
       >
-        <div className="operation-dialog">
-          <p className="field-help">{t('demo.restoreHelp')}</p>
+        <div className="mt-6 space-y-5">
+          <p className="text-sm leading-relaxed text-foreground-secondary">
+            {t('demo.restoreHelp')}
+          </p>
           {error ? (
-            <p className="field-error" role="alert">
+            <p className="text-sm font-semibold text-danger-text" role="alert">
               {error}
             </p>
           ) : null}
-          <Button disabled={resetMutation.isPending} onClick={() => void confirmReset()}>
-            <RotateCcw aria-hidden="true" size={16} />
+          <Button
+            disabled={resetMutation.isPending}
+            onClick={() => void confirmReset()}
+            type="button"
+            variant="destructive"
+          >
+            <RotateCcw aria-hidden="true" className="size-4" />
             {resetMutation.isPending ? t('demo.restoring') : t('demo.restore')}
           </Button>
         </div>

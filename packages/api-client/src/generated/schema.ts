@@ -1175,6 +1175,11 @@ export interface paths {
                          */
                         lastName?: string;
                         /**
+                         * @description User IANA timezone
+                         * @example America/Argentina/Buenos_Aires
+                         */
+                        timezone?: string;
+                        /**
                          * @description User phone number
                          * @example 1234567890
                          */
@@ -1696,6 +1701,8 @@ export interface components {
             details?: components["schemas"]["ErrorDetails"];
         };
         ErrorDetails: {
+            /** @description Current active-session count used by a capacity conflict */
+            activeSessionCount?: number;
             /**
              * Format: date-time
              * @description Authoritative next opening time when a parking is currently closed

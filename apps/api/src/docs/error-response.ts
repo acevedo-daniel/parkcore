@@ -2,6 +2,9 @@ import { z } from 'zod';
 
 export const errorDetailsSchema = z
   .strictObject({
+    activeSessionCount: z.int().nonnegative().optional().openapi({
+      description: 'Current active-session count used by a capacity conflict',
+    }),
     nextOpeningAt: z.iso.datetime().nullable().optional().openapi({
       description: 'Authoritative next opening time when a parking is currently closed',
     }),

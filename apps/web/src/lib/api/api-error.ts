@@ -1,6 +1,7 @@
 import type { MessageKey, Translator } from '../localization.js';
 
 export interface ApiErrorDetails {
+  activeSessionCount?: number;
   nextOpeningAt?: string | null;
 }
 
@@ -61,13 +62,28 @@ export function getApiErrorDetails(error: unknown): ApiErrorDetails | undefined 
   }
 
   const details = error.details;
-  if (typeof details !== 'object' || details === null || !('nextOpeningAt' in details)) {
+  if (typeof details !== 'object' || details === null) {
     return undefined;
   }
 
-  const nextOpeningAt = details.nextOpeningAt;
-  if (nextOpeningAt !== null && typeof nextOpeningAt !== 'string') return undefined;
-  return { nextOpeningAt };
+  const parsed: ApiErrorDetails = {};
+  if ('activeSessionCount' in details) {
+    const activeSessionCount = details.activeSessionCount;
+    if (
+      typeof activeSessionCount !== 'number' ||
+      !Number.isInteger(activeSessionCount) ||
+      activeSessionCount < 0
+    ) {
+      return undefined;
+    }
+    parsed.activeSessionCount = activeSessionCount;
+  }
+  if ('nextOpeningAt' in details) {
+    const nextOpeningAt = details.nextOpeningAt;
+    if (nextOpeningAt !== null && typeof nextOpeningAt !== 'string') return undefined;
+    parsed.nextOpeningAt = nextOpeningAt;
+  }
+  return Object.keys(parsed).length > 0 ? parsed : undefined;
 }
 
 export function getApiErrorMessage(error: unknown, fallback: string) {

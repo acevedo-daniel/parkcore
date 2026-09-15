@@ -10,7 +10,6 @@ import {
 } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
-import { DemoResetControl } from '../../features/auth/demo-reset-control.js';
 import { useAuth } from '../../features/auth/use-auth.js';
 import { cn } from '../../lib/cn.js';
 import { useDocumentMeta } from '../../lib/document-meta.js';
@@ -50,7 +49,7 @@ function OwnerLink({
 
 export function OwnerLayout() {
   const { locale, t } = useAppearance();
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const navigation = useNavigation();
   const [clock, setClock] = useState(() => new Date());
@@ -142,11 +141,6 @@ export function OwnerLayout() {
               <span>{t('nav.signOut')}</span>
             </button>
           </section>
-          {user?.kind === 'DEMO' ? (
-            <div className="border-t border-border-subtle pt-3">
-              <DemoResetControl />
-            </div>
-          ) : null}
         </div>
       </aside>
       <header className="owner-mobile-header sticky top-0 z-30 flex min-h-14 items-center justify-between gap-1 border-b border-border-strong bg-surface px-3 py-2 xl:hidden">
@@ -158,7 +152,6 @@ export function OwnerLayout() {
         </Link>
         <div className="flex items-center gap-1">
           <AppearanceControls className="gap-1" />
-          {user?.kind === 'DEMO' ? <DemoResetControl compact /> : null}
           <span className="type-label hidden sm:inline">{t('nav.operations')}</span>
           <button
             aria-label={t('nav.signOut')}

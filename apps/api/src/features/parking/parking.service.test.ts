@@ -230,9 +230,11 @@ describe('parking.service', () => {
       });
       vi.mocked(parkingRepository.findById).mockResolvedValue(buildParking({ ownerId: 'owner-1' }));
 
-      await expect(update('owner-1', 'parking-1', { capacity: 2 })).rejects.toThrow(
-        '3 active sessions',
-      );
+      await expect(update('owner-1', 'parking-1', { capacity: 2 })).rejects.toMatchObject({
+        code: 'CAPACITY_BELOW_ACTIVE',
+        details: { activeSessionCount: 3 },
+        message: 'Capacity cannot be reduced below 3 active sessions',
+      });
     });
   });
 

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { User } from '../../../prisma/generated/client.js';
+import { isValidIanaTimezone } from '../../utils/timezone.js';
 
 export const updateProfileSchema = z
   .strictObject({
@@ -18,6 +19,13 @@ export const updateProfileSchema = z
       .max(50, { error: 'Max 50 chars' })
       .optional()
       .openapi({ description: 'User last name', example: 'Doe' }),
+
+    timezone: z
+      .string({ error: 'Required' })
+      .trim()
+      .refine(isValidIanaTimezone, { error: 'Invalid IANA timezone' })
+      .optional()
+      .openapi({ description: 'User IANA timezone', example: 'America/Argentina/Buenos_Aires' }),
 
     phone: z
       .string({ error: 'Required' })

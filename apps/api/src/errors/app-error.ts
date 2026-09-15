@@ -1,4 +1,5 @@
 export interface AppErrorDetails {
+  activeSessionCount?: number;
   nextOpeningAt?: string | null;
 }
 
