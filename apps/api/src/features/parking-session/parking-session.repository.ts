@@ -122,7 +122,7 @@ export const findByParking = async (
       where,
       skip: options.skip,
       take: options.take,
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ startTime: 'desc' }, { id: 'desc' }],
       select: parkingSessionWithVehicleSelect,
     }),
     prisma.parkingSession.count({ where }),
@@ -150,7 +150,7 @@ export const findForExport = async (
   };
   return await prisma.parkingSession.findMany({
     where,
-    orderBy: { createdAt: 'desc' },
+    orderBy: [{ startTime: 'desc' }, { id: 'desc' }],
     select: parkingSessionWithVehicleSelect,
   });
 };

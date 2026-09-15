@@ -89,6 +89,8 @@ export const update = async (
   if ('activeCount' in updated) {
     throw new ConflictError(
       `Capacity cannot be reduced below ${String(updated.activeCount)} active session${updated.activeCount === 1 ? '' : 's'}`,
+      'CAPACITY_BELOW_ACTIVE',
+      { activeSessionCount: updated.activeCount },
     );
   }
   return toParkingResponse(updated);

@@ -196,6 +196,11 @@
       "ErrorDetails": {
         "type": "object",
         "properties": {
+          "activeSessionCount": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Current active-session count used by a capacity conflict"
+          },
           "nextOpeningAt": {
             "type": [
               "string",
@@ -2901,6 +2906,11 @@
                     "maxLength": 50,
                     "description": "User last name",
                     "example": "Doe"
+                  },
+                  "timezone": {
+                    "type": "string",
+                    "description": "User IANA timezone",
+                    "example": "America/Argentina/Buenos_Aires"
                   },
                   "phone": {
                     "type": "string",

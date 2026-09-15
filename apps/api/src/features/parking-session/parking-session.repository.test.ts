@@ -260,7 +260,12 @@ describe('parking session repository', () => {
       },
     };
     expect(mockPrisma.parkingSession.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ where: expectedWhere, skip: 0, take: 10 }),
+      expect.objectContaining({
+        where: expectedWhere,
+        skip: 0,
+        take: 10,
+        orderBy: [{ startTime: 'desc' }, { id: 'desc' }],
+      }),
     );
     expect(mockPrisma.parkingSession.count).toHaveBeenCalledWith({ where: expectedWhere });
   });

@@ -13,6 +13,7 @@ const parkingService = vi.hoisted(() => ({
 
 vi.mock('./parking.service.js', () => parkingService);
 
+import { ConflictError } from '../../errors/index.js';
 import { errorHandler } from '../../middlewares/error-handler.middleware.js';
 import { signAccessToken } from '../auth/auth.jwt.js';
 import { parkingRouter } from './parking.routes.js';
@@ -194,5 +195,28 @@ describe('parking routes', () => {
 
     expect(response.status).toBe(200);
     expect(parkingService.update).toHaveBeenCalledWith('owner-1', parkingId, { isActive: false });
+  });
+
+  it('returns structured capacity conflict details through the error contract', async () => {
+    parkingService.update.mockRejectedValue(
+      new ConflictError(
+        'Capacity cannot be reduced below 3 active sessions',
+        'CAPACITY_BELOW_ACTIVE',
+        { activeSessionCount: 3 },
+      ),
+    );
+
+    const response = await request(app)
+      .patch(`/parkings/${parkingId}`)
+      .set(await authorizationHeader())
+      .send({ capacity: 2 });
+
+    expect(response.status).toBe(409);
+    expect(response.body).toEqual({
+      error: true,
+      message: 'Capacity cannot be reduced below 3 active sessions',
+      code: 'CAPACITY_BELOW_ACTIVE',
+      details: { activeSessionCount: 3 },
+    });
   });
 });

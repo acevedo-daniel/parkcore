@@ -74,11 +74,15 @@ describe('user.service', () => {
     it('updates profile and returns sanitized user response', async () => {
       const updateData: UpdateProfile = {
         name: 'Jane',
+        lastName: 'Smith',
         phone: '0987654321',
+        timezone: 'Europe/Madrid',
       };
       const updatedUser = buildUser({
         name: 'Jane',
+        lastName: 'Smith',
         phone: '0987654321',
+        timezone: 'Europe/Madrid',
       });
       vi.mocked(userRepository.update).mockResolvedValue(updatedUser);
 
