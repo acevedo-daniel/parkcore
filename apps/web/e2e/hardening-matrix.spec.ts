@@ -806,9 +806,12 @@ test('covers deterministic loading, empty, error, blocked, and degraded states',
 
   await page.goto(loginRoute.path);
   await expect(page.getByLabel('Email')).toHaveAttribute('autocomplete', 'email');
-  await expect(page.getByLabel('Password')).toHaveAttribute('autocomplete', 'current-password');
+  await expect(page.getByRole('textbox', { name: 'Password' })).toHaveAttribute(
+    'autocomplete',
+    'current-password',
+  );
   await page.getByRole('button', { name: 'Show password' }).click();
-  await expect(page.getByLabel('Password')).toHaveAttribute('type', 'text');
+  await expect(page.getByRole('textbox', { name: 'Password' })).toHaveAttribute('type', 'text');
 
   await page.goto(registerRoute.path);
   await expect(page.getByLabel('First name')).toHaveAttribute('autocomplete', 'given-name');
