@@ -64,7 +64,7 @@ describe('authentication forms', () => {
     unmount();
     renderWithAuth(<RegisterForm onSuccess={vi.fn()} />);
 
-    expect(screen.getByLabelText('First name').getAttribute('autocomplete')).toBe('name');
+    expect(screen.getByLabelText('First name').getAttribute('autocomplete')).toBe('given-name');
     expect(screen.getByLabelText('Last name').getAttribute('autocomplete')).toBe('family-name');
     expect(screen.getByLabelText('Email').getAttribute('autocomplete')).toBe('email');
     expect(screen.getByLabelText('Password').getAttribute('autocomplete')).toBe('new-password');
@@ -127,6 +127,9 @@ describe('authentication forms', () => {
 
     expect(password).toHaveProperty('type', 'text');
     expect(password).toHaveProperty('value', 'password123');
+    expect(
+      screen.getByRole('button', { name: 'Hide password' }).getAttribute('aria-controls'),
+    ).toBe('password');
     expect(screen.getByRole('button', { name: 'Hide password' }).getAttribute('aria-pressed')).toBe(
       'true',
     );

@@ -480,7 +480,7 @@ async function expectMobileNavigationDoesNotCoverContent(page: Page, label: stri
     const navigationBox = mobileNavigation.getBoundingClientRect();
     const paddingBottom = Number.parseFloat(getComputedStyle(main).paddingBottom) || 0;
     return {
-      contentBottom: mainBox.top + main.scrollHeight - paddingBottom,
+      contentBottom: mainBox.bottom - paddingBottom,
       navigationHeight: navigationBox.height,
       navigationTop: navigationBox.top,
       paddingBottom,

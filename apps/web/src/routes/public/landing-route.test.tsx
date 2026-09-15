@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import type { components } from '@parkcore/api-client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -86,5 +87,29 @@ describe('public landing route', () => {
 
     expect(await screen.findByText('Todavía no hay cocheras')).toBeTruthy();
     expect(screen.getByText('Sin cocheras disponibles')).toBeTruthy();
+  });
+
+  it('exposes FAQ disclosures as keyboard-operable controls', async () => {
+    const user = userEvent.setup();
+    api.getPublicParkings.mockResolvedValue(listFixture([]));
+    renderLanding();
+
+    const question = await screen.findByRole('button', {
+      name: '¿Necesito descargar una aplicación para estacionar?',
+    });
+    const answerId = question.getAttribute('aria-controls');
+    expect(answerId).toBeTruthy();
+    expect(question.getAttribute('aria-expanded')).toBe('true');
+
+    const answer = document.getElementById(answerId ?? '');
+    expect(answer?.hidden).toBe(false);
+
+    await user.click(question);
+    expect(question.getAttribute('aria-expanded')).toBe('false');
+    expect(answer?.hidden).toBe(true);
+
+    await user.click(question);
+    expect(question.getAttribute('aria-expanded')).toBe('true');
+    expect(answer?.hidden).toBe(false);
   });
 });

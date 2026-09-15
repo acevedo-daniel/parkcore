@@ -6,6 +6,7 @@ export type AvailabilityState = 'AVAILABLE' | 'LIMITED' | 'FULL' | 'CLOSED' | 'P
 
 interface AvailabilityIndicatorProps {
   className?: string;
+  id?: string;
   nextOpeningAt?: string | null;
   state: AvailabilityState;
   timezone?: string;
@@ -29,6 +30,7 @@ const labelKeyByState: Record<AvailabilityState, MessageKey> = {
 
 export function AvailabilityIndicator({
   className,
+  id,
   nextOpeningAt,
   state,
   timezone,
@@ -45,7 +47,7 @@ export function AvailabilityIndicator({
       : undefined;
 
   return (
-    <Badge className={className} dot variant={variantByState[state]}>
+    <Badge className={className} dot id={id} variant={variantByState[state]}>
       {nextOpening
         ? t('availability.closedWithOpening', { status: label, time: nextOpening })
         : label}

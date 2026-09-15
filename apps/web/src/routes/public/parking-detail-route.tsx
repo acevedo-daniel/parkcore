@@ -9,7 +9,7 @@ import { Button } from '../../components/ui/button.js';
 import { ParkingCalculatorWidget } from '../../features/parking/parking-calculator-widget.js';
 import { getPublicParking, PublicApiError } from '../../lib/api/public-api.js';
 import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
-import { formatMoney } from '../../lib/format.js';
+import { formatMoney, formatNumber } from '../../lib/format.js';
 
 export function ParkingDetailRoute() {
   const { locale, t } = useAppearance();
@@ -37,13 +37,19 @@ export function ParkingDetailRoute() {
     const notFound =
       parkingQuery.error instanceof PublicApiError && parkingQuery.error.status === 404;
     return (
-      <section className="min-h-full bg-canvas px-4 py-16 sm:px-6 lg:px-8">
+      <section
+        aria-labelledby="public-detail-error-title"
+        className="min-h-full bg-canvas px-4 py-16 sm:px-6 lg:px-8"
+      >
         <div
           className="mx-auto max-w-3xl rounded-[2rem] border border-border-strong bg-surface-emphasis p-8 sm:p-10"
           role="alert"
         >
           <p className="type-label text-foreground-muted">{t('public.detail.directoryEyebrow')}</p>
-          <h1 className="mt-4 font-display text-3xl font-black tracking-[-0.04em] text-foreground">
+          <h1
+            className="mt-4 max-w-full break-words font-display text-3xl font-black tracking-[-0.04em] text-foreground"
+            id="public-detail-error-title"
+          >
             {t(notFound ? 'public.detail.notFoundTitle' : 'public.detail.errorTitle')}
           </h1>
           <p className="mt-4 text-base leading-relaxed text-foreground-secondary">
@@ -81,7 +87,10 @@ export function ParkingDetailRoute() {
       : t('public.detail.scheduleUnavailable');
 
   return (
-    <article className="min-h-full bg-canvas pb-20 pt-10 text-foreground sm:pb-28 sm:pt-16">
+    <article
+      aria-labelledby="public-detail-title"
+      className="min-h-full bg-canvas pb-20 pt-10 text-foreground sm:pb-28 sm:pt-16"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link
           className="inline-flex min-h-[var(--touch-target-min)] items-center gap-2 rounded-sm text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset"
@@ -92,13 +101,16 @@ export function ParkingDetailRoute() {
         </Link>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:items-start">
-          <header className="lg:col-span-7">
+          <header className="min-w-0 lg:col-span-7">
             {parking.isShowcase ? (
               <span className="mb-4 inline-flex rounded-full border border-accent-strong bg-accent-soft px-3 py-1.5 text-xs font-bold text-foreground">
                 {t('parking.demo')}
               </span>
             ) : null}
-            <h1 className="mt-2 max-w-3xl font-display text-5xl font-black leading-[0.98] tracking-[-0.055em] text-foreground sm:text-6xl">
+            <h1
+              className="mt-2 max-w-full break-words font-display text-5xl font-black leading-[0.98] tracking-[-0.055em] text-foreground sm:text-6xl"
+              id="public-detail-title"
+            >
               {parking.title}
             </h1>
             <AvailabilityIndicator
@@ -107,7 +119,7 @@ export function ParkingDetailRoute() {
               state={parking.availabilityState}
               timezone={parking.timezone}
             />
-            <p className="mt-5 flex max-w-xl items-start gap-2 text-base leading-relaxed text-foreground-secondary sm:text-lg">
+            <p className="mt-5 flex min-w-0 max-w-xl items-start gap-2 text-base leading-relaxed text-foreground-secondary sm:text-lg">
               <MapPin aria-hidden="true" className="mt-1 size-5 shrink-0 text-foreground" />
               <span>
                 {parking.neighborhood} · {parking.address}
@@ -115,7 +127,7 @@ export function ParkingDetailRoute() {
             </p>
           </header>
 
-          <aside className="rounded-[2rem_2rem_4rem_2rem] border border-border bg-surface p-6 shadow-hover lg:col-span-4 lg:col-start-9">
+          <aside className="min-w-0 rounded-[2rem_2rem_4rem_2rem] border border-border bg-surface p-6 shadow-hover lg:col-span-4 lg:col-start-9">
             <p className="type-label text-foreground-muted">{t('public.detail.essentials')}</p>
             <div className="mt-6 grid gap-5 border-y border-border-subtle py-5 sm:grid-cols-2 lg:grid-cols-1">
               <div>
@@ -132,7 +144,7 @@ export function ParkingDetailRoute() {
                   {t('public.detail.availableSpaces')}
                 </p>
                 <p className="mt-1 font-display text-2xl font-extrabold text-foreground">
-                  {parking.availableSpaces}{' '}
+                  {formatNumber(parking.availableSpaces, locale)}{' '}
                   <span className="text-sm font-medium">{t('public.detail.spacesUnit')}</span>
                 </p>
               </div>
@@ -163,7 +175,7 @@ export function ParkingDetailRoute() {
               </p>
               <a
                 aria-label={t('public.detail.directionsAction', { title: parking.title })}
-                className="mt-5 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-bold text-accent-foreground outline-none transition-colors hover:bg-accent-hover focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset"
+                className="mt-5 inline-flex min-h-[var(--touch-target-min)] items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-bold text-accent-foreground outline-none transition-colors hover:bg-accent-hover focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset"
                 href={directionsUrl}
                 rel="noopener noreferrer"
                 target="_blank"
@@ -212,7 +224,10 @@ function ParkingDetailSkeleton() {
   return (
     <div
       aria-label={t('public.detail.loading')}
+      aria-busy="true"
+      aria-live="polite"
       className="min-h-full bg-canvas px-4 py-16 sm:px-6 lg:px-8"
+      role="status"
     >
       <div className="mx-auto max-w-7xl animate-pulse">
         <div className="h-5 w-36 rounded bg-surface-emphasis" />

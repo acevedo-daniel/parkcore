@@ -9,7 +9,12 @@ import { getReturnTo } from './auth-redirect.js';
 function AuthLoadingState() {
   const { t } = useAppearance();
   return (
-    <section aria-label={t('authGuard.loading')} className="auth-loading">
+    <section
+      aria-busy="true"
+      aria-label={t('authGuard.loading')}
+      className="auth-loading"
+      role="status"
+    >
       <Skeleton className="skeleton-title" />
       <Skeleton className="auth-loading-field" />
       <Skeleton className="auth-loading-field" />

@@ -28,9 +28,10 @@ describe('public parking presentation', () => {
     renderPublicContent('en-US', 'dark');
 
     expect(document.documentElement.dataset.theme).toBe('dark');
-    expect(screen.getByRole('link', { name: 'Open Central Parking' }).className).toContain(
-      'bg-surface',
-    );
+    const link = screen.getByRole('link', { name: 'Open Central Parking' });
+    expect(link.className).toContain('bg-surface');
+    expect(link.getAttribute('aria-describedby')).toBe('parking-parking-1-availability');
+    expect(document.getElementById('parking-parking-1-availability')?.textContent).toBe('Available');
     expect(screen.getByRole('img', { name: 'Parking image not available' })).toBeTruthy();
     expect(screen.getByText('Demo')).toBeTruthy();
     expect(screen.getByText('Full')).toBeTruthy();

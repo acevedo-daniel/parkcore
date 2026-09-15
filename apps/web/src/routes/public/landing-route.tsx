@@ -305,6 +305,7 @@ export function LandingRoute() {
                   key={faq.id}
                 >
                   <button
+                    aria-controls={`faq-${faq.id}-answer`}
                     aria-expanded={isOpen}
                     className="flex w-full items-center justify-between gap-5 p-5 text-left font-display text-base font-bold transition-colors hover:bg-surface-hover sm:p-6"
                     onClick={() => {
@@ -318,11 +319,16 @@ export function LandingRoute() {
                       className={cn('size-5 shrink-0 transition-transform', isOpen && 'rotate-180')}
                     />
                   </button>
-                  {isOpen ? (
-                    <p className="parkcore-reveal border-t border-border-subtle px-5 pb-6 pt-4 text-sm leading-relaxed text-foreground-secondary sm:px-6">
-                      {t(faq.answer)}
-                    </p>
-                  ) : null}
+                  <p
+                    className={cn(
+                      'border-t border-border-subtle px-5 pb-6 pt-4 text-sm leading-relaxed text-foreground-secondary',
+                      isOpen && 'parkcore-reveal',
+                    )}
+                    hidden={!isOpen}
+                    id={`faq-${faq.id}-answer`}
+                  >
+                    {t(faq.answer)}
+                  </p>
                 </div>
               );
             })}
@@ -395,7 +401,10 @@ function FeaturedFacilities({
     return (
       <div
         aria-label={t('public.landing.loadingFacilities')}
+        aria-busy="true"
+        aria-live="polite"
         className="mt-12 grid gap-5 md:grid-cols-2 wide:grid-cols-3"
+        role="status"
       >
         {Array.from({ length: 3 }, (_, index) => (
           <div
@@ -432,7 +441,11 @@ function FeaturedFacilities({
   const facilities = query.data?.data ?? [];
   if (facilities.length === 0) {
     return (
-      <div className="mt-12 rounded-[var(--radius-xl)] border border-dashed border-border-strong bg-surface-subtle p-8 text-center">
+      <div
+        aria-live="polite"
+        className="mt-12 rounded-[var(--radius-xl)] border border-dashed border-border-strong bg-surface-subtle p-8 text-center"
+        role="status"
+      >
         <p className="type-label text-foreground-muted">{t('public.landing.emptyEyebrow')}</p>
         <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-foreground-secondary">
           {t('public.landing.emptyDescription')}
