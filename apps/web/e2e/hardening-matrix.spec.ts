@@ -990,6 +990,9 @@ test('covers deterministic loading, empty, error, blocked, and degraded states',
 test('covers owner management, history, profile, and recovery interactions', async ({ page }) => {
   test.setTimeout(240_000);
   const api = await installHardeningApiMock(page);
+  await page.route('https://example.com/invalid-parking.jpg', async (route) => {
+    await route.abort();
+  });
 
   for (const state of [
     { locale: 'es-AR', theme: 'light' },
@@ -1014,8 +1017,6 @@ test('covers owner management, history, profile, and recovery interactions', asy
 
       const imageInput = page.getByLabel(/image url|url de imagen/i);
       await imageInput.fill('https://example.com/invalid-parking.jpg');
-      const image = page.getByRole('img', { name: /facility image preview|vista previa/i });
-      await image.dispatchEvent('error');
       await expect(page.getByRole('status')).toContainText(
         /could not load this image|no pudimos cargar esta imagen/i,
       );
@@ -1052,7 +1053,7 @@ test('covers owner management, history, profile, and recovery interactions', asy
       await page.goto(`${historyRoute.path}?page=2&period=30d`);
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
       await expect(
-        page.getByRole('link', { name: /open session|abrir estad/i }).first(),
+        page.getByRole('link', { name: /open session|abrir.*sesi/i }).first(),
       ).toBeVisible();
 
       await page.getByLabel(/status|estado/i).selectOption('COMPLETED');
@@ -1077,7 +1078,7 @@ test('covers owner management, history, profile, and recovery interactions', asy
       api.setProfileKind('OWNER');
       await page.goto(profileRoute.path);
       const profileMain = page.locator('main');
-      const name = profileMain.getByLabel(/name|nombre/i);
+      const name = profileMain.locator('#profile-name');
       await name.fill('Updated owner');
 
       const profileTheme = profileMain.getByRole('combobox', { name: /theme|apariencia/i });
@@ -1114,7 +1115,7 @@ test('covers owner management, history, profile, and recovery interactions', asy
       const resetDialog = page.getByRole('dialog');
       await expect(resetDialog).toBeVisible();
       await resetDialog
-        .getByRole('button', { name: /^(restore demo data|restaurar datos)$/i })
+        .getByRole('button', { name: /^(restore demo data|restaurar datos de demostración)$/i })
         .click();
       await expect(page).toHaveURL(/\/app$/);
 
