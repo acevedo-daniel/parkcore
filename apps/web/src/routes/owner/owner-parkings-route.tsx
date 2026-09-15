@@ -8,22 +8,34 @@ import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.j
 import { OwnerParkingPanel } from '../../features/parking/owner-parking-panel.js';
 import { useOwnedParkingOperations } from '../../features/parking/use-owned-parking-operations.js';
 import { cn } from '../../lib/cn.js';
+import { formatNumber } from '../../lib/format.js';
 
 export function OwnerParkingsRoute() {
-  const { t } = useAppearance();
+  const { locale, t } = useAppearance();
   const { parkings, parkingsQuery } = useOwnedParkingOperations();
   const activeVehicles = parkings.reduce(
-    (total, { parking }) => total + parking.activeSessionCount,
+    (total, { parking }) => total + Math.max(0, parking.activeSessionCount),
     0,
   );
-  const totalCapacity = parkings.reduce((total, { parking }) => total + parking.capacity, 0);
+  const totalCapacity = parkings.reduce(
+    (total, { parking }) => total + Math.max(0, parking.capacity),
+    0,
+  );
 
   if (parkingsQuery.isLoading) return <OwnerParkingsSkeleton />;
-  if (parkingsQuery.isError) {
+  if (parkingsQuery.isError && !parkingsQuery.data) {
     return (
-      <ErrorState onRetry={() => void parkingsQuery.refetch()}>{t('api.loadParkings')}</ErrorState>
+      <section className="owner-page" aria-labelledby="owner-parkings-error-title">
+        <h1 className="visually-hidden" id="owner-parkings-error-title">
+          {t('ownerParkings.title')}
+        </h1>
+        <ErrorState onRetry={() => void parkingsQuery.refetch()}>
+          {t('api.loadParkings')}
+        </ErrorState>
+      </section>
     );
   }
+  const facilitiesSnapshotIsStale = parkingsQuery.isError && Boolean(parkingsQuery.data);
 
   return (
     <section className="owner-page space-y-8" aria-labelledby="owner-parkings-title">
@@ -57,6 +69,28 @@ export function OwnerParkingsRoute() {
         title={t('ownerParkings.title')}
       />
 
+      {facilitiesSnapshotIsStale ? (
+        <div
+          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+          role="alert"
+        >
+          <p className="break-words text-sm font-semibold">{t('ownerParkings.stale')}</p>
+          <Button
+            className="self-start sm:self-auto"
+            disabled={parkingsQuery.isFetching}
+            onClick={() => void parkingsQuery.refetch()}
+            size="sm"
+            variant="secondary"
+          >
+            <RefreshCw
+              aria-hidden="true"
+              className={cn('size-3.5', parkingsQuery.isFetching && 'animate-spin')}
+            />
+            {t('ownerParkings.refresh')}
+          </Button>
+        </div>
+      ) : null}
+
       {parkings.length === 0 ? (
         <EmptyState
           action={
@@ -76,15 +110,19 @@ export function OwnerParkingsRoute() {
           <div
             aria-label={t('ownerParkings.networkSummary')}
             className="grid gap-px overflow-hidden rounded-[var(--radius-lg)] border border-border bg-border sm:grid-cols-3"
+            role="group"
           >
             <NetworkMetric
               label={t('ownerParkings.facilityCount')}
-              value={String(parkings.length)}
+              value={formatNumber(parkings.length, locale)}
             />
-            <NetworkMetric label={t('ownerParkings.capacity')} value={String(totalCapacity)} />
+            <NetworkMetric
+              label={t('ownerParkings.capacity')}
+              value={formatNumber(totalCapacity, locale)}
+            />
             <NetworkMetric
               label={t('ownerParkings.activeVehicles')}
-              value={String(activeVehicles)}
+              value={formatNumber(activeVehicles, locale)}
             />
           </div>
 
@@ -114,9 +152,9 @@ export function OwnerParkingsRoute() {
 
 function NetworkMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-surface p-5 text-foreground">
+    <div className="min-w-0 bg-surface p-5 text-foreground">
       <p className="type-label text-foreground-muted">{label}</p>
-      <p className="mt-3 type-metric">{value}</p>
+      <p className="mt-3 break-words type-metric">{value}</p>
     </div>
   );
 }
@@ -124,7 +162,13 @@ function NetworkMetric({ label, value }: { label: string; value: string }) {
 function OwnerParkingsSkeleton() {
   const { t } = useAppearance();
   return (
-    <div className="space-y-8" aria-label={t('ownerParkings.refreshing')}>
+    <div
+      aria-busy="true"
+      aria-label={t('ownerParkings.refreshing')}
+      className="space-y-8"
+      role="status"
+    >
+      <h1 className="visually-hidden">{t('ownerParkings.title')}</h1>
       <div className="space-y-4 border-b border-border-strong pb-7">
         <Skeleton className="h-3 w-24 rounded-full" />
         <Skeleton className="h-12 w-3/4 rounded-[var(--radius-md)]" />

@@ -9,7 +9,17 @@ type ParkingSession = components['schemas']['ParkingSessionResponse'];
 type User = components['schemas']['UserResponse'];
 type Locale = 'es-AR' | 'en-US';
 type Theme = 'dark' | 'light';
-type Scenario = 'blocked' | 'degraded' | 'empty' | 'error' | 'loading' | 'success';
+type Scenario =
+  | 'blocked'
+  | 'closed'
+  | 'degraded'
+  | 'empty'
+  | 'error'
+  | 'loading'
+  | 'owner-empty'
+  | 'owner-error'
+  | 'paused'
+  | 'success';
 
 const VIEWPORTS = [
   { height: 800, name: '360px', width: 360 },
@@ -101,6 +111,14 @@ const PUBLIC_ROUTES = [
   loginRoute,
   registerRoute,
   publicNotFoundRoute,
+] as const satisfies readonly RouteFixture[];
+
+const OWNER_OPERATION_ROUTES = [
+  overviewRoute,
+  ownerParkingsRoute,
+  ownerParkingRoute,
+  sessionRoute,
+  ownerNotFoundRoute,
 ] as const satisfies readonly RouteFixture[];
 
 const owner: User = {
@@ -343,7 +361,34 @@ async function installHardeningApiMock(page: Page) {
     }
 
     if (method === 'GET' && url.pathname === '/parkings/me') {
-      await respond(route, scenario === 'blocked' ? [blockedParking()] : [ownerParking]);
+      if (scenario === 'owner-empty') {
+        await respond(route, []);
+        return;
+      }
+      if (scenario === 'owner-error') {
+        await respond(route, { error: true, message: 'Simulated owner facility failure.' }, 503);
+        return;
+      }
+      if (scenario === 'blocked') {
+        await respond(route, [blockedParking()]);
+        return;
+      }
+      if (scenario === 'closed') {
+        await respond(route, [
+          {
+            ...ownerParking,
+            availabilityState: 'CLOSED',
+            isOpen: false,
+            nextOpeningAt: '2026-08-18T11:00:00.000Z',
+          },
+        ]);
+        return;
+      }
+      if (scenario === 'paused') {
+        await respond(route, [{ ...ownerParking, availabilityState: 'PAUSED', isActive: false }]);
+        return;
+      }
+      await respond(route, [ownerParking]);
       return;
     }
 
@@ -684,6 +729,25 @@ test('keeps public and authentication routes within every viewport in both theme
   expect(api.unexpectedRequests).toEqual([]);
 });
 
+test('keeps owner operation routes within every viewport in both themes', async ({ page }) => {
+  test.setTimeout(420_000);
+  const api = await installHardeningApiMock(page);
+
+  for (const locale of ['es-AR', 'en-US'] as const) {
+    for (const theme of ['light', 'dark'] as const) {
+      for (const route of OWNER_OPERATION_ROUTES) {
+        for (const viewport of VIEWPORTS) {
+          await test.step(`${route.name} ${locale} ${theme} ${viewport.name}`, async () => {
+            await visitFixture(page, route, viewport, locale, theme);
+          });
+        }
+      }
+    }
+  }
+
+  expect(api.unexpectedRequests).toEqual([]);
+});
+
 test('passes the serious and critical axe gate across route, shell, locale, and theme fixtures', async ({
   page,
 }) => {
@@ -827,6 +891,30 @@ test('covers deterministic loading, empty, error, blocked, and degraded states',
   await page.goto(overviewRoute.path);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.getByRole('alert').first()).toBeVisible({ timeout: 20_000 });
+
+  api.setScenario('owner-empty');
+  await page.goto(ownerParkingsRoute.path);
+  await expect(page.getByRole('heading', { name: 'No facilities yet' })).toBeVisible();
+
+  api.setScenario('owner-error');
+  await page.goto(ownerParkingsRoute.path);
+  const ownerFacilitiesError = page.locator('[data-slot="error-state"]');
+  await expect(ownerFacilitiesError).toBeVisible();
+  api.setScenario('success');
+  await ownerFacilitiesError.getByRole('button').click();
+  await expect(
+    page.getByRole('link', { name: 'Open operations for Central Parking' }),
+  ).toBeVisible();
+
+  api.setScenario('closed');
+  await page.goto(ownerParkingRoute.path);
+  await expect(page.getByRole('heading', { name: 'Closed right now' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Check in', exact: true })).toBeDisabled();
+
+  api.setScenario('paused');
+  await page.goto(ownerParkingRoute.path);
+  await expect(page.getByRole('heading', { name: 'Parking paused' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Check in', exact: true })).toBeDisabled();
 
   expect(api.unexpectedRequests).toEqual([]);
 });

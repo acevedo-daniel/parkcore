@@ -47,13 +47,17 @@ export function AttentionItem({
           <CircleAlert aria-hidden="true" className="size-4" />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             <p className="type-label text-warning-text">{stateLabel}</p>
-            {subject ? <p className="text-sm font-bold text-foreground">{subject}</p> : null}
+            {subject ? (
+              <p className="min-w-0 break-words text-sm font-bold text-foreground">{subject}</p>
+            ) : null}
           </div>
-          <p className="mt-1 text-sm leading-relaxed text-foreground-secondary">{description}</p>
+          <p className="mt-1 break-words text-sm leading-relaxed text-foreground-secondary">
+            {description}
+          </p>
           <Link
-            className="mt-3 inline-flex items-center gap-1 text-sm font-bold underline decoration-accent decoration-2 underline-offset-4"
+            className="mt-3 inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-accent decoration-2 underline-offset-4"
             to={to}
           >
             {t('attention.open')}

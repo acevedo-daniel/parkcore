@@ -49,7 +49,7 @@ function OwnerLink({
 
 export function OwnerLayout() {
   const { locale, t } = useAppearance();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
   const navigation = useNavigation();
   const [clock, setClock] = useState(() => new Date());
@@ -103,9 +103,11 @@ export function OwnerLayout() {
               className="system-clock font-mono text-xs text-foreground-muted tabular-nums"
               dateTime={clock.toISOString()}
             >
-              {new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(
-                clock,
-              )}
+              {new Intl.DateTimeFormat(locale, {
+                hour: '2-digit',
+                minute: '2-digit',
+                ...(user?.timezone ? { timeZone: user.timezone } : {}),
+              }).format(clock)}
             </time>
           </div>
           <section className="rounded-[var(--radius-sm)] border border-border-subtle bg-surface-subtle p-3">
@@ -143,7 +145,7 @@ export function OwnerLayout() {
           </section>
         </div>
       </aside>
-      <header className="owner-mobile-header sticky top-0 z-30 flex min-h-14 items-center justify-between gap-1 border-b border-border-strong bg-surface px-3 py-2 wide:hidden">
+      <header className="owner-mobile-header sticky top-0 z-30 flex min-h-14 items-center justify-between gap-1 border-b border-border-strong bg-surface px-3 pb-2 pt-[max(0.5rem,env(safe-area-inset-top,0px))] wide:hidden">
         <Link
           className="brand-mark flex min-h-[var(--touch-target-min)] items-center font-display text-base font-bold tracking-[-0.035em] text-foreground"
           to="/app"
