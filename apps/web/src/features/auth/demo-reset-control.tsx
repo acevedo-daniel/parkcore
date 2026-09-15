@@ -63,6 +63,7 @@ export function DemoResetControl() {
             </p>
           ) : null}
           <Button
+            aria-busy={resetMutation.isPending}
             disabled={resetMutation.isPending}
             onClick={() => void confirmReset()}
             type="button"

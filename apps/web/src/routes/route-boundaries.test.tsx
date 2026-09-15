@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { describe, expect, it } from 'vitest';
 
@@ -33,10 +33,12 @@ describe('PublicRouteErrorBoundary', () => {
     ).toBeTruthy();
     expect(screen.queryByText('raw backend failure')).toBeNull();
     expect(screen.getByRole('link', { name: 'Go home' }).getAttribute('href')).toBe('/');
-    expect(document.title).toBe('View unavailable | ParkCore');
-    expect(document.head.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe(
-      'noindex',
-    );
+    await waitFor(() => {
+      expect(document.title).toBe('View unavailable | ParkCore');
+      expect(document.head.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe(
+        'noindex',
+      );
+    });
   });
 });
 

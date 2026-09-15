@@ -72,6 +72,12 @@ describe('ParkingForm', () => {
     });
 
     expect(screen.getByRole('button', { name: 'Saving…' }).getAttribute('disabled')).not.toBeNull();
+    expect(
+      screen
+        .getByRole('button', { name: /Saving/ })
+        .closest('form')
+        ?.getAttribute('aria-busy'),
+    ).toBe('true');
     expect(screen.getByRole('alert').textContent).toContain('We could not create this facility.');
   });
 
