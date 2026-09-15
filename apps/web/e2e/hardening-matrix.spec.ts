@@ -1039,7 +1039,7 @@ test('covers owner management, history, profile, and recovery interactions', asy
       await page.getByLabel(/capacity|capacidad/i).fill('4');
       await page.getByRole('button', { name: /save changes|guardar cambios/i }).click();
       await expect(page.getByRole('alert')).toContainText(
-        /capacity cannot be reduced|capacidad no puede reducirse/i,
+        /capacity cannot be reduced|no podés reducir la capacidad/i,
       );
 
       api.setScenario('success');
