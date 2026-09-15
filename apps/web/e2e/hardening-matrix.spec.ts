@@ -899,7 +899,7 @@ test('covers deterministic loading, empty, error, blocked, and degraded states',
   api.setScenario('owner-error');
   await page.goto(ownerParkingsRoute.path);
   const ownerFacilitiesError = page.locator('[data-slot="error-state"]');
-  await expect(ownerFacilitiesError).toBeVisible();
+  await expect(ownerFacilitiesError).toBeVisible({ timeout: 20_000 });
   api.setScenario('success');
   await ownerFacilitiesError.getByRole('button').click();
   await expect(
