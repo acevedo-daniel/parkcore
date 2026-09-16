@@ -8,13 +8,13 @@ describe('localizeApiError', () => {
     const t = createTranslator('es-AR');
 
     expect(localizeApiError(new ApiError('backend detail', 401), t, 'api.startSession')).toBe(
-      'Tu sesión ya no es válida. Ingresá de nuevo.',
+      'Tu sesión ya no es válida. Ingresa de nuevo.',
     );
     expect(localizeApiError(new ApiError('backend detail', 400), t, 'api.startSession')).toBe(
-      'No pudimos iniciar esta estadía. Revisá la cochera y probá de nuevo.',
+      'No pudimos iniciar esta estadía. Revisa la cochera y prueba de nuevo.',
     );
     expect(localizeApiError(new Error('backend detail'), t, 'api.startSession')).toBe(
-      'No pudimos conectar con ParkCore. Revisá tu conexión y probá de nuevo.',
+      'No pudimos conectar con ParkCore. Revisa tu conexión y prueba de nuevo.',
     );
   });
 

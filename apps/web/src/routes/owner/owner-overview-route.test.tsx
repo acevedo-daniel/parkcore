@@ -113,7 +113,7 @@ describe('owner overview briefing', () => {
     ).toBeTruthy();
     expect(
       screen.getByText(
-        'Cuando crees la primera, vas a ver la ocupación, los ingresos y las estadías desde acá.',
+        'Cuando crees la primera, vas a ver la ocupación, los ingresos y las estadías desde aquí.',
       ),
     ).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Nueva cochera' }).getAttribute('href')).toBe(

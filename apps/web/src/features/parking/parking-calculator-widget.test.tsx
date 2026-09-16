@@ -73,7 +73,7 @@ describe('ParkingCalculatorWidget', () => {
       'true',
     );
     const durationInput = screen.getByLabelText('Duración en minutos');
-    expect(screen.getByText('Completá la duración para estimar')).toBeTruthy();
+    expect(screen.getByText('Completa la duración para estimar')).toBeTruthy();
 
     await user.type(durationInput, '61');
     expect(screen.getByText(/31,00/)).toBeTruthy();
@@ -86,8 +86,8 @@ describe('ParkingCalculatorWidget', () => {
 
     await user.clear(durationInput);
     await user.type(durationInput, '0');
-    expect(screen.getByText('Usá un número entero de minutos mayor que 0.')).toBeTruthy();
-    expect(screen.getByText('Completá la duración para estimar')).toBeTruthy();
+    expect(screen.getByText('Usa un número entero de minutos mayor que 0.')).toBeTruthy();
+    expect(screen.getByText('Completa la duración para estimar')).toBeTruthy();
   });
 
   it('updates the rate and estimate when the selected facility changes', async () => {

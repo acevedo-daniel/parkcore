@@ -460,7 +460,7 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
   await expect(page.getByRole('textbox', { name: 'Password' })).toHaveAttribute('type', 'password');
   await page.getByRole('button', { name: 'Spanish' }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-AR');
-  await expect(page.getByRole('heading', { name: 'Creá tu cuenta.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Crea tu cuenta.' })).toBeVisible();
   await page.getByRole('button', { name: 'Inglés' }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
 

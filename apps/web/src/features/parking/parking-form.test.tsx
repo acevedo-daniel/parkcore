@@ -34,13 +34,13 @@ describe('ParkingForm', () => {
 
     expect(screen.getByRole('button', { name: 'Crear cochera' })).toBeTruthy();
     await user.click(screen.getByRole('button', { name: 'Crear cochera' }));
-    expect(await screen.findAllByText('Usá al menos 5 caracteres.')).not.toHaveLength(0);
+    expect(await screen.findAllByText('Usa al menos 5 caracteres.')).not.toHaveLength(0);
 
     await fillRequiredFields(user);
     await user.click(screen.getByRole('switch', { name: 'Abierta las 24 horas' }));
     await user.click(screen.getByRole('button', { name: 'Crear cochera' }));
 
-    expect(await screen.findByText('Completá los horarios de apertura y cierre.')).toBeTruthy();
+    expect(await screen.findByText('Completa los horarios de apertura y cierre.')).toBeTruthy();
   });
 
   it('keeps the English submit state and submits valid values', async () => {

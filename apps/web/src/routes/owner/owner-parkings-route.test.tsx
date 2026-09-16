@@ -86,7 +86,7 @@ describe('owner parking list', () => {
     renderParkings('es-AR');
 
     expect(await screen.findByRole('heading', { name: 'Todavía no hay cocheras' })).toBeTruthy();
-    expect(screen.getByText('Creá la primera para empezar a registrar la operación.')).toBeTruthy();
+    expect(screen.getByText('Crea la primera para empezar a registrar la operación.')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Crear cochera' }).getAttribute('href')).toBe(
       '/app/parkings/new',
     );

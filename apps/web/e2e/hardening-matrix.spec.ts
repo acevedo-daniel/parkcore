@@ -1091,7 +1091,7 @@ test('covers owner management, history, profile, and recovery interactions', asy
       await expect(page.getByLabel(/capacity|capacidad/i)).toHaveValue('4');
       expect(api.parkingUpdateAttempts()).toBe(1);
       await expect(page.getByRole('alert')).toContainText(
-        /capacity cannot be reduced|no podés reducir la capacidad/i,
+        /capacity cannot be reduced|no puedes reducir la capacidad/i,
       );
 
       api.setScenario('success');
