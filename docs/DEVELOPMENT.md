@@ -111,6 +111,11 @@ Typical local URLs:
 | Build                    | `pnpm build`                                     | Generate the contract and build API, client, and web.                      |
 | Release checks           | `pnpm release:readiness`                         | Run lint, types, coverage, contract, build, and E2E checks.                |
 
+Additional production verification commands:
+
+- `pnpm --filter @parkcore/web build:check` builds the web artifact and verifies route chunks, canonical assets, and the server-secret boundary.
+- `pnpm --filter @parkcore/web test:e2e:production-preview` runs the built web preview and compiled API smoke without remote credentials.
+
 A production-style web build requires `VITE_API_URL`. For a reproducible verification checkout, use `pnpm install --frozen-lockfile`; CI uses the locked form in every job that installs dependencies.
 
 ## Workspace workflow

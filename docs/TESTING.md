@@ -72,6 +72,18 @@ pnpm e2e:local:db:down
 
 Failed runs retain traces, screenshots, videos, and the HTML report under `apps/web/test-results/local-real-stack/` and `apps/web/playwright-report/local-real-stack/`. The required CI workflow uploads these directories on failure.
 
+### Production preview smoke
+
+```bash
+pnpm e2e:local:db:up
+pnpm --filter @parkcore/web test:e2e:production-preview
+pnpm e2e:local:db:down
+```
+
+This check builds the API client and web artifact, starts the compiled API with explicit disposable-database settings, verifies `/healthz` and the API root, and serves the web artifact through Vite preview. The browser then loads the public landing page, enters the isolated demo, and verifies that the public and protected requests use the configured local API origin, including `/parkings`, `/demo/login`, `/parkings/me`, and `/analytics/summary`. It does not use remote URLs, production credentials, or personal data.
+
+The artifact check rejects server-only runtime configuration in `apps/web/dist`, while allowing the public `VITE_API_URL`. It also prints route-chunk and canonical-asset inventories for review. Failed runs retain diagnostics under `apps/web/test-results/production-preview/` and `apps/web/playwright-report/production-preview/`.
+
 ## Critical behavior
 
 The test strategy protects the rules that define the parking workflow:
