@@ -129,6 +129,22 @@ try {
 
   const violations = [];
 
+  for (const file of canonicalAssets) {
+    if (!file) continue;
+
+    const content = await readFile(file.absolutePath, 'utf8');
+    if (!/<svg\b[^>]*\bviewBox=["']0 0 640 360["']/i.test(content)) {
+      violations.push(`${file.normalizedPath} must preserve the canonical 640 by 360 viewBox`);
+    }
+    if (
+      /<image\b|(?:href|xlink:href)=["'](?:data:|https?:\/\/|\/\/)|url\(\s*(?:data:|https?:\/\/|\/\/)/i.test(
+        content,
+      )
+    ) {
+      violations.push(`${file.normalizedPath} must not reference external or embedded media`);
+    }
+  }
+
   for (const file of files) {
     if (!textExtensions.has(path.extname(file.absolutePath).toLowerCase())) {
       continue;
@@ -144,9 +160,7 @@ try {
   }
 
   if (violations.length > 0) {
-    throw new Error(
-      `Private runtime configuration found in web artifact:\n${violations.join('\n')}`,
-    );
+    throw new Error(`Web build artifact contract failed:\n${violations.join('\n')}`);
   }
 
   const javascriptBytes = javascriptAssets.reduce((total, file) => total + file.size, 0);

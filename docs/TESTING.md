@@ -82,6 +82,8 @@ pnpm e2e:local:db:down
 
 This check builds the API client and web artifact, starts the compiled API with explicit disposable-database settings, verifies `/healthz` and the API root, and serves the web artifact through Vite preview. The browser then loads the public landing page, enters the isolated demo, and verifies that the public and protected requests use the configured local API origin, including `/parkings`, `/demo/login`, `/parkings/me`, and `/analytics/summary`. It does not use remote URLs, production credentials, or personal data.
 
+The production preview also verifies that canonical public images load successfully in card and detail slots, that an external owner-provided image reaches the localized fallback, and that stored light, dark, and system preferences resolve before the application mounts with matching `data-theme`, `color-scheme`, `theme-color`, and built canvas tokens.
+
 The artifact check rejects server-only runtime configuration in `apps/web/dist`, while allowing the public `VITE_API_URL`. It also prints route-chunk and canonical-asset inventories for review. Failed runs retain diagnostics under `apps/web/test-results/production-preview/` and `apps/web/playwright-report/production-preview/`.
 
 ## Critical behavior
