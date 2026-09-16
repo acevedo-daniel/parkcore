@@ -4,12 +4,14 @@ import { useLocation, useNavigate } from 'react-router';
 import { useAppearance } from '../../app/appearance-provider.js';
 import { AuthFormFrame, LoginFooter, LoginForm } from '../../features/auth/auth-forms.js';
 import { DemoLoginButton } from '../../features/auth/demo-login-button.js';
+import { useAuth } from '../../features/auth/use-auth.js';
 import { useDocumentMeta } from '../../lib/document-meta.js';
 import { getAuthPath, getReturnTo } from './auth-redirect.js';
 import { RedirectAuthenticated } from './auth-guard.js';
 
 export function LoginRoute() {
   const { t } = useAppearance();
+  const { sessionErrorKey } = useAuth();
   useDocumentMeta({
     description: t('auth.login.metaDescription'),
     noIndex: true,
@@ -26,6 +28,14 @@ export function LoginRoute() {
         footer={<LoginFooter registerHref={getAuthPath('/register', returnTo)} />}
         title={t('auth.login.title')}
       >
+        {sessionErrorKey ? (
+          <p
+            className="mb-6 rounded-2xl border border-warning-foreground bg-warning-surface p-4 text-sm font-semibold text-warning-text"
+            role="alert"
+          >
+            {t(sessionErrorKey)}
+          </p>
+        ) : null}
         <div className="rounded-[1.75rem] bg-accent p-5 text-accent-foreground shadow-hover">
           <div className="flex items-center gap-2 text-xs font-bold tracking-[0.1em] uppercase">
             <Sparkles aria-hidden="true" className="size-4" />

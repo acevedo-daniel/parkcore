@@ -13,12 +13,20 @@ type Scenario =
   | 'blocked'
   | 'closed'
   | 'degraded'
+  | 'demo-deleted'
+  | 'demo-rate-limited'
+  | 'demo-reset-error'
   | 'empty'
   | 'error'
   | 'export-error'
   | 'history-error'
   | 'loading'
   | 'management-error'
+  | 'analytics-revenue-error'
+  | 'analytics-volume-error'
+  | 'auth-expired-demo'
+  | 'auth-expired-owner'
+  | 'auth-rate-limited'
   | 'owner-empty'
   | 'owner-error'
   | 'paused'
@@ -328,6 +336,7 @@ async function installHardeningApiMock(page: Page) {
   let scenario: Scenario = 'success';
   let catalogErrorAttempts = 0;
   let exportErrorAttempts = 0;
+  let parkingUpdateAttempts = 0;
   let profileUser: User = owner;
   let pendingResolvers: (() => void)[] = [];
   const unexpectedRequests: string[] = [];
@@ -373,6 +382,18 @@ async function installHardeningApiMock(page: Page) {
     }
 
     if (method === 'GET' && url.pathname === '/users/me') {
+      if (scenario === 'auth-expired-demo' || scenario === 'demo-deleted') {
+        await respond(
+          route,
+          { code: 'DEMO_EXPIRED', error: true, message: 'Demo access has expired.' },
+          401,
+        );
+        return;
+      }
+      if (scenario === 'auth-expired-owner') {
+        await respond(route, { error: true, message: 'Owner access has expired.' }, 401);
+        return;
+      }
       await respond(route, profileUser);
       return;
     }
@@ -410,6 +431,11 @@ async function installHardeningApiMock(page: Page) {
     }
 
     if (method === 'GET' && url.pathname === '/parkings/parking-1/sessions/active') {
+      await respond(route, [activeSession]);
+      return;
+    }
+
+    if (method === 'GET' && url.pathname === '/sessions/active') {
       await respond(route, [activeSession]);
       return;
     }
@@ -456,6 +482,10 @@ async function installHardeningApiMock(page: Page) {
     }
 
     if (method === 'GET' && url.pathname === '/analytics/revenue') {
+      if (scenario === 'analytics-revenue-error') {
+        await respond(route, { error: true, message: 'Simulated revenue failure.' }, 503);
+        return;
+      }
       await respond(route, {
         ...analyticsRevenue,
         days: Number(url.searchParams.get('days') ?? 7),
@@ -464,11 +494,19 @@ async function installHardeningApiMock(page: Page) {
     }
 
     if (method === 'GET' && url.pathname === '/analytics/volume') {
+      if (scenario === 'analytics-volume-error') {
+        await respond(route, { error: true, message: 'Simulated volume failure.' }, 503);
+        return;
+      }
       await respond(route, { ...analyticsVolume, days: Number(url.searchParams.get('days') ?? 7) });
       return;
     }
 
     if (method === 'POST' && url.pathname === '/auth/login') {
+      if (scenario === 'auth-rate-limited') {
+        await respond(route, { error: true, message: 'Too many login attempts.' }, 429);
+        return;
+      }
       await respond(route, { accessToken: 'hardening-token', user: owner });
       return;
     }
@@ -479,11 +517,16 @@ async function installHardeningApiMock(page: Page) {
     }
 
     if (method === 'POST' && url.pathname === '/demo/login') {
-      await respond(route, { accessToken: 'hardening-token', user: owner });
+      if (scenario === 'demo-rate-limited') {
+        await respond(route, { error: true, message: 'Too many demo attempts.' }, 429);
+        return;
+      }
+      await respond(route, { accessToken: 'hardening-token', user: demoUser });
       return;
     }
 
     if (method === 'PATCH' && url.pathname === '/parkings/parking-1') {
+      parkingUpdateAttempts += 1;
       if (scenario === 'management-error') {
         await respond(
           route,
@@ -509,6 +552,10 @@ async function installHardeningApiMock(page: Page) {
     }
 
     if (method === 'POST' && url.pathname === '/demo/reset') {
+      if (scenario === 'demo-reset-error') {
+        await respond(route, { error: true, message: 'Simulated demo reset failure.' }, 503);
+        return;
+      }
       await respond(route, { restored: true });
       return;
     }
@@ -533,10 +580,12 @@ async function installHardeningApiMock(page: Page) {
       scenario = nextScenario;
       catalogErrorAttempts = 0;
       exportErrorAttempts = 0;
+      parkingUpdateAttempts = 0;
     },
     setProfileKind: (kind: User['kind']) => {
       profileUser = kind === 'DEMO' ? demoUser : owner;
     },
+    parkingUpdateAttempts: () => parkingUpdateAttempts,
     unexpectedRequests,
   };
 }
@@ -1039,12 +1088,15 @@ test('covers owner management, history, profile, and recovery interactions', asy
       await expect(page.getByLabel(/capacity|capacidad/i)).toBeVisible();
       await page.getByLabel(/capacity|capacidad/i).fill('4');
       await page.getByRole('button', { name: /save changes|guardar cambios/i }).click();
+      await expect(page.getByLabel(/capacity|capacidad/i)).toHaveValue('4');
+      expect(api.parkingUpdateAttempts()).toBe(1);
       await expect(page.getByRole('alert')).toContainText(
-        /capacity cannot be reduced|no podés reducir la capacidad/i,
+        /capacity cannot be reduced|no puedes reducir la capacidad/i,
       );
 
       api.setScenario('success');
       await page.getByRole('button', { name: /save changes|guardar cambios/i }).click();
+      expect(api.parkingUpdateAttempts()).toBe(1);
       await expect(page).toHaveURL(/\/app\/parkings\/parking-1$/);
     });
 
@@ -1096,7 +1148,7 @@ test('covers owner management, history, profile, and recovery interactions', asy
       );
 
       api.setProfileKind('DEMO');
-      api.setScenario('success');
+      api.setScenario('demo-reset-error');
       await configureBrowserState(page, {
         authenticated: true,
         locale: state.locale,
@@ -1116,6 +1168,18 @@ test('covers owner management, history, profile, and recovery interactions', asy
       await expect(resetDialog).toBeVisible();
       await resetDialog
         .getByRole('button', { name: /^(restore demo data|restaurar datos de demostración)$/i })
+        .click();
+      await expect(resetDialog.getByRole('alert')).toContainText(
+        /could not restore the demo data|no pudimos restaurar los datos de la demo/i,
+      );
+      await expect(resetDialog.getByRole('alert')).not.toContainText(
+        'Simulated demo reset failure',
+      );
+
+      api.setScenario('success');
+      await resetDialog
+        .getByRole('button', { name: /restore demo data|restaurar datos/i })
+        .last()
         .click();
       await expect(page).toHaveURL(/\/app$/);
 
@@ -1162,6 +1226,141 @@ test('recovers management and history query failures with route context', async 
   api.setScenario('success');
   await historyError.getByRole('button').click();
   await expect(page.getByRole('link', { name: 'Open session for AB123CD' })).toBeVisible();
+
+  expect(api.unexpectedRequests).toEqual([]);
+});
+
+test('recovers identity, rate-limit, analytics, and demo lifecycle failures', async ({ page }) => {
+  test.setTimeout(240_000);
+  const api = await installHardeningApiMock(page);
+
+  for (const [index, state] of (
+    [
+      { locale: 'es-AR', theme: 'light' },
+      { locale: 'en-US', theme: 'dark' },
+    ] as const
+  ).entries()) {
+    const viewport = index === 0 ? VIEWPORTS[1] : VIEWPORTS[4];
+
+    await test.step(`${state.locale} ${state.theme} owner session expiry`, async () => {
+      await page.setViewportSize({ height: viewport.height, width: viewport.width });
+      api.setProfileKind('OWNER');
+      api.setScenario('auth-expired-owner');
+      await configureBrowserState(page, {
+        authenticated: true,
+        locale: state.locale,
+        theme: state.theme,
+      });
+      await page.goto('/app/parkings/parking-1?tab=sessions');
+
+      await expect(page).toHaveURL(/\/login\?returnTo=/);
+      await expect(page.getByRole('alert')).toContainText(
+        /your session is no longer valid|tu sesi.n ya no es v.lida/i,
+      );
+      expect(new URL(page.url()).searchParams.get('returnTo')).toBe(
+        '/app/parkings/parking-1?tab=sessions',
+      );
+      await expect(page.locator('html')).toHaveAttribute('data-theme', state.theme);
+      await expect(page.locator('html')).toHaveAttribute('lang', state.locale);
+    });
+
+    for (const identityScenario of ['auth-expired-demo', 'demo-deleted'] as const) {
+      await test.step(`${state.locale} ${state.theme} ${identityScenario}`, async () => {
+        api.setProfileKind('DEMO');
+        api.setScenario(identityScenario);
+        await configureBrowserState(page, {
+          authenticated: true,
+          locale: state.locale,
+          theme: state.theme,
+        });
+        await page.goto('/app/profile');
+
+        await expect(page).toHaveURL(/\/login\?returnTo=/);
+        await expect(page.getByRole('alert')).toContainText(/the demo has ended|la demo termin/i);
+        await expect(page.getByRole('alert')).not.toContainText('Demo access has expired');
+        const demoAction = page.getByRole('button', {
+          name: /enter the demo|entrar a la demo/i,
+        });
+        await expect(demoAction).toBeVisible();
+
+        api.setScenario('success');
+        await demoAction.click();
+        await expect(page).toHaveURL(/\/app\/profile$/);
+      });
+    }
+
+    await test.step(`${state.locale} ${state.theme} authentication rate limit`, async () => {
+      api.setScenario('auth-rate-limited');
+      await configureBrowserState(page, {
+        authenticated: false,
+        locale: state.locale,
+        theme: state.theme,
+      });
+      await page.goto('/login?returnTo=%2Fapp%2Fparkings');
+
+      await page.getByLabel(/email|correo electr.nico/i).fill('owner@parkcore.test');
+      await page.getByRole('textbox', { name: /password|contrase.a/i }).fill('password123');
+      await page.getByRole('button', { name: /sign in|ingresar/i }).click();
+      const authAlert = page.getByRole('alert');
+      await expect(authAlert).toContainText(
+        /too many attempts|demasiados intentos|muchos intentos/i,
+      );
+      await expect(authAlert).not.toContainText('Too many login attempts');
+      await expect(page.getByLabel(/email|correo electr.nico/i)).toHaveValue('owner@parkcore.test');
+      await expect(page.getByRole('textbox', { name: /password|contrase.a/i })).toHaveValue(
+        'password123',
+      );
+
+      api.setScenario('success');
+      await page.getByRole('button', { name: /sign in|ingresar/i }).click();
+      await expect(page).toHaveURL(/\/app\/parkings$/);
+    });
+
+    await test.step(`${state.locale} ${state.theme} demo creation rate limit`, async () => {
+      api.setScenario('demo-rate-limited');
+      await configureBrowserState(page, {
+        authenticated: false,
+        locale: state.locale,
+        theme: state.theme,
+      });
+      await page.goto('/login');
+
+      const demoAction = page.getByRole('button', { name: /enter the demo|entrar a la demo/i });
+      await demoAction.click();
+      const demoAlert = page.getByRole('alert');
+      await expect(demoAlert).toContainText(
+        /too many attempts|demasiados intentos|muchos intentos/i,
+      );
+      await expect(demoAlert).not.toContainText('Too many demo attempts');
+
+      api.setScenario('success');
+      await demoAction.click();
+      await expect(page).toHaveURL(/\/app$/);
+    });
+
+    for (const analyticsScenario of [
+      'degraded',
+      'analytics-revenue-error',
+      'analytics-volume-error',
+    ] as const) {
+      await test.step(`${state.locale} ${state.theme} ${analyticsScenario}`, async () => {
+        api.setProfileKind('OWNER');
+        api.setScenario(analyticsScenario);
+        await configureBrowserState(page, {
+          authenticated: true,
+          locale: state.locale,
+          theme: state.theme,
+        });
+        await page.goto('/app');
+
+        await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+        await expect(page.locator('a[href="/app/parkings/parking-1"]').first()).toBeVisible();
+        const analyticsAlert = page.getByRole('alert').first();
+        await expect(analyticsAlert).toBeVisible({ timeout: 20_000 });
+        await expect(analyticsAlert).not.toContainText(/simulated .* failure/i);
+      });
+    }
+  }
 
   expect(api.unexpectedRequests).toEqual([]);
 });

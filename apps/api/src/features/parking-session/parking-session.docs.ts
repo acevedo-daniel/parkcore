@@ -9,6 +9,7 @@ import {
   parkingSessionParamsSchema,
   parkingSessionQuerySchema,
   parkingSessionResponseSchema,
+  ownerActiveSessionResponseSchema,
   vehicleLookupQuerySchema,
   vehicleLookupResponseSchema,
 } from './parking-session.schema.js';
@@ -111,6 +112,22 @@ export function registerParkingSessionDocs(registry: OpenAPIRegistry): void {
       401: errorResponse('Unauthorized'),
       403: errorResponse('Forbidden - not the owner'),
       404: errorResponse('Parking not found'),
+    },
+  });
+
+  registry.registerPath({
+    method: 'get',
+    path: '/sessions/active',
+    tags: ['Parking Sessions'],
+    summary: 'List active sessions across owned parkings',
+    security: [{ bearerAuth: [] }],
+    responses: {
+      200: {
+        description: 'Minimal active session context for the authenticated owner overview',
+        content: { 'application/json': { schema: ownerActiveSessionResponseSchema.array() } },
+      },
+      401: errorResponse('Unauthorized'),
+      403: errorResponse('Forbidden - not an operator'),
     },
   });
 

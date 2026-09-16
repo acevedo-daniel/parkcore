@@ -252,14 +252,44 @@ jobs:
   production:
     name: Production
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     env:
       DATABASE_URL: postgresql://parkcore:parkcore@localhost:5432/parkcore-build
-      VITE_API_URL: https://api.example.invalid
+      NODE_ENV: production
+      PORT: 3000
+      JWT_SECRET: ci-only-production-verification-secret-1234567890
+      JWT_EXPIRES_IN: 24h
+      CORS_ORIGINS: https://parkcore-app.vercel.app
+      LOG_LEVEL: info
+      LOG_PRETTY: 'false'
+      ENABLE_API_DOCS: 'false'
+      DEMO_CLEANUP_BATCH_SIZE: 1
+      PARKCORE_ARTIFACT_PRIVATE_VALUES: |-
+        ci-seed-owner@example.invalid
+        ci-seed-password-not-for-production
+      VITE_API_URL: https://parkcore-api.onrender.com
+
+    services:
+      parkcore-production-db:
+        image: postgres:18.1
+        env:
+          POSTGRES_USER: parkcore
+          POSTGRES_PASSWORD: parkcore
+          POSTGRES_DB: parkcore-build
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U parkcore -d parkcore-build"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
+      - name: Prepare production diagnostics
+        run: mkdir -p .ci/production
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -271,10 +301,69 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          set -o pipefail
+          pnpm install --frozen-lockfile 2>&1 | tee .ci/production/install.log
+
+      - name: Audit production dependencies
+        run: |
+          set -o pipefail
+          pnpm audit --prod 2>&1 | tee .ci/production/audit.log
+
+      - name: Apply forward migrations to the fresh database
+        run: |
+          set -o pipefail
+          pnpm --filter @parkcore/api prisma:migrate:deploy 2>&1 | tee .ci/production/migrations.log
 
       - name: Build deployable workspaces
-        run: pnpm build
+        run: |
+          set -o pipefail
+          pnpm build 2>&1 | tee .ci/production/build.log
+
+      - name: Verify compiled API artifact
+        run: |
+          set -o pipefail
+          pnpm --filter @parkcore/api exec tsx src/scripts/check-build-artifact.ts 2>&1 | tee .ci/production/api-artifact.log
+
+      - name: Verify web artifact secret boundary
+        run: |
+          set -o pipefail
+          node scripts/check-web-build-artifact.mjs 2>&1 | tee .ci/production/web-artifact.log
+
+      - name: Start compiled API and run startup smoke
+        run: |
+          set -Eeuo pipefail
+          node apps/api/dist/server.js > .ci/production/api.log 2>&1 &
+          api_pid=$!
+
+          cleanup() {
+            exit_code=$?
+            if kill -0 "$api_pid" 2>/dev/null; then
+              kill -TERM "$api_pid" 2>/dev/null || true
+              wait "$api_pid" 2>/dev/null || true
+            fi
+            exit "$exit_code"
+          }
+
+          trap cleanup EXIT
+          SMOKE_BASE_URL=http://127.0.0.1:3000 \
+            SMOKE_RETRIES=10 \
+            SMOKE_TIMEOUT_MS=5000 \
+            pnpm --filter @parkcore/api smoke:remote 2>&1 | tee .ci/production/startup-smoke.log
+
+      - name: Verify bounded demo cleanup
+        run: |
+          set -o pipefail
+          pnpm --filter @parkcore/api demo:cleanup:check 2>&1 | tee .ci/production/demo-cleanup.log
+
+      - name: Upload production diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: production-diagnostics
+          path: .ci/production/
+          if-no-files-found: ignore
+          retention-days: 7
 
   ci_gate:
     name: CI Gate

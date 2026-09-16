@@ -41,6 +41,13 @@ const parkingSessionHistoryAggregateSelect = {
   totalAmountCents: true,
 } as const satisfies Prisma.ParkingSessionSelect;
 
+const ownerActiveSessionSelect = {
+  id: true,
+  startTime: true,
+  parkingId: true,
+  vehicle: { select: { plate: true } },
+} as const satisfies Prisma.ParkingSessionSelect;
+
 const checkInParkingSelect = {
   id: true,
   ownerId: true,
@@ -64,6 +71,10 @@ export type ParkingSessionWithRelations = Prisma.ParkingSessionGetPayload<{
 
 export type ParkingSessionHistoryAggregateRow = Prisma.ParkingSessionGetPayload<{
   select: typeof parkingSessionHistoryAggregateSelect;
+}>;
+
+export type OwnerActiveSessionRecord = Prisma.ParkingSessionGetPayload<{
+  select: typeof ownerActiveSessionSelect;
 }>;
 
 export type CheckInBlockedReason =
@@ -93,6 +104,14 @@ export const findActiveByParking = async (
     },
     orderBy: [{ startTime: 'asc' }, { id: 'asc' }],
     select: parkingSessionWithVehicleSelect,
+  });
+};
+
+export const findActiveByOwner = async (ownerId: string): Promise<OwnerActiveSessionRecord[]> => {
+  return await prisma.parkingSession.findMany({
+    where: { parking: { ownerId }, status: 'ACTIVE' },
+    orderBy: [{ startTime: 'asc' }, { id: 'asc' }],
+    select: ownerActiveSessionSelect,
   });
 };
 

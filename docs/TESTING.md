@@ -72,6 +72,52 @@ pnpm e2e:local:db:down
 
 Failed runs retain traces, screenshots, videos, and the HTML report under `apps/web/test-results/local-real-stack/` and `apps/web/playwright-report/local-real-stack/`. The required CI workflow uploads these directories on failure.
 
+### Production preview smoke
+
+```bash
+pnpm e2e:local:db:up
+pnpm --filter @parkcore/web test:e2e:production-preview
+pnpm e2e:local:db:down
+```
+
+This check builds the API client and web artifact, starts the compiled API with explicit disposable-database settings, verifies `/healthz` and the API root, and serves the web artifact through Vite preview. The browser then loads the public landing page, enters the isolated demo, and verifies that the public and protected requests use the configured local API origin, including `/parkings`, `/demo/login`, `/parkings/me`, and `/analytics/summary`. It does not use remote URLs, production credentials, or personal data.
+
+The production preview also verifies that canonical public images load successfully in card and detail slots, that an external owner-provided image reaches the localized fallback, and that stored light, dark, and system preferences resolve before the application mounts with matching `data-theme`, `color-scheme`, `theme-color`, and built canvas tokens.
+
+The artifact check rejects server-only runtime configuration in `apps/web/dist`, while allowing the public `VITE_API_URL`. It also prints route-chunk and canonical-asset inventories for review. Failed runs retain diagnostics under `apps/web/test-results/production-preview/` and `apps/web/playwright-report/production-preview/`.
+
+### Production CI boundary
+
+The `Production` job uses a fresh PostgreSQL service for every run. It starts
+from the frozen lockfile, audits production dependencies, applies committed
+forward migrations with `prisma migrate deploy`, builds the API, generated
+client, and web workspaces, and checks the compiled API and browser artifacts.
+The API is started with production-shaped `DATABASE_URL`, `JWT_SECRET`, exact
+`CORS_ORIGINS`, logging, API docs, and `VITE_API_URL` settings. The startup
+smoke checks both `/healthz` and the root service response. `/healthz` remains
+a process-liveness check and does not query the database.
+
+The production job never uses `db:setup`, `prisma migrate dev`,
+`prisma migrate reset`, or the seed. Its cleanup verification creates only
+temporary records in the disposable database, runs the real `demo:cleanup`
+command with a batch of one, and checks that one unexpired DEMO, one OWNER,
+and one SHOWCASE user remain protected. Failure diagnostics for installation,
+audit, migration, build, artifact, startup, and cleanup steps are uploaded
+from `.ci/production/`.
+
+### Reliability and recovery matrix
+
+The hardening matrix treats failure recovery as a release boundary. It runs representative compact and wide viewports in both supported locales and themes, using contract-shaped API failures rather than fixture fallback.
+
+| Failure                                         | Required recovery                                                                                                                                                     |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API unavailable                                 | Show localized feedback, keep the route context, and offer an explicit retry without substituting data.                                                               |
+| Expired owner session                           | Clear the token and query cache, then return to sign-in with a safe internal `returnTo` path.                                                                         |
+| Expired or deleted DEMO sandbox                 | Show the localized expiry message at session end and offer a fresh demo entry.                                                                                        |
+| `409` business conflict                         | Preserve the relevant form or operation context, translate the stable error code, and do not retry automatically.                                                     |
+| `429` auth or DEMO creation limit               | Preserve entered values, show localized wait-and-retry feedback, and keep the rate-limit buckets independent. API tests retain `RateLimit` and `Retry-After` headers. |
+| Partial analytics, image, or DEMO reset failure | Keep unrelated owner operations usable, show a recoverable localized state, and never expose raw backend text.                                                        |
+
 ## Critical behavior
 
 The test strategy protects the rules that define the parking workflow:
@@ -85,6 +131,7 @@ The test strategy protects the rules that define the parking workflow:
 - public discovery includes the stable SHOWCASE scenario, marks it as fictional demonstration data, and excludes DEMO facilities;
 - showcase refresh preserves canonical facility and asset identities while rebasing time-dependent records;
 - expired cleanup removes only DEMO owners and remains bounded;
+- the owner overview uses one owner-scoped active-session request regardless of facility count, while public and owner parking snapshots use active-session counts when detailed sessions are not needed;
 - the generated web client remains synchronized with the API contract.
 - shared auth, parking, and check-in forms render localized labels and validation in both locales;
 - API failures are mapped to catalog messages instead of exposing backend response text;
@@ -194,7 +241,7 @@ The browser-QA command runs the real-stack workflow across Chromium, Firefox, an
 
 ## CI
 
-`.github/workflows/ci.yml` separates verification into six conceptual jobs and one final gate:
+`.github/workflows/ci.yml` separates verification into seven conceptual jobs and one final gate:
 
 1. **Quality**: authored text, formatting, lint, and typecheck;
 2. **Tests / API**: PostgreSQL bootstrap and API coverage tests;
@@ -202,10 +249,11 @@ The browser-QA command runs the real-stack workflow across Chromium, Firefox, an
 4. **Contract**: generated API/client drift detection;
 5. **E2E**: local real-stack Playwright browser workflow with PostgreSQL and failure diagnostics;
 6. **E2E / Web**: credential-free deterministic browser hardening matrix with responsive, accessibility, theme, and localization checks;
-7. **Production**: deployable API, client, and web builds;
+7. **Production**: fresh-database migrations, deployable API/client/web builds, compiled startup, cleanup, and browser secret-boundary checks;
 8. **CI Gate**: the stable required check that fails when any verification job fails, is cancelled, or is skipped.
 
-CI runs for pushes and pull requests targeting `main`.
+CI runs for pushes and pull requests targeting `main`. The `CI Gate` requires
+the production job alongside the quality, test, contract, and browser jobs.
 
 ## Release verification
 

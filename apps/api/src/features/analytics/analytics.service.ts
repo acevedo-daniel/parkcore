@@ -9,12 +9,11 @@ interface CurrencyRevenue {
 }
 
 const toCurrencyRevenue = (
-  sessions: analyticsRepository.OwnerAnalyticsSession[],
+  aggregates: analyticsRepository.OwnerCompletedSessionAggregate[],
 ): CurrencyRevenue[] => {
   const totals = new Map<Currency, number>();
-  for (const session of sessions) {
-    if (session.status !== 'COMPLETED' || session.totalAmountCents === null) continue;
-    totals.set(session.currency, (totals.get(session.currency) ?? 0) + session.totalAmountCents);
+  for (const aggregate of aggregates) {
+    totals.set(aggregate.currency, (totals.get(aggregate.currency) ?? 0) + aggregate.revenueCents);
   }
   return [...totals.entries()]
     .sort(([first], [second]) => first.localeCompare(second))
@@ -26,10 +25,13 @@ const roundPercent = (value: number): number => Math.round(value * 10) / 10;
 const toFacilityAnalytics = (
   facility: analyticsRepository.OwnerFacility,
   activeVehicles: number,
-  sessions: analyticsRepository.OwnerAnalyticsSession[],
+  aggregates: analyticsRepository.OwnerCompletedSessionAggregate[],
 ): AnalyticsFacility => {
-  const completed = sessions.filter((session) => session.status === 'COMPLETED');
-  const revenueCents = completed.reduce((sum, session) => sum + (session.totalAmountCents ?? 0), 0);
+  const completedSessions = aggregates.reduce(
+    (sum, aggregate) => sum + aggregate.completedSessions,
+    0,
+  );
+  const revenueCents = aggregates.reduce((sum, aggregate) => sum + aggregate.revenueCents, 0);
 
   return {
     parkingId: facility.id,
@@ -39,41 +41,59 @@ const toFacilityAnalytics = (
     capacity: facility.capacity,
     occupancyPercent:
       facility.capacity === 0 ? 0 : roundPercent((activeVehicles / facility.capacity) * 100),
-    completedSessions: completed.length,
+    completedSessions,
     revenueCents,
     currency: facility.currency,
   };
 };
 
 export const getSummary = async (ownerId: string, now = new Date()) => {
-  const [facilities, activeSessions, timezone] = await Promise.all([
+  const [facilities, activeSessionCounts, timezone] = await Promise.all([
     analyticsRepository.findOwnerFacilities(ownerId),
-    analyticsRepository.findOwnerSessions(ownerId, { status: 'ACTIVE' }),
+    analyticsRepository.findOwnerActiveSessionCounts(ownerId),
     analyticsRepository.findOwnerTimezone(ownerId),
   ]);
   const today = getLocalPeriodWindow('today', timezone, now);
-  const completedToday = await analyticsRepository.findOwnerSessions(ownerId, {
-    status: 'COMPLETED',
+  const completedToday = await analyticsRepository.findOwnerCompletedSessionAggregates(ownerId, {
     endTimeFrom: today.start,
     endTimeTo: today.end,
   });
+  const activeByParking = new Map(
+    activeSessionCounts.map(({ parkingId, activeSessions }) => [parkingId, activeSessions]),
+  );
+  const completedByParking = new Map<
+    string,
+    analyticsRepository.OwnerCompletedSessionAggregate[]
+  >();
+  for (const aggregate of completedToday) {
+    const aggregates = completedByParking.get(aggregate.parkingId) ?? [];
+    aggregates.push(aggregate);
+    completedByParking.set(aggregate.parkingId, aggregates);
+  }
 
   const facilityData = facilities.map((facility) =>
     toFacilityAnalytics(
       facility,
-      activeSessions.filter((session) => session.parkingId === facility.id).length,
-      completedToday.filter((session) => session.parkingId === facility.id),
+      activeByParking.get(facility.id) ?? 0,
+      completedByParking.get(facility.id) ?? [],
     ),
   );
   const totalCapacity = facilities.reduce((sum, facility) => sum + facility.capacity, 0);
-  const activeVehicles = activeSessions.length;
+  const activeVehicles = activeSessionCounts.reduce(
+    (sum, { activeSessions }) => sum + activeSessions,
+    0,
+  );
+  const completedTodayCount = completedToday.reduce(
+    (sum, aggregate) => sum + aggregate.completedSessions,
+    0,
+  );
 
   return {
     activeVehicles,
     totalCapacity,
     occupancyPercent:
       totalCapacity === 0 ? 0 : roundPercent((activeVehicles / totalCapacity) * 100),
-    completedToday: completedToday.length,
+    completedToday: completedTodayCount,
     revenueToday: toCurrencyRevenue(completedToday),
     facilities: facilityData,
   };
@@ -88,6 +108,16 @@ const getCompletedWindow = async (ownerId: string, days: number, now: Date) => {
     endTimeTo: window.end,
   });
   return { sessions, timezone };
+};
+
+const getCompletedAggregateWindow = async (ownerId: string, days: number, now: Date) => {
+  const timezone = await analyticsRepository.findOwnerTimezone(ownerId);
+  const window = getLocalPeriodWindow(days === 7 ? '7d' : '30d', timezone, now);
+  const aggregates = await analyticsRepository.findOwnerCompletedSessionAggregates(ownerId, {
+    endTimeFrom: window.start,
+    endTimeTo: window.end,
+  });
+  return { aggregates, timezone };
 };
 
 export const getRevenue = async (ownerId: string, query: AnalyticsQuery, now = new Date()) => {
@@ -131,14 +161,23 @@ export const getVolume = async (ownerId: string, query: AnalyticsQuery, now = ne
 };
 
 export const getFacilities = async (ownerId: string, query: AnalyticsQuery, now = new Date()) => {
-  const [facilities, activeSessions, completedWindow] = await Promise.all([
+  const [facilities, activeSessionCounts, completedWindow] = await Promise.all([
     analyticsRepository.findOwnerFacilities(ownerId),
-    analyticsRepository.findOwnerSessions(ownerId, { status: 'ACTIVE' }),
-    getCompletedWindow(ownerId, query.days, now),
+    analyticsRepository.findOwnerActiveSessionCounts(ownerId),
+    getCompletedAggregateWindow(ownerId, query.days, now),
   ]);
   const activeByParking = new Map<string, number>();
-  for (const session of activeSessions) {
-    activeByParking.set(session.parkingId, (activeByParking.get(session.parkingId) ?? 0) + 1);
+  for (const { parkingId, activeSessions } of activeSessionCounts) {
+    activeByParking.set(parkingId, activeSessions);
+  }
+  const completedByParking = new Map<
+    string,
+    analyticsRepository.OwnerCompletedSessionAggregate[]
+  >();
+  for (const aggregate of completedWindow.aggregates) {
+    const aggregates = completedByParking.get(aggregate.parkingId) ?? [];
+    aggregates.push(aggregate);
+    completedByParking.set(aggregate.parkingId, aggregates);
   }
   return {
     days: query.days,
@@ -146,7 +185,7 @@ export const getFacilities = async (ownerId: string, query: AnalyticsQuery, now 
       toFacilityAnalytics(
         facility,
         activeByParking.get(facility.id) ?? 0,
-        completedWindow.sessions.filter((session) => session.parkingId === facility.id),
+        completedByParking.get(facility.id) ?? [],
       ),
     ),
   };

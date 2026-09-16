@@ -28,7 +28,14 @@ export function DemoResetControl() {
       setOpen(false);
       void navigate('/app', { replace: true });
     } catch (reason) {
-      setError(localizeApiError(reason, t, 'demo.restoreError'));
+      setError(
+        localizeApiError(reason, t, 'demo.restoreError', {
+          500: 'demo.restoreError',
+          502: 'demo.restoreError',
+          503: 'demo.restoreError',
+          504: 'demo.restoreError',
+        }),
+      );
     }
   };
 

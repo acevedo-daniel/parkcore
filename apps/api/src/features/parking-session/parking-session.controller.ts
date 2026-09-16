@@ -42,6 +42,12 @@ export const listActive = async (req: Request, res: Response): Promise<void> => 
   res.json(sessions);
 };
 
+export const listActiveByOwner = async (req: Request, res: Response): Promise<void> => {
+  const userId = getAuthenticatedUserId(req);
+  const sessions = await parkingSessionService.getActiveSessionsByOwner(userId);
+  res.json(sessions);
+};
+
 export const findAll = async (req: Request, res: Response): Promise<void> => {
   const userId = getAuthenticatedUserId(req);
   const { parkingId } = parkingParamsSchema.parse(req.params);

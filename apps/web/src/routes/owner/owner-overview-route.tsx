@@ -1,4 +1,4 @@
-import { useQueries } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { ArrowUpRight, BarChart3, Plus, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
@@ -15,7 +15,7 @@ import {
 } from '../../features/analytics/use-analytics.js';
 import { OwnerParkingPanel } from '../../features/parking/owner-parking-panel.js';
 import { useOwnedParkingOperations } from '../../features/parking/use-owned-parking-operations.js';
-import { getActiveSessions } from '../../lib/api/owner-api.js';
+import { getActiveSessionsForOwner } from '../../lib/api/owner-api.js';
 import { cn } from '../../lib/cn.js';
 import { formatMoney, formatNumber } from '../../lib/format.js';
 import type { Locale } from '../../lib/localization.js';
@@ -42,12 +42,11 @@ export function OwnerOverviewRoute() {
   const summaryQuery = useAnalyticsSummary();
   const revenueQuery = useAnalyticsRevenue(days);
   const volumeQuery = useAnalyticsVolume(days);
-  const activeSessionQueries = useQueries({
-    queries: parkings.map(({ parking }) => ({
-      queryFn: () => getActiveSessions(parking.id),
-      queryKey: ['active-sessions', parking.id],
-      staleTime: 30_000,
-    })),
+  const activeSessionsQuery = useQuery({
+    enabled: parkings.length > 0,
+    queryFn: getActiveSessionsForOwner,
+    queryKey: ['active-sessions', 'owner'],
+    staleTime: 30_000,
   });
 
   const isRefreshing =
@@ -55,7 +54,7 @@ export function OwnerOverviewRoute() {
     summaryQuery.isFetching ||
     revenueQuery.isFetching ||
     volumeQuery.isFetching ||
-    activeSessionQueries.some((query) => query.isFetching);
+    activeSessionsQuery.isFetching;
   const summary = summaryQuery.data;
   const revenueSeries = revenueQuery.data?.data ?? [];
   const volumeSeries = volumeQuery.data?.data ?? [];
@@ -92,8 +91,14 @@ export function OwnerOverviewRoute() {
   const totalStays = chartPoints.reduce((total, point) => total + point.completedSessions, 0);
   const activityIsLoading = revenueQuery.isPending || volumeQuery.isPending;
   const activityHasError = revenueQuery.isError || volumeQuery.isError;
-  const attentionQueryHasError = activeSessionQueries.some((query) => query.isError);
+  const attentionQueryHasError = activeSessionsQuery.isError;
   const facilitiesSnapshotIsStale = parkingsQuery.isError && Boolean(parkingsQuery.data);
+  const activeSessionsByParking = new Map<string, NonNullable<typeof activeSessionsQuery.data>>();
+  for (const session of activeSessionsQuery.data ?? []) {
+    const sessions = activeSessionsByParking.get(session.parkingId) ?? [];
+    sessions.push(session);
+    activeSessionsByParking.set(session.parkingId, sessions);
+  }
 
   const fallbackNetwork = parkings.reduce(
     (totals, { parking }) => ({
@@ -123,8 +128,8 @@ export function OwnerOverviewRoute() {
       : t('common.notAvailable');
 
   const attentionItems = deriveOwnerAttentionItems(
-    parkings.map(({ parking }, index) => ({
-      activeSessions: activeSessionQueries[index]?.data ?? [],
+    parkings.map(({ parking }) => ({
+      activeSessions: activeSessionsByParking.get(parking.id) ?? [],
       parking,
     })),
     new Date(),
@@ -147,9 +152,7 @@ export function OwnerOverviewRoute() {
     void summaryQuery.refetch();
     void revenueQuery.refetch();
     void volumeQuery.refetch();
-    activeSessionQueries.forEach((query) => {
-      void query.refetch();
-    });
+    void activeSessionsQuery.refetch();
   };
   const retrySummary = () => {
     void summaryQuery.refetch();
@@ -159,9 +162,7 @@ export function OwnerOverviewRoute() {
     if (volumeQuery.isError) void volumeQuery.refetch();
   };
   const retryAttention = () => {
-    activeSessionQueries.forEach((query) => {
-      if (query.isError) void query.refetch();
-    });
+    if (activeSessionsQuery.isError) void activeSessionsQuery.refetch();
   };
 
   if (parkingsQuery.isLoading) return <OwnerOverviewSkeleton />;

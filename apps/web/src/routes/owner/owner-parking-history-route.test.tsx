@@ -168,7 +168,7 @@ describe('parking session history pagination', () => {
     expect(await screen.findByText('Filtered summary')).toBeTruthy();
     expect(screen.getByText('America/Argentina/Buenos_Aires')).toBeTruthy();
     expect(screen.getByText(/ARS.*25\.00/)).toBeTruthy();
-    expect(screen.getByText(/\$15\.50/)).toBeTruthy();
+    expect(screen.getByText(/\$15\.50/).classList.contains('whitespace-nowrap')).toBe(true);
     expect(screen.getByText('No charge')).toBeTruthy();
   });
 

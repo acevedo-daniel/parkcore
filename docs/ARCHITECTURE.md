@@ -110,7 +110,7 @@ The web localization boundary lives in `apps/web/src/lib/localization.ts` and th
 
 Shared web controls and feedback live under `apps/web/src/components/ui/`, while reusable operational presentation primitives live under `apps/web/src/components/domain/`. Native inputs, textareas, selects, checkboxes, and switches remain the browser interaction source of truth, while the shared `Field` wrapper owns label, help, and error association. Radix owns dialog, sheet, and toast focus containment and dismissal behavior. These controls and domain primitives consume semantic theme tokens and typed shared labels so route components compose the interaction layer without recreating its accessibility or theme contract.
 
-The owner overview composes the owned parking snapshot with active-session reads for long-running attention context and the owner analytics summary, revenue, and volume queries. It keeps the network and facility briefing available when an analytics query is degraded, uses owner-timezone period boundaries supplied by the API, and keeps revenue totals separated by currency.
+The owner overview composes the owned parking snapshot with one owner-scoped active-session context read for long-running attention and the owner analytics summary, revenue, and volume queries. The facility snapshot and public discovery use active-session counts rather than transferring session identifiers when detailed session data is not needed. The overview keeps the network and facility briefing available when an analytics query is degraded, uses owner-timezone period boundaries supplied by the API, and keeps revenue totals separated by currency.
 
 Access tokens carry the authenticated identity kind. Credential login issues tokens only for `OWNER` identities. `DEMO` tokens are bounded by the demo identity expiration, while `SHOWCASE` tokens may read identity data but are rejected from parking mutation and operation paths.
 
@@ -133,6 +133,26 @@ The Vercel build receives the public `VITE_API_URL`. Render receives backend run
 
 Provider-specific SDKs are not part of the application architecture; hosting configuration stays at the deployment boundary.
 
+### Production release boundary
+
+The API parses its runtime environment before binding its listener. Production
+requires a database connection, a JWT signing secret of at least 32
+characters, and exact HTTP(S) CORS origins. Logging and API documentation
+settings are explicit deployment values. The `/healthz` endpoint is a cheap
+process-liveness check and does not query PostgreSQL; the root response is the
+startup service identity check.
+
+CI validates this boundary with a fresh PostgreSQL service and committed
+forward migrations through `prisma migrate deploy`. It starts the compiled
+API, runs the health and root smoke, and then verifies bounded demo cleanup on
+the disposable database. The cleanup command targets only expired DEMO users,
+while OWNER and SHOWCASE identities remain outside its deletion predicate.
+
+The web build receives only public `VITE_*` configuration. Its artifact check
+rejects server runtime names, configured private values, and PostgreSQL
+connection strings, so database credentials, JWT secrets, CORS configuration,
+and seed credentials do not cross into the browser boundary.
+
 ## Invariants
 
 - **API authority:** browser state is never trusted as authorization or domain truth.
@@ -140,10 +160,12 @@ Provider-specific SDKs are not part of the application architecture; hosting con
 - **Credential boundary:** only `OWNER` identities have credential login; `DEMO` and `SHOWCASE` responses never expose credentials.
 - **Contract boundary:** the web application consumes the API through the generated client.
 - **Persistence authority:** PostgreSQL constraints and transactions reinforce critical session invariants.
+- **Runtime boundary:** production configuration is validated before the API accepts traffic, and `/healthz` remains a liveness check rather than a database readiness query.
 - **Pricing history:** a session owns the pricing snapshot used to calculate its completed total.
 - **Terminal sessions:** completed or cancelled sessions do not transition again.
 - **Vehicle identity:** normalized plates are unique per parking, while visit-specific contact data belongs only to its session.
 - **Timezone scope:** network analytics use `User.timezone`; parking history, displayed timestamps, and CSV values use `Parking.timezone`.
+- **Maintenance safety:** cleanup is bounded and deletes only expired `DEMO` users; `OWNER` and `SHOWCASE` data are not cleanup targets.
 
 ## Trade-offs
 

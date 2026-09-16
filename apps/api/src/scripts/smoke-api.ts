@@ -64,6 +64,13 @@ async function checkHealth(): Promise<void> {
   assert(result.json?.status === 'ok', 'GET /healthz expected body.status === "ok"');
 }
 
+async function checkRoot(): Promise<void> {
+  const result = await requestJson('/');
+  assert(result.status === 200, `GET / expected 200, got ${String(result.status)}`);
+  assert(result.json?.status === 'ok', 'GET / expected body.status === "ok"');
+  assert(result.json.service === 'parkcore-api', 'GET / returned an unexpected service name');
+}
+
 async function checkDocs(): Promise<void> {
   const docsPaths = ['/openapi.json', '/api-docs/openapi.json'];
   let result: HttpResult | null = null;
@@ -121,6 +128,7 @@ async function checkAuthFlow(): Promise<void> {
 async function main(): Promise<void> {
   console.log(`Smoke check target: ${baseUrl}`);
   await checkHealth();
+  await checkRoot();
 
   if (withDocs) {
     await checkDocs();
@@ -130,7 +138,7 @@ async function main(): Promise<void> {
     await checkAuthFlow();
   }
 
-  const checks = ['health', withDocs ? 'docs' : null, withAuth ? 'auth' : null]
+  const checks = ['health', 'root', withDocs ? 'docs' : null, withAuth ? 'auth' : null]
     .filter((check): check is string => check !== null)
     .join(' + ');
   console.log(`Smoke check passed (${checks}). Base URL: ${baseUrl}`);

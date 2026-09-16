@@ -13,6 +13,11 @@ function StatusProbe() {
   return <span data-testid="auth-status">{status}</span>;
 }
 
+function SessionErrorProbe() {
+  const { sessionErrorKey } = useAuth();
+  return <span data-testid="session-error">{sessionErrorKey ?? ''}</span>;
+}
+
 function renderAuth(queryClient: QueryClient, children: ReactNode = <StatusProbe />) {
   return render(
     <QueryClientProvider client={queryClient}>
@@ -39,5 +44,18 @@ describe('AuthProvider', () => {
     expect(screen.getByTestId('auth-status').textContent).toBe('unauthenticated');
     expect(window.localStorage.getItem('parkcore.access-token')).toBeNull();
     expect(queryClient.getQueryData(['demo', 'parking'])).toBeUndefined();
+  });
+
+  it('keeps the demo expiry reason for the localized login recovery', () => {
+    const queryClient = new QueryClient();
+    setAccessToken('expired-demo-token');
+    renderAuth(queryClient, <SessionErrorProbe />);
+
+    act(() => {
+      window.dispatchEvent(new CustomEvent(authExpiredEvent, { detail: { code: 'DEMO_EXPIRED' } }));
+    });
+
+    expect(screen.getByTestId('session-error').textContent).toBe('api.demoExpired');
+    expect(window.localStorage.getItem('parkcore.access-token')).toBeNull();
   });
 });

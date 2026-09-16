@@ -185,6 +185,31 @@ describe('owner workflow integration', () => {
         (session) => session.id === checkedIn.id && session.vehicle.id === checkedIn.vehicle.id,
       ),
     ).toBe(true);
+
+    const ownerActiveContextResponse = await request(app)
+      .get('/sessions/active')
+      .set('Authorization', authorization);
+    expect(ownerActiveContextResponse.status).toBe(200);
+    expect(ownerActiveContextResponse.body).toEqual(
+      expect.arrayContaining([
+        {
+          id: checkedIn.id,
+          parkingId: parking.id,
+          startTime: checkedIn.startTime,
+          vehicle: { plate: 'AB123CD' },
+        },
+        {
+          id: secondCheckedIn.id,
+          parkingId: parking.id,
+          startTime: secondCheckedIn.startTime,
+          vehicle: { plate: 'XY456ZZ' },
+        },
+      ]),
+    );
+    expect(ownerActiveContextResponse.body).toHaveLength(2);
+    expect(JSON.stringify(ownerActiveContextResponse.body)).not.toMatch(
+      /customerName|customerPhone|notes|hourlyRateCents|totalAmountCents/,
+    );
     await expect(
       prisma.parkingSession.count({ where: { parkingId: parking.id, status: 'ACTIVE' } }),
     ).resolves.toBe(2);

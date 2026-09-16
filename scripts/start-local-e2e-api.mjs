@@ -7,7 +7,10 @@ import { fileURLToPath } from 'node:url';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, '..');
-const logDirectory = path.join(repositoryRoot, 'apps', 'web', 'test-results', 'local-real-stack');
+const configuredLogDirectory = process.env.PARKCORE_E2E_LOG_DIRECTORY?.trim();
+const logDirectory = configuredLogDirectory
+  ? path.resolve(repositoryRoot, configuredLogDirectory)
+  : path.join(repositoryRoot, 'apps', 'web', 'test-results', 'local-real-stack');
 const logPath = path.join(logDirectory, 'api.log');
 const pnpmCommand = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
 

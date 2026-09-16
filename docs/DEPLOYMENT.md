@@ -33,6 +33,12 @@ source
 
 GitHub Actions verifies the source but does not deploy it directly. Render is configured to auto-deploy `main` after required checks pass.
 
+The `Production` CI job also exercises the release boundary on a fresh,
+job-scoped PostgreSQL service. It installs from the frozen lockfile, audits
+production dependencies, applies forward migrations, builds the deployable
+workspaces, checks the compiled artifacts, starts the compiled API, and runs
+the startup smoke before the service is discarded.
+
 Before a release, run:
 
 ```bash
@@ -93,16 +99,17 @@ The Vercel configuration also applies browser protection headers, including a Co
 
 ### Render / API
 
-| Variable          | Requirement                                     |
-| ----------------- | ----------------------------------------------- |
-| `NODE_ENV`        | `production`                                    |
-| `DATABASE_URL`    | Neon PostgreSQL connection string; secret       |
-| `JWT_SECRET`      | Unique signing secret of at least 32 characters |
-| `CORS_ORIGINS`    | Exact allowed Vercel browser origin(s)          |
-| `PORT`            | Supplied by Render                              |
-| `LOG_LEVEL`       | Non-secret runtime setting                      |
-| `LOG_PRETTY`      | Disabled in the current production blueprint    |
-| `ENABLE_API_DOCS` | Disabled in the current production blueprint    |
+| Variable                  | Requirement                                      |
+| ------------------------- | ------------------------------------------------ |
+| `NODE_ENV`                | `production`                                     |
+| `DATABASE_URL`            | Neon PostgreSQL connection string; secret        |
+| `JWT_SECRET`              | Unique signing secret of at least 32 characters  |
+| `CORS_ORIGINS`            | Exact allowed Vercel browser origin(s)           |
+| `PORT`                    | Supplied by Render                               |
+| `LOG_LEVEL`               | Non-secret runtime setting                       |
+| `LOG_PRETTY`              | Disabled in the current production blueprint     |
+| `ENABLE_API_DOCS`         | Disabled in the current production blueprint     |
+| `DEMO_CLEANUP_BATCH_SIZE` | Optional bounded cleanup batch; defaults to `10` |
 
 `render.yaml` marks `DATABASE_URL`, `JWT_SECRET`, and `CORS_ORIGINS` as values supplied outside Git.
 
@@ -146,6 +153,26 @@ Production rules:
 
 The current Render build command applies forward migrations before starting the new API process.
 
+### Demo cleanup
+
+Expired DEMO sandboxes can be removed by an external scheduler or by a
+manual operator invocation:
+
+```bash
+pnpm --filter @parkcore/api demo:cleanup
+```
+
+Each invocation removes at most `DEMO_CLEANUP_BATCH_SIZE` expired DEMO
+owners, ordered from oldest expiry, together with their dependent parking
+data. Repeat the command until it reports zero removals when a backlog must
+be drained. The command never targets `OWNER` or `SHOWCASE` users and does
+not seed, reset, or rewrite normal production data.
+
+CI verifies this command on its disposable database by creating expired and
+unexpired DEMO fixtures plus OWNER and SHOWCASE sentinels, then running the
+real command with a batch size of one. The check is intentionally not a
+production seed or a deployment step.
+
 ## Validation
 
 ### API liveness
@@ -164,7 +191,10 @@ The endpoint returns a process-liveness response and is the health check used by
 SMOKE_BASE_URL=https://parkcore-api.onrender.com pnpm --filter @parkcore/api smoke:remote
 ```
 
-The default remote smoke check is intentionally safe and focuses on liveness. Optional documentation/authentication checks should only be enabled when their side effects and environment are appropriate.
+The default remote smoke check is intentionally safe and verifies API
+liveness plus the root service response. Optional documentation/authentication
+checks should only be enabled when their side effects and environment are
+appropriate.
 
 ### Web / full-stack smoke
 
@@ -187,7 +217,9 @@ pnpm --filter @parkcore/web test:e2e:browser-qa
 - Vercel serves the static frontend; it does not proxy the ParkCore API.
 - Render is the only application runtime that receives database credentials.
 - Neon is not accessed directly by the browser.
-- CI verifies source quality and contract consistency; platform services perform the actual deployment.
+- CI verifies source quality, contract consistency, fresh-database migration,
+  compiled startup, and the browser secret boundary; platform services perform
+  the actual deployment.
 - Production API documentation is disabled by the current Render configuration.
 
 ## Related documentation

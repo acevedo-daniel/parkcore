@@ -1,11 +1,12 @@
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   CANONICAL_ASSET_DIRECTORY,
   CANONICAL_REFERENCE_TIME,
   CANONICAL_SCENARIO_EXPECTATIONS,
   buildCanonicalScenario,
+  createCanonicalScenario,
 } from './canonical-scenario.js';
 
 const referenceTime = new Date(CANONICAL_REFERENCE_TIME);
@@ -116,5 +117,24 @@ describe('canonical scenario generator', () => {
       ).toBe(true);
       expect(facility.image).not.toMatch(/^https?:\/\//);
     }
+  });
+
+  it('creates a new scenario with bulk inserts without a replacement delete', async () => {
+    const client = {
+      user: { findUnique: vi.fn().mockResolvedValue({ kind: 'DEMO' }) },
+      parking: { createMany: vi.fn(), deleteMany: vi.fn() },
+      vehicle: { createMany: vi.fn(), deleteMany: vi.fn() },
+      parkingSession: { createMany: vi.fn(), deleteMany: vi.fn() },
+    };
+
+    const scenario = await createCanonicalScenario(client as never, 'owner-1', referenceTime);
+
+    expect(scenario.facilities).toHaveLength(CANONICAL_SCENARIO_EXPECTATIONS.facilities);
+    expect(client.parking.createMany).toHaveBeenCalledWith({ data: scenario.facilities });
+    expect(client.vehicle.createMany).toHaveBeenCalledWith({ data: scenario.vehicles });
+    expect(client.parkingSession.createMany).toHaveBeenCalledWith({ data: scenario.sessions });
+    expect(client.parking.deleteMany).not.toHaveBeenCalled();
+    expect(client.vehicle.deleteMany).not.toHaveBeenCalled();
+    expect(client.parkingSession.deleteMany).not.toHaveBeenCalled();
   });
 });

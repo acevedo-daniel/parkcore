@@ -1,10 +1,10 @@
 import type { AttentionState } from '../../components/domain/attention-item.js';
-import type { Parking, ParkingSession } from '../../lib/api/owner-api.js';
+import type { OwnerActiveSession, Parking } from '../../lib/api/owner-api.js';
 
 export const LONG_RUNNING_STAY_MS = 8 * 60 * 60 * 1000;
 
 export interface OwnerAttentionSource {
-  activeSessions: readonly Pick<ParkingSession, 'id' | 'startTime' | 'vehicle'>[];
+  activeSessions: readonly OwnerActiveSession[];
   parking: Pick<Parking, 'availabilityState' | 'id' | 'title'>;
 }
 

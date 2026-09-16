@@ -25,6 +25,7 @@ import {
   cancelIfActive,
   completeIfActive,
   createActiveIfAvailable,
+  findActiveByOwner,
   findActiveByParking,
   findByParking,
 } from './parking-session.repository.js';
@@ -71,6 +72,26 @@ describe('parking session repository', () => {
         return await callback(transactionClient);
       },
     );
+  });
+
+  it('loads minimal active session context once for an owner', async () => {
+    const startTime = new Date('2026-09-11T08:00:00.000Z');
+    const sessions = [
+      { id: 'session-1', startTime, parkingId: 'parking-1', vehicle: { plate: 'AB123CD' } },
+    ];
+    mockPrisma.parkingSession.findMany.mockResolvedValue(sessions);
+
+    await expect(findActiveByOwner('owner-1')).resolves.toEqual(sessions);
+    expect(mockPrisma.parkingSession.findMany).toHaveBeenCalledWith({
+      where: { parking: { ownerId: 'owner-1' }, status: 'ACTIVE' },
+      orderBy: [{ startTime: 'asc' }, { id: 'asc' }],
+      select: {
+        id: true,
+        startTime: true,
+        parkingId: true,
+        vehicle: { select: { plate: true } },
+      },
+    });
   });
 
   it('keeps parking eligibility, vehicle identity, and session creation in one serializable transaction', async () => {

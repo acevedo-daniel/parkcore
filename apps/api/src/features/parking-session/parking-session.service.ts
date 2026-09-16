@@ -12,11 +12,16 @@ import type {
   ParkingSessionActiveQuery,
   ParkingSessionQuery,
   ParkingSessionResponse,
+  OwnerActiveSessionResponse,
   VehicleLookupQuery,
   VehicleLookupResponse,
   VisitData,
 } from './parking-session.schema.js';
-import { toParkingSessionResponse, toVehicleSummary } from './parking-session.schema.js';
+import {
+  toOwnerActiveSessionResponse,
+  toParkingSessionResponse,
+  toVehicleSummary,
+} from './parking-session.schema.js';
 
 const isSerializationConflict = (error: unknown): boolean => {
   if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034') {
@@ -152,6 +157,13 @@ export const getActiveSessionsByParking = async (
     throw new ForbiddenError("You don't have access to this parking");
   const sessions = await parkingSessionRepository.findActiveByParking(parkingId, query);
   return sessions.map(toParkingSessionResponse);
+};
+
+export const getActiveSessionsByOwner = async (
+  ownerId: string,
+): Promise<OwnerActiveSessionResponse[]> => {
+  const sessions = await parkingSessionRepository.findActiveByOwner(ownerId);
+  return sessions.map(toOwnerActiveSessionResponse);
 };
 
 export const getSessionsByParking = async (

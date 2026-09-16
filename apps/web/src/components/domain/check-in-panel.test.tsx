@@ -198,7 +198,7 @@ describe('CheckInPanel', () => {
     expect(screen.getByRole('button', { name: 'Iniciar estadía' })).toBeTruthy();
     await user.click(screen.getByRole('button', { name: 'Iniciar estadía' }));
 
-    expect(await screen.findByText('Ingresá una patente.')).toBeTruthy();
+    expect(await screen.findByText('Ingresa una patente.')).toBeTruthy();
     expect(onSubmit).not.toHaveBeenCalled();
   });
 });

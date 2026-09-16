@@ -11,7 +11,7 @@ import {
   type User,
 } from '../../lib/api/auth-api.js';
 import { ApiError } from '../../lib/api/api-error.js';
-import { authExpiredEvent } from '../../lib/api/api-client.js';
+import { authExpiredEvent, type AuthExpiredEventDetail } from '../../lib/api/api-client.js';
 import { clearAccessToken, getAccessToken, setAccessToken } from '../../lib/auth/auth-storage.js';
 import type { MessageKey } from '../../lib/localization.js';
 import { AuthContext, type AuthContextValue, type AuthStatus } from './auth-context.js';
@@ -23,14 +23,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
   const [user, setUser] = useState<User>();
   const [errorKey, setErrorKey] = useState<MessageKey>();
+  const [sessionErrorKey, setSessionErrorKey] = useState<MessageKey>();
 
-  const clearSession = useCallback(() => {
-    clearAccessToken();
-    queryClient.clear();
-    setUser(undefined);
-    setErrorKey(undefined);
-    setStatus('unauthenticated');
-  }, [queryClient]);
+  const clearSession = useCallback(
+    (nextSessionErrorKey?: MessageKey) => {
+      clearAccessToken();
+      queryClient.clear();
+      setUser(undefined);
+      setErrorKey(undefined);
+      setSessionErrorKey(nextSessionErrorKey);
+      setStatus('unauthenticated');
+    },
+    [queryClient],
+  );
 
   const restore = useCallback(async () => {
     if (!getAccessToken()) {
@@ -46,10 +51,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setStatus('authenticated');
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
-        clearSession();
+        clearSession(error.code === 'DEMO_EXPIRED' ? 'api.demoExpired' : 'api.unauthorized');
         return;
       }
       setUser(undefined);
+      setSessionErrorKey(undefined);
       setErrorKey('auth.restoreError');
       setStatus('unavailable');
     }
@@ -66,9 +72,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [restore]);
 
   useEffect(() => {
-    window.addEventListener(authExpiredEvent, clearSession);
+    const handleAuthExpired = (event: Event) => {
+      const detail =
+        typeof CustomEvent !== 'undefined' && event instanceof CustomEvent
+          ? (event.detail as AuthExpiredEventDetail | undefined)
+          : undefined;
+      clearSession(detail?.code === 'DEMO_EXPIRED' ? 'api.demoExpired' : 'api.unauthorized');
+    };
+
+    window.addEventListener(authExpiredEvent, handleAuthExpired);
     return () => {
-      window.removeEventListener(authExpiredEvent, clearSession);
+      window.removeEventListener(authExpiredEvent, handleAuthExpired);
     };
   }, [clearSession]);
 
@@ -76,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAccessToken(response.accessToken);
     setUser(response.user);
     setErrorKey(undefined);
+    setSessionErrorKey(undefined);
     setStatus('authenticated');
   }, []);
 
@@ -109,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout: clearSession,
       register: registerUser,
       restore,
+      sessionErrorKey,
       status,
       updateUser,
       user,
@@ -120,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loginUser,
       registerUser,
       restore,
+      sessionErrorKey,
       status,
       updateUser,
       user,

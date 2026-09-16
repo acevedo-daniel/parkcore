@@ -80,7 +80,7 @@ export function OwnerLayout() {
       <a className="skip-link" href="#owner-main">
         {t('nav.skipMain')}
       </a>
-      <aside className="owner-sidebar hidden shrink-0 border-r border-border-strong bg-surface p-6 wide:sticky wide:top-0 wide:flex wide:h-screen wide:w-64 wide:flex-col wide:justify-between">
+      <aside className="owner-sidebar hidden shrink-0 border-r border-border-strong bg-surface p-6 wide:sticky wide:top-0 wide:flex wide:h-screen wide:w-[var(--owner-sidebar-width)] wide:flex-col wide:justify-between">
         <div className="flex flex-col gap-6">
           <div className="owner-brand-block border-b border-border-strong pb-5">
             <Link
@@ -175,7 +175,7 @@ export function OwnerLayout() {
         </div>
       ) : null}
       <main
-        className="owner-main mx-auto w-full max-w-7xl flex-1 p-5 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] sm:px-7 sm:pt-7 sm:pb-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:px-10 lg:pt-10 lg:pb-[calc(6rem+env(safe-area-inset-bottom,0px))] wide:pb-10"
+        className="owner-main mx-auto w-full max-w-[var(--owner-max-width)] flex-1 p-5 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] sm:px-7 sm:pt-7 sm:pb-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:px-10 lg:pt-10 lg:pb-[calc(6rem+env(safe-area-inset-bottom,0px))] wide:pb-10"
         id="owner-main"
         tabIndex={-1}
       >

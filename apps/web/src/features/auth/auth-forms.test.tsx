@@ -220,7 +220,7 @@ describe('authentication forms', () => {
 
     expect(screen.getByLabelText('Contraseña')).toBeTruthy();
     await user.click(screen.getByRole('button', { name: 'Ingresar' }));
-    expect(await screen.findByText('Ingresá un email válido.')).toBeTruthy();
+    expect(await screen.findByText('Ingresa un email válido.')).toBeTruthy();
 
     await user.type(screen.getByLabelText('Email'), 'owner@example.com');
     await user.type(screen.getByLabelText('Contraseña'), 'wrong-password');
