@@ -254,7 +254,7 @@ export const Combobox = forwardRef<HTMLInputElement, ComboboxProps>(function Com
       </span>
       {isOpen ? (
         <div
-          className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-[var(--radius-md)] border border-border bg-surface-raised p-1 text-sm shadow-overlay"
+          className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-[var(--radius-md)] border border-border bg-surface-raised p-1 text-sm shadow-popover"
           id={listboxId}
           role="listbox"
         >

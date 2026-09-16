@@ -256,7 +256,7 @@ export function OwnerParkingHistoryRoute() {
           <h2 className="type-label text-foreground-muted" id="history-summary-title">
             {t('parkingHistory.summary')}
           </h2>
-          <dl className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+          <dl className="mt-5 grid gap-5 sm:grid-cols-2 wide:grid-cols-[repeat(4,minmax(0,1fr))_minmax(15rem,auto)]">
             <HistoryMetric
               label={t('parkingHistory.total')}
               value={formatNumber(aggregate.totalSessions, locale)}
@@ -279,7 +279,7 @@ export function OwnerParkingHistoryRoute() {
                 aggregate.revenueByCurrency.length > 0 ? (
                   <span className="flex min-w-0 flex-wrap gap-x-3 gap-y-1">
                     {aggregate.revenueByCurrency.map(({ currency, revenueCents }) => (
-                      <span className="min-w-0 break-words" key={currency}>
+                      <span className="shrink-0 whitespace-nowrap" key={currency}>
                         {formatMoney(revenueCents, currency, locale)}
                       </span>
                     ))}
