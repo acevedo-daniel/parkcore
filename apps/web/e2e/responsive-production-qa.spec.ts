@@ -186,7 +186,9 @@ test('keeps the deployed public and owner surfaces usable at production viewport
     await page.getByLabel('Latitude').fill('-34.61');
     await page.getByLabel('Longitude').fill('-58.38');
     await page.getByLabel('Capacity').fill('3');
+    await page.getByLabel('Currency').selectOption('USD');
     await page.getByLabel('Hourly rate (USD)').fill('12.34');
+    await page.getByText('Visible in directory', { exact: true }).click();
     await page.getByRole('button', { name: 'Create parking' }).click();
     await expect(page).toHaveURL(/\/app\/parkings\/[0-9a-f-]{36}$/i);
     const parkingMatch = /\/app\/parkings\/([0-9a-f-]{36})$/i.exec(page.url());
@@ -308,7 +310,7 @@ test('keeps the deployed public and owner surfaces usable at production viewport
         `${prefix} create capacity field`,
       );
       await expectElementWithinViewport(
-        page.getByLabel('Hourly rate (USD)'),
+        page.getByLabel(/Hourly rate \((?:ARS|USD)\)/),
         `${prefix} create rate field`,
       );
 

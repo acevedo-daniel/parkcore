@@ -341,7 +341,10 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
           path: '/register?returnTo=%2Fapp%2Fparkings',
           ready: async () => {
             await expect(page.getByRole('heading', { name: 'Create your account.' })).toBeVisible();
-            await expect(page.getByLabel('First name')).toHaveAttribute('autocomplete', 'name');
+            await expect(page.getByLabel('First name')).toHaveAttribute(
+              'autocomplete',
+              'given-name',
+            );
             await expect(page.getByLabel('Last name')).toHaveAttribute(
               'autocomplete',
               'family-name',
