@@ -86,6 +86,19 @@ The production preview also verifies that canonical public images load successfu
 
 The artifact check rejects server-only runtime configuration in `apps/web/dist`, while allowing the public `VITE_API_URL`. It also prints route-chunk and canonical-asset inventories for review. Failed runs retain diagnostics under `apps/web/test-results/production-preview/` and `apps/web/playwright-report/production-preview/`.
 
+### Reliability and recovery matrix
+
+The hardening matrix treats failure recovery as a release boundary. It runs representative compact and wide viewports in both supported locales and themes, using contract-shaped API failures rather than fixture fallback.
+
+| Failure                                         | Required recovery                                                                                                                                                     |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API unavailable                                 | Show localized feedback, keep the route context, and offer an explicit retry without substituting data.                                                               |
+| Expired owner session                           | Clear the token and query cache, then return to sign-in with a safe internal `returnTo` path.                                                                         |
+| Expired or deleted DEMO sandbox                 | Show the localized expiry message at session end and offer a fresh demo entry.                                                                                        |
+| `409` business conflict                         | Preserve the relevant form or operation context, translate the stable error code, and do not retry automatically.                                                     |
+| `429` auth or DEMO creation limit               | Preserve entered values, show localized wait-and-retry feedback, and keep the rate-limit buckets independent. API tests retain `RateLimit` and `Retry-After` headers. |
+| Partial analytics, image, or DEMO reset failure | Keep unrelated owner operations usable, show a recoverable localized state, and never expose raw backend text.                                                        |
+
 ## Critical behavior
 
 The test strategy protects the rules that define the parking workflow:

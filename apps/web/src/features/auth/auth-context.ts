@@ -12,6 +12,7 @@ export interface AuthContextValue {
   logout: () => void;
   register: (input: RegisterRequest) => Promise<void>;
   restore: () => Promise<void>;
+  sessionErrorKey?: MessageKey;
   status: AuthStatus;
   updateUser: (user: User) => void;
   user?: User;

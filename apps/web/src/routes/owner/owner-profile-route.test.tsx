@@ -191,7 +191,7 @@ describe('DEMO profile controls', () => {
 
   it('keeps reset errors in the confirmation dialog', async () => {
     const user = userEvent.setup();
-    demoApi.resetDemo.mockRejectedValue(new ApiError('reset failed', 400));
+    demoApi.resetDemo.mockRejectedValue(new ApiError('reset failed', 503));
     renderProfile(userFixture({ email: null, kind: 'DEMO' }));
 
     await user.click(screen.getByRole('button', { name: 'Restore demo data' }));

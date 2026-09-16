@@ -4,6 +4,10 @@ import { getAccessToken } from '../auth/auth-storage.js';
 
 export const authExpiredEvent = 'parkcore:auth-expired';
 
+export interface AuthExpiredEventDetail {
+  code?: string;
+}
+
 export const resolveApiBaseUrl = (
   configuredUrl: string | undefined,
   isProduction: boolean,
@@ -31,10 +35,25 @@ export const authenticatedApi = createApiClient({
 });
 
 authenticatedApi.use({
-  onResponse({ response }) {
-    if (response.status === 401 && typeof window !== 'undefined') {
-      window.dispatchEvent(new Event(authExpiredEvent));
+  async onResponse({ response }) {
+    if (response.status !== 401 || typeof window === 'undefined') return response;
+
+    let code: string | undefined;
+    try {
+      const body: unknown = await response.clone().json();
+      if (typeof body === 'object' && body !== null && 'code' in body) {
+        const candidate = body.code;
+        if (typeof candidate === 'string') code = candidate;
+      }
+    } catch {
+      // The response body is optional for auth expiry recovery.
     }
+
+    window.dispatchEvent(
+      new CustomEvent<AuthExpiredEventDetail>(authExpiredEvent, {
+        detail: code ? { code } : undefined,
+      }),
+    );
     return response;
   },
 });

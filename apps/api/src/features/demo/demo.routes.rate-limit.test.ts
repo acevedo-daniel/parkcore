@@ -52,6 +52,8 @@ describe('demo reset rate limit', () => {
     expect(first.status).toBe(200);
     expect(second.status).toBe(429);
     expect(second.body).toEqual({ error: true, message: 'Too many requests, try again later' });
+    expect(second.headers.ratelimit).toBeTypeOf('string');
+    expect(second.headers['retry-after']).toBeTypeOf('string');
     expect(resetControllerMock).toHaveBeenCalledOnce();
   });
 
@@ -65,6 +67,8 @@ describe('demo reset rate limit', () => {
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);
     expect(third.status).toBe(429);
+    expect(third.headers.ratelimit).toBeTypeOf('string');
+    expect(third.headers['retry-after']).toBeTypeOf('string');
     expect(loginControllerMock).toHaveBeenCalledTimes(2);
   });
 });
