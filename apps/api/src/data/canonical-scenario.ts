@@ -6,6 +6,15 @@ export const CANONICAL_TIMEZONE = 'America/Argentina/Buenos_Aires';
 export const CANONICAL_CURRENCY = 'ARS' as const;
 export const CANONICAL_ASSET_DIRECTORY = '/assets/canonical';
 
+const canonicalAssetExtensions: Readonly<Partial<Record<string, 'svg' | 'webp'>>> = {
+  'central-corrientes': 'webp',
+  'palermo-plaza': 'webp',
+  'recoleta-patio': 'webp',
+  'puerto-madero-dock': 'webp',
+  'belgrano-norte': 'webp',
+  'san-telmo-mercado': 'svg',
+};
+
 export const CANONICAL_SCENARIO_EXPECTATIONS = {
   facilities: 6,
   listedActiveFacilities: 5,
@@ -160,8 +169,11 @@ const stableUuid = (...parts: string[]): string => {
   return `${versioned.slice(0, 8)}-${versioned.slice(8, 12)}-${versioned.slice(12, 16)}-${versioned.slice(16, 20)}-${versioned.slice(20)}`;
 };
 
-const assetReference = (facilityKey: string): string =>
-  `${CANONICAL_ASSET_DIRECTORY}/${facilityKey}.svg`;
+const assetReference = (facilityKey: string): string => {
+  const extension = canonicalAssetExtensions[facilityKey];
+  if (!extension) throw new Error(`Missing canonical asset extension for ${facilityKey}`);
+  return `${CANONICAL_ASSET_DIRECTORY}/${facilityKey}.${extension}`;
+};
 
 const vehiclePlate = (facility: FacilityDefinition, index: number): string =>
   `${facility.code}${String(index).padStart(3, '0')}`;
