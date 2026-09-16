@@ -654,6 +654,49 @@
         ],
         "additionalProperties": false
       },
+      "OwnerActiveSessionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parking session UUID"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Check-in time"
+          },
+          "parkingId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Parking UUID"
+          },
+          "vehicle": {
+            "$ref": "#/components/schemas/OwnerActiveSessionVehicle"
+          }
+        },
+        "required": [
+          "id",
+          "startTime",
+          "parkingId",
+          "vehicle"
+        ],
+        "additionalProperties": false
+      },
+      "OwnerActiveSessionVehicle": {
+        "type": "object",
+        "properties": {
+          "plate": {
+            "type": "string",
+            "description": "Normalized plate identity scoped to this parking"
+          }
+        },
+        "required": [
+          "plate"
+        ],
+        "additionalProperties": false
+      },
       "ParkingResponse": {
         "type": "object",
         "properties": {
@@ -2186,6 +2229,54 @@
           },
           "404": {
             "description": "Parking not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sessions/active": {
+      "get": {
+        "tags": [
+          "Parking Sessions"
+        ],
+        "summary": "List active sessions across owned parkings",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Minimal active session context for the authenticated owner overview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OwnerActiveSessionResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - not an operator",
             "content": {
               "application/json": {
                 "schema": {

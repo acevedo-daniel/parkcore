@@ -4,6 +4,7 @@ vi.mock('./parking-session.repository.js', () => ({
   createActiveIfAvailable: vi.fn(),
   findById: vi.fn(),
   completeIfActive: vi.fn(),
+  findActiveByOwner: vi.fn(),
   findActiveByParking: vi.fn(),
   findByParking: vi.fn(),
   cancelIfActive: vi.fn(),
@@ -29,6 +30,7 @@ import {
   cancelSession,
   checkIn,
   checkOut,
+  getActiveSessionsByOwner,
   getActiveSessionsByParking,
   getSessionById,
   getSessionsByParking,
@@ -412,6 +414,27 @@ describe('parking session service', () => {
     expect(parkingSessionRepository.findActiveByParking).toHaveBeenLastCalledWith('parking-1', {
       plate: 'AB123CD',
     });
+  });
+
+  it('maps the owner-wide active session context without loading visit details', async () => {
+    const startTime = new Date('2026-09-11T08:00:00.000Z');
+    vi.mocked(parkingSessionRepository.findActiveByOwner).mockResolvedValue([
+      {
+        id: 'session-1',
+        startTime,
+        parkingId: 'parking-1',
+        vehicle: { plate: 'AB123CD' },
+      },
+    ]);
+
+    await expect(getActiveSessionsByOwner('owner-1')).resolves.toEqual([
+      {
+        id: 'session-1',
+        startTime: startTime.toISOString(),
+        parkingId: 'parking-1',
+        vehicle: { plate: 'AB123CD' },
+      },
+    ]);
   });
 
   it('rejects missing or foreign sessions', async () => {

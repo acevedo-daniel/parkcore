@@ -5,6 +5,7 @@ import { authenticatedApi } from './api-client.js';
 
 export type Parking = components['schemas']['ParkingResponse'];
 export type ParkingSession = components['schemas']['ParkingSessionResponse'];
+export type OwnerActiveSession = components['schemas']['OwnerActiveSessionResponse'];
 export type VehicleLookupResponse = components['schemas']['VehicleLookupResponse'];
 export type CreateParkingRequest = components['schemas']['CreateParkingRequest'];
 export type UpdateParkingRequest = components['schemas']['UpdateParkingRequest'];
@@ -59,6 +60,12 @@ export async function getActiveSessions(
     '/parkings/{parkingId}/sessions/active',
     { params: { path: { parkingId }, query } },
   );
+  if (data) return data;
+  return ownerError(error, response, 'Unable to load active sessions.');
+}
+
+export async function getActiveSessionsForOwner(): Promise<OwnerActiveSession[]> {
+  const { data, error, response } = await authenticatedApi.GET('/sessions/active');
   if (data) return data;
   return ownerError(error, response, 'Unable to load active sessions.');
 }

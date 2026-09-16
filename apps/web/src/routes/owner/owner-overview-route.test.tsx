@@ -6,11 +6,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AppearanceProvider } from '../../app/appearance-provider.js';
 import { ToastProvider } from '../../components/ui/feedback.js';
-import { parkingFixture, parkingSessionFixture } from '../../test/fixtures.js';
+import { parkingFixture } from '../../test/fixtures.js';
 import { OwnerOverviewRoute } from './owner-overview-route.js';
 
 const api = vi.hoisted(() => ({
-  getActiveSessions: vi.fn(),
+  getActiveSessionsForOwner: vi.fn(),
   getAnalyticsRevenue: vi.fn(),
   getAnalyticsSummary: vi.fn(),
   getAnalyticsVolume: vi.fn(),
@@ -88,7 +88,7 @@ function renderOverview(locale: 'es-AR' | 'en-US' = 'en-US') {
 }
 
 afterEach(() => {
-  api.getActiveSessions.mockReset();
+  api.getActiveSessionsForOwner.mockReset();
   api.getAnalyticsRevenue.mockReset();
   api.getAnalyticsSummary.mockReset();
   api.getAnalyticsVolume.mockReset();
@@ -152,19 +152,14 @@ describe('owner overview briefing', () => {
       }),
     ];
     api.getOwnedParkings.mockResolvedValue(parkings);
-    api.getActiveSessions.mockImplementation((parkingId: string) =>
-      Promise.resolve(
-        parkingId === longRunningParking.id
-          ? [
-              parkingSessionFixture({
-                id: 'long-session',
-                parkingId,
-                startTime: '2026-09-11T00:00:00.000Z',
-              }),
-            ]
-          : [],
-      ),
-    );
+    api.getActiveSessionsForOwner.mockResolvedValue([
+      {
+        id: 'long-session',
+        parkingId: longRunningParking.id,
+        startTime: '2026-09-11T00:00:00.000Z',
+        vehicle: { plate: 'AB123CD' },
+      },
+    ]);
     configureAnalytics();
     api.getAnalyticsSummary.mockResolvedValue({
       ...baseSummary,
@@ -177,6 +172,9 @@ describe('owner overview briefing', () => {
     });
     renderOverview();
 
+    await waitFor(() => {
+      expect(api.getActiveSessionsForOwner).toHaveBeenCalledTimes(1);
+    });
     expect(
       await screen.findByRole('heading', { name: '3 vehicles are parked right now.' }),
     ).toBeTruthy();
@@ -208,7 +206,7 @@ describe('owner overview briefing', () => {
   it('switches the activity period with accessible controls', async () => {
     const user = userEvent.setup();
     api.getOwnedParkings.mockResolvedValue([parkingFixture()]);
-    api.getActiveSessions.mockResolvedValue([]);
+    api.getActiveSessionsForOwner.mockResolvedValue([]);
     configureAnalytics();
     renderOverview();
 
@@ -225,7 +223,7 @@ describe('owner overview briefing', () => {
 
   it('keeps the operational briefing usable when summary analytics fail', async () => {
     api.getOwnedParkings.mockResolvedValue([parkingFixture({ activeSessionCount: 2 })]);
-    api.getActiveSessions.mockResolvedValue([]);
+    api.getActiveSessionsForOwner.mockResolvedValue([]);
     api.getAnalyticsSummary.mockRejectedValue(new Error('summary unavailable'));
     api.getAnalyticsRevenue.mockResolvedValue(baseRevenue);
     api.getAnalyticsVolume.mockResolvedValue(baseVolume);
@@ -244,7 +242,7 @@ describe('owner overview briefing', () => {
 
   it('keeps attention context visible when active stay details fail', async () => {
     api.getOwnedParkings.mockResolvedValue([parkingFixture()]);
-    api.getActiveSessions.mockRejectedValue(new Error('active stays unavailable'));
+    api.getActiveSessionsForOwner.mockRejectedValue(new Error('active stays unavailable'));
     configureAnalytics();
     renderOverview();
 
@@ -258,7 +256,7 @@ describe('owner overview briefing', () => {
   it('degrades the activity panel independently and provides a local retry', async () => {
     const user = userEvent.setup();
     api.getOwnedParkings.mockResolvedValue([parkingFixture()]);
-    api.getActiveSessions.mockResolvedValue([]);
+    api.getActiveSessionsForOwner.mockResolvedValue([]);
     api.getAnalyticsSummary.mockResolvedValue(baseSummary);
     api.getAnalyticsRevenue
       .mockRejectedValueOnce(new Error('revenue unavailable'))

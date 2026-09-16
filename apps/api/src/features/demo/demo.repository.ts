@@ -1,6 +1,10 @@
 import { type Prisma, type PrismaClient, type User } from '../../../prisma/generated/client.js';
 import { env } from '../../config/env.js';
-import { CANONICAL_TIMEZONE, restoreCanonicalScenario } from '../../data/canonical-scenario.js';
+import {
+  CANONICAL_TIMEZONE,
+  createCanonicalScenario,
+  restoreCanonicalScenario,
+} from '../../data/canonical-scenario.js';
 import { DEMO_TTL_MS } from './demo.constants.js';
 import { prisma } from '../../config/prisma.js';
 
@@ -43,7 +47,7 @@ export async function createDemoSandbox(): Promise<User> {
       },
     });
 
-    await restoreCanonicalScenario(transaction, user.id, createdAt);
+    await createCanonicalScenario(transaction, user.id, createdAt);
     return user;
   });
 }

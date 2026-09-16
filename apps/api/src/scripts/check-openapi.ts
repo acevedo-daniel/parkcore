@@ -37,6 +37,7 @@ const requiredPaths = [
   '/parkings/{parkingId}/sessions',
   '/parkings/{parkingId}/sessions/export.csv',
   '/parkings/{parkingId}/sessions/active',
+  '/sessions/active',
   '/sessions/{sessionId}',
   '/sessions/{sessionId}/check-out',
   '/sessions/{sessionId}/cancel',
@@ -56,6 +57,7 @@ const requiredSchemas = [
   'PublicParkingListResponse',
   'VehicleSummary',
   'ParkingSessionResponse',
+  'OwnerActiveSessionResponse',
   'ParkingSessionListResponse',
   'DemoStatusResponse',
   'DemoResetResponse',
@@ -66,6 +68,7 @@ const dateTimeFields: Record<string, string[]> = {
   ParkingResponse: ['createdAt', 'updatedAt'],
   PublicParkingResponse: ['nextOpeningAt'],
   ParkingSessionResponse: ['startTime', 'endTime', 'createdAt', 'updatedAt'],
+  OwnerActiveSessionResponse: ['startTime'],
 };
 
 const doc = generateOpenApiDocument() as OpenApiDoc;

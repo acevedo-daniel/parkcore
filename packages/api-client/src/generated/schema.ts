@@ -582,6 +582,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/sessions/active": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List active sessions across owned parkings */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Minimal active session context for the authenticated owner overview */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OwnerActiveSessionResponse"][];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden - not an operator */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/parkings/{parkingId}/sessions/export.csv": {
         parameters: {
             query?: never;
@@ -1924,6 +1978,28 @@ export interface components {
                 /** @description Revenue in integer cents */
                 revenueCents: number;
             }[];
+        };
+        OwnerActiveSessionResponse: {
+            /**
+             * Format: uuid
+             * @description Parking session UUID
+             */
+            id: string;
+            /**
+             * Format: date-time
+             * @description Check-in time
+             */
+            startTime: string;
+            /**
+             * Format: uuid
+             * @description Parking UUID
+             */
+            parkingId: string;
+            vehicle: components["schemas"]["OwnerActiveSessionVehicle"];
+        };
+        OwnerActiveSessionVehicle: {
+            /** @description Normalized plate identity scoped to this parking */
+            plate: string;
         };
         ParkingResponse: {
             /**

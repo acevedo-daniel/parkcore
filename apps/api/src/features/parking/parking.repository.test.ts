@@ -57,9 +57,10 @@ describe('parking repository capacity updates', () => {
       where: { id: 'parking-1' },
       data: { capacity: 4 },
       include: {
-        parkingSessions: {
-          where: { status: 'ACTIVE' },
-          select: { id: true },
+        _count: {
+          select: {
+            parkingSessions: { where: { status: 'ACTIVE' } },
+          },
         },
       },
     });
@@ -72,9 +73,10 @@ describe('parking repository capacity updates', () => {
     expect(mockPrisma.parking.findMany).toHaveBeenCalledWith({
       where: { ownerId: 'owner-1' },
       include: {
-        parkingSessions: {
-          where: { status: 'ACTIVE' },
-          select: { id: true },
+        _count: {
+          select: {
+            parkingSessions: { where: { status: 'ACTIVE' } },
+          },
         },
       },
     });

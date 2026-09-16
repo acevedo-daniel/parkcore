@@ -446,9 +446,27 @@ const persistScenario = async (
     }
   }
 
+  await persistScenarioRecords(client, scenario);
+};
+
+const persistScenarioRecords = async (
+  client: CanonicalDatabaseClient,
+  scenario: CanonicalScenario,
+): Promise<void> => {
   await client.vehicle.createMany({ data: scenario.vehicles });
   await client.parkingSession.createMany({ data: scenario.sessions });
 };
+
+export async function createCanonicalScenario(
+  client: CanonicalDatabaseClient,
+  ownerId: string,
+  referenceTime: Date,
+): Promise<CanonicalScenario> {
+  const scenario = await getPersistedScenario(client, ownerId, referenceTime);
+  await client.parking.createMany({ data: scenario.facilities });
+  await persistScenarioRecords(client, scenario);
+  return scenario;
+}
 
 export async function restoreCanonicalScenario(
   client: CanonicalDatabaseClient,

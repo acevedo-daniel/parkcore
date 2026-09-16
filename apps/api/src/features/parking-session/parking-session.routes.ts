@@ -13,5 +13,6 @@ parkingSessionsRouter.get('/', parkingSessionController.findAll);
 export const parkingSessionRouter = Router();
 parkingSessionRouter.use(requireAuth, requireOperator);
 parkingSessionRouter.post('/:sessionId/check-out', parkingSessionController.checkOut);
+parkingSessionRouter.get('/active', parkingSessionController.listActiveByOwner);
 parkingSessionRouter.get('/:sessionId', parkingSessionController.findById);
 parkingSessionRouter.patch('/:sessionId/cancel', parkingSessionController.cancel);

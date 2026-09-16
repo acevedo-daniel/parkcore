@@ -161,6 +161,21 @@ export const parkingSessionResponseSchema = z
   })
   .openapi('ParkingSessionResponse');
 
+export const ownerActiveSessionResponseSchema = z
+  .strictObject({
+    id: z.uuid().openapi({ description: 'Parking session UUID' }),
+    startTime: dateTimeSchema.openapi({ description: 'Check-in time' }),
+    parkingId: z.uuid().openapi({ description: 'Parking UUID' }),
+    vehicle: z
+      .strictObject({
+        plate: z
+          .string()
+          .openapi({ description: 'Normalized plate identity scoped to this parking' }),
+      })
+      .openapi('OwnerActiveSessionVehicle'),
+  })
+  .openapi('OwnerActiveSessionResponse');
+
 export const parkingSessionAggregateSchema = z
   .strictObject({
     totalSessions: z.int().nonnegative().openapi({ description: 'All filtered sessions' }),
@@ -199,6 +214,7 @@ export type VehicleLookupQuery = z.infer<typeof vehicleLookupQuerySchema>;
 export type VehicleSummary = z.infer<typeof vehicleSummarySchema>;
 export type VehicleLookupResponse = z.infer<typeof vehicleLookupResponseSchema>;
 export type ParkingSessionResponse = z.infer<typeof parkingSessionResponseSchema>;
+export type OwnerActiveSessionResponse = z.infer<typeof ownerActiveSessionResponseSchema>;
 export type ParkingSessionAggregate = z.infer<typeof parkingSessionAggregateSchema>;
 export type VisitData = Pick<CheckIn, 'customerName' | 'customerPhone' | 'notes'>;
 
@@ -253,5 +269,18 @@ export function toParkingSessionResponse(
     createdAt: session.createdAt.toISOString(),
     updatedAt: session.updatedAt.toISOString(),
     vehicle: toVehicleSummary(session.vehicle),
+  };
+}
+
+export function toOwnerActiveSessionResponse(
+  session: Pick<ParkingSession, 'id' | 'startTime' | 'parkingId'> & {
+    vehicle: Pick<Vehicle, 'plate'>;
+  },
+): OwnerActiveSessionResponse {
+  return {
+    id: session.id,
+    startTime: session.startTime.toISOString(),
+    parkingId: session.parkingId,
+    vehicle: { plate: session.vehicle.plate },
   };
 }

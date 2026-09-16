@@ -97,6 +97,7 @@ The test strategy protects the rules that define the parking workflow:
 - public discovery includes the stable SHOWCASE scenario, marks it as fictional demonstration data, and excludes DEMO facilities;
 - showcase refresh preserves canonical facility and asset identities while rebasing time-dependent records;
 - expired cleanup removes only DEMO owners and remains bounded;
+- the owner overview uses one owner-scoped active-session request regardless of facility count, while public and owner parking snapshots use active-session counts when detailed sessions are not needed;
 - the generated web client remains synchronized with the API contract.
 - shared auth, parking, and check-in forms render localized labels and validation in both locales;
 - API failures are mapped to catalog messages instead of exposing backend response text;

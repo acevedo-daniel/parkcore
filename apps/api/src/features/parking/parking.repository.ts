@@ -1,27 +1,25 @@
 import { prisma } from '../../config/prisma.js';
 import { Parking, Prisma } from '../../../prisma/generated/client.js';
 
-const activeParkingSessionsInclude = {
-  where: { status: 'ACTIVE' },
-  select: { id: true },
-} as const;
-
 const publicParkingInclude = {
   owner: { select: { kind: true } },
-  parkingSessions: activeParkingSessionsInclude,
+  _count: { select: { parkingSessions: { where: { status: 'ACTIVE' } } } },
 } satisfies Prisma.ParkingInclude;
-
-export type PublicParkingRecord = Prisma.ParkingGetPayload<{
-  include: typeof publicParkingInclude;
-}>;
 
 const ownerParkingInclude = {
-  parkingSessions: activeParkingSessionsInclude,
+  _count: { select: { parkingSessions: { where: { status: 'ACTIVE' } } } },
 } satisfies Prisma.ParkingInclude;
 
-export type OwnerParkingRecord = Prisma.ParkingGetPayload<{
-  include: typeof ownerParkingInclude;
-}>;
+export type ParkingWithActiveSessionCount = Parking & {
+  parkingSessions?: readonly { id: string }[];
+  _count?: { parkingSessions: number };
+};
+
+export type PublicParkingRecord = ParkingWithActiveSessionCount & {
+  owner: { kind: 'OWNER' | 'DEMO' | 'SHOWCASE' };
+};
+
+export type OwnerParkingRecord = ParkingWithActiveSessionCount;
 
 const publicVisibilityWhere: Prisma.ParkingWhereInput = {
   isActive: true,

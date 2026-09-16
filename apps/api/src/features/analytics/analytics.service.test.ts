@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('./analytics.repository.js', () => ({
+  findOwnerActiveSessionCounts: vi.fn(),
+  findOwnerCompletedSessionAggregates: vi.fn(),
   findOwnerFacilities: vi.fn(),
   findOwnerSessions: vi.fn(),
   findOwnerTimezone: vi.fn(),
@@ -48,12 +50,17 @@ describe('analytics service', () => {
 
   it('builds an owner summary from active and completed sessions', async () => {
     vi.mocked(analyticsRepository.findOwnerFacilities).mockResolvedValue(facilities);
-    vi.mocked(analyticsRepository.findOwnerSessions)
-      .mockResolvedValueOnce([
-        session({ status: 'ACTIVE', endTime: null, totalAmountCents: null }),
-        session({ status: 'ACTIVE', endTime: null, totalAmountCents: null }),
-      ])
-      .mockResolvedValueOnce([session()]);
+    vi.mocked(analyticsRepository.findOwnerActiveSessionCounts).mockResolvedValue([
+      { parkingId: facilities[0].id, activeSessions: 2 },
+    ]);
+    vi.mocked(analyticsRepository.findOwnerCompletedSessionAggregates).mockResolvedValue([
+      {
+        parkingId: facilities[0].id,
+        currency: 'USD',
+        completedSessions: 1,
+        revenueCents: 2400,
+      },
+    ]);
 
     await expect(getSummary('owner-1', now)).resolves.toMatchObject({
       activeVehicles: 2,
@@ -101,12 +108,23 @@ describe('analytics service', () => {
 
   it('groups selected-window facility metrics while preserving active occupancy', async () => {
     vi.mocked(analyticsRepository.findOwnerFacilities).mockResolvedValue(facilities);
-    vi.mocked(analyticsRepository.findOwnerSessions)
-      .mockResolvedValueOnce([session({ status: 'ACTIVE', endTime: null, totalAmountCents: null })])
-      .mockResolvedValueOnce([
-        session(),
-        session({ parkingId: facilities[1].id, totalAmountCents: 1800 }),
-      ]);
+    vi.mocked(analyticsRepository.findOwnerActiveSessionCounts).mockResolvedValue([
+      { parkingId: facilities[0].id, activeSessions: 1 },
+    ]);
+    vi.mocked(analyticsRepository.findOwnerCompletedSessionAggregates).mockResolvedValue([
+      {
+        parkingId: facilities[0].id,
+        currency: 'USD',
+        completedSessions: 1,
+        revenueCents: 2400,
+      },
+      {
+        parkingId: facilities[1].id,
+        currency: 'USD',
+        completedSessions: 1,
+        revenueCents: 1800,
+      },
+    ]);
 
     await expect(getFacilities('owner-1', { days: 30 }, now)).resolves.toMatchObject({
       days: 30,

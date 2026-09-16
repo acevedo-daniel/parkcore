@@ -11,6 +11,7 @@ import {
 
 export type ParkingWithActiveSessionIds = Parking & {
   parkingSessions?: readonly { id: string }[];
+  _count?: { parkingSessions: number };
 };
 
 export const parkingAvailabilityStates = ['AVAILABLE', 'LIMITED', 'FULL', 'CLOSED'] as const;
@@ -50,7 +51,10 @@ export const deriveParkingAvailabilitySnapshot = (
     now,
   );
   const capacity = Math.max(0, parking.capacity);
-  const activeSessionCount = Math.min(parking.parkingSessions?.length ?? 0, capacity);
+  const activeSessionCount = Math.min(
+    parking._count?.parkingSessions ?? parking.parkingSessions?.length ?? 0,
+    capacity,
+  );
   const availableSpaces = Math.max(0, capacity - activeSessionCount);
   const occupancyPercent =
     capacity === 0 ? 0 : Math.min(100, (activeSessionCount / capacity) * 100);
