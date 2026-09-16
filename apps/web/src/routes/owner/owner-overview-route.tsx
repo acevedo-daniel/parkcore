@@ -417,7 +417,12 @@ export function OwnerOverviewRoute() {
         </div>
         <div className="grid gap-4 md:grid-cols-2 wide:grid-cols-3">
           {parkings.slice(0, 3).map(({ parking }, index) => (
-            <OwnerParkingPanel identifier={index + 1} key={parking.id} parking={parking} />
+            <OwnerParkingPanel
+              identifier={index + 1}
+              key={parking.id}
+              parking={parking}
+              presentation="overview"
+            />
           ))}
         </div>
       </section>
@@ -695,9 +700,9 @@ function OwnerOverviewSkeleton() {
       </div>
       <Skeleton className="h-80 rounded-[var(--radius-xl)]" />
       <div className="grid gap-4 md:grid-cols-2 wide:grid-cols-3">
-        <Skeleton className="h-40 rounded-[var(--radius-lg)]" />
-        <Skeleton className="h-40 rounded-[var(--radius-lg)]" />
-        <Skeleton className="h-40 rounded-[var(--radius-lg)]" />
+        <Skeleton className="h-96 rounded-[var(--radius-lg)]" />
+        <Skeleton className="h-96 rounded-[var(--radius-lg)]" />
+        <Skeleton className="h-96 rounded-[var(--radius-lg)]" />
       </div>
     </div>
   );

@@ -139,7 +139,7 @@ export function OwnerParkingsRoute() {
             <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-surface">
               {parkings.map(({ parking }, index) => (
                 <div className="border-b border-border-subtle last:border-b-0" key={parking.id}>
-                  <OwnerParkingPanel identifier={index + 1} parking={parking} />
+                  <OwnerParkingPanel identifier={index + 1} parking={parking} presentation="list" />
                 </div>
               ))}
             </div>
@@ -182,7 +182,7 @@ function OwnerParkingsSkeleton() {
       <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-surface">
         {Array.from({ length: 3 }).map((_, index) => (
           <div
-            className="grid gap-6 border-b border-border-subtle p-5 last:border-b-0 sm:p-6 md:grid-cols-[minmax(0,1.4fr)_minmax(12rem,1fr)] lg:grid-cols-[minmax(14rem,1.4fr)_minmax(12rem,1fr)_minmax(10rem,0.8fr)_auto]"
+            className="grid min-w-0 gap-6 border-b border-border-subtle p-5 last:border-b-0 sm:p-6 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] md:items-center md:gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,auto)]"
             key={index}
           >
             <Skeleton className="h-24 rounded-[var(--radius-md)]" />

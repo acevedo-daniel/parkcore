@@ -125,8 +125,10 @@ describe('owner overview briefing', () => {
     const longRunningParking = parkingFixture({
       activeSessionCount: 1,
       availableSpaces: 11,
+      address: '123456 Avenida del Libertador, acceso norte',
       id: 'long-running',
-      title: 'Long-running Parking',
+      neighborhood: 'Palermo Viejo con referencias extensas',
+      title: 'Long-running Parking with a name that wraps across the card',
     });
     const parkings = [
       parkingFixture({
@@ -201,6 +203,14 @@ describe('owner overview briefing', () => {
       '/app/sessions/long-session',
       '/app/parkings/paused',
     ]);
+    expect(
+      document.querySelectorAll('[data-slot="owner-parking-panel"][data-presentation="overview"]'),
+    ).toHaveLength(3);
+    expect(
+      screen.getByRole('heading', {
+        name: 'Long-running Parking with a name that wraps across the card',
+      }),
+    ).toBeTruthy();
   });
 
   it('switches the activity period with accessible controls', async () => {
