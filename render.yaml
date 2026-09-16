@@ -27,6 +27,9 @@ services:
       - key: ENABLE_API_DOCS
         value: 'false'
 
+      - key: DEMO_CLEANUP_BATCH_SIZE
+        value: '10'
+
       - key: DATABASE_URL
         sync: false
 

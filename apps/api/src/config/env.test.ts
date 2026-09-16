@@ -29,7 +29,9 @@ describe('env config', () => {
     setRequiredEnv({
       NODE_ENV: 'production',
       CORS_ORIGINS: 'https://parkcore.app, https://admin.parkcore.app',
+      LOG_LEVEL: 'info',
       LOG_PRETTY: 'false',
+      ENABLE_API_DOCS: 'false',
     });
 
     const module = await import('./env.js');
@@ -37,7 +39,9 @@ describe('env config', () => {
     expect(module.env.NODE_ENV).toBe('production');
     expect(module.env.CORS_ORIGINS).toEqual(['https://parkcore.app', 'https://admin.parkcore.app']);
     expect(module.env.JWT_EXPIRES_IN).toBe('1h');
+    expect(module.env.LOG_LEVEL).toBe('info');
     expect(module.env.LOG_PRETTY).toBe(false);
+    expect(module.env.ENABLE_API_DOCS).toBe(false);
   });
 
   it('parses LOG_PRETTY as strict boolean string', async () => {
@@ -57,6 +61,44 @@ describe('env config', () => {
       NODE_ENV: 'production',
     });
     delete process.env.CORS_ORIGINS;
+
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const exitSpy = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((code?: number | string | null): never => {
+        throw new Error(`process.exit:${String(code ?? '')}`);
+      });
+
+    await expect(import('./env.js')).rejects.toThrow('process.exit:1');
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(errorSpy).toHaveBeenCalledWith('Invalid environment variables:');
+  });
+
+  it('fails fast when DATABASE_URL is missing', async () => {
+    setRequiredEnv({
+      NODE_ENV: 'production',
+      CORS_ORIGINS: 'https://parkcore.app',
+    });
+    delete process.env.DATABASE_URL;
+
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const exitSpy = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((code?: number | string | null): never => {
+        throw new Error(`process.exit:${String(code ?? '')}`);
+      });
+
+    await expect(import('./env.js')).rejects.toThrow('process.exit:1');
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(errorSpy).toHaveBeenCalledWith('Invalid environment variables:');
+  });
+
+  it('fails fast when JWT_SECRET is missing', async () => {
+    setRequiredEnv({
+      NODE_ENV: 'production',
+      CORS_ORIGINS: 'https://parkcore.app',
+    });
+    delete process.env.JWT_SECRET;
 
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const exitSpy = vi

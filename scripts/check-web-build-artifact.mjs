@@ -35,6 +35,16 @@ const privateRuntimeNames = [
   'LOG_PRETTY',
   'ENABLE_API_DOCS',
 ];
+const privateRuntimeValues = [
+  process.env.DATABASE_URL,
+  process.env.JWT_SECRET,
+  process.env.SEED_OWNER_EMAIL,
+  process.env.SEED_OWNER_PASSWORD,
+  process.env.PARKCORE_ARTIFACT_PRIVATE_VALUES,
+]
+  .flatMap((value) => value?.split(/[\r\n,]+/) ?? [])
+  .map((value) => value.trim())
+  .filter(Boolean);
 const requiredRouteFragments = [
   'landing-route',
   'parking-catalog-route',
@@ -156,6 +166,16 @@ try {
       if (content.includes(runtimeName)) {
         violations.push(`${file.normalizedPath} contains ${runtimeName}`);
       }
+    }
+
+    for (const runtimeValue of privateRuntimeValues) {
+      if (content.includes(runtimeValue)) {
+        violations.push(`${file.normalizedPath} contains a private runtime value`);
+      }
+    }
+
+    if (/postgres(?:ql)?:\/\//i.test(content)) {
+      violations.push(`${file.normalizedPath} contains a PostgreSQL connection string`);
     }
   }
 

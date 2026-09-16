@@ -26,6 +26,7 @@
     "prisma:studio": "prisma studio",
     "prisma:seed": "tsx prisma/seed.ts",
     "demo:cleanup": "tsx src/scripts/demo-cleanup.ts",
+    "demo:cleanup:check": "tsx src/scripts/check-demo-cleanup.ts",
     "showcase:refresh": "tsx src/scripts/showcase-refresh.ts",
     "db:setup": "pnpm prisma:generate && pnpm prisma:migrate:deploy && pnpm prisma:seed",
     "lint": "eslint .",
