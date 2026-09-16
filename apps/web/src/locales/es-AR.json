@@ -1,9 +1,11 @@
 {
   "appearance": {
     "language": "Seleccionar idioma",
+    "languageLabel": "Idioma",
     "languageEnglish": "Inglés",
     "languageSpanish": "Español",
     "languageTheme": "Idioma y tema",
+    "appearanceLabel": "Apariencia",
     "theme": "Apariencia"
   },
   "common": {

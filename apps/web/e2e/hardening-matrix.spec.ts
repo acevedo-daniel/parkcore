@@ -1035,6 +1035,46 @@ test('keeps focus, compact overlays, and fixed navigation inside the viewport', 
   expect(api.unexpectedRequests).toEqual([]);
 });
 
+test('keeps profile preferences labeled and accessible at narrow widths', async ({ page }) => {
+  test.setTimeout(180_000);
+  const api = await installHardeningApiMock(page);
+
+  for (const locale of ['es-AR', 'en-US'] as const) {
+    for (const theme of ['light', 'dark'] as const) {
+      for (const viewport of [VIEWPORTS[0], VIEWPORTS[1]] as const) {
+        await test.step(`${locale} ${theme} ${viewport.name}`, async () => {
+          api.setProfileKind('OWNER');
+          api.setScenario('success');
+          await visitFixture(page, profileRoute, viewport, locale, theme);
+
+          const profileMain = page.locator('main');
+          const controls = profileMain.locator(
+            '[data-slot="appearance-controls"][data-presentation="profile"]',
+          );
+          const languageLabel = locale === 'en-US' ? 'Language' : 'Idioma';
+          const appearanceLabel = locale === 'en-US' ? 'Appearance' : 'Apariencia';
+          await expect(controls).toHaveCount(1);
+          await expect(controls.getByText(languageLabel, { exact: true })).toBeVisible();
+          await expect(controls.getByText(appearanceLabel, { exact: true })).toBeVisible();
+
+          await expectVisibleFocus(
+            controls.getByRole('button', {
+              name: locale === 'en-US' ? 'English' : 'Español',
+            }),
+            `${viewport.name} ${locale} ${theme} profile language focus`,
+          );
+          await expectVisibleFocus(
+            controls.getByRole('combobox', { name: appearanceLabel }),
+            `${viewport.name} ${locale} ${theme} profile appearance focus`,
+          );
+        });
+      }
+    }
+  }
+
+  expect(api.unexpectedRequests).toEqual([]);
+});
+
 test('covers deterministic loading, empty, error, blocked, and degraded states', async ({
   page,
 }) => {
@@ -1223,7 +1263,9 @@ test('covers owner management, history, profile, and recovery interactions', asy
       const name = profileMain.locator('#profile-name');
       await name.fill('Updated owner');
 
-      const profileTheme = profileMain.getByRole('combobox', { name: /theme|apariencia/i });
+      const profileTheme = profileMain.getByRole('combobox', {
+        name: /theme|appearance|apariencia/i,
+      });
       const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
       await profileTheme.selectOption(nextTheme);
       await expect(page.locator('html')).toHaveAttribute('data-theme', nextTheme);
