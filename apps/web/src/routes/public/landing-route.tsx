@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { ParkingDiscoveryCard } from '../../components/domain/parking-discovery-card.js';
-import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
+import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { DemoLoginButton } from '../../features/auth/demo-login-button.js';
 import { ParkingCalculatorWidget } from '../../features/parking/parking-calculator-widget.js';
 import { getPublicParkings } from '../../lib/api/public-api.js';
@@ -441,22 +441,22 @@ function FeaturedFacilities({
   const facilities = query.data?.data ?? [];
   if (facilities.length === 0) {
     return (
-      <div
-        aria-live="polite"
-        className="mt-12 rounded-[var(--radius-xl)] border border-dashed border-border-strong bg-surface-subtle p-8 text-center"
-        role="status"
+      <EmptyState
+        action={
+          <Link
+            className="inline-flex min-h-[var(--touch-target-min)] items-center rounded-sm text-sm font-bold underline decoration-accent decoration-2 underline-offset-4"
+            to="/parkings"
+          >
+            {t('public.landing.emptyAction')}
+          </Link>
+        }
+        className="mt-10 rounded-[var(--radius-lg)] border border-dashed border-border-strong bg-surface-subtle px-5 py-5 sm:px-6 sm:py-6"
+        compactLayout="split"
+        title={t('public.landing.emptyEyebrow')}
+        variant="compact"
       >
-        <p className="type-label text-foreground-muted">{t('public.landing.emptyEyebrow')}</p>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-foreground-secondary">
-          {t('public.landing.emptyDescription')}
-        </p>
-        <Link
-          className="mt-5 inline-flex text-sm font-bold underline decoration-accent decoration-2 underline-offset-4"
-          to="/parkings"
-        >
-          {t('public.landing.emptyAction')}
-        </Link>
-      </div>
+        {t('public.landing.emptyDescription')}
+      </EmptyState>
     );
   }
 

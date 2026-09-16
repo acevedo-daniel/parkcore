@@ -7,7 +7,7 @@ import { useAppearance } from '../../app/appearance-provider.js';
 import { Combobox } from '../../components/ui/combobox.js';
 import { Button } from '../../components/ui/button.js';
 import { Field, Input } from '../../components/ui/field.js';
-import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
+import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { getPublicParkings, type PublicParking } from '../../lib/api/public-api.js';
 import { cn } from '../../lib/cn.js';
 import { formatMoney, formatNumber } from '../../lib/format.js';
@@ -91,23 +91,20 @@ export function ParkingCalculatorWidget({ className, parking }: ParkingCalculato
           </Link>
         </ErrorState>
       ) : availableFacilities.length === 0 ? (
-        <div
-          aria-atomic="true"
-          aria-live="polite"
-          className="rounded-[var(--radius-lg)] border border-dashed border-border-strong bg-surface-subtle p-5"
-          role="status"
+        <EmptyState
+          action={
+            <Link
+              className="inline-flex min-h-[var(--touch-target-min)] items-center rounded-sm text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4"
+              to="/parkings"
+            >
+              {t('calculator.emptyAction')}
+            </Link>
+          }
+          title={t('calculator.emptyEyebrow')}
+          variant="compact"
         >
-          <p className="type-label text-foreground-muted">{t('calculator.emptyEyebrow')}</p>
-          <p className="mt-2 text-sm leading-relaxed text-foreground-secondary">
-            {t('calculator.emptyDescription')}
-          </p>
-          <Link
-            className="mt-4 inline-flex min-h-[var(--touch-target-min)] items-center rounded-sm text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4"
-            to="/parkings"
-          >
-            {t('calculator.emptyAction')}
-          </Link>
-        </div>
+          {t('calculator.emptyDescription')}
+        </EmptyState>
       ) : (
         <CalculatorForm
           facilities={availableFacilities}

@@ -62,6 +62,21 @@ describe('core UI feedback and actions', () => {
     expect(onRetry).toHaveBeenCalledOnce();
   });
 
+  it('supports a compact empty state without the default card framing', () => {
+    render(
+      <EmptyState compactLayout="split" title="No facilities yet" variant="compact">
+        The directory will fill in as facilities become available.
+      </EmptyState>,
+    );
+
+    const emptyState = screen.getByRole('status');
+    expect(emptyState.getAttribute('data-slot')).toBe('empty-state');
+    expect(emptyState.getAttribute('data-variant')).toBe('compact');
+    expect(emptyState.getAttribute('data-layout')).toBe('split');
+    expect(emptyState.className).not.toContain('min-h-56');
+    expect(screen.queryByRole('heading', { name: 'No facilities yet' })).toBeNull();
+  });
+
   it('marks skeleton feedback as non-interactive busy content', () => {
     const { container } = render(<Skeleton className="h-10" />);
     const skeleton = container.querySelector('[data-slot="skeleton"]');
