@@ -97,6 +97,10 @@ The API is started with production-shaped `DATABASE_URL`, `JWT_SECRET`, exact
 smoke checks both `/healthz` and the root service response. `/healthz` remains
 a process-liveness check and does not query the database.
 
+Before startup, the job runs the SHOWCASE bootstrap against the disposable
+database. This verifies public data provisioning without using the full seed;
+the API startup then verifies that the canonical facilities are current.
+
 The production job never uses `db:setup`, `prisma migrate dev`,
 `prisma migrate reset`, or the seed. Its cleanup verification creates only
 temporary records in the disposable database, runs the real `demo:cleanup`

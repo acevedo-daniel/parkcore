@@ -5,7 +5,11 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import app from '../../app.js';
 import { prisma } from '../../src/config/prisma.js';
 import { CANONICAL_REFERENCE_TIME } from '../../src/data/canonical-scenario.js';
-import { CANONICAL_SHOWCASE_USER_ID, refreshCanonicalShowcase } from '../../src/data/showcase.js';
+import {
+  CANONICAL_SHOWCASE_USER_ID,
+  ensureCanonicalShowcase,
+  refreshCanonicalShowcase,
+} from '../../src/data/showcase.js';
 
 describe('canonical showcase', () => {
   let ownerId: string | undefined;
@@ -74,7 +78,7 @@ describe('canonical showcase', () => {
   });
 
   it('provisions five public facilities and keeps the paused facility private', async () => {
-    const first = await refreshCanonicalShowcase(prisma, new Date(CANONICAL_REFERENCE_TIME));
+    const first = await ensureCanonicalShowcase(prisma, new Date(CANONICAL_REFERENCE_TIME));
     const publicResponse = await request(app).get('/parkings?currency=ARS&limit=10');
     const publicBody = publicResponse.body as {
       data: { id: string; isShowcase: boolean; title: string }[];
@@ -95,6 +99,28 @@ describe('canonical showcase', () => {
     expect(detailResponse.status).toBe(200);
     expect(detailResponse.body).toMatchObject({ id: central.id, isShowcase: true });
     expect(detailResponse.body).not.toHaveProperty('ownerId');
+  });
+
+  it('keeps a current showcase intact during production startup bootstrap', async () => {
+    await refreshCanonicalShowcase(prisma, new Date(CANONICAL_REFERENCE_TIME));
+    const before = await prisma.parkingSession.findMany({
+      where: { parking: { ownerId: CANONICAL_SHOWCASE_USER_ID } },
+      orderBy: { id: 'asc' },
+      select: { id: true, startTime: true, updatedAt: true },
+    });
+
+    const ensured = await ensureCanonicalShowcase(
+      prisma,
+      new Date(new Date(CANONICAL_REFERENCE_TIME).getTime() + 2 * 1440 * 60_000),
+    );
+    const after = await prisma.parkingSession.findMany({
+      where: { parking: { ownerId: CANONICAL_SHOWCASE_USER_ID } },
+      orderBy: { id: 'asc' },
+      select: { id: true, startTime: true, updatedAt: true },
+    });
+
+    expect(ensured.facilities).toHaveLength(6);
+    expect(after).toEqual(before);
   });
 
   it('refreshes atomically, preserves identity, and leaves other owners unchanged', async () => {

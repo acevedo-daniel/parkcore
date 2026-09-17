@@ -3,17 +3,36 @@ import type { Server } from 'node:http';
 import app from './app.js';
 import { env } from './src/config/env.js';
 import { prisma } from './src/config/prisma.js';
+import { ensureCanonicalShowcase } from './src/data/showcase.js';
 import { logger } from './src/lib/logger.js';
 
-const server = app.listen(env.PORT, () => {
-  logger.info({ port: env.PORT }, 'ParkCore API running');
-  logger.info({ env: env.NODE_ENV }, 'Runtime environment');
-});
+let server: Server | undefined;
 
-server.once('error', (error) => {
-  logger.fatal({ err: error }, 'Failed to start ParkCore API');
-  process.exit(1);
-});
+async function bootstrapProductionShowcase(): Promise<void> {
+  if (env.NODE_ENV !== 'production') return;
+
+  const scenario = await prisma.$transaction((transaction) =>
+    ensureCanonicalShowcase(transaction, new Date()),
+  );
+  logger.info(
+    { facilities: scenario.facilities.length, sessions: scenario.sessions.length },
+    'Canonical public showcase ready',
+  );
+}
+
+async function start(): Promise<void> {
+  await bootstrapProductionShowcase();
+
+  server = app.listen(env.PORT, () => {
+    logger.info({ port: env.PORT }, 'ParkCore API running');
+    logger.info({ env: env.NODE_ENV }, 'Runtime environment');
+  });
+
+  server.once('error', (error) => {
+    logger.fatal({ err: error }, 'Failed to start ParkCore API');
+    process.exit(1);
+  });
+}
 
 let isShuttingDown = false;
 
@@ -46,7 +65,7 @@ async function shutdown(signal: string): Promise<void> {
   forceCloseTimer.unref();
 
   try {
-    await closeServer(server);
+    if (server) await closeServer(server);
 
     await prisma.$disconnect();
     clearTimeout(forceCloseTimer);
@@ -59,6 +78,11 @@ async function shutdown(signal: string): Promise<void> {
     process.exit(1);
   }
 }
+
+void start().catch((error: unknown) => {
+  logger.fatal({ err: error }, 'Failed to initialize ParkCore API');
+  process.exit(1);
+});
 
 process.on('SIGINT', () => {
   void shutdown('SIGINT');

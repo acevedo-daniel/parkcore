@@ -1,5 +1,7 @@
 import {
+  CANONICAL_SCENARIO_EXPECTATIONS,
   CANONICAL_TIMEZONE,
+  buildCanonicalScenario,
   refreshCanonicalScenario,
   type CanonicalDatabaseClient,
   type CanonicalScenario,
@@ -7,11 +9,8 @@ import {
 
 export const CANONICAL_SHOWCASE_USER_ID = '00000000-0000-4000-8000-000000000020';
 
-export async function refreshCanonicalShowcase(
-  client: CanonicalDatabaseClient,
-  referenceTime: Date,
-): Promise<CanonicalScenario> {
-  const showcase = await client.user.upsert({
+const upsertCanonicalShowcase = async (client: CanonicalDatabaseClient) =>
+  await client.user.upsert({
     where: { id: CANONICAL_SHOWCASE_USER_ID },
     update: {
       email: null,
@@ -35,5 +34,36 @@ export async function refreshCanonicalShowcase(
     },
   });
 
+export async function refreshCanonicalShowcase(
+  client: CanonicalDatabaseClient,
+  referenceTime: Date,
+): Promise<CanonicalScenario> {
+  const showcase = await upsertCanonicalShowcase(client);
+
   return await refreshCanonicalScenario(client, showcase.id, referenceTime);
+}
+
+export async function ensureCanonicalShowcase(
+  client: CanonicalDatabaseClient,
+  referenceTime: Date,
+): Promise<CanonicalScenario> {
+  const showcase = await upsertCanonicalShowcase(client);
+  const expected = buildCanonicalScenario(showcase.id, referenceTime);
+  const existingFacilities = await client.parking.findMany({
+    where: { ownerId: showcase.id },
+    select: { id: true, image: true, isActive: true, isListed: true },
+  });
+  const isCurrent =
+    existingFacilities.length === CANONICAL_SCENARIO_EXPECTATIONS.facilities &&
+    expected.facilities.every((facility) => {
+      const existing = existingFacilities.find((item) => item.id === facility.id);
+      if (!existing) return false;
+      return (
+        existing.image === facility.image &&
+        existing.isActive === facility.isActive &&
+        existing.isListed === facility.isListed
+      );
+    });
+
+  return isCurrent ? expected : await refreshCanonicalScenario(client, showcase.id, referenceTime);
 }
