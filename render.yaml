@@ -6,7 +6,7 @@ services:
     branch: main
     rootDir: .
 
-    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm --filter @parkcore/api build && pnpm --filter @parkcore/api prisma:migrate:deploy
+    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm --filter @parkcore/api build && pnpm --filter @parkcore/api prisma:migrate:deploy && pnpm --filter @parkcore/api showcase:refresh
 
     startCommand: pnpm --filter @parkcore/api start
 

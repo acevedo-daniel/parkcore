@@ -73,7 +73,13 @@ Protected owner parking reads use a parallel operational snapshot. The repositor
 
 The public catalog canonicalizes its search, currency, rate, availability, and pagination state into URL parameters before requesting the typed client. Auth entry routes accept only internal `/app` return targets, while public unavailable states use localized recovery links and no-index metadata.
 
-The canonical SHOWCASE identity has a stable ID and no credentials. Database setup provisions its six-facility fictional Buenos Aires scenario. The `showcase:refresh` maintenance command accepts an optional reference time and runs the canonical replacement inside one PostgreSQL transaction, preserving facility and asset IDs while rebasing sessions. It targets only the SHOWCASE owner, so normal OWNER and DEMO data are not changed.
+The canonical SHOWCASE identity has a stable ID and no credentials. Local
+database setup and the production deployment bootstrap provision its
+six-facility fictional Buenos Aires scenario. The `showcase:refresh` command
+accepts an optional reference time and runs the canonical replacement inside
+one PostgreSQL transaction, preserving facility and asset IDs while rebasing
+sessions. It targets only the SHOWCASE owner, so normal OWNER and DEMO data are
+not changed.
 
 ## Contract flow
 

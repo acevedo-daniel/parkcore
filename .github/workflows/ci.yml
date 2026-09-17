@@ -320,6 +320,11 @@ jobs:
           set -o pipefail
           pnpm build 2>&1 | tee .ci/production/build.log
 
+      - name: Bootstrap canonical public showcase
+        run: |
+          set -o pipefail
+          pnpm --filter @parkcore/api showcase:refresh 2>&1 | tee .ci/production/showcase.log
+
       - name: Verify compiled API artifact
         run: |
           set -o pipefail
