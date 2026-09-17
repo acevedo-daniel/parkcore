@@ -59,6 +59,12 @@ The final command provisions or refreshes only the non-credentialed canonical
 `SHOWCASE` facilities used by public discovery. It does not seed owner
 credentials, create demo sandboxes, or rewrite normal owner data.
 
+The production API verifies the SHOWCASE records before opening its listener
+and repairs missing or stale canonical facilities. A normal API redeploy
+therefore repairs a missing public showcase even when the existing Render
+service does not expose a shell or has not yet synchronized the Blueprint
+build command.
+
 ### Start
 
 ```bash
@@ -157,9 +163,11 @@ Production rules:
 - if a migration fails, stop the rollout and recover through a reviewed forward migration or the database provider's recovery facilities.
 
 The current Render build command applies forward migrations and refreshes the
-canonical public showcase before starting the new API process. If the public
-directory is empty after a deployment, inspect the Render build log for the
-`showcase:refresh` step before investigating frontend assets.
+canonical public showcase before starting the new API process. The API startup
+also verifies and repairs that SHOWCASE-only data. If the public directory is
+empty after a deployment, inspect the Render build and API startup logs for
+`showcase:refresh` or `Canonical public showcase ready` before
+investigating frontend assets.
 
 ### Demo cleanup
 
