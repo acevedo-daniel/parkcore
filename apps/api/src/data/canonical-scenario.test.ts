@@ -110,6 +110,14 @@ describe('canonical scenario generator', () => {
     );
 
     expect(existsSync(`${assetRoot}PROVENANCE.md`)).toBe(true);
+    expect(
+      scenario.facilities
+        .filter((facility) => facility.isActive && facility.isListed)
+        .every((facility) => facility.image.endsWith('.webp')),
+    ).toBe(true);
+    expect(
+      scenario.facilities.find((facility) => facility.title === 'San Telmo Mercado')?.image,
+    ).toBe(`${CANONICAL_ASSET_DIRECTORY}/san-telmo-mercado.svg`);
     for (const facility of scenario.facilities) {
       expect(facility.image.startsWith(`${CANONICAL_ASSET_DIRECTORY}/`)).toBe(true);
       expect(

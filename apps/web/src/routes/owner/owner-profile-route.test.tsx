@@ -127,11 +127,21 @@ describe('owner profile route', () => {
     const owner = userFixture({ lastName: 'Lovelace', name: 'Ada' });
     renderProfile(owner);
 
+    expect(screen.getByText('Language', { exact: true })).toBeTruthy();
+    expect(screen.getByText('Appearance', { exact: true })).toBeTruthy();
+    expect(
+      document
+        .querySelector('[data-slot="appearance-controls"]')
+        ?.getAttribute('data-presentation'),
+    ).toBe('profile');
+
     const name = screen.getByLabelText<HTMLInputElement>('Name');
     await user.clear(name);
     await user.type(name, 'Grace');
     await user.click(screen.getByRole('button', { name: 'Spanish' }));
 
+    expect(screen.getByText('Idioma', { exact: true })).toBeTruthy();
+    expect(screen.getByText('Apariencia', { exact: true })).toBeTruthy();
     expect(screen.getByLabelText<HTMLInputElement>('Nombre').value).toBe('Grace');
     expect(screen.getByRole('heading', { name: 'Perfil' })).toBeTruthy();
 

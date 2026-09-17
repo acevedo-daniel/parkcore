@@ -3,6 +3,7 @@ import { AlertTriangle, Inbox, RefreshCw, X } from 'lucide-react';
 import { useCallback, useId, useState, type ReactNode } from 'react';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { cn } from '../../lib/cn.js';
 import { Button, IconButton } from './button.js';
 import { ToastContext } from './toast-context.js';
 
@@ -66,37 +67,72 @@ export function Skeleton({ className = '' }: { className?: string }) {
 export function EmptyState({
   action,
   children,
+  className,
+  compactLayout = 'stacked',
   title,
+  variant = 'default',
 }: {
   action?: ReactNode;
   children: ReactNode;
+  className?: string;
+  compactLayout?: 'split' | 'stacked';
   title: string;
+  variant?: 'compact' | 'default';
 }) {
   const { t } = useAppearance();
   const titleId = useId();
+  const isCompact = variant === 'compact';
+  const isSplitCompact = isCompact && compactLayout === 'split';
   return (
     <section
       aria-labelledby={titleId}
       aria-atomic="true"
       aria-live="polite"
-      className="flex min-h-56 flex-col items-start justify-center rounded-[var(--radius-xl)] border border-dashed border-border-strong bg-surface p-6 text-foreground sm:p-8"
+      className={cn(
+        isCompact
+          ? 'flex min-w-0 flex-col items-start text-foreground'
+          : 'flex min-h-56 flex-col items-start justify-center rounded-[var(--radius-xl)] border border-dashed border-border-strong bg-surface p-6 text-foreground sm:p-8',
+        isSplitCompact && 'sm:flex-row sm:items-center sm:justify-between sm:gap-8',
+        className,
+      )}
+      data-layout={isCompact ? compactLayout : undefined}
       data-slot="empty-state"
+      data-variant={variant}
       role="status"
     >
-      <span className="flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground">
-        <Inbox aria-hidden="true" className="size-5" />
-      </span>
-      <p className="mt-5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground-muted">
-        {t('feedback.emptyEyebrow')}
-      </p>
-      <h2
-        className="mt-2 font-display text-2xl font-bold leading-none tracking-[-0.045em]"
-        id={titleId}
-      >
-        {title}
-      </h2>
-      <p className="mt-3 max-w-lg text-sm leading-relaxed text-foreground-secondary">{children}</p>
-      {action ? <div className="mt-6">{action}</div> : null}
+      {isCompact ? (
+        <div className={cn('min-w-0', isSplitCompact && 'sm:max-w-2xl')}>
+          <p className="type-label text-foreground-muted" id={titleId}>
+            {title}
+          </p>
+          <p className="mt-2 max-w-lg text-sm leading-relaxed text-foreground-secondary">
+            {children}
+          </p>
+        </div>
+      ) : (
+        <>
+          <span className="flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground">
+            <Inbox aria-hidden="true" className="size-5" />
+          </span>
+          <p className="mt-5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground-muted">
+            {t('feedback.emptyEyebrow')}
+          </p>
+          <h2
+            className="mt-2 font-display text-2xl font-bold leading-none tracking-[-0.045em]"
+            id={titleId}
+          >
+            {title}
+          </h2>
+          <p className="mt-3 max-w-lg text-sm leading-relaxed text-foreground-secondary">
+            {children}
+          </p>
+        </>
+      )}
+      {action ? (
+        <div className={cn(isCompact ? 'mt-4' : 'mt-6', isSplitCompact && 'sm:mt-0 sm:shrink-0')}>
+          {action}
+        </div>
+      ) : null}
     </section>
   );
 }

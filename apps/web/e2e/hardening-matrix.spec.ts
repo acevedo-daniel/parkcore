@@ -29,6 +29,7 @@ type Scenario =
   | 'auth-rate-limited'
   | 'owner-empty'
   | 'owner-error'
+  | 'owner-multi'
   | 'paused'
   | 'success';
 
@@ -243,6 +244,31 @@ const ownerParking: Parking = {
   updatedAt: '2026-08-17T09:00:00.000Z',
 };
 
+const multiOwnerParkings: Parking[] = [
+  ownerParking,
+  {
+    ...ownerParking,
+    activeSessionCount: 7,
+    address: '4567 Avenida del Libertador, entrada norte y acceso auxiliar',
+    availableSpaces: 13,
+    id: 'parking-2',
+    neighborhood: 'Palermo Viejo con referencias extensas',
+    occupancyPercent: 35,
+    title: 'North Riverside Facility with a Long Operational Name',
+  },
+  {
+    ...ownerParking,
+    activeSessionCount: 16,
+    address: '8901 Avenida Pueyrredón, subsuelo y acceso lateral',
+    availabilityState: 'LIMITED',
+    availableSpaces: 4,
+    id: 'parking-3',
+    neighborhood: 'Recoleta Centro con una ubicación detallada',
+    occupancyPercent: 80,
+    title: 'Recoleta Patio Parking and Visitor Operations Center',
+  },
+];
+
 const analyticsSummary: components['schemas']['AnalyticsSummaryResponse'] = {
   activeVehicles: 1,
   completedToday: 2,
@@ -405,6 +431,10 @@ async function installHardeningApiMock(page: Page) {
       }
       if (scenario === 'owner-error') {
         await respond(route, { error: true, message: 'Simulated owner facility failure.' }, 503);
+        return;
+      }
+      if (scenario === 'owner-multi') {
+        await respond(route, multiOwnerParkings);
         return;
       }
       if (scenario === 'blocked') {
@@ -632,6 +662,44 @@ async function expectNoHorizontalOverflow(page: Page, label: string) {
     geometry.scrollWidth,
     `${label} should not overflow horizontally. ${JSON.stringify(geometry.overflowing)}`,
   ).toBeLessThanOrEqual(geometry.clientWidth + 1);
+}
+
+async function expectOwnerOverviewPanelsWithinViewport(page: Page, label: string) {
+  const viewport = page.viewportSize();
+  expect(viewport, `${label} should have a configured viewport.`).not.toBeNull();
+  if (!viewport) return;
+
+  const panels = await page
+    .locator('[data-slot="owner-parking-panel"][data-presentation="overview"]')
+    .evaluateAll((elements) =>
+      elements.map((element) => {
+        const panel = element as HTMLElement;
+        const box = panel.getBoundingClientRect();
+        return {
+          clientWidth: panel.clientWidth,
+          left: box.left,
+          right: box.right,
+          scrollWidth: panel.scrollWidth,
+          width: box.width,
+        };
+      }),
+    );
+
+  expect(panels, `${label} should render three overview facility panels.`).toHaveLength(3);
+  panels.forEach((panel, index) => {
+    const panelLabel = `${label} panel ${String(index + 1)}`;
+    expect(panel.width, `${panelLabel} should have a width.`).toBeGreaterThan(0);
+    expect(panel.left, `${panelLabel} should start inside the viewport.`).toBeGreaterThanOrEqual(
+      -1,
+    );
+    expect(panel.right, `${panelLabel} should end inside the viewport.`).toBeLessThanOrEqual(
+      viewport.width + 1,
+    );
+    expect(
+      panel.scrollWidth,
+      `${panelLabel} should not overflow its own content box.`,
+    ).toBeLessThanOrEqual(panel.clientWidth + 1);
+  });
 }
 
 async function expectMobileNavigationDoesNotCoverContent(page: Page, label: string) {
@@ -865,6 +933,28 @@ test('keeps owner operation routes within every viewport in both themes', async 
   expect(api.unexpectedRequests).toEqual([]);
 });
 
+test('keeps multiple owner overview summaries inside their grid', async ({ page }) => {
+  test.setTimeout(120_000);
+  const api = await installHardeningApiMock(page);
+  api.setScenario('owner-multi');
+
+  for (const locale of ['es-AR', 'en-US'] as const) {
+    for (const theme of ['light', 'dark'] as const) {
+      for (const viewport of [VIEWPORTS[3], VIEWPORTS[4]] as const) {
+        await test.step(`${locale} ${theme} ${viewport.name}`, async () => {
+          await visitFixture(page, overviewRoute, viewport, locale, theme);
+          await expectOwnerOverviewPanelsWithinViewport(
+            page,
+            `${viewport.name} ${locale} ${theme} owner overview`,
+          );
+        });
+      }
+    }
+  }
+
+  expect(api.unexpectedRequests).toEqual([]);
+});
+
 test('passes the serious and critical axe gate across route, shell, locale, and theme fixtures', async ({
   page,
 }) => {
@@ -939,6 +1029,46 @@ test('keeps focus, compact overlays, and fixed navigation inside the viewport', 
           `checkout dialog ${locale} ${theme}`,
         );
       });
+    }
+  }
+
+  expect(api.unexpectedRequests).toEqual([]);
+});
+
+test('keeps profile preferences labeled and accessible at narrow widths', async ({ page }) => {
+  test.setTimeout(180_000);
+  const api = await installHardeningApiMock(page);
+
+  for (const locale of ['es-AR', 'en-US'] as const) {
+    for (const theme of ['light', 'dark'] as const) {
+      for (const viewport of [VIEWPORTS[0], VIEWPORTS[1]] as const) {
+        await test.step(`${locale} ${theme} ${viewport.name}`, async () => {
+          api.setProfileKind('OWNER');
+          api.setScenario('success');
+          await visitFixture(page, profileRoute, viewport, locale, theme);
+
+          const profileMain = page.locator('main');
+          const controls = profileMain.locator(
+            '[data-slot="appearance-controls"][data-presentation="profile"]',
+          );
+          const languageLabel = locale === 'en-US' ? 'Language' : 'Idioma';
+          const appearanceLabel = locale === 'en-US' ? 'Appearance' : 'Apariencia';
+          await expect(controls).toHaveCount(1);
+          await expect(controls.getByText(languageLabel, { exact: true })).toBeVisible();
+          await expect(controls.getByText(appearanceLabel, { exact: true })).toBeVisible();
+
+          await expectVisibleFocus(
+            controls.getByRole('button', {
+              name: locale === 'en-US' ? 'English' : 'Español',
+            }),
+            `${viewport.name} ${locale} ${theme} profile language focus`,
+          );
+          await expectVisibleFocus(
+            controls.getByRole('combobox', { name: appearanceLabel }),
+            `${viewport.name} ${locale} ${theme} profile appearance focus`,
+          );
+        });
+      }
     }
   }
 
@@ -1133,7 +1263,9 @@ test('covers owner management, history, profile, and recovery interactions', asy
       const name = profileMain.locator('#profile-name');
       await name.fill('Updated owner');
 
-      const profileTheme = profileMain.getByRole('combobox', { name: /theme|apariencia/i });
+      const profileTheme = profileMain.getByRole('combobox', {
+        name: /theme|appearance|apariencia/i,
+      });
       const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
       await profileTheme.selectOption(nextTheme);
       await expect(page.locator('html')).toHaveAttribute('data-theme', nextTheme);

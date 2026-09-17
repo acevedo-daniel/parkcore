@@ -53,11 +53,11 @@ const requiredRouteFragments = [
   'owner-parking-overview-route',
 ];
 const canonicalAssetNames = [
-  'belgrano-norte.svg',
-  'central-corrientes.svg',
-  'palermo-plaza.svg',
-  'puerto-madero-dock.svg',
-  'recoleta-patio.svg',
+  'belgrano-norte.webp',
+  'central-corrientes.webp',
+  'palermo-plaza.webp',
+  'puerto-madero-dock.webp',
+  'recoleta-patio.webp',
   'san-telmo-mercado.svg',
 ];
 
@@ -141,6 +141,17 @@ try {
 
   for (const file of canonicalAssets) {
     if (!file) continue;
+
+    if (path.extname(file.absolutePath).toLowerCase() === '.webp') {
+      const header = await readFile(file.absolutePath);
+      const isWebp =
+        header.subarray(0, 4).toString('ascii') === 'RIFF' &&
+        header.subarray(8, 12).toString('ascii') === 'WEBP';
+      if (!isWebp) {
+        violations.push(`${file.normalizedPath} must be a valid WebP asset`);
+      }
+      continue;
+    }
 
     const content = await readFile(file.absolutePath, 'utf8');
     if (!/<svg\b[^>]*\bviewBox=["']0 0 640 360["']/i.test(content)) {

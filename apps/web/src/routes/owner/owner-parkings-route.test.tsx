@@ -65,6 +65,9 @@ describe('owner parking list', () => {
         name: '2 of 12 occupied, 10 open (25%).',
       }),
     ).toBeTruthy();
+    expect(
+      document.querySelector('[data-slot="owner-parking-panel"][data-presentation="list"]'),
+    ).toBeTruthy();
 
     const openLink = screen.getByRole('link', { name: 'Open operations for Central Parking' });
     const editLink = screen.getByRole('link', { name: 'Edit Central Parking' });

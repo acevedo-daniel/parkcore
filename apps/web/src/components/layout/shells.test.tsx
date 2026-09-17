@@ -57,6 +57,11 @@ describe('application shells', () => {
     expect(within(dialog).getByRole('button', { name: 'Probar demo' })).toBeTruthy();
     expect(within(dialog).getByRole('button', { name: 'Español' })).toBeTruthy();
     expect(within(dialog).getByRole('combobox', { name: 'Apariencia' })).toBeTruthy();
+    expect(
+      dialog
+        .querySelector<HTMLElement>('[data-slot="appearance-controls"]')
+        ?.getAttribute('data-presentation'),
+    ).toBe('compact');
   });
 
   it('returns focus to the compact menu trigger after dismissal', async () => {
@@ -98,6 +103,11 @@ describe('application shells', () => {
       'pb-[calc(6rem+env(safe-area-inset-bottom,0px))]',
     );
     expect(screen.getAllByRole('combobox', { name: 'Apariencia' })).toHaveLength(2);
+    expect(
+      Array.from(document.querySelectorAll<HTMLElement>('[data-slot="appearance-controls"]')).map(
+        (control) => control.getAttribute('data-presentation'),
+      ),
+    ).toEqual(['compact', 'compact']);
     expect(document.title).toBe('ParkCore | Operaciones');
   });
 });

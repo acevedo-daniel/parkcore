@@ -212,8 +212,8 @@ function OwnerProfileContent({ user }: { user: User }) {
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-foreground-secondary">
             {t('profile.preferencesDescription')}
           </p>
-          <div className="mt-5">
-            <AppearanceControls className="flex-wrap justify-start" />
+          <div className="mt-5 max-w-xl">
+            <AppearanceControls presentation="profile" />
           </div>
           <div className="mt-7 max-w-xl">
             <Controller
