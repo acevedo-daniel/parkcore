@@ -52,8 +52,12 @@ pnpm release:readiness
 ### Build and migration
 
 ```bash
-corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm --filter @parkcore/api build && pnpm --filter @parkcore/api prisma:migrate:deploy
+corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm --filter @parkcore/api build && pnpm --filter @parkcore/api prisma:migrate:deploy && pnpm --filter @parkcore/api showcase:refresh
 ```
+
+The final command provisions or refreshes only the non-credentialed canonical
+`SHOWCASE` facilities used by public discovery. It does not seed owner
+credentials, create demo sandboxes, or rewrite normal owner data.
 
 ### Start
 
@@ -131,10 +135,11 @@ If the production API origin changes, update these together:
 
 ParkCore uses committed forward Prisma migrations.
 
-Production applies them with:
+Production applies them and refreshes the public showcase with:
 
 ```bash
 pnpm --filter @parkcore/api prisma:migrate:deploy
+pnpm --filter @parkcore/api showcase:refresh
 ```
 
 Inspect migration state with:
@@ -151,7 +156,10 @@ Production rules:
 - do not edit migration files that have already been applied;
 - if a migration fails, stop the rollout and recover through a reviewed forward migration or the database provider's recovery facilities.
 
-The current Render build command applies forward migrations before starting the new API process.
+The current Render build command applies forward migrations and refreshes the
+canonical public showcase before starting the new API process. If the public
+directory is empty after a deployment, inspect the Render build log for the
+`showcase:refresh` step before investigating frontend assets.
 
 ### Demo cleanup
 
