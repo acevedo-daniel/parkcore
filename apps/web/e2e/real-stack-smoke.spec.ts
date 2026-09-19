@@ -226,7 +226,7 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
   await plateField.fill('cc-004');
   await expect(
     checkInSheet.getByText(
-      'Returning vehicle found. Review its vehicle details before starting the session.',
+      'A previously registered vehicle was found. Review its details before starting the stay.',
       { exact: true },
     ),
   ).toBeVisible();
@@ -449,7 +449,7 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
   await duplicateSheet.getByRole('textbox', { exact: true, name: 'Plate' }).fill('CC000');
   await expect(
     duplicateSheet.getByText(
-      'Returning vehicle found. Review its vehicle details before starting the session.',
+      'A previously registered vehicle was found. Review its details before starting the stay.',
       { exact: true },
     ),
   ).toBeVisible();
