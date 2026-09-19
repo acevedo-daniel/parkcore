@@ -3,6 +3,7 @@ node_modules/
 
 # Environment
 **/.env
+**/.env.*
 !**/.env.example
 
 # Logs
@@ -23,9 +24,15 @@ Thumbs.db
 
 # Build
 **/dist/
+**/build/
 **/coverage/
+*.tsbuildinfo
 **/test-results/
 **/playwright-report/
+
+# CI and local tool diagnostics
+.ci/
+.ruff_cache/
 
 # Temporary source assets
 temp/
