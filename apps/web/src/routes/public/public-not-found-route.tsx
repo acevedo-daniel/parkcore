@@ -21,7 +21,7 @@ export function PublicNotFoundRoute() {
           404
         </p>
         <h1
-          className="mt-6 max-w-3xl font-display text-5xl font-black leading-[0.92] tracking-[-0.065em] text-foreground sm:text-7xl"
+          className="mt-6 max-w-full break-words font-display text-5xl font-black leading-[0.92] tracking-[-0.065em] text-foreground sm:text-7xl"
           id="public-not-found-title"
         >
           {t('public.notFound.title')}

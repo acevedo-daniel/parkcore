@@ -100,7 +100,10 @@ export function ParkingDetailRoute() {
           {t('public.detail.back')}
         </Link>
 
-        <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:items-start">
+        <div
+          className="mt-10 grid gap-8 lg:grid-cols-12 lg:gap-x-10 lg:gap-y-8 lg:items-start"
+          data-slot="parking-detail-layout"
+        >
           <header className="min-w-0 lg:col-span-7">
             {parking.isShowcase ? (
               <span className="mb-4 inline-flex rounded-full border border-accent-strong bg-accent-soft px-3 py-1.5 text-xs font-bold text-foreground">
@@ -127,7 +130,10 @@ export function ParkingDetailRoute() {
             </p>
           </header>
 
-          <aside className="min-w-0 rounded-[2rem_2rem_4rem_2rem] border border-border bg-surface p-6 shadow-hover lg:col-span-4 lg:col-start-9">
+          <aside
+            className="min-w-0 rounded-[2rem_2rem_4rem_2rem] border border-border bg-surface p-6 shadow-hover lg:col-span-4 lg:col-start-9 lg:row-span-2"
+            data-slot="parking-detail-summary"
+          >
             <p className="type-label text-foreground-muted">{t('public.detail.essentials')}</p>
             <div className="mt-6 grid gap-5 border-y border-border-subtle py-5 sm:grid-cols-2 lg:grid-cols-1">
               <div>
@@ -190,10 +196,10 @@ export function ParkingDetailRoute() {
               </p>
             ) : null}
           </aside>
-        </div>
-
-        <div className="mt-12 grid gap-8 md:grid-cols-12">
-          <div className="min-w-0 aspect-[16/10] overflow-hidden rounded-[2.5rem_2.5rem_5rem_2.5rem] border border-border bg-surface-emphasis md:col-span-7">
+          <div
+            className="min-w-0 aspect-[16/10] overflow-hidden rounded-[2.5rem_2.5rem_5rem_2.5rem] border border-border bg-surface-emphasis lg:col-span-7 lg:row-start-2"
+            data-slot="parking-detail-hero-image"
+          >
             <PublicParkingImage
               alt={t('parking.discoveryImageAlt', { title: parking.title })}
               fetchPriority="high"
@@ -203,14 +209,16 @@ export function ParkingDetailRoute() {
               variant="detail"
             />
           </div>
+        </div>
 
-          <div className="grid min-w-0 gap-6 md:col-span-5 md:col-start-8 wide:col-span-4 wide:col-start-9">
-            <section className="min-w-0 rounded-[2rem] border border-border bg-surface p-6 sm:p-7">
-              <p className="type-label text-foreground-muted">{t('public.detail.about')}</p>
-              <p className="mt-4 text-base leading-relaxed text-foreground-secondary">
-                {parking.description ?? t('public.detail.missingDescription')}
-              </p>
-            </section>
+        <div className="mt-8 grid gap-8 md:grid-cols-12">
+          <section className="min-w-0 rounded-[2rem] border border-border bg-surface p-6 sm:p-7 md:col-span-7">
+            <p className="type-label text-foreground-muted">{t('public.detail.about')}</p>
+            <p className="mt-4 text-base leading-relaxed text-foreground-secondary">
+              {parking.description ?? t('public.detail.missingDescription')}
+            </p>
+          </section>
+          <div className="min-w-0 md:col-span-5 md:col-start-8 wide:col-span-4 wide:col-start-9">
             <ParkingCalculatorWidget className="min-w-0 max-w-none" parking={parking} />
           </div>
         </div>

@@ -111,7 +111,7 @@ describe('public parking catalog', () => {
     api.getPublicParkings.mockRejectedValueOnce(new Error('Offline'));
     renderCatalog();
     await waitFor(() => {
-      expect(screen.getByRole('alert').textContent).toContain('We could not load active parkings.');
+      expect(screen.getByRole('alert').textContent).toContain('We could not load the directory.');
     });
   });
 
@@ -205,8 +205,8 @@ describe('public parking catalog', () => {
     renderCatalog('/parkings?search=old&page=3');
     await screen.findByRole('link', { name: 'Open Central Parking' });
 
-    await user.clear(screen.getByLabelText('Where are you going?'));
-    await user.type(screen.getByLabelText('Where are you going?'), 'central');
+    await user.clear(screen.getByLabelText('Where are you parking?'));
+    await user.type(screen.getByLabelText('Where are you parking?'), 'central');
     await user.selectOptions(screen.getByLabelText('Currency'), 'USD');
     await user.type(screen.getByLabelText('Min. rate (USD)'), '10');
     await user.type(screen.getByLabelText('Max. rate (USD)'), '20');

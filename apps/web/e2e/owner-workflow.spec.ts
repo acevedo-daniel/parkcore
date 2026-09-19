@@ -53,13 +53,16 @@ test('serves the SPA entry for direct public and owner routes', async ({ request
 });
 
 test('keeps public mobile navigation and main content usable with a keyboard', async ({ page }) => {
-  await page.addInitScript("localStorage.setItem('parkcore-lang', 'en');");
+  await page.addInitScript("localStorage.setItem('parkcore-lang', 'en-US');");
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
 
-  await page.locator('body').focus();
-  await page.keyboard.press('Tab');
+  await expect(
+    page.getByRole('heading', { name: 'Parking with clear information.' }),
+  ).toBeVisible();
   const skipLink = page.getByRole('link', { name: 'Skip to main content' });
+  await expect(skipLink).toBeVisible();
+  await page.locator('body').press('Tab');
   await expect(skipLink).toBeFocused();
   await expect(skipLink).toHaveCSS('outline-style', 'solid');
   await page.keyboard.press('Enter');
@@ -90,7 +93,7 @@ test('preserves an unsaved form while language and appearance change', async ({ 
   });
   await page.goto('/login');
 
-  const email = page.getByLabel('Email');
+  const email = page.getByLabel('Correo electrónico');
   await email.fill('owner@parkcore.test');
   await page.getByRole('combobox', { name: 'Apariencia' }).selectOption('dark');
 

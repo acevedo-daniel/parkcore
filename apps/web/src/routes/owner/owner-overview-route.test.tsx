@@ -113,7 +113,7 @@ describe('owner overview briefing', () => {
     ).toBeTruthy();
     expect(
       screen.getByText(
-        'Cuando crees la primera, vas a ver la ocupación, los ingresos y las estadías desde aquí.',
+        'Cuando crees tu primera cochera, verás la ocupación, los ingresos y las estadías aquí.',
       ),
     ).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Nueva cochera' }).getAttribute('href')).toBe(
@@ -244,9 +244,9 @@ describe('owner overview briefing', () => {
     ).toBeTruthy();
     expect(screen.getAllByText('N/D').length).toBeGreaterThan(0);
     expect(screen.getByRole('alert').textContent).toContain(
-      'Algunos datos de analítica no están disponibles ahora. La operación sigue visible.',
+      'Algunos datos de análisis no están disponibles ahora. La operación sigue visible.',
     );
-    expect(screen.getByRole('button', { name: 'Reintentar analítica' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Actualizar análisis' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Cocheras en operación' })).toBeTruthy();
   });
 
@@ -259,7 +259,7 @@ describe('owner overview briefing', () => {
     expect((await screen.findByRole('alert')).textContent).toContain(
       'We could not review active stays for every facility.',
     );
-    expect(screen.getByRole('button', { name: 'Retry attention' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Refresh alerts' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Operating facilities' })).toBeTruthy();
   });
 

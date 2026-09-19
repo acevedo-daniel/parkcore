@@ -63,7 +63,7 @@ export default defineConfig({
       command:
         'pnpm --filter @parkcore/api-client build && pnpm build:check && pnpm exec vite preview --host 127.0.0.1 --port 4173 --strictPort',
       cwd: webDirectory,
-      env: { ...localEnvironment, VITE_API_URL: localApiUrl },
+      env: { ...localEnvironment, VITE_API_URL: 'http://localhost:3000' },
       url: localWebUrl,
       reuseExistingServer: false,
       timeout: 120_000,

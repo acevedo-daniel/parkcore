@@ -39,7 +39,7 @@ describe('CheckInPanel', () => {
 
     expect(api.lookupVehicle).not.toHaveBeenCalled();
     expect(screen.getByRole('status').textContent).toContain(
-      'Enter at least 5 letters or numbers to look up a returning vehicle.',
+      'Enter at least 5 alphanumeric characters to look up a registered vehicle.',
     );
 
     await user.type(plateInput, '3');
@@ -65,7 +65,7 @@ describe('CheckInPanel', () => {
     await user.type(screen.getByLabelText('Plate'), 'ab-123 cd');
     await waitFor(() => {
       expect(screen.getByRole('status').textContent).toContain(
-        'Returning vehicle found. Review its vehicle details before starting the session.',
+        'A previously registered vehicle was found. Review its details before starting the stay.',
       );
     });
 

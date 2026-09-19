@@ -59,7 +59,7 @@ export function ParkingCalculatorWidget({ className, parking }: ParkingCalculato
     <section
       aria-labelledby={titleId}
       className={cn(
-        'relative w-full max-w-[460px] rounded-[var(--radius-xl)] border border-border bg-surface-raised p-6 text-foreground shadow-hover sm:p-8',
+        'relative w-full max-w-[460px] @container rounded-[var(--radius-xl)] border border-border bg-surface-raised p-6 text-foreground shadow-hover sm:p-8',
         className,
       )}
     >
@@ -198,12 +198,12 @@ function CalculatorForm({
   return (
     <>
       <div className="rounded-[var(--radius-lg)] border border-border bg-surface-subtle p-4 transition-colors focus-within:border-primary focus-within:bg-surface">
-        <div className="flex items-center gap-3">
+        <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-2 @sm:flex @sm:items-center @sm:gap-3">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
             <MapPin aria-hidden="true" className="size-3.5" />
           </span>
           <Combobox
-            className="min-w-0 flex-1"
+            className="public-discovery-combobox min-w-0 @sm:flex-1"
             id="estimate-facility"
             key={facilities.map((facility) => facility.id).join('|')}
             label={t('calculator.facility')}
@@ -213,7 +213,7 @@ function CalculatorForm({
             options={facilities.map((facility) => ({ label: facility.title, value: facility.id }))}
             value={selectedId}
           />
-          <span className="shrink-0 text-right">
+          <span className="col-start-2 flex items-baseline justify-end gap-1 text-right @sm:block @sm:shrink-0">
             <span className="font-mono text-xs font-bold tabular-nums text-foreground">
               {formatMoney(selectedFacility.hourlyRateCents, selectedFacility.currency, locale)}
             </span>
@@ -234,12 +234,12 @@ function CalculatorForm({
             {durationSummary}
           </span>
         </legend>
-        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-5">
+        <div className="grid grid-cols-2 gap-1.5 @sm:grid-cols-5">
           {DURATION_OPTIONS.map((option) => (
             <button
               aria-pressed={selectedDuration === option.id}
               className={cn(
-                'min-h-[var(--touch-target-min)] cursor-pointer rounded-[var(--radius-sm)] px-1 py-2 text-center text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring',
+                'min-h-[var(--touch-target-min)] min-w-0 cursor-pointer break-words whitespace-normal rounded-[var(--radius-sm)] px-1 py-2 text-center text-xs font-bold leading-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring',
                 selectedDuration === option.id
                   ? 'bg-primary text-primary-foreground'
                   : 'border border-border bg-surface text-foreground hover:bg-accent hover:text-accent-foreground',
