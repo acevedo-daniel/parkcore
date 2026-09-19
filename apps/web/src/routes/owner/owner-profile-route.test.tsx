@@ -118,7 +118,12 @@ describe('owner profile route', () => {
     expect(auth.updateUser).toHaveBeenCalledWith(updated);
     expect(email.readOnly).toBe(true);
     expect(email.getAttribute('aria-readonly')).toBe('true');
-    expect((await screen.findByRole('status')).textContent).toContain('Your profile was updated.');
+    expect(
+      await within(screen.getByRole('region', { name: 'Profile' })).findByText(
+        'Your profile was updated.',
+        { exact: true },
+      ),
+    ).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Restore demo data' })).toBeNull();
   });
 
