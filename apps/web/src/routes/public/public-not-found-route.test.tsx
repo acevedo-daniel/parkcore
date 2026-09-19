@@ -16,11 +16,11 @@ describe('PublicNotFoundRoute', () => {
       </AppearanceProvider>,
     );
 
-    expect(screen.getByRole('heading', { name: 'There is no parking here.' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'We could not find this facility.' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Explore facilities' }).getAttribute('href')).toBe(
       '/parkings',
     );
-    expect(document.title).toBe('No parking here | ParkCore');
+    expect(document.title).toBe('Facility not found | ParkCore');
     expect(document.head.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe(
       'noindex',
     );

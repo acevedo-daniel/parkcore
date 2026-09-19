@@ -184,7 +184,10 @@ describe('parking operations', () => {
       'VEHICLE_ALREADY_ACTIVE',
       'This plate already has an active stay here. Open it from the active list.',
     ],
-    ['CHECK_IN_RACE', 'The operation changed while you checked in. Refresh and try again.'],
+    [
+      'CHECK_IN_RACE',
+      'The operation changed while you were recording the vehicle. Refresh the view and try again.',
+    ],
   ] as const)('preserves form values for a %s check-in conflict', async (code, message) => {
     const user = userEvent.setup();
     api.getOwnedParkings.mockResolvedValue([parkingFixture()]);

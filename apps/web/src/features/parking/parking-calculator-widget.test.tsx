@@ -57,7 +57,7 @@ describe('ParkingCalculatorWidget', () => {
     );
     renderCalculator();
 
-    await screen.findByRole('combobox', { name: '¿A qué cochera vas?' });
+    await screen.findByRole('combobox', { name: '¿Dónde vas a estacionar?' });
     expect(screen.getByText(/31,00/)).toBeTruthy();
     expect(screen.getByRole('button', { name: '1 hora' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '2 horas' })).toBeTruthy();
@@ -73,21 +73,21 @@ describe('ParkingCalculatorWidget', () => {
       'true',
     );
     const durationInput = screen.getByLabelText('Duración en minutos');
-    expect(screen.getByText('Completa la duración para estimar')).toBeTruthy();
+    expect(screen.getByText('Completa la duración para calcular el costo')).toBeTruthy();
 
     await user.type(durationInput, '61');
     expect(screen.getByText(/31,00/)).toBeTruthy();
     expect(screen.getByText('2 horas facturadas')).toBeTruthy();
     expect(
       screen.getByText(
-        'Estimación según la tarifa actual. El importe final depende de la duración real de la estadía.',
+        'Cálculo según la tarifa actual. El importe final depende de la duración real de la estadía.',
       ),
     ).toBeTruthy();
 
     await user.clear(durationInput);
     await user.type(durationInput, '0');
     expect(screen.getByText('Usa un número entero de minutos mayor que 0.')).toBeTruthy();
-    expect(screen.getByText('Completa la duración para estimar')).toBeTruthy();
+    expect(screen.getByText('Completa la duración para calcular el costo')).toBeTruthy();
   });
 
   it('updates the rate and estimate when the selected facility changes', async () => {
@@ -100,7 +100,7 @@ describe('ParkingCalculatorWidget', () => {
     );
     renderCalculator();
 
-    const facilityInput = await screen.findByRole('combobox', { name: '¿A qué cochera vas?' });
+    const facilityInput = await screen.findByRole('combobox', { name: '¿Dónde vas a estacionar?' });
     await user.click(facilityInput);
     await user.click(screen.getByRole('option', { name: 'North Garage' }));
 
@@ -119,7 +119,7 @@ describe('ParkingCalculatorWidget', () => {
     api.getPublicParkings.mockResolvedValue(listFixture([first, second]));
     const queryClient = renderCalculator();
 
-    const facilityInput = await screen.findByRole('combobox', { name: '¿A qué cochera vas?' });
+    const facilityInput = await screen.findByRole('combobox', { name: '¿Dónde vas a estacionar?' });
     await user.click(facilityInput);
     await user.click(screen.getByRole('option', { name: 'North Garage' }));
 

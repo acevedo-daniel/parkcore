@@ -220,13 +220,15 @@ describe('authentication forms', () => {
 
     expect(screen.getByLabelText('Contraseña')).toBeTruthy();
     await user.click(screen.getByRole('button', { name: 'Ingresar' }));
-    expect(await screen.findByText('Ingresa un email válido.')).toBeTruthy();
+    expect(await screen.findByText('Ingresa un correo electrónico válido.')).toBeTruthy();
 
-    await user.type(screen.getByLabelText('Email'), 'owner@example.com');
+    await user.type(screen.getByLabelText('Correo electrónico'), 'owner@example.com');
     await user.type(screen.getByLabelText('Contraseña'), 'wrong-password');
     await user.click(screen.getByRole('button', { name: 'Ingresar' }));
 
-    expect(await screen.findByText('El email o la contraseña no son correctos.')).toBeTruthy();
+    expect(
+      await screen.findByText('El correo electrónico o la contraseña no son correctos.'),
+    ).toBeTruthy();
   });
 
   it('changes shared copy without losing entered form state', async () => {
@@ -241,7 +243,10 @@ describe('authentication forms', () => {
     await user.type(screen.getByLabelText('Email'), 'owner@example.com');
     await user.click(screen.getByRole('button', { name: 'Español' }));
 
-    expect(screen.getByLabelText('Email')).toHaveProperty('value', 'owner@example.com');
+    expect(screen.getByLabelText('Correo electrónico')).toHaveProperty(
+      'value',
+      'owner@example.com',
+    );
     expect(screen.getByLabelText('Contraseña')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Ingresar' })).toBeTruthy();
   });

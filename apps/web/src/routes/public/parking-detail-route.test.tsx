@@ -145,7 +145,7 @@ describe('public parking detail', () => {
 
     expect(
       await screen.findByText(
-        'This facility has not added a public description yet. Its rate, address, and capacity are available above.',
+        'This facility does not have a public description yet. Its rate, address, and capacity appear above.',
       ),
     ).toBeTruthy();
   });

@@ -91,7 +91,7 @@ describe('ParkingForm', () => {
     await user.click(timezone);
     await user.keyboard('{ArrowDown}{Enter}');
 
-    const imageInput = screen.getByLabelText('Image URL');
+    const imageInput = screen.getByLabelText('Facility image URL');
     await user.type(imageInput, 'https://example.com/parking.jpg');
     const image = await screen.findByRole('img', { name: 'Facility image preview' });
     expect(image.getAttribute('src')).toBe('https://example.com/parking.jpg');
