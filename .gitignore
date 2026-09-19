@@ -26,6 +26,10 @@ Thumbs.db
 **/coverage/
 **/test-results/
 **/playwright-report/
+
+# Temporary source assets
+temp/
+
 apps/api/prisma/generated/
 
 docs-local
