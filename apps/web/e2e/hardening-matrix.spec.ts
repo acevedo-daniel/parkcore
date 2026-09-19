@@ -1194,7 +1194,7 @@ test('covers owner management, history, profile, and recovery interactions', asy
       await createButton.click();
       await expect(page.locator('[aria-invalid="true"]').first()).toBeFocused();
 
-      const imageInput = page.getByLabel(/image url|url de imagen/i);
+      const imageInput = page.getByLabel(/image url|url de la imagen/i);
       await imageInput.fill('https://example.com/invalid-parking.jpg');
       await expect(page.getByRole('status')).toContainText(
         /could not load this image|no pudimos cargar esta imagen/i,

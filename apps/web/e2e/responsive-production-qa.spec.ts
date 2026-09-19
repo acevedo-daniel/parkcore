@@ -222,7 +222,9 @@ test('keeps the deployed public and owner surfaces usable at production viewport
           page,
           theme,
           '/',
-          page.getByRole('heading', { name: /Parking,\s*under control/i }),
+          page.getByRole('heading', {
+            name: /Parking with clear information|Estacionar con información clara/i,
+          }),
           `${prefix} ${theme} landing`,
         );
         if (viewport.width < 768) {
@@ -241,7 +243,7 @@ test('keeps the deployed public and owner surfaces usable at production viewport
           page,
           theme,
           '/parkings',
-          page.getByRole('heading', { name: 'Facilities you can understand before you arrive.' }),
+          page.getByRole('heading', { name: 'Facilities with clear information.' }),
           `${prefix} ${theme} catalog`,
         );
         await visitWithTheme(
@@ -260,7 +262,9 @@ test('keeps the deployed public and owner surfaces usable at production viewport
       await visit(
         page,
         '/not-a-route',
-        page.getByRole('heading', { name: /No parking/i }),
+        page.getByRole('heading', {
+          name: /We could not find this facility|No encontramos esta cochera/i,
+        }),
         `${prefix} public 404`,
       );
 
@@ -280,7 +284,9 @@ test('keeps the deployed public and owner surfaces usable at production viewport
           page,
           theme,
           '/app',
-          page.getByRole('heading', { name: 'Everything important, in view.' }),
+          page.getByRole('heading', {
+            name: /Operations overview|Resumen de la operación/i,
+          }),
           `${prefix} ${theme} owner overview`,
         );
       }
@@ -296,7 +302,9 @@ test('keeps the deployed public and owner surfaces usable at production viewport
       await visit(
         page,
         '/app/parkings',
-        page.getByRole('heading', { name: 'Facilities, made clear.' }),
+        page.getByRole('heading', {
+          name: /All your facilities in one place|Todas tus cocheras, en un solo lugar/i,
+        }),
         `${prefix} owner parking list`,
       );
       await visit(

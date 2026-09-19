@@ -244,8 +244,12 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
       await page.goto('/');
       await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
       await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
-      await expect(page.getByRole('heading', { name: 'Parking, under control.' })).toBeVisible();
-      await expect(page.getByRole('heading', { name: 'Estimate a stay' })).toBeVisible();
+      await expect(
+        page.getByRole('heading', { name: 'Parking with clear information.' }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('heading', { name: 'Estimate the cost of a stay' }),
+      ).toBeVisible();
       await expect(page.getByText('Demonstration data', { exact: true })).toBeVisible();
       await expect(
         page.getByText('This is not real-time activity.', { exact: true }),
@@ -266,7 +270,7 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
           ready: async () => {
             await expect(
               page.getByRole('heading', {
-                name: 'Facilities you can understand before you arrive.',
+                name: 'Facilities with clear information.',
               }),
             ).toBeVisible();
             await expect(page.getByRole('link', { name: 'Open Showcase Central' })).toBeVisible();
@@ -369,7 +373,7 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
           path: '/not-a-public-route',
           ready: async () => {
             await expect(
-              page.getByRole('heading', { name: 'There is no parking here.' }),
+              page.getByRole('heading', { name: 'We could not find this facility.' }),
             ).toBeVisible();
             await expect(page.getByRole('link', { name: 'Explore facilities' })).toHaveAttribute(
               'href',
@@ -395,7 +399,7 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
   await expect(page.getByText('$31.00', { exact: true })).toBeVisible();
 
   await page.goto('/parkings');
-  await page.getByLabel('Where are you going?').fill('central');
+  await page.getByLabel('Where are you parking?').fill('central');
   await page.getByLabel('Currency').selectOption('USD');
   await page.getByLabel('Min. rate (USD)').fill('10');
   await page.getByLabel('Max. rate (USD)').fill('20');

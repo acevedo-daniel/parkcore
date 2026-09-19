@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const localApiUrl = 'http://127.0.0.1:3000';
+const localApiUrl = 'http://localhost:3000';
 
 interface ThemeBootstrapObservation {
   colorScheme: string;
@@ -59,7 +59,9 @@ test('serves public and protected journeys through the configured API origin', a
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/');
   await expect(
-    page.getByRole('heading', { name: /Parking,\s+(under control|bajo control)\.?/i }),
+    page.getByRole('heading', {
+      name: /Parking with clear information|Estacionar con información clara/i,
+    }),
   ).toBeVisible();
   await expect.poll(() => apiRequests.get('/parkings') ?? 0).toBeGreaterThan(0);
 
@@ -111,7 +113,7 @@ test('serves public and protected journeys through the configured API origin', a
   await page.goto('/app/parkings/new');
   await expect(page.getByRole('heading', { name: /Create|Crear/ })).toBeVisible();
   await page
-    .getByLabel(/image url|url de imagen/i)
+    .getByLabel(/image url|url de la imagen/i)
     .fill('https://example.com/parkcore-invalid-image.svg');
   await expect(page.getByRole('status')).toContainText(
     /could not load this image|no pudimos cargar esta imagen/i,
