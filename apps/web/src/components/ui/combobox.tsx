@@ -141,7 +141,9 @@ export const Combobox = forwardRef<HTMLInputElement, ComboboxProps>(function Com
     onChange?.(option.value);
     onValueChange?.(option.value, option);
     requestAnimationFrame(() => {
-      inputRef.current?.focus();
+      const input = inputRef.current;
+      input?.focus();
+      if (input) input.scrollLeft = 0;
     });
   };
 
@@ -180,7 +182,7 @@ export const Combobox = forwardRef<HTMLInputElement, ComboboxProps>(function Com
           aria-invalid={ariaInvalid}
           aria-required={ariaRequired}
           aria-labelledby={`${inputId}-label`}
-          className="min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-foreground-muted"
+          className="min-w-0 flex-1 overflow-hidden text-ellipsis bg-transparent text-foreground outline-none placeholder:text-foreground-muted"
           disabled={disabled}
           id={inputId}
           onBlur={(event) => {

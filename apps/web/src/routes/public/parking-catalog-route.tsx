@@ -332,10 +332,10 @@ function CatalogFilters({
         >
           {t('public.catalog.searchLabel')}
         </label>
-        <div className="flex items-center gap-2 rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3 focus-within:border-primary focus-within:bg-surface">
+        <div className="flex items-center gap-2 rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3 focus-within:border-focus-ring focus-within:bg-surface">
           <Search aria-hidden="true" className="size-4 shrink-0 text-foreground-muted" />
           <Input
-            className="h-12 border-0 bg-transparent px-0 focus:bg-transparent"
+            className="public-discovery-search h-12 border-0 bg-transparent px-0 focus:bg-transparent focus-visible:outline-none focus-visible:ring-0"
             defaultValue={searchParams.get('search') ?? ''}
             id={`${idPrefix}-search`}
             name="search"

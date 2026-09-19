@@ -450,6 +450,10 @@
     outline-offset: 2px !important;
   }
 
+  .public-shell .public-discovery-search:focus-visible {
+    outline: none !important;
+  }
+
   ::selection {
     background: var(--primary);
     color: var(--primary-foreground);
@@ -545,6 +549,14 @@
     transition-duration: var(--motion-fast);
     transition-property: background-color, border-color, box-shadow, color;
     transition-timing-function: var(--motion-ease-out);
+  }
+
+  /* The public search field uses one focus frame around the icon and input. */
+  .public-shell .public-discovery-search,
+  .public-shell .public-discovery-search:focus,
+  .public-shell .public-discovery-search:focus-visible {
+    border: 0 !important;
+    box-shadow: none !important;
   }
 
   @keyframes parkcore-reveal {
