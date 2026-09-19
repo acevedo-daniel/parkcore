@@ -9,6 +9,8 @@ ParkCore helps an owner run the daily state of a parking facility: manage its av
 - [Production web app](https://parkcore-app.vercel.app/)
 - [API health](https://parkcore-api.onrender.com/healthz)
 
+The public catalog uses a stable fictional `SHOWCASE` scenario. The in-app demo creates an isolated four-hour `DEMO` sandbox for owner workflows, and its facilities never appear in public discovery.
+
 ## Screenshots
 
 ### Public discovery
@@ -74,7 +76,7 @@ Prerequisites: Node.js 24, pnpm 10, and Docker Desktop.
 ```powershell
 Copy-Item apps/api/.env.example apps/api/.env
 Copy-Item apps/web/.env.example apps/web/.env
-pnpm install
+pnpm install --frozen-lockfile
 pnpm docker:up
 pnpm db:setup
 pnpm dev
@@ -86,6 +88,7 @@ On macOS or Linux, replace `Copy-Item` with `cp`. The API starts at `http://loca
 
 ```bash
 pnpm text:check
+pnpm locales:check
 pnpm format:check
 pnpm lint
 pnpm typecheck
@@ -96,7 +99,7 @@ pnpm contract:check
 pnpm build
 ```
 
-`pnpm build` requires `VITE_API_URL`; the local web `.env` supplies it after setup. CI runs quality checks, PostgreSQL-backed API checks, web tests, contract verification, a local real-stack browser workflow, a production build, and the final `CI Gate`. See [Testing](docs/TESTING.md) for test boundaries, coverage thresholds, and release verification.
+`pnpm build` requires `VITE_API_URL`; the local web `.env` supplies it after setup. CI runs authored-text and locale checks, formatting, lint and type checks, PostgreSQL-backed API checks, web tests, contract verification, local real-stack and hardening browser workflows, a fresh-database production build and startup boundary, and the final `CI Gate`. The production web artifact check also prevents server-only runtime values and database connection strings from crossing into the browser. See [Testing](docs/TESTING.md) for test boundaries, coverage thresholds, and release verification.
 
 ## Documentation
 
