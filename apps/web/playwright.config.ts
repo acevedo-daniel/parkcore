@@ -4,6 +4,7 @@ export default defineConfig({
   testDir: './e2e',
   testIgnore: [
     'hardening-matrix.spec.ts',
+    'production-preview-smoke.spec.ts',
     'real-stack-smoke.spec.ts',
     'responsive-production-qa.spec.ts',
   ],

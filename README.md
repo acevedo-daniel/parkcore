@@ -9,21 +9,25 @@ ParkCore helps an owner run the daily state of a parking facility: manage its av
 - [Production web app](https://parkcore-app.vercel.app/)
 - [API health](https://parkcore-api.onrender.com/healthz)
 
+The public catalog uses a stable fictional `SHOWCASE` scenario. The in-app demo creates an isolated four-hour `DEMO` sandbox for owner workflows, and its facilities never appear in public discovery.
+
 ## Screenshots
 
 ### Public discovery
 
-| Landing page                                                      | Public catalog                                                                                  |
-| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| ![ParkCore public landing page](docs/screenshots/public-home.png) | ![ParkCore public parking catalog with search and filters](docs/screenshots/public-catalog.png) |
+| Landing page                                                                                                | Public catalog                                                                                                             |
+| ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| ![ParkCore Spanish-first public landing page with parking cost estimator](docs/screenshots/public-home.png) | ![ParkCore public parking catalog with fictional Demo facilities, search and filters](docs/screenshots/public-catalog.png) |
 
 ### Owner operations
 
-![ParkCore owner parking overview with live occupancy and active sessions](docs/screenshots/owner-parking-overview.png)
+![ParkCore Spanish owner operations overview with live occupancy and active sessions in the light theme](docs/screenshots/owner-parking-overview.png)
 
-| Vehicle check-in                                                                                        | Checkout summary                                                                                                |
-| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| ![ParkCore owner check-in sheet with vehicle and visit information](docs/screenshots/check-in-flow.png) | ![ParkCore checkout dialog with the rate snapshot and final calculation](docs/screenshots/checkout-summary.png) |
+![ParkCore Spanish Central Corrientes parking operation with active sessions in the light theme](docs/screenshots/owner-parking-operation.png)
+
+| Vehicle check-in                                                                                                                  | Checkout summary                                                                                                               |
+| --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| ![ParkCore Spanish owner check-in sheet with a fictional vehicle and optional visitor fields](docs/screenshots/check-in-flow.png) | ![ParkCore completed Spanish checkout receipt with the confirmed rate and final amount](docs/screenshots/checkout-summary.png) |
 
 ## Key capabilities
 
@@ -74,7 +78,7 @@ Prerequisites: Node.js 24, pnpm 10, and Docker Desktop.
 ```powershell
 Copy-Item apps/api/.env.example apps/api/.env
 Copy-Item apps/web/.env.example apps/web/.env
-pnpm install
+pnpm install --frozen-lockfile
 pnpm docker:up
 pnpm db:setup
 pnpm dev
@@ -86,6 +90,7 @@ On macOS or Linux, replace `Copy-Item` with `cp`. The API starts at `http://loca
 
 ```bash
 pnpm text:check
+pnpm locales:check
 pnpm format:check
 pnpm lint
 pnpm typecheck
@@ -96,7 +101,7 @@ pnpm contract:check
 pnpm build
 ```
 
-`pnpm build` requires `VITE_API_URL`; the local web `.env` supplies it after setup. CI runs quality checks, PostgreSQL-backed API checks, web tests, contract verification, a local real-stack browser workflow, a production build, and the final `CI Gate`. See [Testing](docs/TESTING.md) for test boundaries, coverage thresholds, and release verification.
+`pnpm build` requires `VITE_API_URL`; the local web `.env` supplies it after setup. CI runs authored-text and locale checks, formatting, lint and type checks, PostgreSQL-backed API checks, web tests, contract verification, local real-stack and hardening browser workflows, a fresh-database production build and startup boundary, and the final `CI Gate`. The production web artifact check also prevents server-only runtime values and database connection strings from crossing into the browser. See [Testing](docs/TESTING.md) for test boundaries, coverage thresholds, and release verification.
 
 ## Documentation
 
