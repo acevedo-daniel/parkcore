@@ -15,17 +15,19 @@ The public catalog uses a stable fictional `SHOWCASE` scenario. The in-app demo 
 
 ### Public discovery
 
-| Landing page                                                      | Public catalog                                                                                  |
-| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| ![ParkCore public landing page](docs/screenshots/public-home.png) | ![ParkCore public parking catalog with search and filters](docs/screenshots/public-catalog.png) |
+| Landing page                                                                                                | Public catalog                                                                                                             |
+| ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| ![ParkCore Spanish-first public landing page with parking cost estimator](docs/screenshots/public-home.png) | ![ParkCore public parking catalog with fictional Demo facilities, search and filters](docs/screenshots/public-catalog.png) |
 
 ### Owner operations
 
-![ParkCore owner parking overview with live occupancy and active sessions](docs/screenshots/owner-parking-overview.png)
+![ParkCore Spanish owner operations overview with live occupancy and active sessions](docs/screenshots/owner-parking-overview.png)
 
-| Vehicle check-in                                                                                        | Checkout summary                                                                                                |
-| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| ![ParkCore owner check-in sheet with vehicle and visit information](docs/screenshots/check-in-flow.png) | ![ParkCore checkout dialog with the rate snapshot and final calculation](docs/screenshots/checkout-summary.png) |
+![ParkCore owner operations overview in dark theme](docs/screenshots/owner-operations-dark.png)
+
+| Vehicle check-in                                                                                                                  | Checkout summary                                                                                                               |
+| --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| ![ParkCore Spanish owner check-in sheet with a fictional vehicle and optional visitor fields](docs/screenshots/check-in-flow.png) | ![ParkCore completed Spanish checkout receipt with the confirmed rate and final amount](docs/screenshots/checkout-summary.png) |
 
 ## Key capabilities
 
