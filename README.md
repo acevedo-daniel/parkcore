@@ -21,9 +21,9 @@ The public catalog uses a stable fictional `SHOWCASE` scenario. The in-app demo 
 
 ### Owner operations
 
-![ParkCore Spanish owner operations overview with live occupancy and active sessions](docs/screenshots/owner-parking-overview.png)
+![ParkCore Spanish owner operations overview with live occupancy and active sessions in the light theme](docs/screenshots/owner-parking-overview.png)
 
-![ParkCore owner operations overview in dark theme](docs/screenshots/owner-operations-dark.png)
+![ParkCore Spanish Central Corrientes parking operation with active sessions in the light theme](docs/screenshots/owner-parking-operation.png)
 
 | Vehicle check-in                                                                                                                  | Checkout summary                                                                                                               |
 | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
