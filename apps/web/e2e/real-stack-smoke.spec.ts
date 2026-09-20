@@ -18,6 +18,17 @@ interface ParkingSnapshot {
   nextOpeningAt: string | null;
 }
 
+interface PublicParkingSnapshot {
+  id: string;
+  title: string;
+  isShowcase: boolean;
+}
+
+interface PublicParkingListSnapshot {
+  data: PublicParkingSnapshot[];
+  meta: { total: number };
+}
+
 interface VehicleSummary {
   id: string;
   plate: string;
@@ -73,6 +84,15 @@ async function readOwnedParking(
   return parking;
 }
 
+async function readPublicParkingList(page: Page, apiBaseUrl: string, webOrigin: string) {
+  const response = await page.request.get(`${apiBaseUrl}/parkings?limit=10`, {
+    headers: { Origin: webOrigin },
+  });
+  expect(response.status()).toBe(200);
+  expect(response.headers()['access-control-allow-origin']).toBe(webOrigin);
+  return (await response.json()) as PublicParkingListSnapshot;
+}
+
 async function expectNoHorizontalOverflow(page: Page, label: string) {
   const metrics = await page.evaluate(() => {
     const root = (
@@ -119,10 +139,54 @@ function sessionIdFromHref(href: string | null) {
 }
 
 test('proves the isolated canonical demo stay journey', async ({ page }, testInfo) => {
+  const consoleErrors: string[] = [];
+  const pageErrors: string[] = [];
+  const requestFailures: string[] = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text());
+  });
+  page.on('pageerror', (error) => {
+    pageErrors.push(error.message);
+  });
+  page.on('requestfailed', (request) => {
+    requestFailures.push(
+      `${request.method()} ${request.url()}: ${request.failure()?.errorText ?? 'failed'}`,
+    );
+  });
   await page.addInitScript(() => {
     localStorage.setItem('parkcore-lang', 'en');
     localStorage.setItem('parkcore-theme', 'light');
   });
+  await page.setViewportSize({ height: 960, width: 1440 });
+  await page.goto('/');
+  const publicAppearance = page.locator('.public-header-tools [data-slot="appearance-controls"]');
+  await expect(
+    page.getByRole('heading', { exact: true, name: 'Parking with clear information.' }),
+  ).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await publicAppearance.getByRole('combobox', { name: 'Theme' }).selectOption('dark');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await publicAppearance.getByRole('button', { exact: true, name: 'Spanish' }).click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'es-AR');
+  await expect(publicAppearance.getByRole('button', { exact: true, name: /Ingl/ })).toHaveAttribute(
+    'aria-pressed',
+    'false',
+  );
+  await publicAppearance.getByRole('button', { exact: true, name: /Ingl/ }).click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
+  await publicAppearance.getByRole('combobox', { name: 'Theme' }).selectOption('light');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+
+  await page.goto('/parkings');
+  await expect(
+    page.getByRole('heading', { exact: true, name: 'Facilities with clear information.' }),
+  ).toBeVisible();
+  const publicResults = page.getByRole('region', { name: 'Parking results' });
+  await expect(publicResults).toBeVisible();
+  await expect(publicResults.getByText('Demo', { exact: true })).toHaveCount(5);
+  await expectNoHorizontalOverflow(page, 'public catalog before demo');
+
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/login');
 
@@ -143,8 +207,37 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
   });
   const accessToken = demoLogin.accessToken;
   const headers = authHeaders(accessToken);
+  const webOrigin = new URL(page.url()).origin;
   await expect(page).toHaveURL(/\/app$/);
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
+  await expect(
+    page.getByRole('heading', { exact: true, name: 'Operations overview.' }),
+  ).toBeVisible();
+
+  const ownerMobileAppearance = page.locator(
+    '.owner-mobile-header [data-slot="appearance-controls"]',
+  );
+  await ownerMobileAppearance.getByRole('button', { exact: true, name: 'Spanish' }).click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'es-AR');
+  await ownerMobileAppearance.getByRole('button', { exact: true, name: /Ingl/ }).click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
+
+  const publicListingBeforeOperations = await readPublicParkingList(page, apiBaseUrl, webOrigin);
+  expect(publicListingBeforeOperations.meta.total).toBe(5);
+  expect(publicListingBeforeOperations.data).toHaveLength(5);
+  expect(publicListingBeforeOperations.data.every((parking) => parking.isShowcase)).toBe(true);
+  expect(JSON.stringify(publicListingBeforeOperations)).not.toMatch(
+    /ownerId|customerName|customerPhone|notes/i,
+  );
+
+  await page.goto('/parkings');
+  await expect(
+    page.getByRole('heading', { exact: true, name: 'Facilities with clear information.' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('region', { name: 'Parking results' }).getByText('Demo', { exact: true }),
+  ).toHaveCount(5);
 
   const ownedParkingsResponse = await page.request.get(`${apiBaseUrl}/parkings/me`, { headers });
   expect(ownedParkingsResponse.status()).toBe(200);
@@ -468,4 +561,35 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
     'This plate already has an active stay here. Open it from the active list.',
   );
   await expectNoHorizontalOverflow(page, 'wide dark duplicate check-in state');
+
+  await page.goto('/app/profile');
+  const restoreButton = page.getByRole('button', { exact: true, name: 'Restore demo data' });
+  await expect(restoreButton).toBeVisible();
+  await restoreButton.click();
+  const resetDialog = page.getByRole('dialog');
+  await expect(resetDialog).toBeVisible();
+  const resetResponsePromise = page.waitForResponse(
+    (response) => response.url().endsWith('/demo/reset') && response.request().method() === 'POST',
+  );
+  await resetDialog.getByRole('button', { exact: true, name: 'Restore demo data' }).click();
+  const resetResponse = await resetResponsePromise;
+  expect(resetResponse.status()).toBe(200);
+  expect((await resetResponse.json()) as { restored: boolean }).toMatchObject({ restored: true });
+  await expect(page).toHaveURL(/\/app$/);
+  await expect(
+    page.getByRole('heading', { exact: true, name: 'Operations overview.' }),
+  ).toBeVisible();
+  const restoredCentral = await readOwnedParking(page, apiBaseUrl, accessToken, central.title);
+  expect(restoredCentral).toMatchObject({
+    activeSessionCount: 4,
+    availableSpaces: 26,
+    availabilityState: 'AVAILABLE',
+  });
+
+  const unexpectedConsoleErrors = consoleErrors.filter(
+    (message) => !message.includes('status of 409 (Conflict)'),
+  );
+  expect(pageErrors, 'deployed page errors').toEqual([]);
+  expect(unexpectedConsoleErrors, 'deployed console errors').toEqual([]);
+  expect(requestFailures, 'deployed request failures').toEqual([]);
 });
