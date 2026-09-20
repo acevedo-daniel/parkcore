@@ -481,7 +481,7 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
     path: testInfo.outputPath('canonical-receipt-compact-dark.png'),
   });
 
-  await page.setViewportSize({ height: 1000, width: 1440 });
+  await page.setViewportSize({ height: 960, width: 1440 });
   await expect(page.locator('.owner-sidebar').getByRole('combobox', { name: 'Theme' })).toHaveValue(
     'dark',
   );
@@ -493,11 +493,17 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
 
   await page.getByRole('link', { exact: true, name: 'Parking operation' }).click();
   await expect(page).toHaveURL(new RegExp(`/app/parkings/${central.id}$`));
+  const ownerAppearance = page.locator('.owner-sidebar [data-slot="appearance-controls"]');
+  await ownerAppearance.getByRole('button', { exact: true, name: 'Spanish' }).click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'es-AR');
+  await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
   await expectNoHorizontalOverflow(page, 'wide dark operation');
   await page.screenshot({
-    fullPage: true,
+    fullPage: false,
     path: testInfo.outputPath('canonical-operation-wide-dark.png'),
   });
+  await ownerAppearance.getByRole('button', { exact: true, name: /Ingl/ }).click();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
 
   await page.getByRole('link', { exact: true, name: 'History' }).click();
   await expect(page).toHaveURL(new RegExp(`/app/parkings/${central.id}/sessions$`));
