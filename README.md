@@ -25,8 +25,6 @@ The public catalog uses a stable fictional `SHOWCASE` scenario. The in-app demo 
 
 ![ParkCore Spanish Central Corrientes parking operation with active sessions in the light theme](docs/screenshots/owner-parking-operation.png)
 
-![ParkCore Spanish Central Corrientes parking operation with active sessions in the dark theme](docs/screenshots/owner-parking-operation-dark.png)
-
 | Vehicle check-in                                                                                                                  | Checkout summary                                                                                                               |
 | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | ![ParkCore Spanish owner check-in sheet with a fictional vehicle and optional visitor fields](docs/screenshots/check-in-flow.png) | ![ParkCore completed Spanish checkout receipt with the confirmed rate and final amount](docs/screenshots/checkout-summary.png) |
