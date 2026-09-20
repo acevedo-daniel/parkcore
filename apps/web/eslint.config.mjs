@@ -40,6 +40,13 @@ export default defineConfig(
       },
     },
   },
+  {
+    files: ['public/**/*.js'],
+    extends: [tseslint.configs.disableTypeChecked],
+    languageOptions: {
+      globals: globals.browser,
+    },
+  },
   query.configs['flat/recommended'],
   {
     files: ['*.config.{js,mjs,cjs,ts,mts,cts}'],
