@@ -23,6 +23,7 @@ function runCleanupCommand(): void {
     cwd: repositoryRoot,
     encoding: 'utf8',
     env: process.env,
+    shell: process.platform === 'win32',
   });
 
   if (result.stdout) process.stdout.write(result.stdout);
