@@ -36,7 +36,6 @@
     "generate:openapi": "tsx src/scripts/generate-openapi.ts",
     "openapi:check": "tsx src/scripts/check-openapi.ts",
     "build:check": "pnpm build && tsx src/scripts/check-build-artifact.ts",
-    "release:readiness": "pnpm openapi:check && pnpm build:check",
     "smoke:local": "tsx src/scripts/smoke-local.ts",
     "smoke:remote": "tsx src/scripts/smoke-api.ts",
     "test": "vitest run",

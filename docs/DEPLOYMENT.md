@@ -31,7 +31,7 @@ source
 -> health / browser validation
 ```
 
-GitHub Actions verifies the source but does not deploy it directly. Render is configured to auto-deploy `main` after required checks pass.
+GitHub Actions verifies the source but does not deploy it directly. Render is configured with `autoDeployTrigger: checksPass`, so it auto-deploys `main` only after the linked branch's CI checks pass. The GitHub Actions `CI Gate` is the complete repository verification authority; the local preflight below is for early feedback only.
 
 The `Production` CI job also exercises the release boundary on a fresh,
 job-scoped PostgreSQL service. It installs from the frozen lockfile, audits
@@ -39,11 +39,13 @@ production dependencies, applies forward migrations, builds the deployable
 workspaces, checks the compiled artifacts, starts the compiled API, and runs
 the startup smoke before the service is discarded.
 
-Before a release, run:
+For local feedback before a push or pull request, you can run:
 
 ```bash
-pnpm release:readiness
+pnpm preflight
 ```
+
+This preflight is not a substitute for the CI Gate, which also runs coverage-enforced API tests, browser workflows, and the fresh-database production boundary.
 
 ## Render API
 
@@ -171,8 +173,9 @@ investigating frontend assets.
 
 ### Demo cleanup
 
-Expired DEMO sandboxes can be removed by an external scheduler or by a
-manual operator invocation:
+New demo creation opportunistically removes one bounded batch of expired
+DEMO sandboxes. No external scheduler is configured. The manual cleanup
+command remains available when an operator needs to drain a backlog:
 
 ```bash
 pnpm --filter @parkcore/api demo:cleanup

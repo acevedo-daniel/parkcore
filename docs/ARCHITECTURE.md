@@ -179,9 +179,9 @@ and seed credentials do not cross into the browser boundary.
 
 ### Browser token persistence
 
-The access token is stored in `localStorage` so an owner session survives a browser refresh. This keeps ParkCore 1.0 authentication simple, but a successful same-origin XSS attack could read that token until it expires.
+The access token is stored in `localStorage` so an owner session survives a browser refresh. For this public portfolio demo, that remains a proportionate simplicity trade-off; it is not a high-assurance security claim, and a successful same-origin XSS attack could read the token until it expires.
 
-The current frontend avoids unsafe HTML rendering, relies on React escaping, and the production web configuration applies a Content Security Policy. Moving to cookie-based sessions or refresh-token rotation would change the authentication model and is intentionally outside 1.0 release polish.
+The current frontend avoids unsafe HTML rendering, relies on React escaping, and the production web configuration restricts script sources with a Content Security Policy. These measures reduce exposure but do not remove the `localStorage` XSS risk. HttpOnly cookie sessions would require a broader authentication change, including CORS credentials and CSRF handling, without a clear benefit for the current demo threat model.
 
 ### Monorepo with independently deployed surfaces
 

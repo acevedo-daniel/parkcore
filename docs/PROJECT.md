@@ -4,7 +4,7 @@
 
 ## Product
 
-ParkCore is a parking-operations system for independent parking owners. Owners use it to manage facilities and the vehicle sessions taking place inside them; public visitors can browse explicitly listed, eligible facilities through a read-only catalog.
+ParkCore is a parking-operations system for independent parking owners, presented as a publicly deployed portfolio project and technical demo maintained mainly by its author. It models facility operations with fictional public showcase data; it is not a commercial parking service. Owners use it to manage facilities and the vehicle sessions taking place inside them; public visitors can browse explicitly listed, eligible facilities through a read-only catalog.
 
 The product focuses on the operational state of a parking facility: whether it is open for intake, how much capacity remains, which vehicles are currently inside, and how an individual stay is completed or cancelled.
 

@@ -111,7 +111,7 @@ Typical local URLs:
 | Build                    | `pnpm build`                                                  | Generate the contract and build API, client, and web.                      |
 | Production API smoke     | `SMOKE_BASE_URL=... pnpm --filter @parkcore/api smoke:remote` | Check API health and root service response.                                |
 | Verify demo cleanup      | `pnpm --filter @parkcore/api demo:cleanup:check`              | Check bounded cleanup on a disposable database only.                       |
-| Release checks           | `pnpm release:readiness`                                      | Run lint, types, coverage, contract, build, and E2E checks.                |
+| Local preflight          | `pnpm preflight`                                              | Run the local baseline; the GitHub Actions CI Gate remains authoritative.  |
 
 Additional production verification commands:
 
@@ -174,12 +174,13 @@ The seed creates a named credentialed OWNER and the stable non-credentialed SHOW
 
 The seed is designed for development/demo use, not production data. It is safe to rerun for the same identities. DEMO owners are created only by `POST /demo/login` and receive their own scenario inside the creation transaction. Reset preserves the original four-hour expiry. Expired DEMO owners are removed in bounded batches during demo creation or with `pnpm --filter @parkcore/api demo:cleanup`; neither path targets OWNER or SHOWCASE users. Protected requests for expired or deleted DEMO owners return `code=DEMO_EXPIRED`.
 
-`demo:cleanup` is suitable for a manual maintenance run or an external
-scheduled invocation. It removes no more than `DEMO_CLEANUP_BATCH_SIZE`
-expired DEMO owners per run, with a default of `10`, and can be repeated for a
-larger backlog. The CI-only `demo:cleanup:check` command creates temporary
-fixtures in a disposable database and verifies that an unexpired DEMO, an
-OWNER, and a SHOWCASE user survive the real cleanup command.
+No external scheduler is configured. Each new demo sandbox opportunistically
+removes one bounded batch of expired DEMO owners. The manual
+`demo:cleanup` command remains available to drain a backlog; each run removes
+no more than `DEMO_CLEANUP_BATCH_SIZE`, which defaults to `10`. The CI-only
+`demo:cleanup:check` command creates temporary fixtures in a disposable
+database and verifies that an unexpired DEMO, an OWNER, and a SHOWCASE user
+survive the real cleanup command.
 
 An optional `SEED_REFERENCE_TIME` can be used when reproducible session timestamps are needed. Run `pnpm --filter @parkcore/api showcase:refresh` to rebase only the canonical SHOWCASE records around the current time. Pass an ISO-8601 timestamp after `--`, or set `SHOWCASE_REFERENCE_TIME`, when a fixed reference time is required. Demo creation uses a four-hour TTL and the bounded cleanup limit configured by `DEMO_CLEANUP_BATCH_SIZE`.
 
