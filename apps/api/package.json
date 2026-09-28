@@ -1,7 +1,7 @@
 {
   "name": "@parkcore/api",
   "version": "1.0.0",
-  "description": "Parking operations system Express API and domain services.",
+  "description": "Express API and domain services for ParkCore.",
   "homepage": "https://parkcore-app.vercel.app/",
   "license": "MIT",
   "repository": {

@@ -1,7 +1,7 @@
 {
   "name": "parkcore",
   "version": "1.0.0",
-  "description": "Parking operations system for independent parking owners.",
+  "description": "Bilingual demo app for everyday parking operations.",
   "homepage": "https://parkcore-app.vercel.app/",
   "keywords": [
     "typescript",

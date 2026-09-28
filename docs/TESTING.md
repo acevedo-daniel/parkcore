@@ -1,6 +1,6 @@
 # ParkCore - Testing
 
-> Test strategy, boundaries, data setup, coverage thresholds, and CI verification for ParkCore 1.0.
+> Test strategy, boundaries, data setup, coverage thresholds, and CI verification.
 
 ## Strategy
 
@@ -160,7 +160,7 @@ pnpm contract:check
 pnpm build
 ```
 
-Use these commands for individual local checks. They are not a substitute for the complete GitHub Actions CI Gate. The generated API client must be built before web tests from a clean checkout. The API test and coverage commands need the documented PostgreSQL setup, the local real-stack command needs the isolated E2E database lifecycle, and `pnpm build` needs `VITE_API_URL`.
+Use these commands to run individual checks during development. From a clean checkout, build the generated API client before running web tests. API tests and coverage need the documented PostgreSQL setup, the local real-stack command needs the isolated E2E database, and `pnpm build` needs `VITE_API_URL`.
 
 ## Coverage thresholds
 
@@ -171,7 +171,7 @@ Vitest enforces these minimum thresholds:
 | `apps/api` |   70% |       70% |        70% |      60% |
 | `apps/web` |   65% |       65% |        65% |      55% |
 
-Coverage is a CI requirement, not a substitute for verifying the critical behaviors above.
+CI enforces these thresholds, and the critical behaviors above still need direct coverage.
 
 ## Contract verification
 
@@ -212,7 +212,7 @@ The axe gate scans the rendered `body` of each required route fixture at compact
 
 Failure traces, screenshots, videos, and the HTML report are retained under `apps/web/test-results/hardening/` and `apps/web/playwright-report/hardening/`. These are generated diagnostics and must not be committed. The deployed responsive command below remains an explicit remote check because local mocked verification cannot prove deployed CSS, browser, CDN, or API behavior.
 
-Before release, manually verify the canonical keyboard journey from public landing through directory, detail, login, owner operation, check-in, checkout, history, and profile. Include skip links, landmarks, tab order, combobox Arrow and Escape behavior, overlay focus containment and return, form error focus, autofill, 200 percent zoom, reduced motion, longest Spanish and English labels, screen-reader names for landmarks and status regions, and fixed-navigation clearance for focused content.
+For a manual accessibility check of the deployed app, follow the keyboard journey from public landing through directory, detail, login, owner operation, check-in, checkout, history, and profile. Check skip links, landmarks, tab order, combobox Arrow and Escape behavior, overlay focus containment and return, form error focus, autofill, 200 percent zoom, reduced motion, the longest Spanish and English labels, screen-reader names for landmarks and status regions, and clearance for focused content around fixed navigation.
 
 ### Local real-stack workflow
 
@@ -269,7 +269,7 @@ pnpm preflight
 
 It checks authored text, localization parity, formatting, lint, types, builds the API client needed by web tests, runs API and web tests without coverage thresholds, and checks generated-contract drift. API tests require the configured local PostgreSQL database. It does not run Playwright, the browser hardening matrix, coverage thresholds, or the fresh-database production build and startup checks.
 
-The GitHub Actions `CI Gate` is the complete repository verification authority for pushes and pull requests targeting `main`. It requires every quality, API, web, contract, browser, and production job to pass. A production-style local build also needs a valid `VITE_API_URL`.
+GitHub Actions runs this workflow for pushes and pull requests targeting `main`. The `CI Gate` job requires the quality, API, web, contract, browser, and production jobs to pass. A production-style local build also needs a valid `VITE_API_URL`.
 
 ## Related documentation
 

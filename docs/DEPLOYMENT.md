@@ -1,6 +1,6 @@
 # ParkCore - Deployment
 
-> Production topology, configuration boundaries, migrations, release flow, and validation for ParkCore 1.0.
+> Production topology, configuration boundaries, migrations, and validation.
 
 ## Production topology
 
@@ -18,34 +18,19 @@ Browser -> Vercel web -> Render API -> Neon PostgreSQL
 
 The repository keeps platform configuration at the deployment boundary through `vercel.json` and `render.yaml`.
 
-## Release flow
+## Deployment flow
 
-The intended release sequence is:
+Render is configured to deploy the API from `main` after the linked branch's checks pass (`autoDeployTrigger: checksPass`). GitHub Actions verifies the source but does not deploy it. The web app is built and served by Vercel; `vercel.json` defines its build output and routing.
 
-```text
-source
--> CI verification
--> forward database migration
--> API deployment
--> web deployment
--> health / browser validation
-```
+The `Production` CI job checks the deployment build and startup path using a fresh, job-scoped PostgreSQL service. It installs from the frozen lockfile, audits production dependencies, applies forward migrations, builds the deployable workspaces, checks the compiled artifacts, starts the compiled API, and runs the startup smoke before the database is discarded.
 
-GitHub Actions verifies the source but does not deploy it directly. Render is configured with `autoDeployTrigger: checksPass`, so it auto-deploys `main` only after the linked branch's CI checks pass. The GitHub Actions `CI Gate` is the complete repository verification authority; the local preflight below is for early feedback only.
-
-The `Production` CI job also exercises the release boundary on a fresh,
-job-scoped PostgreSQL service. It installs from the frozen lockfile, audits
-production dependencies, applies forward migrations, builds the deployable
-workspaces, checks the compiled artifacts, starts the compiled API, and runs
-the startup smoke before the service is discarded.
-
-For local feedback before a push or pull request, you can run:
+For local feedback, run:
 
 ```bash
 pnpm preflight
 ```
 
-This preflight is not a substitute for the CI Gate, which also runs coverage-enforced API tests, browser workflows, and the fresh-database production boundary.
+The CI workflow also runs coverage-enforced API tests, browser workflows, and production checks against a fresh database.
 
 ## Render API
 

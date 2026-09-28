@@ -1,17 +1,15 @@
 # ParkCore
 
-> A focused parking-operations system for independent parking owners.
+> A bilingual demo app for everyday parking operations.
 
-ParkCore helps an owner run the daily state of a parking facility: manage its availability, check vehicles in, follow active stays, and complete or cancel them with a preserved hourly rate. It also provides a read-only public catalog of active facilities. It is intentionally not a reservation marketplace or payment platform.
-
-ParkCore is a public portfolio and technical demonstration project maintained mainly by its author. Its MIT license makes the source open source under that license, but ParkCore is not operated as a community-driven open-source product and does not currently solicit or plan work around external contributions. The deployed app is a demonstration, not a commercial parking service.
+ParkCore lets owners manage facilities, check vehicles in, follow active stays, and complete or cancel them using the rate recorded at check-in. Visitors can browse facilities listed for public discovery.
 
 ## Demo
 
 - [Public web demo](https://parkcore-app.vercel.app/)
 - [API health](https://parkcore-api.onrender.com/healthz)
 
-The public catalog uses a stable fictional `SHOWCASE` scenario. The in-app demo creates an isolated four-hour `DEMO` sandbox for owner workflows, and its facilities never appear in public discovery.
+The public catalog uses a stable fictional `SHOWCASE` scenario. The in-app demo creates an isolated four-hour `DEMO` workspace for owner workflows. Its facilities never appear in public discovery.
 
 ## Screenshots
 
@@ -90,22 +88,9 @@ On macOS or Linux, replace `Copy-Item` with `cp`. The API starts at `http://loca
 
 ## Quality
 
-For a local pre-push baseline, run `pnpm preflight`. It checks authored text, localization parity, formatting, lint, types, API-client build, API and web tests, and generated-contract drift. It uses the local PostgreSQL setup for API tests and is intentionally narrower than the complete GitHub Actions `CI Gate`.
+Run `pnpm preflight` for local feedback. It checks authored text, localization parity, formatting, lint, types, API and web tests, and generated-contract drift. API tests use the local PostgreSQL setup.
 
-```bash
-pnpm text:check
-pnpm locales:check
-pnpm format:check
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm test:coverage
-pnpm --filter @parkcore/web test:e2e
-pnpm contract:check
-pnpm build
-```
-
-`pnpm build` requires `VITE_API_URL`; the local web `.env` supplies it after setup. GitHub Actions `CI Gate` is the complete repository verification authority. It includes authored-text and locale checks, formatting, lint and type checks, PostgreSQL-backed API checks, web tests, contract verification, local real-stack and hardening browser workflows, and a fresh-database production build and startup boundary. The production web artifact check also prevents server-only runtime values and database connection strings from crossing into the browser. See [Testing](docs/TESTING.md) for test boundaries and CI coverage.
+The GitHub Actions workflow also runs coverage-enforced API tests, browser workflows, and production build and startup checks against a fresh database. A local `pnpm build` requires `VITE_API_URL`, which is set in the web `.env` after setup. See [Testing](docs/TESTING.md) for the test strategy and CI jobs.
 
 ## Documentation
 

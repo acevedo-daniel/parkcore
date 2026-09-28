@@ -1,6 +1,6 @@
 # ParkCore - Development
 
-> Local setup, environment configuration, workspace commands, and database workflow for ParkCore 1.0.
+> Local setup, environment configuration, workspace commands, and database workflow.
 
 ## Requirements
 
@@ -111,7 +111,7 @@ Typical local URLs:
 | Build                    | `pnpm build`                                                  | Generate the contract and build API, client, and web.                      |
 | Production API smoke     | `SMOKE_BASE_URL=... pnpm --filter @parkcore/api smoke:remote` | Check API health and root service response.                                |
 | Verify demo cleanup      | `pnpm --filter @parkcore/api demo:cleanup:check`              | Check bounded cleanup on a disposable database only.                       |
-| Local preflight          | `pnpm preflight`                                              | Run the local baseline; the GitHub Actions CI Gate remains authoritative.  |
+| Local preflight          | `pnpm preflight`                                              | Run the main local checks for early feedback.                              |
 
 Additional production verification commands:
 

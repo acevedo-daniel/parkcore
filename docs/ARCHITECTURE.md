@@ -1,6 +1,6 @@
 # ParkCore - Architecture
 
-> System boundaries, dependency rules, contract flow, persistence model, and architectural trade-offs for ParkCore 1.0.
+> System boundaries, dependency rules, contract flow, persistence model, and architectural trade-offs.
 
 ## Summary
 
@@ -141,7 +141,7 @@ The Vercel build receives the public `VITE_API_URL`. Render receives backend run
 
 Provider-specific SDKs are not part of the application architecture; hosting configuration stays at the deployment boundary.
 
-### Production release boundary
+### Production runtime checks
 
 The API parses its runtime environment before binding its listener. Production
 requires a database connection, a JWT signing secret of at least 32
@@ -179,9 +179,9 @@ and seed credentials do not cross into the browser boundary.
 
 ### Browser token persistence
 
-The access token is stored in `localStorage` so an owner session survives a browser refresh. For this public portfolio demo, that remains a proportionate simplicity trade-off; it is not a high-assurance security claim, and a successful same-origin XSS attack could read the token until it expires.
+The access token is stored in `localStorage` so an owner session survives a browser refresh. A successful same-origin XSS attack could read the token until it expires.
 
-The current frontend avoids unsafe HTML rendering, relies on React escaping, and the production web configuration restricts script sources with a Content Security Policy. These measures reduce exposure but do not remove the `localStorage` XSS risk. HttpOnly cookie sessions would require a broader authentication change, including CORS credentials and CSRF handling, without a clear benefit for the current demo threat model.
+The frontend avoids unsafe HTML rendering, relies on React escaping, and the production web configuration restricts script sources with a Content Security Policy. These measures reduce exposure but do not remove the `localStorage` risk. An HttpOnly cookie design would also require credentialed CORS and CSRF protections, so it would involve changes beyond token storage.
 
 ### Monorepo with independently deployed surfaces
 
