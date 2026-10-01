@@ -60,6 +60,6 @@
     "release:readiness": "pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm contract:check && pnpm build && pnpm --filter @parkcore/web test:e2e"
   },
   "devDependencies": {
-    "prettier": "3.9.6"
+    "prettier": "3.9.9"
   }
 }
