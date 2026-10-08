@@ -1,7 +1,7 @@
 {
   "name": "parkcore",
   "version": "1.0.0",
-  "description": "Parking operations system for independent parking owners.",
+  "description": "Bilingual demo app for everyday parking operations.",
   "homepage": "https://parkcore-app.vercel.app/",
   "keywords": [
     "typescript",
@@ -25,11 +25,17 @@
   "packageManager": "pnpm@10.33.0",
   "pnpm": {
     "overrides": {
+      "brace-expansion@^2": "2.1.7",
+      "brace-expansion@^5": "5.0.12",
       "deepmerge-ts": "8.0.0",
-      "fast-uri": "3.1.7",
+      "fast-copy": "4.1.0",
+      "fast-uri": "3.1.8",
+      "ip-address": "10.7.1",
       "js-yaml": "4.3.2",
       "mysql2": "3.23.1",
-      "qs": "6.16.0"
+      "proxy-addr": "2.0.8",
+      "qs": "6.16.0",
+      "source-map-js": "1.2.2"
     }
   },
   "scripts": {
@@ -45,7 +51,7 @@
     "text:check": "node scripts/check-authored-text.mjs",
     "tokens:check": "node scripts/check-design-tokens.mjs",
     "assets:canonical": "node scripts/generate-canonical-assets.mjs",
-    "format:check": "pnpm -r --filter @parkcore/api --filter @parkcore/api-client --filter @parkcore/web format:check && prettier --check README.md docs .github docker-compose.yml package.json pnpm-workspace.yaml render.yaml vercel.json",
+    "format:check": "pnpm -r --filter @parkcore/api --filter @parkcore/api-client --filter @parkcore/web format:check && prettier --check README.md SECURITY.md docs .github scripts docker-compose.yml docker-compose.e2e.yml docker-compose.preflight.yml package.json pnpm-workspace.yaml render.yaml vercel.json",
     "contract:generate": "pnpm --filter @parkcore/api generate:openapi && pnpm --filter @parkcore/api-client generate",
     "contract:check": "pnpm contract:generate && git diff --exit-code -- apps/api/openapi.json packages/api-client/src/generated/schema.ts",
     "openapi:check": "pnpm --filter @parkcore/api openapi:check",
@@ -57,9 +63,10 @@
     "e2e:local:db:up": "docker compose -f docker-compose.e2e.yml up -d --wait",
     "e2e:local:db:down": "docker compose -f docker-compose.e2e.yml down -v --remove-orphans",
     "db:setup": "pnpm --filter @parkcore/api db:setup",
-    "release:readiness": "pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm contract:check && pnpm build && pnpm --filter @parkcore/web test:e2e"
+    "preflight": "node scripts/preflight.mjs",
+    "test:scripts": "node --test scripts/check-authored-text.test.mjs scripts/preflight.test.mjs"
   },
   "devDependencies": {
-    "prettier": "3.9.6"
+    "prettier": "3.9.9"
   }
 }
