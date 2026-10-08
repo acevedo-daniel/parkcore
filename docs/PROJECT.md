@@ -1,18 +1,16 @@
 # ParkCore - Project
 
-> Product scope, actors, domain model, and durable business rules for ParkCore 1.0.
+> Product scope, actors, domain model, and durable business rules.
 
 ## Product
 
-ParkCore is a parking-operations system for independent parking owners. Owners use it to manage facilities and the vehicle sessions taking place inside them; public visitors can browse explicitly listed, eligible facilities through a read-only catalog.
+ParkCore is a bilingual app for everyday parking operations. Owners can manage facilities and vehicle stays, while visitors can browse facilities listed for public discovery. The catalog uses fictional `SHOWCASE` data, and the in-app demo gives each owner session its own isolated workspace.
 
 The product focuses on the operational state of a parking facility: whether it is open for intake, how much capacity remains, which vehicles are currently inside, and how an individual stay is completed or cancelled.
 
 ## Problem
 
-Running a parking facility requires a reliable current state. The operator needs to know which facilities are active, which vehicles are inside, whether capacity remains, and what rate applies to each stay.
-
-ParkCore keeps those facts together in one workflow without expanding into reservations, payment processing, customer accounts, or marketplace behavior.
+The operator needs a clear view of active facilities, vehicles on site, available capacity, and the rate attached to each stay. ParkCore brings these tasks into one workflow.
 
 ## Actors
 
@@ -71,7 +69,7 @@ Driver information can be recorded as visit data during check-in, but drivers do
 
 ## Out of scope
 
-ParkCore 1.0 intentionally does not include:
+ParkCore does not include:
 
 - reservations or advance booking;
 - payments or payment-provider integrations;
@@ -109,9 +107,7 @@ Each demo entry creates an isolated four-hour DEMO sandbox with its own canonica
 
 `Vehicle` represents stable vehicle identity within one parking.
 
-Its identity is parking-scoped: the same normalized plate may exist independently in different parking facilities. Plate normalization trims the input, uppercases it, and removes non-alphanumeric characters before identity lookup. A returning check-in reuses the vehicle only within that parking and may update type, brand, or model from the values confirmed for the visit. Customer name, phone, and notes remain visit-specific and are never copied from an earlier session.
-
-Stable vehicle metadata includes type, brand, and model. A returning vehicle can reuse that identity on a later check-in.
+Its identity is parking-scoped, so the same normalized plate may exist independently at different facilities. Plate normalization trims the input, uppercases it, and removes non-alphanumeric characters. A returning check-in can update the vehicle's type, brand, or model from the values confirmed for that visit. Customer name, phone, and notes belong to the visit and are not copied from earlier sessions.
 
 ### ParkingSession
 
@@ -141,13 +137,13 @@ An `ACTIVE` session has no `endTime`. Both terminal transitions record the time 
 
 Network analytics use the owner's IANA timezone. Parking history periods, displayed session times, and CSV timestamps use the parking's IANA timezone. Revenue summaries never combine ARS and USD amounts into one total.
 
-The protected owner overview presents a current network briefing from facility snapshots and owner-scoped analytics: active vehicles, free capacity, active and paused facilities, completed stays today, facility attention for full, nearly full, paused, and long-running active stays, plus 7-day and 30-day revenue and completed-stay trends. Facility attention opens the relevant facility operation, while a long-running stay opens its session. Revenue remains separated by currency. Summary, revenue, or volume failures degrade their local overview sections while facility operations remain available.
+The owner overview summarizes network activity: vehicles on site, free capacity, facility status, completed stays, and revenue trends. It flags full or nearly full facilities, paused facilities, and long-running stays. Revenue is shown by currency. If an analytics section is unavailable, parking operations remain accessible.
 
 ## Capacity and pricing
 
 Capacity is the maximum number of simultaneous `ACTIVE` sessions in a parking. ParkCore does not model individual physical spaces.
 
-Money is stored in integer cents. ParkCore 1.0 supports `ARS` and `USD` without exchange-rate conversion.
+Money is stored in integer cents. ParkCore supports `ARS` and `USD` without exchange-rate conversion.
 
 At check-in, the session snapshots the parking's hourly rate and currency. Checkout therefore uses the terms that applied when the stay began, even if the parking configuration changes later.
 
@@ -176,8 +172,6 @@ The public estimator applies the same started-hour rule to the facility's curren
 - An inactive parking cannot accept a new check-in.
 - A parking cannot exceed its configured number of concurrent active sessions.
 - The same parking/vehicle pair cannot have more than one active session.
-- Check-in performs capacity and duplicate-active-session validation in a serializable transaction.
-- A database-level partial unique index reinforces the one-active-session invariant for a parking/vehicle pair.
 - Checkout and cancellation transition only an `ACTIVE` session.
 - Terminal sessions retain their terminal `endTime`; cancelled sessions retain a null amount.
 - Checkout calculates from the session's stored pricing snapshot.
@@ -185,9 +179,8 @@ The public estimator applies the same started-hour rule to the facility's curren
 - History CSV exports use local-offset ISO timestamps, include the parking timezone, exclude default customer contact columns, and leave cancelled totals empty.
 - Vehicle identity is managed through the check-in workflow; there is no standalone vehicle CRUD surface.
 
-## Product limitations
+## Current limitations
 
-- `ARS` and `USD` are supported currencies in ParkCore 1.0.
 - Capacity represents concurrent vehicles, not mapped physical spaces.
 - The public experience is discovery-only: it cannot create or alter parking sessions.
 - Driver/contact data belongs to an individual stay and does not create a customer account.

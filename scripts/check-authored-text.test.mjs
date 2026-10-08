@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, rmdirSync, unlinkSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, rmdirSync, unlinkSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
 import { test } from 'node:test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { findViolations } from './check-authored-text.mjs';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, '..');
@@ -60,5 +62,32 @@ test('excludes generated and dependency content', () => {
     } catch {
       // Keep an existing build directory untouched.
     }
+  }
+});
+
+test('scans persistent local-docs buckets and excludes only local-docs/tmp', async () => {
+  const fixtureRoot = mkdtempSync(path.join(os.tmpdir(), 'parkcore-authored-text-'));
+  const forbiddenCharacter = String.fromCodePoint(0x2014);
+  const fixtures = [
+    ['execution/plan.md', `clean line\nforbidden ${forbiddenCharacter}\n`],
+    ['issues/draft.md', `forbidden ${forbiddenCharacter}\n`],
+    ['keep/decision.md', `clean\nforbidden ${forbiddenCharacter}\n`],
+    ['tmp/recovery.md', `forbidden ${forbiddenCharacter}\n`],
+  ];
+
+  try {
+    for (const [relativePath, content] of fixtures) {
+      const filePath = path.join(fixtureRoot, 'local-docs', relativePath);
+      mkdirSync(path.dirname(filePath), { recursive: true });
+      writeFileSync(filePath, content, 'utf8');
+    }
+
+    assert.deepEqual(await findViolations(fixtureRoot), [
+      'local-docs/execution/plan.md:2: U+2014 em dash',
+      'local-docs/issues/draft.md:1: U+2014 em dash',
+      'local-docs/keep/decision.md:2: U+2014 em dash',
+    ]);
+  } finally {
+    rmSync(fixtureRoot, { recursive: true, force: true });
   }
 });

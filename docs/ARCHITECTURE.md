@@ -1,6 +1,6 @@
 # ParkCore - Architecture
 
-> System boundaries, dependency rules, contract flow, persistence model, and architectural trade-offs for ParkCore 1.0.
+> System boundaries, dependency rules, contract flow, persistence model, and architectural trade-offs.
 
 ## Summary
 
@@ -47,9 +47,9 @@ This separation keeps transport concerns away from persistence and makes the API
 
 PostgreSQL is the persistence source of truth. Prisma provides the schema, generated client, and committed forward migrations.
 
-The main operational concurrency boundary is check-in. A serializable Prisma transaction reads the current parking ownership, active state, schedule, capacity, hourly rate, and currency, then normalizes and resolves the parking-scoped vehicle. It checks an existing vehicle's active session before checking capacity, so duplicate-active conflicts take precedence over full-capacity conflicts. Only after eligibility succeeds does the transaction create or update stable vehicle metadata and create the active session with the current rate and currency snapshot.
+The main operational concurrency boundary is check-in. A PostgreSQL row lock serializes check-ins and capacity edits for one parking while allowing unrelated parkings to proceed independently. The transaction reads the current parking ownership, active state, schedule, capacity, hourly rate, and currency, then normalizes and resolves the parking-scoped vehicle. It checks an existing vehicle's active session before checking capacity, so duplicate-active conflicts take precedence over full-capacity conflicts. Only after eligibility succeeds does the transaction create or update stable vehicle metadata and create the active session with the current rate and currency snapshot.
 
-The transaction owns both vehicle and session mutations. A rejected or serialization-conflicted check-in therefore cannot leave a new vehicle or stable metadata change behind. The service exposes stable conflict codes for `PARKING_INACTIVE`, `PARKING_CLOSED`, `PARKING_FULL`, `VEHICLE_ALREADY_ACTIVE`, and `CHECK_IN_RACE`; closed conflicts may include `details.nextOpeningAt`. Owner parking updates use `CAPACITY_BELOW_ACTIVE` with `details.activeSessionCount` when a capacity reduction would displace active sessions. Terminal checkout and cancellation conflicts use `SESSION_NOT_ACTIVE`.
+The transaction owns the parking lock and both vehicle and session mutations. A rejected check-in therefore cannot leave a new vehicle or stable metadata change behind. The service exposes stable conflict codes for `PARKING_INACTIVE`, `PARKING_CLOSED`, `PARKING_FULL`, `VEHICLE_ALREADY_ACTIVE`, and `CHECK_IN_RACE`; closed conflicts may include `details.nextOpeningAt`. `CHECK_IN_RACE` reports a vehicle identity collision that remains after the parking-scoped lock. Owner parking updates use the same row lock and report `CAPACITY_BELOW_ACTIVE` with `details.activeSessionCount` when a capacity reduction would displace active sessions. Terminal checkout and cancellation conflicts use `SESSION_NOT_ACTIVE`.
 
 A partial unique database index on `(parkingId, vehicleId)` where `status = 'ACTIVE'` provides a second persistence-level guard against duplicate active sessions.
 
@@ -141,7 +141,7 @@ The Vercel build receives the public `VITE_API_URL`. Render receives backend run
 
 Provider-specific SDKs are not part of the application architecture; hosting configuration stays at the deployment boundary.
 
-### Production release boundary
+### Production runtime checks
 
 The API parses its runtime environment before binding its listener. Production
 requires a database connection, a JWT signing secret of at least 32
@@ -179,9 +179,9 @@ and seed credentials do not cross into the browser boundary.
 
 ### Browser token persistence
 
-The access token is stored in `localStorage` so an owner session survives a browser refresh. This keeps ParkCore 1.0 authentication simple, but a successful same-origin XSS attack could read that token until it expires.
+The access token is stored in `localStorage` so an owner session survives a browser refresh. A successful same-origin XSS attack could read the token until it expires.
 
-The current frontend avoids unsafe HTML rendering, relies on React escaping, and the production web configuration applies a Content Security Policy. Moving to cookie-based sessions or refresh-token rotation would change the authentication model and is intentionally outside 1.0 release polish.
+The frontend avoids unsafe HTML rendering, relies on React escaping, and the production web configuration restricts script sources with a Content Security Policy. These measures reduce exposure but do not remove the `localStorage` risk. An HttpOnly cookie design would also require credentialed CORS and CSRF protections, so it would involve changes beyond token storage.
 
 ### Monorepo with independently deployed surfaces
 

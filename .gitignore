@@ -39,5 +39,5 @@ temp/
 
 apps/api/prisma/generated/
 
-docs-local
+local-docs/
 AGENTS.md
