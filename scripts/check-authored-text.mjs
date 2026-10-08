@@ -2,14 +2,14 @@
 
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, '..');
 const forbiddenCodePoint = 0x2014;
 const forbiddenCharacter = String.fromCodePoint(forbiddenCodePoint);
 
-const scannedRoots = new Set(['.github', 'apps', 'docs', 'docs-local', 'packages', 'scripts']);
+const scannedRoots = new Set(['.github', 'apps', 'docs', 'local-docs', 'packages', 'scripts']);
 
 const excludedDirectoryNames = new Set([
   '.git',
@@ -56,8 +56,13 @@ const binaryExtensions = new Set([
 function isExcluded(relativePath, entry) {
   const pathParts = relativePath.split(path.sep);
   const normalizedParts = pathParts.map((part) => part.toLowerCase());
+  const normalizedPath = normalizedParts.join('/');
   const fileName = pathParts.at(-1) ?? '';
   const lowerFileName = fileName.toLowerCase();
+
+  if (normalizedPath === 'local-docs/tmp' || normalizedPath.startsWith('local-docs/tmp/')) {
+    return true;
+  }
 
   if (normalizedParts.some((part) => excludedDirectoryNames.has(part))) {
     return true;
@@ -91,20 +96,20 @@ function isScannedRoot(relativePath) {
   return scannedRoots.has(rootName);
 }
 
-async function collectFiles(directory, relativeDirectory = '') {
+async function collectFiles(rootDirectory, directory = rootDirectory, relativeDirectory = '') {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
 
   for (const entry of entries) {
     const relativePath = path.join(relativeDirectory, entry.name);
-    const absolutePath = path.join(repositoryRoot, relativePath);
+    const absolutePath = path.join(rootDirectory, relativePath);
 
     if (entry.isSymbolicLink() || isExcluded(relativePath, entry)) {
       continue;
     }
 
     if (entry.isDirectory()) {
-      files.push(...(await collectFiles(absolutePath, relativePath)));
+      files.push(...(await collectFiles(rootDirectory, absolutePath, relativePath)));
       continue;
     }
 
@@ -116,8 +121,8 @@ async function collectFiles(directory, relativeDirectory = '') {
   return files;
 }
 
-async function findViolations() {
-  const files = await collectFiles(repositoryRoot);
+export async function findViolations(rootDirectory = repositoryRoot) {
+  const files = await collectFiles(rootDirectory);
   const violations = [];
 
   for (const file of files) {
@@ -139,15 +144,21 @@ async function findViolations() {
     });
   }
 
-  return violations;
+  return violations.sort();
 }
 
-const violations = await findViolations();
+const isDirectExecution =
+  process.argv[1] !== undefined &&
+  pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url;
 
-if (violations.length > 0) {
-  console.error('Authored text check failed:');
-  violations.forEach((violation) => console.error(`- ${violation}`));
-  process.exitCode = 1;
-} else {
-  console.log('Authored text check passed.');
+if (isDirectExecution) {
+  const violations = await findViolations();
+
+  if (violations.length > 0) {
+    console.error('Authored text check failed:');
+    violations.forEach((violation) => console.error(`- ${violation}`));
+    process.exitCode = 1;
+  } else {
+    console.log('Authored text check passed.');
+  }
 }

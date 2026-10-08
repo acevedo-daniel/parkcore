@@ -1,0 +1,14 @@
+services:
+  preflight-db:
+    image: postgres:18.1
+    environment:
+      POSTGRES_USER: parkcore
+      POSTGRES_PASSWORD: parkcore
+      POSTGRES_DB: postgres
+    ports:
+      - '127.0.0.1::5432'
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U parkcore -d postgres]
+      interval: 2s
+      timeout: 5s
+      retries: 30

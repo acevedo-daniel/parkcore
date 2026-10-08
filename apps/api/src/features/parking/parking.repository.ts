@@ -1,5 +1,6 @@
 import { prisma } from '../../config/prisma.js';
 import { Parking, Prisma } from '../../../prisma/generated/client.js';
+import { lockParkingRow } from '../../utils/parking-lock.js';
 
 const publicParkingInclude = {
   owner: { select: { kind: true } },
@@ -72,6 +73,8 @@ export const updateWithCapacityCheck = async (
 ): Promise<OwnerParkingRecord | CapacityUpdateBlocked | null> => {
   return await prisma.$transaction(
     async (tx) => {
+      await lockParkingRow(tx, id);
+
       const current = await tx.parking.findUnique({
         where: { id },
         select: { capacity: true },
@@ -89,7 +92,7 @@ export const updateWithCapacityCheck = async (
 
       return await tx.parking.update({ where: { id }, data, include: ownerParkingInclude });
     },
-    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
   );
 };
 

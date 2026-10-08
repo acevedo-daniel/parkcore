@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mockPrisma, transactionClient } = vi.hoisted(() => {
   const tx = {
+    $queryRaw: vi.fn(),
     parking: { findUnique: vi.fn(), update: vi.fn() },
     parkingSession: { count: vi.fn() },
   };
@@ -41,8 +42,9 @@ describe('parking repository capacity updates', () => {
       kind: 'capacity-blocked',
     });
     expect(mockPrisma.$transaction).toHaveBeenCalledWith(expect.any(Function), {
-      isolationLevel: 'Serializable',
+      isolationLevel: 'ReadCommitted',
     });
+    expect(transactionClient.$queryRaw).toHaveBeenCalledTimes(1);
     expect(transactionClient.parking.update).not.toHaveBeenCalled();
   });
 

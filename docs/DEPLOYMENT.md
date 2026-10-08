@@ -1,6 +1,6 @@
 # ParkCore - Deployment
 
-> Production topology, configuration boundaries, migrations, release flow, and validation for ParkCore 1.0.
+> Production topology, configuration boundaries, migrations, and validation.
 
 ## Production topology
 
@@ -18,32 +18,19 @@ Browser -> Vercel web -> Render API -> Neon PostgreSQL
 
 The repository keeps platform configuration at the deployment boundary through `vercel.json` and `render.yaml`.
 
-## Release flow
+## Deployment flow
 
-The intended release sequence is:
+Render is configured to deploy the API from `main` after the linked branch's checks pass (`autoDeployTrigger: checksPass`). GitHub Actions verifies the source but does not deploy it. The web app is built and served by Vercel; `vercel.json` defines its build output and routing.
 
-```text
-source
--> CI verification
--> forward database migration
--> API deployment
--> web deployment
--> health / browser validation
-```
+The `Production` CI job checks the deployment build and startup path using a fresh, job-scoped PostgreSQL service. It installs from the frozen lockfile, audits production dependencies, applies forward migrations, builds the deployable workspaces, checks the compiled artifacts, starts the compiled API, and runs the startup smoke before the database is discarded.
 
-GitHub Actions verifies the source but does not deploy it directly. Render is configured to auto-deploy `main` after required checks pass.
-
-The `Production` CI job also exercises the release boundary on a fresh,
-job-scoped PostgreSQL service. It installs from the frozen lockfile, audits
-production dependencies, applies forward migrations, builds the deployable
-workspaces, checks the compiled artifacts, starts the compiled API, and runs
-the startup smoke before the service is discarded.
-
-Before a release, run:
+To reproduce the complete pull-request verification locally, run:
 
 ```bash
-pnpm release:readiness
+pnpm preflight
 ```
+
+`pnpm preflight` requires Node.js 24, the pinned pnpm version, Docker Compose, and free application ports. It provisions isolated disposable PostgreSQL databases for API tests, browser E2E, and production checks, and never targets the hosted database or personal `.env` configuration. GitHub Actions runs for pull requests targeting `main` and manual dispatch; `CI Gate` requires every quality, coverage, contract, browser, and production job to succeed.
 
 ## Render API
 
@@ -171,8 +158,9 @@ investigating frontend assets.
 
 ### Demo cleanup
 
-Expired DEMO sandboxes can be removed by an external scheduler or by a
-manual operator invocation:
+New demo creation opportunistically removes one bounded batch of expired
+DEMO sandboxes. No external scheduler is configured. The manual cleanup
+command remains available when an operator needs to drain a backlog:
 
 ```bash
 pnpm --filter @parkcore/api demo:cleanup

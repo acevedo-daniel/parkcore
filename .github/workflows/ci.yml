@@ -3,15 +3,14 @@ name: CI
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   quality:
@@ -24,6 +23,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -37,8 +38,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check CI template placeholders
+        run: node scripts/check-ci-placeholders.mjs
+
+      - name: Test repository scripts
+        run: pnpm test:scripts
+
       - name: Verify authored text
         run: pnpm text:check
+
+      - name: Verify design tokens
+        run: pnpm tokens:check
 
       - name: Verify localization parity
         run: pnpm locales:check
@@ -82,6 +92,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -109,6 +121,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -126,7 +140,7 @@ jobs:
         run: pnpm --filter @parkcore/api-client build
 
       - name: Run web tests
-        run: pnpm --filter @parkcore/web test
+        run: pnpm --filter @parkcore/web test:coverage
 
   contract:
     name: Contract
@@ -136,6 +150,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -177,6 +193,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -217,6 +235,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -287,6 +307,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Prepare production diagnostics
         run: mkdir -p .ci/production
@@ -309,6 +331,11 @@ jobs:
         run: |
           set -o pipefail
           pnpm audit --prod 2>&1 | tee .ci/production/audit.log
+
+      - name: Audit the full dependency graph
+        run: |
+          set -o pipefail
+          pnpm audit --audit-level high 2>&1 | tee .ci/production/full-audit.log
 
       - name: Apply forward migrations to the fresh database
         run: |
@@ -387,18 +414,11 @@ jobs:
     steps:
       - name: Verify required jobs
         env:
-          QUALITY_RESULT: ${{ needs.quality.result }}
-          API_RESULT: ${{ needs.api_tests_integration.result }}
-          WEB_RESULT: ${{ needs.web_tests.result }}
-          CONTRACT_RESULT: ${{ needs.contract.result }}
-          E2E_RESULT: ${{ needs.real_stack_e2e.result }}
-          E2E_WEB_RESULT: ${{ needs.hardening_e2e.result }}
-          PRODUCTION_RESULT: ${{ needs.production.result }}
+          RESULTS: ${{ join(needs.*.result, ' ') }}
         run: |
-          test "$QUALITY_RESULT" = "success"
-          test "$API_RESULT" = "success"
-          test "$WEB_RESULT" = "success"
-          test "$CONTRACT_RESULT" = "success"
-          test "$E2E_RESULT" = "success"
-          test "$E2E_WEB_RESULT" = "success"
-          test "$PRODUCTION_RESULT" = "success"
+          for result in $RESULTS; do
+            if [ "$result" != "success" ]; then
+              echo "::error::A required job finished with: $result"
+              exit 1
+            fi
+          done
