@@ -145,7 +145,7 @@ describe('parking session service', () => {
       });
     });
 
-    it('rejects a non-owner and persistence conflicts', async () => {
+    it('rejects a non-owner and preserves transaction errors', async () => {
       vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockResolvedValue({
         kind: 'parking-forbidden',
       });
@@ -160,18 +160,7 @@ describe('parking session service', () => {
         },
       ) as Prisma.PrismaClientKnownRequestError;
       vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockRejectedValue(conflict);
-      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toMatchObject({
-        message: 'Check-in conflict, try again',
-        code: 'CHECK_IN_RACE',
-      });
-
-      vi.mocked(parkingSessionRepository.createActiveIfAvailable).mockRejectedValue({
-        cause: { originalCode: '40001' },
-      });
-      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toMatchObject({
-        message: 'Check-in conflict, try again',
-        code: 'CHECK_IN_RACE',
-      });
+      await expect(checkIn('owner-1', 'parking-1', checkInDto)).rejects.toBe(conflict);
 
       const duplicateActiveSession = Object.assign(
         Object.create(Prisma.PrismaClientKnownRequestError.prototype),

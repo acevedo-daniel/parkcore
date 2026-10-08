@@ -23,18 +23,6 @@ import {
   toVehicleSummary,
 } from './parking-session.schema.js';
 
-const isSerializationConflict = (error: unknown): boolean => {
-  if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034') {
-    return true;
-  }
-
-  if (typeof error !== 'object' || error === null || !('cause' in error)) return false;
-  const cause = error.cause;
-  return typeof cause === 'object' && cause !== null && 'originalCode' in cause
-    ? cause.originalCode === '40001'
-    : false;
-};
-
 const isVehicleIdentityUniqueConflict = (error: unknown): boolean => {
   if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
     return false;
@@ -100,9 +88,6 @@ export const checkIn = async (
         throw new ConflictError('Check-in conflict, try again', 'CHECK_IN_RACE');
       }
       throw new ConflictError('Vehicle is already in the parking', 'VEHICLE_ALREADY_ACTIVE');
-    }
-    if (isSerializationConflict(error)) {
-      throw new ConflictError('Check-in conflict, try again', 'CHECK_IN_RACE');
     }
     throw error;
   }

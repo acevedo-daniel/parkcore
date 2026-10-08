@@ -31,6 +31,7 @@ import {
 } from './parking-session.repository.js';
 
 const transactionClient = {
+  $queryRaw: vi.fn(),
   parking: {
     findUnique: vi.fn(),
   },
@@ -94,7 +95,7 @@ describe('parking session repository', () => {
     });
   });
 
-  it('keeps parking eligibility, vehicle identity, and session creation in one serializable transaction', async () => {
+  it('locks the parking row while checking eligibility and creating the session', async () => {
     const session = buildSessionWithVehicle();
     transactionClient.parkingSession.count.mockResolvedValue(0);
     transactionClient.parkingSession.findFirst.mockResolvedValue(null);
@@ -106,8 +107,9 @@ describe('parking session repository', () => {
     ).resolves.toEqual(session);
 
     expect(mockTransaction).toHaveBeenCalledWith(expect.any(Function), {
-      isolationLevel: 'Serializable',
+      isolationLevel: 'ReadCommitted',
     });
+    expect(transactionClient.$queryRaw).toHaveBeenCalledTimes(1);
     expect(transactionClient.parking.findUnique).toHaveBeenCalledWith({
       where: { id: 'parking-1' },
       select: {

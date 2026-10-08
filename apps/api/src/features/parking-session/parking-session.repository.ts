@@ -1,5 +1,6 @@
 import { Prisma, type ParkingSessionStatus } from '../../../prisma/generated/client.js';
 import { prisma } from '../../config/prisma.js';
+import { lockParkingRow } from '../../utils/parking-lock.js';
 import { getScheduleState } from '../../utils/timezone.js';
 import { normalizePlate } from '../vehicle/plate-normalization.js';
 import type { CheckIn, ParkingSessionFilter, VisitData } from './parking-session.schema.js';
@@ -182,6 +183,8 @@ export const createActiveIfAvailable = async (
 ): Promise<ParkingSessionWithVehicle | CheckInBlockedReason> => {
   return await prisma.$transaction(
     async (tx) => {
+      await lockParkingRow(tx, parkingId);
+
       const parking = await tx.parking.findUnique({
         where: { id: parkingId },
         select: checkInParkingSelect,
@@ -254,7 +257,7 @@ export const createActiveIfAvailable = async (
         select: parkingSessionWithVehicleSelect,
       });
     },
-    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
   );
 };
 

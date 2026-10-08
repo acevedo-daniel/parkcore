@@ -54,6 +54,11 @@ interface SessionListResponse {
   timezone: string;
 }
 
+function responseErrorCode(body: unknown): string | undefined {
+  if (typeof body !== 'object' || body === null || !('code' in body)) return undefined;
+  return typeof body.code === 'string' ? body.code : undefined;
+}
+
 describe('owner workflow integration', () => {
   let ownerId: string | undefined;
   const demoIds: string[] = [];
@@ -540,6 +545,55 @@ describe('owner workflow integration', () => {
       prisma.parkingSession.count({ where: { parkingId: parking.id, status: 'ACTIVE' } }),
     ).resolves.toBe(1);
     await expect(prisma.vehicle.count({ where: { parkingId: parking.id } })).resolves.toBe(1);
+  });
+
+  it('allows concurrent check-ins for independent parkings', async () => {
+    const suffix = randomUUID();
+    const registerResponse = await request(app)
+      .post('/auth/register')
+      .send({
+        email: `independent-check-ins-${suffix}@parkcore.test`,
+        password: 'Passw0rd!123',
+        name: 'Independent',
+        lastName: 'CheckIns',
+        timezone: 'America/Argentina/Buenos_Aires',
+      });
+    expect(registerResponse.status).toBe(201);
+    const auth = registerResponse.body as unknown as AuthResponse;
+    ownerId = auth.user.id;
+
+    const parkingIds = await Promise.all(
+      Array.from({ length: 8 }, async (_, index) => {
+        const response = await request(app)
+          .post('/parkings')
+          .set('Authorization', `Bearer ${auth.accessToken}`)
+          .send({
+            title: `Independent Parking ${String(index)} ${suffix}`,
+            neighborhood: 'Downtown',
+            address: '123 Integration Street',
+            hourlyRateCents: 1500,
+            currency: 'USD',
+            capacity: 1,
+            lat: -34.6037,
+            lng: -58.3816,
+          });
+        expect(response.status).toBe(201);
+        return (response.body as unknown as ParkingResponse).id;
+      }),
+    );
+
+    const responses = await Promise.all(
+      parkingIds.map((parkingId) =>
+        request(app)
+          .post(`/parkings/${parkingId}/sessions/check-in`)
+          .set('Authorization', `Bearer ${auth.accessToken}`)
+          .send({ plate: 'AA-111-AA', type: 'CAR' }),
+      ),
+    );
+
+    expect(
+      responses.map(({ status, body }) => ({ status, code: responseErrorCode(body) })),
+    ).toEqual(Array(8).fill({ status: 201, code: undefined }));
   });
 
   it('returns stable blocked check-in codes without mutating vehicles', async () => {
