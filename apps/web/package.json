@@ -1,7 +1,7 @@
 {
   "name": "@parkcore/web",
   "version": "1.0.0",
-  "description": "Parking operations system React web application.",
+  "description": "Bilingual React web client for ParkCore.",
   "homepage": "https://parkcore-app.vercel.app/",
   "license": "MIT",
   "repository": {

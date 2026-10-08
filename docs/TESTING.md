@@ -1,6 +1,6 @@
 # ParkCore - Testing
 
-> Test strategy, boundaries, data setup, coverage thresholds, and release verification for ParkCore 1.0.
+> Test strategy, boundaries, data setup, coverage thresholds, and CI verification.
 
 ## Strategy
 
@@ -111,7 +111,7 @@ from `.ci/production/`.
 
 ### Reliability and recovery matrix
 
-The hardening matrix treats failure recovery as a release boundary. It runs representative compact and wide viewports in both supported locales and themes, using contract-shaped API failures rather than fixture fallback.
+The hardening matrix checks failure recovery across representative compact and wide viewports in both supported locales and themes, using contract-shaped API failures rather than fixture fallback.
 
 | Failure                                         | Required recovery                                                                                                                                                     |
 | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -160,7 +160,7 @@ pnpm contract:check
 pnpm build
 ```
 
-These commands are the local equivalents of the required CI boundaries. The generated API client must be built before web tests from a clean checkout. The API coverage command needs the documented PostgreSQL setup, the local real-stack command needs the isolated E2E database lifecycle, and `pnpm build` needs `VITE_API_URL`.
+Use these commands to run individual checks during development. From a clean checkout, build the generated API client before running web tests. API tests and coverage need the documented PostgreSQL setup, the local real-stack command needs the isolated E2E database, and `pnpm build` needs `VITE_API_URL`.
 
 ## Coverage thresholds
 
@@ -171,7 +171,7 @@ Vitest enforces these minimum thresholds:
 | `apps/api` |   70% |       70% |        70% |      60% |
 | `apps/web` |   65% |       65% |        65% |      55% |
 
-Coverage is a release gate, not a substitute for verifying the critical behaviors above.
+CI enforces these thresholds, and the critical behaviors above still need direct coverage.
 
 ## Contract verification
 
@@ -212,7 +212,7 @@ The axe gate scans the rendered `body` of each required route fixture at compact
 
 Failure traces, screenshots, videos, and the HTML report are retained under `apps/web/test-results/hardening/` and `apps/web/playwright-report/hardening/`. These are generated diagnostics and must not be committed. The deployed responsive command below remains an explicit remote check because local mocked verification cannot prove deployed CSS, browser, CDN, or API behavior.
 
-Before release, manually verify the canonical keyboard journey from public landing through directory, detail, login, owner operation, check-in, checkout, history, and profile. Include skip links, landmarks, tab order, combobox Arrow and Escape behavior, overlay focus containment and return, form error focus, autofill, 200 percent zoom, reduced motion, longest Spanish and English labels, screen-reader names for landmarks and status regions, and fixed-navigation clearance for focused content.
+For a manual accessibility check of the deployed app, follow the keyboard journey from public landing through directory, detail, login, owner operation, check-in, checkout, history, and profile. Check skip links, landmarks, tab order, combobox Arrow and Escape behavior, overlay focus containment and return, form error focus, autofill, 200 percent zoom, reduced motion, the longest Spanish and English labels, screen-reader names for landmarks and status regions, and clearance for focused content around fixed navigation.
 
 ### Local real-stack workflow
 
@@ -254,31 +254,22 @@ The browser-QA command runs the real-stack workflow across Chromium, Firefox, an
 5. **E2E**: local real-stack Playwright browser workflow with PostgreSQL and failure diagnostics;
 6. **E2E / Web**: credential-free deterministic browser hardening matrix with responsive, accessibility, theme, and localization checks;
 7. **Production**: fresh-database migrations, deployable API/client/web builds, compiled startup, cleanup, and browser secret-boundary checks;
-8. **CI Gate**: the stable required check that fails when any verification job fails, is cancelled, or is skipped.
+8. **CI Gate**: the final aggregate check that fails when any verification job fails, is cancelled, or is skipped.
 
 CI runs for pushes and pull requests targeting `main`. The `CI Gate` requires
 the production job alongside the quality, test, contract, and browser jobs.
 
-## Release verification
+## Local preflight and CI Gate
 
-The root release command is:
+The root `pnpm preflight` command is an optional local baseline for early feedback:
 
 ```bash
-pnpm release:readiness
+pnpm preflight
 ```
 
-It runs:
+It checks authored text, localization parity, formatting, lint, types, builds the API client needed by web tests, runs API and web tests without coverage thresholds, and checks generated-contract drift. API tests require the configured local PostgreSQL database. It does not run Playwright, the browser hardening matrix, coverage thresholds, or the fresh-database production build and startup checks.
 
-```text
-lint
--> typecheck
--> test:coverage
--> contract:check
--> build
--> web E2E
-```
-
-Use it before treating a cross-workspace change as release-ready. A production-style build also needs a valid `VITE_API_URL`.
+GitHub Actions runs this workflow for pushes and pull requests targeting `main`. The `CI Gate` job requires the quality, API, web, contract, browser, and production jobs to pass. A production-style local build also needs a valid `VITE_API_URL`.
 
 ## Related documentation
 
