@@ -60,6 +60,6 @@
     "preflight": "pnpm text:check && pnpm locales:check && pnpm format:check && pnpm lint && pnpm typecheck && pnpm --filter @parkcore/api-client build && pnpm test && pnpm contract:check"
   },
   "devDependencies": {
-    "prettier": "3.9.6"
+    "prettier": "3.9.9"
   }
 }
