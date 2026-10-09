@@ -217,14 +217,27 @@ jobs:
       - name: Run local real-stack browser workflow
         run: pnpm --filter @parkcore/web test:e2e:local
 
+      - name: Report flaky browser tests
+        if: ${{ !cancelled() }}
+        run: |
+          report=apps/web/playwright-report/local-real-stack-results.json
+          [ -f "$report" ] || exit 0
+          jq -r '.. | objects | select(has("specs")) | .specs[] | select(any(.tests[]; .status == "flaky")) | "\(.file):\(.line) \(.title)"' "$report" \
+            | sort -u | while read -r entry; do
+                echo "::warning title=Flaky E2E test::$entry"
+                echo "- $entry" >> "$GITHUB_STEP_SUMMARY"
+              done
+
       - name: Upload browser diagnostics
-        if: failure()
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
           name: web-e2e-local-real-stack-diagnostics
           path: |
             apps/web/test-results/local-real-stack/
             apps/web/playwright-report/local-real-stack/
+            apps/web/playwright-report/local-real-stack-results.json
+          retention-days: 7
           if-no-files-found: ignore
 
   hardening_e2e:
@@ -259,14 +272,27 @@ jobs:
       - name: Run browser hardening matrix
         run: pnpm --filter @parkcore/web test:e2e:hardening
 
+      - name: Report flaky browser tests
+        if: ${{ !cancelled() }}
+        run: |
+          report=apps/web/playwright-report/hardening-results.json
+          [ -f "$report" ] || exit 0
+          jq -r '.. | objects | select(has("specs")) | .specs[] | select(any(.tests[]; .status == "flaky")) | "\(.file):\(.line) \(.title)"' "$report" \
+            | sort -u | while read -r entry; do
+                echo "::warning title=Flaky E2E test::$entry"
+                echo "- $entry" >> "$GITHUB_STEP_SUMMARY"
+              done
+
       - name: Upload browser hardening diagnostics
-        if: failure()
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
           name: web-e2e-hardening-diagnostics
           path: |
             apps/web/test-results/hardening/
             apps/web/playwright-report/hardening/
+            apps/web/playwright-report/hardening-results.json
+          retention-days: 7
           if-no-files-found: ignore
 
   production:

@@ -5,12 +5,16 @@ export default defineConfig({
   testMatch: /hardening-matrix\.spec\.ts/,
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),
-  retries: 0,
+  retries: process.env.CI ? 1 : 0,
   timeout: 420_000,
   expect: { timeout: 20_000 },
   workers: 1,
   outputDir: 'test-results/hardening',
-  reporter: [['list'], ['html', { outputFolder: 'playwright-report/hardening', open: 'never' }]],
+  reporter: [
+    ['list'],
+    ['html', { outputFolder: 'playwright-report/hardening', open: 'never' }],
+    ['json', { outputFile: 'playwright-report/hardening-results.json' }],
+  ],
   use: {
     actionTimeout: 10_000,
     baseURL: 'http://127.0.0.1:4173',

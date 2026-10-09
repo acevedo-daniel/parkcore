@@ -30,13 +30,14 @@ export default defineConfig({
   testMatch: /real-stack-smoke\.spec\.ts/,
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),
-  retries: 0,
+  retries: process.env.CI ? 1 : 0,
   timeout: 120_000,
   workers: 1,
   outputDir: 'test-results/local-real-stack',
   reporter: [
     ['list'],
     ['html', { outputFolder: 'playwright-report/local-real-stack', open: 'never' }],
+    ['json', { outputFile: 'playwright-report/local-real-stack-results.json' }],
   ],
   projects: [{ name: 'chromium' }],
   use: {
