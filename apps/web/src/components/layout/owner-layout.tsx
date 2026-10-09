@@ -101,7 +101,7 @@ export function OwnerLayout() {
         <div className="owner-account flex flex-col gap-4 border-t border-border-strong pt-5">
           <div className="flex items-center justify-between">
             <time
-              className="system-clock font-mono text-xs text-muted-foreground tabular-nums"
+              className="system-clock type-operational text-xs text-muted-foreground"
               dateTime={clock.toISOString()}
             >
               {new Intl.DateTimeFormat(locale, {

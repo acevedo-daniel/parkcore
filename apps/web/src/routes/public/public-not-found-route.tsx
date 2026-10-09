@@ -17,9 +17,7 @@ export function PublicNotFoundRoute() {
       className="min-h-page-state bg-background px-4 py-16 text-foreground sm:px-6 lg:px-8"
     >
       <div className="mx-auto max-w-3xl rounded-3xl border border-border-strong bg-card p-8 shadow-md sm:p-10">
-        <p className="font-mono text-xs font-bold tracking-eyebrow text-muted-foreground uppercase">
-          404
-        </p>
+        <p className="type-eyebrow text-muted-foreground">404</p>
         <h1
           className="mt-6 max-w-full break-words font-display text-5xl font-black leading-display tracking-display text-foreground sm:text-7xl"
           id="public-not-found-title"

@@ -323,19 +323,17 @@ export function OwnerOverviewRoute() {
           <div className="mt-6 border-t border-border-subtle pt-5">
             <p className="type-label text-muted-foreground">{t('overview.revenueToday')}</p>
             {summaryQuery.isPending ? (
-              <p className="mt-2 font-mono text-lg font-bold tabular-nums">
+              <p className="mt-2 type-operational text-lg font-bold">
                 {t('overview.loadingValue')}
               </p>
             ) : summaryQuery.isError ? (
-              <p className="mt-2 font-mono text-lg font-bold tabular-nums">
-                {t('common.notAvailable')}
-              </p>
+              <p className="mt-2 type-operational text-lg font-bold">{t('common.notAvailable')}</p>
             ) : summary?.revenueToday.length ? (
               <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2">
                 {summary.revenueToday.map(({ currency, revenueCents }) => (
                   <div className="flex items-baseline gap-2" key={currency}>
                     <span className="type-label text-muted-foreground">{currency}</span>
-                    <span className="font-mono text-lg font-bold tabular-nums">
+                    <span className="type-operational text-lg font-bold">
                       {formatMoney(revenueCents, currency, locale)}
                     </span>
                   </div>
@@ -471,7 +469,7 @@ export function OwnerOverviewRoute() {
               {([7, 30] as const).map((period) => (
                 <ToggleGroupItem
                   aria-label={t('overview.periodOption', { days: period })}
-                  className="rounded-full px-3 py-2 font-mono text-xs font-bold"
+                  className="rounded-full px-3 py-2 text-xs font-bold tabular-nums"
                   key={period}
                   value={String(period)}
                 >
@@ -492,7 +490,7 @@ export function OwnerOverviewRoute() {
               >
                 {revenueCurrencies.map((currency) => (
                   <ToggleGroupItem
-                    className="rounded-full border border-border-strong px-3 py-2 font-mono text-xs font-bold data-[state=on]:border-brand"
+                    className="rounded-full border border-border-strong px-3 py-2 text-xs font-bold data-[state=on]:border-brand"
                     key={currency}
                     value={currency}
                   >
@@ -590,7 +588,7 @@ export function OwnerOverviewRoute() {
               <div className="mt-2 flex gap-1.5 sm:gap-3">
                 {chartPoints.map((point, index) => (
                   <span
-                    className="min-w-0 flex-1 truncate text-center font-mono text-2xs text-muted-foreground"
+                    className="min-w-0 flex-1 truncate text-center font-sans text-2xs tabular-nums text-muted-foreground"
                     key={point.date}
                   >
                     {days === 30 && index % 4 !== 0 && index !== chartPoints.length - 1
@@ -626,12 +624,12 @@ export function OwnerOverviewRoute() {
                 </div>
                 {activeBarIndex !== null && chartPoints[activeBarIndex] ? (
                   <div aria-live="polite" className="text-sm text-foreground-secondary">
-                    <span className="font-mono text-xs uppercase tracking-wider text-foreground-secondary">
+                    <span className="type-label text-foreground-secondary">
                       {t('overview.selectedDay', {
                         date: formatBarDate(chartPoints[activeBarIndex].date, locale),
                       })}
                     </span>
-                    <p className="mt-1 font-mono font-bold tabular-nums">
+                    <p className="mt-1 type-operational font-bold">
                       {t('overview.selectedDayValue', {
                         revenue: formatMoney(
                           revenueForCurrency(chartPoints[activeBarIndex]),
@@ -681,7 +679,7 @@ function SummaryValue({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
       <p className="type-label text-muted-foreground">{label}</p>
-      <p className="mt-1 break-words font-mono text-lg font-bold tabular-nums">{value}</p>
+      <p className="mt-1 break-words type-operational text-lg font-bold">{value}</p>
     </div>
   );
 }

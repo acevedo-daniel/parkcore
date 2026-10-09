@@ -543,9 +543,7 @@ function FormSection({
       aria-describedby={descriptionId}
       className={`space-y-5 border-b border-border-subtle pb-8 ${wide ? 'lg:col-span-2' : ''}`}
     >
-      <legend className="break-words px-0 font-mono text-2xs font-bold uppercase tracking-eyebrow text-muted-foreground">
-        {title}
-      </legend>
+      <legend className="break-words px-0 type-label text-muted-foreground">{title}</legend>
       <p
         className="max-w-2xl break-words text-sm leading-relaxed text-foreground-secondary"
         id={descriptionId}

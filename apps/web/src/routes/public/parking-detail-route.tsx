@@ -140,7 +140,7 @@ export function ParkingDetailRoute() {
                 <p className="text-xs font-medium text-foreground-secondary">
                   {t('public.detail.hourlyRate')}
                 </p>
-                <p className="mt-1 font-mono text-2xl font-bold text-foreground">
+                <p className="mt-1 font-display text-2xl font-bold tabular-nums text-foreground">
                   {formatMoney(parking.hourlyRateCents, parking.currency, locale)}{' '}
                   <span className="text-sm">{t('public.detail.perHour')}</span>
                 </p>

@@ -18,7 +18,7 @@ const badgeVariants = cva(
         info: 'border-transparent bg-info-soft text-info-soft-foreground',
         brand: 'border-transparent bg-brand-soft text-foreground',
         plate:
-          'rounded-xs border-border-strong bg-popover px-2.5 py-1 font-mono text-sm font-bold tracking-label text-foreground shadow-xs select-all',
+          'type-code rounded-xs border-border-strong bg-popover px-2.5 py-1 text-sm font-bold text-foreground shadow-xs select-all',
       },
       size: {
         default: '',

@@ -174,7 +174,7 @@ export function LandingRoute() {
           <div className="mt-16 grid gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-3">
             {HOW_IT_WORKS_ITEMS.map((item) => (
               <article className="min-h-64 bg-card p-7 sm:p-8" key={item.number}>
-                <span className="font-mono text-xs font-bold text-muted-foreground">
+                <span className="font-display text-xs font-bold tabular-nums text-muted-foreground">
                   {item.number}
                 </span>
                 <h3 className="mt-12 max-w-48 font-display text-2xl font-bold leading-tight tracking-title">
@@ -278,7 +278,7 @@ export function LandingRoute() {
                 className="flex gap-5 rounded-xl bg-card p-5 text-foreground sm:p-6"
                 key={item.title}
               >
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary font-mono text-sm font-bold text-primary-foreground">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary font-display text-sm font-bold tabular-nums text-primary-foreground">
                   0{index + 1}
                 </span>
                 <div>

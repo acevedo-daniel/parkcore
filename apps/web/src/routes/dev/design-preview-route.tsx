@@ -99,16 +99,17 @@ const colorTokens = [
 ] as const;
 
 const typeRoles = [
-  ['type-display', 'type-display'],
-  ['type-page-title', 'type-page-title'],
-  ['type-heading', 'type-heading'],
-  ['type-section-title', 'type-section-title'],
-  ['text-base', 'text-base'],
-  ['text-sm', 'text-sm'],
-  ['type-label', 'type-label'],
-  ['type-eyebrow', 'type-eyebrow'],
-  ['type-metric', 'type-metric'],
-  ['type-operational', 'type-operational'],
+  ['Display', 'type-display', 'Aa 123'],
+  ['Page title', 'type-page-title', 'Aa 123'],
+  ['Heading', 'type-heading', 'Aa 123'],
+  ['Section title', 'type-section-title', 'Aa 123'],
+  ['Body', 'text-base', 'Aa 123'],
+  ['Small text', 'text-sm', 'Aa 123'],
+  ['Label', 'type-label', 'Aa 123'],
+  ['Eyebrow', 'type-eyebrow', 'Aa 123'],
+  ['Metric', 'type-metric', 'Aa 123'],
+  ['Operational', 'type-operational', 'Aa 123'],
+  ['Code', 'type-code', 'AB123CD'],
 ] as const;
 
 const buttonVariants = [
@@ -167,10 +168,10 @@ export function DesignPreviewRoute() {
 
       <PreviewSection title="type-scale">
         <div className="divide-y divide-border-subtle border-y border-border-subtle">
-          {typeRoles.map(([role, className]) => (
+          {typeRoles.map(([role, className, sample]) => (
             <div className="grid min-w-0 grid-cols-2 items-center gap-4 py-4" key={role}>
               <span className="type-label text-muted-foreground">{role}</span>
-              <p className={className}>Aa 123</p>
+              <p className={className}>{sample}</p>
             </div>
           ))}
         </div>

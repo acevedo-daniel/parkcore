@@ -47,7 +47,7 @@ function RouteRecovery({ notFound, owner }: { notFound: boolean; owner: boolean 
             : 'mx-auto w-full max-w-3xl rounded-2xl border border-border-strong bg-card p-8 shadow-md sm:p-10'
         }
       >
-        <p className="font-mono text-xs font-bold tracking-eyebrow text-muted-foreground uppercase">
+        <p className="type-eyebrow text-muted-foreground">
           {notFound ? '404' : t('route.error.attention')}
         </p>
         <h1

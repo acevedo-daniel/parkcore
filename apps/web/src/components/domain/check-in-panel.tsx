@@ -200,7 +200,7 @@ export function CheckInPanel({
       <FormField error={errors.plate?.message} htmlFor="check-in-plate" label={t('checkIn.plate')}>
         <Input
           autoComplete="off"
-          className="font-mono font-bold tracking-widest"
+          className="type-code font-bold tracking-widest"
           id="check-in-plate"
           placeholder={t('checkIn.platePlaceholder')}
           {...register('plate')}

@@ -62,7 +62,7 @@ export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps)
             <span className="block text-xs font-medium text-muted-foreground">
               {t('parking.hourlyRate')}
             </span>
-            <span className="font-mono text-lg font-bold tabular-nums">
+            <span className="type-operational text-lg font-bold">
               {formatMoney(parking.hourlyRateCents, parking.currency, locale)}
               <span className="text-xs font-medium"> / h</span>
             </span>

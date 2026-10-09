@@ -245,7 +245,7 @@ export function OwnerParkingOverviewRoute() {
               <Plus aria-hidden="true" className="size-4" /> {t('parkingOperation.checkIn')}{' '}
               <kbd
                 aria-hidden="true"
-                className="ml-1 rounded border border-border-strong px-1.5 py-0.5 font-mono text-2xs"
+                className="ml-1 type-code rounded border border-border-strong px-1.5 py-0.5 text-2xs"
               >
                 N
               </kbd>
@@ -326,7 +326,7 @@ export function OwnerParkingOverviewRoute() {
             </InputGroupAddon>
             <InputGroupInput
               aria-label={t('parkingOperation.searchPlate')}
-              className="h-12 rounded-full border-0 bg-transparent font-mono font-semibold"
+              className="h-12 rounded-full border-0 bg-transparent type-code font-semibold"
               id="active-session-plate"
               onChange={(event) => {
                 setPlateSearch(event.target.value);

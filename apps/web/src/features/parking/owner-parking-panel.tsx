@@ -95,7 +95,7 @@ function FacilityIdentity({ identifier, parking }: { identifier: number; parking
       </p>
       <p className="mt-4 text-sm text-foreground-secondary">
         <span className="type-label mr-2 text-muted-foreground">{t('ownerParkings.rate')}</span>
-        <span className="font-mono font-semibold tabular-nums">
+        <span className="type-operational font-semibold">
           {formatMoney(parking.hourlyRateCents, parking.currency, locale)}
         </span>{' '}
         <span>{t('parking.perHour')}</span>
@@ -134,14 +134,14 @@ function OccupancySummary({
       <div className="flex min-w-0 items-end justify-between gap-3">
         <div className="min-w-0">
           <p className="type-label text-muted-foreground">{t('ownerParkings.occupancy')}</p>
-          <p className="mt-2 break-words font-mono text-lg font-bold tabular-nums">
+          <p className="mt-2 break-words type-operational text-lg font-bold">
             {t('ownerParkings.occupancyValue', {
               active: activeSessionCount,
               capacity,
             })}
           </p>
         </div>
-        <span className="shrink-0 font-mono text-sm font-bold tabular-nums text-foreground-secondary">
+        <span className="shrink-0 type-operational text-sm font-bold text-foreground-secondary">
           {occupancyPercent}%
         </span>
       </div>

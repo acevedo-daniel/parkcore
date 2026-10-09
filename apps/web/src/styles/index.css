@@ -116,6 +116,7 @@
   --tracking-section: var(--tracking-section);
   --tracking-body: var(--tracking-body);
   --tracking-label: var(--tracking-label);
+  --tracking-code: var(--tracking-code);
   --tracking-eyebrow: var(--tracking-eyebrow);
   --tracking-operational: var(--tracking-operational);
 
@@ -318,9 +319,10 @@
   --tracking-heading: -0.025em;
   --tracking-section: -0.01em;
   --tracking-body: -0.005em;
-  --tracking-label: 0.08em;
-  --tracking-eyebrow: 0.16em;
-  --tracking-operational: 0.02em;
+  --tracking-label: 0.01em;
+  --tracking-eyebrow: 0.08em;
+  --tracking-operational: 0;
+  --tracking-code: 0.035em;
 
   --font-weight-normal: 400;
   --font-weight-medium: 500;
@@ -481,25 +483,23 @@
 }
 
 @utility type-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: var(--text-xs);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: var(--tracking-label);
-  line-height: var(--leading-tight);
-  text-transform: uppercase;
+  line-height: var(--leading-normal);
 }
 
 @utility type-eyebrow {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: var(--text-2xs);
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: var(--tracking-eyebrow);
-  line-height: var(--leading-tight);
-  text-transform: uppercase;
+  line-height: var(--leading-normal);
 }
 
 @utility type-metric {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: var(--text-metric);
   font-weight: 700;
   letter-spacing: var(--tracking-display);
@@ -508,8 +508,14 @@
 }
 
 @utility type-operational {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   letter-spacing: var(--tracking-operational);
+  font-variant-numeric: tabular-nums;
+}
+
+@utility type-code {
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-code);
   font-variant-numeric: tabular-nums;
 }
 

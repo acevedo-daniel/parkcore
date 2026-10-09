@@ -27,10 +27,10 @@ Language selects copy; locale formats dates, numbers, and currency; register set
 
 ## Visual rules
 
-- Typography roles: Outfit sets display, page-title, and heading styles through `type-display`, `type-page-title`, `type-heading`, and `type-section-title`. Nunito Sans carries interface and body copy at 16px `--text-base`, with small text at `text-sm`. JetBrains Mono is reserved for labels, eyebrows, metrics, plates, and operational values, with tabular numerals where values must scan quickly.
+- Typography roles: Outfit sets display, page-title, heading, eyebrow, and metric styles through `type-display`, `type-page-title`, `type-heading`, `type-section-title`, `type-eyebrow`, and `type-metric`. Nunito Sans carries interface, labels, body copy, and operational values. Use tabular numerals for values that need to scan quickly. Reserve JetBrains Mono for vehicle plates, keyboard shortcuts, and short identifiers through `type-code`.
 - Color character: Keep ParkCore yellow as the brand anchor against warm neutrals and ink. Use a softened gold for selected brand surfaces, blue-teal for information and focus, forest green for success, amber for warnings, and brick red for destructive states. Reuse those hues in charts and keep semantic colors local to status.
 - Accent usage: Use `brand` only on the landing hero band, login brand panel, empty-state media, selected segmented options, and route loading bar. Keep at most one brand surface per view and never use brand for body text. Use neutral `accent` for hover and selected menu or ghost-control surfaces.
-- Shape character: Controls use `rounded-md` (10px), cards use `rounded-lg` (12px), dialogs and sheets use `rounded-xl` (16px), marketing panels use `rounded-3xl` (32px), and plates use `rounded-xs` (4px). Reserve pills for badges, status, filters, and icon-only header buttons. The signature panel uses three 32px corners and a 64px bottom-right corner.
+- Shape character: Buttons use `rounded-lg` (12px); fields and compact controls use `rounded-md` (10px); cards use `rounded-lg` (12px); dialogs and sheets use `rounded-xl` (16px); marketing panels use `rounded-3xl` (32px); plates use `rounded-xs` (4px). Reserve pill shapes for badges, status, navigation actions, and segmented filters. The signature panel uses three 32px corners and a 64px bottom-right corner.
 - Depth: Static surfaces use a border without a shadow. Controls use `shadow-xs`; clickable discovery cards use `shadow-md` on hover; menus and popovers use `shadow-lg`; dialogs and sheets use `shadow-xl`.
 - Motion character: Use 140ms micro feedback, 180ms standard transitions, and 220ms overlays with `--ease-out` (`cubic-bezier(0.16, 1, 0.3, 1)`). Animate color, background, border, shadow, opacity, and transform. Press feedback uses `scale-98`. Hover lift is limited to clickable discovery cards.
 - Icon family and stroke: Use Lucide icons at stroke width 2. Controls use `size-4`; feature media uses `size-5`.
@@ -73,9 +73,10 @@ The light warning solid is adjusted from `oklch(0.580 0.141 54.6)` to `oklch(0.5
   --tracking-heading: -0.025em;
   --tracking-section: -0.01em;
   --tracking-body: -0.005em;
-  --tracking-label: 0.08em;
-  --tracking-eyebrow: 0.16em;
-  --tracking-operational: 0.02em;
+  --tracking-label: 0.01em;
+  --tracking-code: 0.035em;
+  --tracking-eyebrow: 0.08em;
+  --tracking-operational: 0;
 
   --motion-micro: 140ms;
   --motion-standard: 180ms;
@@ -226,18 +227,19 @@ The light warning solid is adjusted from `oklch(0.580 0.141 54.6)` to `oklch(0.5
 | Section title | `clamp(1.15rem, 2vw, 1.4rem)` / `1.25` | 600 | `-0.01em` | `type-section-title` |
 | Body | `1rem` / `1.5` | 400 | `-0.005em` | body default |
 | Small | `0.875rem` / `1.5` | 500 | body tracking | `text-sm` |
-| Label | `0.75rem` / `1.05`, mono | 600 | `0.08em`, uppercase | `type-label` |
-| Eyebrow | `0.6875rem` / `1.05`, mono | 700 | `0.16em`, uppercase | `type-eyebrow` |
-| Metric | `clamp(2rem, 4vw, 3rem)` / `1`, mono | 700 | `-0.055em` | `type-metric` |
-| Operational | Inherited size, mono | Inherited | `0.02em` | `type-operational` |
+| Label | `0.75rem` / `1.5`, Nunito Sans | 700 | `0.01em` | `type-label` |
+| Eyebrow | `0.6875rem` / `1.5`, Outfit | 600 | `0.08em` | `type-eyebrow` |
+| Metric | `clamp(2rem, 4vw, 3rem)` / `1`, Outfit | 700 | `-0.03em`, tabular numerals | `type-metric` |
+| Operational | Inherited size, Nunito Sans | Inherited | Normal, tabular numerals | `type-operational` |
+| Code | Inherited size, JetBrains Mono | Inherited | `0.035em`, tabular numerals | `type-code` |
 
 | Font role | Family and fallback | Weights | Token / class |
 | --- | --- | --- | --- |
 | UI | Nunito Sans Variable, Plus Jakarta Sans Variable, ui-sans-serif, system-ui, sans-serif | 200–1000 | `--font-sans` / `font-sans` |
 | Heading | Outfit Variable, Nunito Sans Variable, Plus Jakarta Sans Variable, ui-sans-serif, system-ui, sans-serif | 100–900 | `--font-display` / `font-display` |
-| Labels, metrics, plates | JetBrains Mono Variable, ui-monospace, SFMono-Regular, Menlo, monospace | 400, 600, 700 | `--font-mono` / `font-mono` |
+| Codes and plates | JetBrains Mono Variable, ui-monospace, SFMono-Regular, Menlo, monospace | 400, 600, 700 | `--font-mono` / `type-code` |
 
-Nunito Sans and Outfit are self-hosted variable Latin fonts in `apps/web/public/fonts/`, with their SIL Open Font License files alongside them. Plus Jakarta Sans remains a local fallback; JetBrains Mono remains the operational face.
+Nunito Sans and Outfit are self-hosted variable Latin fonts in `apps/web/public/fonts/`, with their SIL Open Font License files alongside them. Plus Jakarta Sans remains a local fallback. JetBrains Mono is reserved for codes and vehicle plates.
 
 ## Breakpoints and layout modes
 

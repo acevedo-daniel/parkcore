@@ -217,7 +217,7 @@ function CalculatorForm({
             value={selectedId}
           />
           <span className="col-start-2 flex items-baseline justify-end gap-1 text-right @sm:block @sm:shrink-0">
-            <span className="font-mono text-xs font-bold tabular-nums text-foreground">
+            <span className="type-operational text-xs font-bold text-foreground">
               {formatMoney(selectedFacility.hourlyRateCents, selectedFacility.currency, locale)}
             </span>
             <span className="block text-2xs text-muted-foreground">{t('calculator.perHour')}</span>
@@ -231,7 +231,7 @@ function CalculatorForm({
             <Clock aria-hidden="true" className="size-3.5" />
             {t('calculator.estimatedStay')}
           </span>
-          <span className="font-mono text-xs font-bold tabular-nums text-foreground">
+          <span className="type-operational text-xs font-bold text-foreground">
             {durationSummary}
           </span>
         </legend>
