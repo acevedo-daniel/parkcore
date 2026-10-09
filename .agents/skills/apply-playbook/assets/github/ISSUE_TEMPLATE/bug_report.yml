@@ -1,0 +1,40 @@
+name: Bug report
+description: Report behavior that is wrong or broken
+labels:
+  - bug
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. See the error
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Only what is relevant to the bug.
+      placeholder: |
+        OS: Windows 11
+        Runtime: Node 24
+        Browser: Chrome
+    validations:
+      required: false
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or screenshots
+      description: Paste logs or drop images here. Remove secrets and personal data first.
+    validations:
+      required: false
