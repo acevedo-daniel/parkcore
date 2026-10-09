@@ -548,5 +548,5 @@ describe('demo isolation integration', () => {
     await expect(
       prisma.parking.findUnique({ where: { id: showcaseParking.id } }),
     ).resolves.not.toBeNull();
-  }, 15_000);
+  });
 });

@@ -36,6 +36,7 @@ export default defineConfig({
   testDir: './e2e',
   testMatch: /production-preview-smoke\.spec\.ts/,
   fullyParallel: false,
+  forbidOnly: Boolean(process.env.CI),
   retries: 0,
   timeout: 120_000,
   workers: 1,

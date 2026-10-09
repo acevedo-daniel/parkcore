@@ -10,11 +10,14 @@ export default defineConfig({
   testDir: './e2e',
   testMatch: /(?:real-stack-smoke|responsive-production-qa)\.spec\.ts/,
   fullyParallel: false,
+  forbidOnly: Boolean(process.env.CI),
   retries: 0,
-  timeout: 120_000,
+  timeout: 300_000,
   workers: 1,
   use: {
+    actionTimeout: 10_000,
     baseURL,
+    navigationTimeout: 30_000,
     trace: 'retain-on-failure',
   },
   projects: [

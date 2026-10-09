@@ -218,10 +218,6 @@ async function installApiMock(page: Page) {
 }
 
 test('walks the public discovery, estimate, and demo entry journey', async ({ page }, testInfo) => {
-  test.setTimeout(180_000);
-  page.setDefaultTimeout(10_000);
-  page.setDefaultNavigationTimeout(30_000);
-
   const api = await installApiMock(page);
   await page.addInitScript(() => {
     if (!localStorage.getItem('parkcore-lang')) localStorage.setItem('parkcore-lang', 'en-US');
@@ -412,18 +408,16 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
   );
   await expect(page.getByRole('link', { name: 'Open Showcase Central' })).toBeVisible();
   await expect
-    .poll(
-      () =>
-        api.requests.some(
-          (request) =>
-            request.startsWith('GET /parkings?') &&
-            request.includes('search=central') &&
-            request.includes('currency=USD') &&
-            request.includes('minHourlyRateCents=1000') &&
-            request.includes('maxHourlyRateCents=2000') &&
-            request.includes('availableNow=true'),
-        ),
-      { timeout: 10_000 },
+    .poll(() =>
+      api.requests.some(
+        (request) =>
+          request.startsWith('GET /parkings?') &&
+          request.includes('search=central') &&
+          request.includes('currency=USD') &&
+          request.includes('minHourlyRateCents=1000') &&
+          request.includes('maxHourlyRateCents=2000') &&
+          request.includes('availableNow=true'),
+      ),
     )
     .toBe(true);
 
@@ -441,9 +435,7 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
   await expect(page.getByRole('status', { name: 'No active parkings' })).toBeVisible();
 
   await page.goto('/parkings?search=offline');
-  await expect(page.getByRole('alert')).toContainText('We could not load the directory', {
-    timeout: 15_000,
-  });
+  await expect(page.getByRole('alert')).toContainText('We could not load the directory');
   await page.getByRole('button', { name: 'Try again' }).click();
   await expect(page.getByRole('link', { name: 'Open Showcase Central' })).toBeVisible();
 

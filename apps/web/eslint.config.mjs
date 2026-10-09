@@ -41,6 +41,71 @@ export default defineConfig(
     },
   },
   {
+    files: ['e2e/**/*.ts'],
+    ignores: ['e2e/fixtures.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@playwright/test',
+              importNames: ['test'],
+              message: 'Import test from the readiness fixture.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "CallExpression[callee.type='MemberExpression'][callee.property.name='waitForTimeout']",
+          message: 'Wait on an observable condition.',
+        },
+        {
+          selector:
+            "CallExpression[callee.type='MemberExpression'][callee.object.name='test'][callee.property.name='setTimeout']",
+          message: 'Set budgets only in runner configuration.',
+        },
+        {
+          selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='only']",
+          message: 'Do not commit focused tests.',
+        },
+        {
+          selector: "CallExpression > ObjectExpression > Property[key.name='timeout']",
+          message: 'Do not override wait or test budgets at call sites.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/**/*.test.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'CallExpression[callee.name=/^(it|test)$/][arguments.length=3]',
+          message: 'Configure test budgets globally.',
+        },
+        {
+          selector:
+            "CallExpression[callee.name=/^(waitFor|waitForElementToBeRemoved)$/] > ObjectExpression > Property[key.name='timeout']",
+          message: 'Configure asyncUtilTimeout in shared setup.',
+        },
+        {
+          selector:
+            "CallExpression[callee.type='MemberExpression'][callee.property.name=/^(findBy|findAllBy)/] > ObjectExpression > Property[key.name='timeout']",
+          message: 'Do not override asynchronous query budgets.',
+        },
+        {
+          selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='only']",
+          message: 'Do not commit focused tests.',
+        },
+      ],
+    },
+  },
+  {
     files: ['public/**/*.js'],
     extends: [tseslint.configs.disableTypeChecked],
     languageOptions: {

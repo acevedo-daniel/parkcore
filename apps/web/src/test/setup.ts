@@ -1,5 +1,7 @@
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
 import { afterEach, beforeEach } from 'vitest';
+
+configure({ asyncUtilTimeout: 1_000 });
 
 function resetDocumentAppearance() {
   window.localStorage.clear();

@@ -137,10 +137,6 @@ async function visitWithTheme(
 test('keeps the deployed public and owner surfaces usable at production viewports', async ({
   page,
 }, testInfo) => {
-  test.setTimeout(300_000);
-  page.setDefaultTimeout(10_000);
-  page.setDefaultNavigationTimeout(30_000);
-
   const timestamp = Date.now();
   const runId = Math.floor(timestamp / 1000)
     .toString(36)
