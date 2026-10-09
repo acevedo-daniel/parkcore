@@ -5,6 +5,7 @@ function resetDocumentAppearance() {
   window.localStorage.clear();
   document.documentElement.lang = 'en-US';
   document.documentElement.removeAttribute('data-theme');
+  document.documentElement.removeAttribute('data-hydrated');
   document.documentElement.style.removeProperty('color-scheme');
 }
 

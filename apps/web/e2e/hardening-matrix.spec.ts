@@ -1,5 +1,7 @@
 import { AxeBuilder } from '@axe-core/playwright';
-import { expect, test, type Locator, type Page, type Route } from '@playwright/test';
+import type { Locator, Page, Route } from '@playwright/test';
+
+import { expect, test } from './fixtures';
 
 import type { components } from '@parkcore/api-client';
 

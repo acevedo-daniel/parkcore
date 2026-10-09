@@ -1,4 +1,6 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+
+import { expect, test } from './fixtures';
 
 const viewports = [
   { name: '360px', width: 360, height: 800 },

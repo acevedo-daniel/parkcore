@@ -4,10 +4,13 @@ import { RouterProvider, type RouterProviderProps } from 'react-router';
 import { ToastProvider } from '../components/ui/feedback.js';
 import { AuthProvider } from '../features/auth/auth-provider.js';
 import { AppearanceProvider } from './appearance-provider.js';
+import { useDocumentReadyMarker } from './document-ready.js';
 
 const queryClient = new QueryClient();
 
 export function AppProviders({ router }: Pick<RouterProviderProps, 'router'>) {
+  useDocumentReadyMarker();
+
   return (
     <AppearanceProvider>
       <QueryClientProvider client={queryClient}>
