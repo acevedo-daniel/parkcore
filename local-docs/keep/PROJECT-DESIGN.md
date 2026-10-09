@@ -12,7 +12,7 @@ status: draft
 - Density: D2 Standard Workspace. Use 16px body text, grouped sections, and planar table rows for a readable operations baseline.
 - Must feel: trustworthy, fast to scan, distinctly yellow and ink.
 - Must not feel: generic gray SaaS, playful, cluttered.
-- Signature move: Feature panels use `rounded-signature`, with 32px corners except for a 64px bottom-right corner, a `type-display` heading, and a `brand` or `inverse` surface.
+- Signature move: Feature panels use `rounded-signature`, with 32px corners except for a 64px bottom-right corner, an Outfit `type-display` heading, and a `brand` or `inverse` surface.
 - Color schemes: Light, dark, and system. System is the default. Users can change appearance in the public header, owner sidebar, and profile.
 
 ## Voice
@@ -27,7 +27,7 @@ Language selects copy; locale formats dates, numbers, and currency; register set
 
 ## Visual rules
 
-- Typography roles: Display uses `type-display`; page titles use `type-page-title`; headings use `type-heading`; section titles use `type-section-title`; body uses 16px `--text-base`; small text uses `text-sm`; labels and eyebrows use the mono face with `type-label` and `type-eyebrow`; metrics use `type-metric`; operational values use `type-operational` and tabular numerals.
+- Typography roles: Outfit sets display, page-title, and heading styles through `type-display`, `type-page-title`, `type-heading`, and `type-section-title`. Nunito Sans carries interface and body copy at 16px `--text-base`, with small text at `text-sm`. JetBrains Mono is reserved for labels, eyebrows, metrics, plates, and operational values, with tabular numerals where values must scan quickly.
 - Accent usage: Use `brand` only on the landing hero band, login brand panel, empty-state media, selected segmented options, and route loading bar. Keep at most one brand surface per view and never use brand for body text. Use neutral `accent` for hover and selected menu or ghost-control surfaces.
 - Shape character: Controls use `rounded-md` (10px), cards use `rounded-lg` (12px), dialogs and sheets use `rounded-xl` (16px), marketing panels use `rounded-3xl` (32px), and plates use `rounded-xs` (4px). Reserve pills for badges, status, filters, and icon-only header buttons. The signature panel uses three 32px corners and a 64px bottom-right corner.
 - Depth: Static surfaces use a border without a shadow. Controls use `shadow-xs`; clickable discovery cards use `shadow-md` on hover; menus and popovers use `shadow-lg`; dialogs and sheets use `shadow-xl`.
@@ -43,8 +43,8 @@ The light warning solid is adjusted from `oklch(0.580 0.141 54.6)` to `oklch(0.5
 
 ```css
 :root {
-  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-sans);
+  --font-sans: 'Nunito Sans Variable', 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Outfit Variable', 'Nunito Sans Variable', 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --text-2xs: 0.6875rem;
@@ -67,11 +67,11 @@ The light warning solid is adjusted from `oklch(0.580 0.141 54.6)` to `oklch(0.5
   --leading-section: 1.25;
   --leading-normal: 1.5;
 
-  --tracking-display: -0.055em;
-  --tracking-title: -0.035em;
-  --tracking-heading: -0.045em;
-  --tracking-section: -0.02em;
-  --tracking-body: -0.011em;
+  --tracking-display: -0.03em;
+  --tracking-title: -0.02em;
+  --tracking-heading: -0.025em;
+  --tracking-section: -0.01em;
+  --tracking-body: -0.005em;
   --tracking-label: 0.08em;
   --tracking-eyebrow: 0.16em;
   --tracking-operational: 0.02em;
@@ -219,11 +219,11 @@ The light warning solid is adjusted from `oklch(0.580 0.141 54.6)` to `oklch(0.5
 
 | Role | Size / line height | Weight | Tracking | Class |
 | --- | --- | --- | --- | --- |
-| Display | `clamp(2.75rem, 6vw, 5rem)` / `0.95` | 700 | `-0.055em` | `type-display` |
-| Page title | `clamp(1.75rem, 4vw, 2.5rem)` / `1.15` | 700 | `-0.035em` | `type-page-title` |
-| Heading | `1.75rem` / `1.05` | 700 | `-0.045em` | `type-heading` |
-| Section title | `clamp(1.15rem, 2vw, 1.4rem)` / `1.25` | 600 | `-0.02em` | `type-section-title` |
-| Body | `1rem` / `1.5` | 400 | `-0.011em` | body default |
+| Display | `clamp(2.75rem, 6vw, 5rem)` / `0.95` | 700 | `-0.03em` | `type-display` |
+| Page title | `clamp(1.75rem, 4vw, 2.5rem)` / `1.15` | 700 | `-0.02em` | `type-page-title` |
+| Heading | `1.75rem` / `1.05` | 700 | `-0.025em` | `type-heading` |
+| Section title | `clamp(1.15rem, 2vw, 1.4rem)` / `1.25` | 600 | `-0.01em` | `type-section-title` |
+| Body | `1rem` / `1.5` | 400 | `-0.005em` | body default |
 | Small | `0.875rem` / `1.5` | 500 | body tracking | `text-sm` |
 | Label | `0.75rem` / `1.05`, mono | 600 | `0.08em`, uppercase | `type-label` |
 | Eyebrow | `0.6875rem` / `1.05`, mono | 700 | `0.16em`, uppercase | `type-eyebrow` |
@@ -232,9 +232,11 @@ The light warning solid is adjusted from `oklch(0.580 0.141 54.6)` to `oklch(0.5
 
 | Font role | Family and fallback | Weights | Token / class |
 | --- | --- | --- | --- |
-| UI | Plus Jakarta Sans Variable, ui-sans-serif, system-ui, sans-serif | 400, 500, 600, 700, 800 | `--font-sans` / `font-sans` |
-| Heading | Plus Jakarta Sans Variable, ui-sans-serif, system-ui, sans-serif | 400, 500, 600, 700, 800 | `--font-display` / `font-display` |
+| UI | Nunito Sans Variable, Plus Jakarta Sans Variable, ui-sans-serif, system-ui, sans-serif | 200–1000 | `--font-sans` / `font-sans` |
+| Heading | Outfit Variable, Nunito Sans Variable, Plus Jakarta Sans Variable, ui-sans-serif, system-ui, sans-serif | 100–900 | `--font-display` / `font-display` |
 | Labels, metrics, plates | JetBrains Mono Variable, ui-monospace, SFMono-Regular, Menlo, monospace | 400, 600, 700 | `--font-mono` / `font-mono` |
+
+Nunito Sans and Outfit are self-hosted variable Latin fonts in `apps/web/public/fonts/`, with their SIL Open Font License files alongside them. Plus Jakarta Sans remains a local fallback; JetBrains Mono remains the operational face.
 
 ## Breakpoints and layout modes
 
