@@ -59,7 +59,7 @@ function PublicMobileMenu() {
       </DialogPrimitive.Trigger>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="public-menu-overlay fixed inset-0 z-50 bg-overlay backdrop-blur-xs animate-in fade-in" />
-        <DialogPrimitive.Content className="public-menu-content fixed inset-y-0 right-0 z-50 flex w-full max-w-xs flex-col justify-between overflow-x-hidden overflow-y-auto border-l border-border bg-card p-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] pt-[max(1.5rem,env(safe-area-inset-top,0px))] shadow-xl animate-in slide-in-from-right">
+        <DialogPrimitive.Content className="public-menu-content fixed inset-y-0 right-0 z-50 flex w-full max-w-xs flex-col justify-between overflow-x-hidden overflow-y-auto border-l border-border bg-card p-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] pt-[max(1.5rem,env(safe-area-inset-top,0px))] shadow-xl animate-in fade-in">
           <div>
             <header className="public-menu-header mb-6 flex items-center justify-between border-b border-border-subtle pb-4">
               <DialogPrimitive.Title className="brand-mark font-display text-lg font-extrabold tracking-tight text-foreground">
