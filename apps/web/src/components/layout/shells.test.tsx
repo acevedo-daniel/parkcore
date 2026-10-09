@@ -97,9 +97,7 @@ describe('application shells', () => {
     });
     expect(mobileNavigation.className).toContain('wide:hidden');
     expect(mobileNavigation.className).toContain('owner-mobile-nav');
-    expect(screen.getByRole('main').className).toContain(
-      'pb-[calc(6rem+env(safe-area-inset-bottom,0px))]',
-    );
+    expect(screen.getByRole('main').className).toContain('pb-safe-owner-content');
     expect(screen.getAllByRole('combobox', { name: 'Apariencia' })).toHaveLength(2);
     expect(
       Array.from(document.querySelectorAll<HTMLElement>('[data-slot="appearance-controls"]')).map(

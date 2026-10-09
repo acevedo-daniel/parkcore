@@ -52,7 +52,7 @@ export function MonetaryFilterGroup({
   return (
     <fieldset className={className}>
       <legend className="type-label text-muted-foreground">{t('filters.rate')}</legend>
-      <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(8rem,0.8fr)_minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-rate-filter">
         <FormField htmlFor={`${idPrefix}-${currencyName}-filter`} label={t('filters.currency')}>
           <Select
             name={currencyName}

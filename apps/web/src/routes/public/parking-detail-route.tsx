@@ -42,12 +42,12 @@ export function ParkingDetailRoute() {
         className="min-h-full bg-background px-4 py-16 sm:px-6 lg:px-8"
       >
         <div
-          className="mx-auto max-w-3xl rounded-[2rem] border border-border-strong bg-accent p-8 sm:p-10"
+          className="mx-auto max-w-3xl rounded-3xl border border-border-strong bg-accent p-8 sm:p-10"
           role="alert"
         >
           <p className="type-label text-muted-foreground">{t('public.detail.directoryEyebrow')}</p>
           <h1
-            className="mt-4 max-w-full break-words font-display text-3xl font-black tracking-[-0.04em] text-foreground"
+            className="mt-4 max-w-full break-words font-display text-3xl font-black tracking-heading text-foreground"
             id="public-detail-error-title"
           >
             {t(notFound ? 'public.detail.notFoundTitle' : 'public.detail.errorTitle')}
@@ -93,7 +93,7 @@ export function ParkingDetailRoute() {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link
-          className="inline-flex min-h-[var(--touch-target-min)] items-center gap-2 rounded-sm text-sm font-bold text-foreground underline decoration-brand decoration-2 underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold text-foreground underline decoration-brand decoration-2 underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           to="/parkings"
         >
           <ArrowLeft aria-hidden="true" className="size-4" />
@@ -111,7 +111,7 @@ export function ParkingDetailRoute() {
               </span>
             ) : null}
             <h1
-              className="mt-2 max-w-full break-words font-display text-5xl font-black leading-[0.98] tracking-[-0.055em] text-foreground sm:text-6xl"
+              className="mt-2 max-w-full break-words font-display text-5xl font-black leading-display tracking-display text-foreground sm:text-6xl"
               id="public-detail-title"
             >
               {parking.title}
@@ -131,7 +131,7 @@ export function ParkingDetailRoute() {
           </header>
 
           <aside
-            className="min-w-0 rounded-[2rem_2rem_4rem_2rem] border border-border bg-card p-6 shadow-md lg:col-span-4 lg:col-start-9 lg:row-span-2"
+            className="min-w-0 rounded-signature border border-border bg-card p-6 shadow-md lg:col-span-4 lg:col-start-9 lg:row-span-2"
             data-slot="parking-detail-summary"
           >
             <p className="type-label text-muted-foreground">{t('public.detail.essentials')}</p>
@@ -181,7 +181,7 @@ export function ParkingDetailRoute() {
               </p>
               <a
                 aria-label={t('public.detail.directionsAction', { title: parking.title })}
-                className="mt-5 inline-flex min-h-[var(--touch-target-min)] items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-bold text-brand-foreground outline-none transition-colors hover:bg-brand/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-bold text-brand-foreground outline-none transition-colors hover:bg-brand/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 href={directionsUrl}
                 rel="noopener noreferrer"
                 target="_blank"
@@ -197,7 +197,7 @@ export function ParkingDetailRoute() {
             ) : null}
           </aside>
           <div
-            className="min-w-0 aspect-[16/10] overflow-hidden rounded-[2.5rem_2.5rem_5rem_2.5rem] border border-border bg-accent lg:col-span-7 lg:row-start-2"
+            className="min-w-0 aspect-16/10 overflow-hidden rounded-signature border border-border bg-accent lg:col-span-7 lg:row-start-2"
             data-slot="parking-detail-hero-image"
           >
             <PublicParkingImage
@@ -212,7 +212,7 @@ export function ParkingDetailRoute() {
         </div>
 
         <div className="mt-8 grid gap-8 md:grid-cols-12">
-          <section className="min-w-0 rounded-[2rem] border border-border bg-card p-6 sm:p-7 md:col-span-7">
+          <section className="min-w-0 rounded-3xl border border-border bg-card p-6 sm:p-7 md:col-span-7">
             <p className="type-label text-muted-foreground">{t('public.detail.about')}</p>
             <p className="mt-4 text-base leading-relaxed text-foreground-secondary">
               {parking.description ?? t('public.detail.missingDescription')}
@@ -242,8 +242,8 @@ function ParkingDetailSkeleton() {
         <div className="mt-10 h-16 max-w-2xl rounded bg-accent" />
         <div className="mt-5 h-6 max-w-lg rounded bg-accent" />
         <div className="mt-12 grid gap-8 md:grid-cols-12">
-          <div className="aspect-[16/10] rounded-[2.5rem] bg-accent md:col-span-7" />
-          <div className="min-h-64 rounded-[2rem] bg-accent md:col-span-5 md:col-start-8 wide:col-span-4 wide:col-start-9" />
+          <div className="aspect-16/10 rounded-3xl bg-accent md:col-span-7" />
+          <div className="min-h-64 rounded-3xl bg-accent md:col-span-5 md:col-start-8 wide:col-span-4 wide:col-start-9" />
         </div>
       </div>
     </div>

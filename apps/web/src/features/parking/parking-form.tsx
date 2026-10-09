@@ -238,7 +238,7 @@ export function ParkingForm({
           />
         </FormField>
         {image ? (
-          <figure className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-muted">
+          <figure className="overflow-hidden rounded-xl border border-border bg-muted">
             {imageLoadFailed ? (
               <div
                 aria-live="polite"
@@ -543,7 +543,7 @@ function FormSection({
       aria-describedby={descriptionId}
       className={`space-y-5 border-b border-border-subtle pb-8 ${wide ? 'lg:col-span-2' : ''}`}
     >
-      <legend className="break-words px-0 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+      <legend className="break-words px-0 font-mono text-2xs font-bold uppercase tracking-eyebrow text-muted-foreground">
         {title}
       </legend>
       <p

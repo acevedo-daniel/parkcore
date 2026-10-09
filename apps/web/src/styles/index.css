@@ -496,6 +496,10 @@
   padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
 }
 
+@utility pb-safe-owner-content {
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+}
+
 @utility pb-safe-overlay {
   padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
 }
@@ -566,6 +570,56 @@
 
 @utility origin-dropdown-menu {
   transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+}
+
+@utility grid-cols-rate-filter {
+  grid-template-columns: minmax(8rem, 0.8fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+
+@utility grid-cols-session-row {
+  grid-template-columns: minmax(9rem, 1.1fr) minmax(7rem, 0.8fr) minmax(8rem, 1fr) auto;
+}
+
+@utility grid-cols-session-history-row {
+  grid-template-columns:
+    minmax(10rem, 1.25fr) minmax(9rem, 1fr) minmax(7rem, 0.9fr) minmax(8rem, auto)
+    auto;
+}
+
+@utility grid-cols-owner-parking-card {
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+}
+
+@utility grid-cols-owner-parking-fields {
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, auto);
+}
+
+@utility grid-cols-owner-parking-metrics {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+}
+
+@utility grid-cols-calculator-facility {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+@utility grid-cols-owner-overview {
+  grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 0.65fr);
+}
+
+@utility grid-cols-parking-overview {
+  grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
+}
+
+@utility grid-cols-history-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(15rem, auto);
+}
+
+@utility grid-cols-history-filters {
+  grid-template-columns: minmax(0, 1fr) 12rem 12rem auto;
+}
+
+@utility bottom-tab-indicator {
+  bottom: -5px;
 }
 
 @layer components {

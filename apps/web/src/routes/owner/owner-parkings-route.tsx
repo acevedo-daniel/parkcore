@@ -72,7 +72,7 @@ export function OwnerParkingsRoute() {
 
       {facilitiesSnapshotIsStale ? (
         <div
-          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-lg border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="break-words text-sm font-semibold">{t('ownerParkings.stale')}</p>
@@ -110,7 +110,7 @@ export function OwnerParkingsRoute() {
         <>
           <div
             aria-label={t('ownerParkings.networkSummary')}
-            className="grid gap-px overflow-hidden rounded-[var(--radius-lg)] border border-border bg-border sm:grid-cols-3"
+            className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3"
             role="group"
           >
             <NetworkMetric
@@ -137,7 +137,7 @@ export function OwnerParkingsRoute() {
             <h2 className="sr-only" id="owner-facility-list-title">
               {t('ownerParkings.facilityList')}
             </h2>
-            <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card">
+            <div className="overflow-hidden rounded-xl border border-border bg-card">
               {parkings.map(({ parking }, index) => (
                 <div className="border-b border-border-subtle last:border-b-0" key={parking.id}>
                   <OwnerParkingPanel identifier={index + 1} parking={parking} presentation="list" />
@@ -172,24 +172,24 @@ function OwnerParkingsSkeleton() {
       <h1 className="sr-only">{t('ownerParkings.title')}</h1>
       <div className="space-y-4 border-b border-border-strong pb-7">
         <Skeleton className="h-3 w-24 rounded-full" />
-        <Skeleton className="h-12 w-3/4 rounded-[var(--radius-md)]" />
+        <Skeleton className="h-12 w-3/4 rounded-lg" />
         <Skeleton className="h-5 w-full max-w-xl rounded-full" />
       </div>
-      <div className="grid gap-px overflow-hidden rounded-[var(--radius-lg)] border border-border bg-border sm:grid-cols-3">
+      <div className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
         {Array.from({ length: 3 }).map((_, index) => (
           <Skeleton className="h-24 rounded-none border-0" key={index} />
         ))}
       </div>
-      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card">
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
         {Array.from({ length: 3 }).map((_, index) => (
           <div
-            className="grid min-w-0 gap-6 border-b border-border-subtle p-5 last:border-b-0 sm:p-6 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] md:items-center md:gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,auto)]"
+            className="grid min-w-0 gap-6 border-b border-border-subtle p-5 last:border-b-0 sm:p-6 md:grid-cols-owner-parking-card md:items-center md:gap-8 lg:grid-cols-owner-parking-fields"
             key={index}
           >
-            <Skeleton className="h-24 rounded-[var(--radius-md)]" />
-            <Skeleton className="h-20 rounded-[var(--radius-md)]" />
-            <Skeleton className="h-16 rounded-[var(--radius-md)]" />
-            <Skeleton className="h-20 rounded-[var(--radius-md)]" />
+            <Skeleton className="h-24 rounded-lg" />
+            <Skeleton className="h-20 rounded-lg" />
+            <Skeleton className="h-16 rounded-lg" />
+            <Skeleton className="h-20 rounded-lg" />
           </div>
         ))}
       </div>

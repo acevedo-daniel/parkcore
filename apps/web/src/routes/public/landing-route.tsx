@@ -120,7 +120,7 @@ export function LandingRoute() {
               <span aria-hidden="true" className="size-1.5 rounded-full bg-brand-foreground" />
               {t('public.landing.heroEyebrow')}
             </p>
-            <h1 className="mt-7 min-w-0 max-w-full break-words font-display text-5xl font-bold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-[5.1rem]">
+            <h1 className="mt-7 min-w-0 max-w-full break-words font-display text-5xl font-bold leading-display tracking-display sm:text-6xl lg:text-display">
               {t('public.landing.heroTitle')}
             </h1>
             <p className="mt-7 max-w-xl text-lg font-medium leading-relaxed text-brand-foreground/85 sm:text-xl">
@@ -162,7 +162,7 @@ export function LandingRoute() {
           <div className="grid gap-12 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-5">
               <p className="type-label text-muted-foreground">{t('public.landing.howEyebrow')}</p>
-              <h2 className="mt-4 font-display text-4xl font-bold leading-[1.02] tracking-[-0.045em] sm:text-5xl">
+              <h2 className="mt-4 font-display text-4xl font-bold leading-tight tracking-heading sm:text-5xl">
                 {t('public.landing.howTitle')}
               </h2>
             </div>
@@ -171,13 +171,13 @@ export function LandingRoute() {
             </p>
           </div>
 
-          <div className="mt-16 grid gap-px overflow-hidden rounded-[var(--radius-xl)] border border-border bg-border md:grid-cols-3">
+          <div className="mt-16 grid gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-3">
             {HOW_IT_WORKS_ITEMS.map((item) => (
               <article className="min-h-64 bg-card p-7 sm:p-8" key={item.number}>
                 <span className="font-mono text-xs font-bold text-muted-foreground">
                   {item.number}
                 </span>
-                <h3 className="mt-12 max-w-48 font-display text-2xl font-bold leading-tight tracking-[-0.03em]">
+                <h3 className="mt-12 max-w-48 font-display text-2xl font-bold leading-tight tracking-title">
                   {t(item.title)}
                 </h3>
                 <p className="mt-4 max-w-xs text-sm leading-relaxed text-foreground-secondary">
@@ -191,11 +191,11 @@ export function LandingRoute() {
 
       <section className="border-y border-border bg-muted py-20 sm:py-28">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-          <article className="rounded-[var(--radius-xl)] bg-card p-8 shadow-md sm:p-10">
+          <article className="rounded-2xl bg-card p-8 shadow-md sm:p-10">
             <span className="inline-flex rounded-full bg-brand px-3 py-1.5 text-xs font-bold text-brand-foreground">
               {t('public.landing.driverEyebrow')}
             </span>
-            <h2 className="mt-7 max-w-md font-display text-3xl font-bold leading-[1.04] tracking-[-0.04em] sm:text-4xl">
+            <h2 className="mt-7 max-w-md font-display text-3xl font-bold leading-tight tracking-heading sm:text-4xl">
               {t('public.landing.driverTitle')}
             </h2>
             <p className="mt-5 max-w-md text-base leading-relaxed text-foreground-secondary">
@@ -210,11 +210,11 @@ export function LandingRoute() {
             </Link>
           </article>
 
-          <article className="rounded-[var(--radius-xl)] bg-inverse p-8 text-inverse-foreground shadow-md sm:p-10">
+          <article className="rounded-2xl bg-inverse p-8 text-inverse-foreground shadow-md sm:p-10">
             <span className="inline-flex rounded-full bg-brand px-3 py-1.5 text-xs font-bold text-brand-foreground">
               {t('public.landing.operatorEyebrow')}
             </span>
-            <h2 className="mt-7 max-w-md font-display text-3xl font-bold leading-[1.04] tracking-[-0.04em] sm:text-4xl">
+            <h2 className="mt-7 max-w-md font-display text-3xl font-bold leading-tight tracking-heading sm:text-4xl">
               {t('public.landing.operatorTitle')}
             </h2>
             <p className="mt-5 max-w-md text-base leading-relaxed text-inverse-foreground/75">
@@ -239,7 +239,7 @@ export function LandingRoute() {
               <p className="type-label text-muted-foreground">
                 {t('public.landing.featuredEyebrow')}
               </p>
-              <h2 className="mt-4 font-display text-4xl font-bold tracking-[-0.045em] sm:text-5xl">
+              <h2 className="mt-4 font-display text-4xl font-bold tracking-heading sm:text-5xl">
                 {t('public.landing.featuredTitle')}
               </h2>
             </div>
@@ -262,7 +262,7 @@ export function LandingRoute() {
             <p className="type-label text-brand-foreground/75">
               {t('public.landing.operationsEyebrow')}
             </p>
-            <h2 className="mt-4 font-display text-4xl font-bold leading-[1.02] tracking-[-0.045em] sm:text-5xl">
+            <h2 className="mt-4 font-display text-4xl font-bold leading-tight tracking-heading sm:text-5xl">
               {t('public.landing.operationsTitle')}
             </h2>
             <p className="mt-6 max-w-lg text-base leading-relaxed sm:text-lg">
@@ -275,7 +275,7 @@ export function LandingRoute() {
           <ol className="grid gap-4 lg:col-span-6 lg:col-start-7">
             {OPERATION_ITEMS.map((item, index) => (
               <li
-                className="flex gap-5 rounded-[var(--radius-lg)] bg-card p-5 text-foreground sm:p-6"
+                className="flex gap-5 rounded-xl bg-card p-5 text-foreground sm:p-6"
                 key={item.title}
               >
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary font-mono text-sm font-bold text-primary-foreground">
@@ -297,7 +297,7 @@ export function LandingRoute() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="type-label text-muted-foreground">{t('public.landing.faqEyebrow')}</p>
-            <h2 className="mt-4 font-display text-4xl font-bold tracking-[-0.045em] sm:text-5xl">
+            <h2 className="mt-4 font-display text-4xl font-bold tracking-heading sm:text-5xl">
               {t('public.landing.faqTitle')}
             </h2>
           </div>
@@ -309,7 +309,7 @@ export function LandingRoute() {
           >
             {FAQS.map((faq) => (
               <AccordionItem
-                className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card"
+                className="overflow-hidden rounded-xl border border-border bg-card"
                 key={faq.id}
                 value={faq.id}
               >
@@ -330,7 +330,7 @@ export function LandingRoute() {
       <section className="bg-inverse px-4 py-20 text-inverse-foreground sm:px-6 sm:py-28 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <ReceiptText aria-hidden="true" className="mx-auto size-8 text-brand" />
-          <h2 className="mt-6 font-display text-4xl font-bold leading-[1.02] tracking-[-0.045em] sm:text-5xl">
+          <h2 className="mt-6 font-display text-4xl font-bold leading-tight tracking-heading sm:text-5xl">
             {t('public.landing.finalTitle')}
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-inverse-foreground/75 sm:text-lg">
@@ -398,11 +398,8 @@ function FeaturedFacilities({
         role="status"
       >
         {Array.from({ length: 3 }, (_, index) => (
-          <div
-            className="overflow-hidden rounded-[var(--radius-xl)] border border-border bg-card"
-            key={index}
-          >
-            <Skeleton className="aspect-[4/3] rounded-none" />
+          <div className="overflow-hidden rounded-2xl border border-border bg-card" key={index}>
+            <Skeleton className="aspect-4/3 rounded-none" />
             <div className="space-y-4 p-6">
               <Skeleton className="h-7 w-3/4" />
               <Skeleton className="h-4 w-full" />
@@ -435,13 +432,13 @@ function FeaturedFacilities({
       <EmptyState
         action={
           <Link
-            className="inline-flex min-h-[var(--touch-target-min)] items-center rounded-sm text-sm font-bold underline decoration-brand decoration-2 underline-offset-4"
+            className="inline-flex min-h-11 items-center rounded-sm text-sm font-bold underline decoration-brand decoration-2 underline-offset-4"
             to="/parkings"
           >
             {t('public.landing.emptyAction')}
           </Link>
         }
-        className="mt-10 rounded-[var(--radius-lg)] border border-dashed border-border-strong bg-muted px-5 py-5 sm:px-6 sm:py-6"
+        className="mt-10 rounded-xl border border-dashed border-border-strong bg-muted px-5 py-5 sm:px-6 sm:py-6"
         compactLayout="split"
         title={t('public.landing.emptyEyebrow')}
         variant="compact"

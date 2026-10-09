@@ -180,7 +180,7 @@ export function OwnerParkingOverviewRoute() {
         }
         backAction={
           <Link
-            className="inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-brand decoration-4 underline-offset-4"
+            className="inline-flex min-h-11 items-center gap-1 text-sm font-bold underline decoration-brand decoration-4 underline-offset-4"
             to="/app/parkings"
           >
             <ChevronLeft aria-hidden="true" className="size-4" />
@@ -200,7 +200,7 @@ export function OwnerParkingOverviewRoute() {
 
       {facilitySnapshotIsStale ? (
         <div
-          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-lg border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="break-words text-sm font-semibold">{t('parkingOperation.staleFacility')}</p>
@@ -220,16 +220,16 @@ export function OwnerParkingOverviewRoute() {
         </div>
       ) : null}
 
-      <div className="grid gap-4 wide:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
+      <div className="grid gap-4 wide:grid-cols-parking-overview">
         <section
-          className="rounded-[var(--radius-xl)] border border-border bg-accent p-6 text-foreground sm:p-8"
+          className="rounded-2xl border border-border bg-accent p-6 text-foreground sm:p-8"
           aria-labelledby="check-in-title"
         >
           <p className="type-label text-muted-foreground">{t('parkingOperation.arrivals')}</p>
           <div className="mt-6 flex min-w-0 flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <div>
               <h2
-                className="font-display text-3xl font-bold leading-none tracking-[-0.055em]"
+                className="font-display text-3xl font-bold leading-none tracking-display"
                 id="check-in-title"
               >
                 {stateTitle}
@@ -245,7 +245,7 @@ export function OwnerParkingOverviewRoute() {
               <Plus aria-hidden="true" className="size-4" /> {t('parkingOperation.checkIn')}{' '}
               <kbd
                 aria-hidden="true"
-                className="ml-1 rounded border border-border-strong px-1.5 py-0.5 font-mono text-[10px]"
+                className="ml-1 rounded border border-border-strong px-1.5 py-0.5 font-mono text-2xs"
               >
                 N
               </kbd>
@@ -254,7 +254,7 @@ export function OwnerParkingOverviewRoute() {
         </section>
 
         <section
-          className="rounded-[var(--radius-xl)] border border-border bg-card p-6 sm:p-8"
+          className="rounded-2xl border border-border bg-card p-6 sm:p-8"
           aria-labelledby="capacity-title"
         >
           <p className="type-label text-muted-foreground" id="capacity-title">
@@ -291,7 +291,7 @@ export function OwnerParkingOverviewRoute() {
           <div>
             <p className="type-label text-muted-foreground">{t('parkingOperation.onSite')}</p>
             <h2
-              className="mt-2 font-display text-3xl font-bold leading-none tracking-[-0.055em]"
+              className="mt-2 font-display text-3xl font-bold leading-none tracking-display"
               id="active-sessions-title"
             >
               {t('parkingOperation.activeSessions')}
@@ -345,7 +345,7 @@ export function OwnerParkingOverviewRoute() {
 
         {activeSessionsQuery.isError && hasActiveSessionData ? (
           <div
-            className="mt-4 flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+            className="mt-4 flex flex-col gap-3 rounded-lg border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
             role="alert"
           >
             <p className="text-sm font-semibold">{t('parkingOperation.staleActiveSessions')}</p>
@@ -365,8 +365,8 @@ export function OwnerParkingOverviewRoute() {
         <div className="mt-5">
           {activeSessionsLoading ? (
             <div className="grid gap-3">
-              <Skeleton className="h-28 rounded-[var(--radius-lg)]" />
-              <Skeleton className="h-28 rounded-[var(--radius-lg)]" />
+              <Skeleton className="h-28 rounded-xl" />
+              <Skeleton className="h-28 rounded-xl" />
             </div>
           ) : activeSessionsQuery.isError && !hasActiveSessionData ? (
             <ErrorState
@@ -518,12 +518,12 @@ function OwnerParkingOperationSkeleton() {
       role="status"
     >
       <h1 className="sr-only">{t('parkingOperation.eyebrow')}</h1>
-      <Skeleton className="h-48 rounded-[var(--radius-xl)]" />
-      <div className="grid gap-4 wide:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
-        <Skeleton className="h-64 rounded-[var(--radius-xl)]" />
-        <Skeleton className="h-64 rounded-[var(--radius-xl)]" />
+      <Skeleton className="h-48 rounded-2xl" />
+      <div className="grid gap-4 wide:grid-cols-parking-overview">
+        <Skeleton className="h-64 rounded-2xl" />
+        <Skeleton className="h-64 rounded-2xl" />
       </div>
-      <Skeleton className="h-72 rounded-[var(--radius-xl)]" />
+      <Skeleton className="h-72 rounded-2xl" />
     </div>
   );
 }

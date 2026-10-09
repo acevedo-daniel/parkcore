@@ -180,7 +180,7 @@ export function OwnerParkingHistoryRoute() {
         }
         backAction={
           <Link
-            className="inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-brand decoration-4 underline-offset-4"
+            className="inline-flex min-h-11 items-center gap-1 text-sm font-bold underline decoration-brand decoration-4 underline-offset-4"
             to={`/app/parkings/${parking.id}`}
           >
             {t('parkingHistory.backToParking')}
@@ -214,7 +214,7 @@ export function OwnerParkingHistoryRoute() {
 
       {hasStaleData ? (
         <div
-          className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-4 rounded-xl border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="break-words text-sm font-semibold">{t('parkingHistory.stale')}</p>
@@ -247,7 +247,7 @@ export function OwnerParkingHistoryRoute() {
       {exportStatus === 'error' ? (
         <div
           aria-live="assertive"
-          className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-destructive-soft-foreground bg-destructive-soft p-4 text-destructive-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-4 rounded-xl border border-destructive-soft-foreground bg-destructive-soft p-4 text-destructive-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="text-sm font-semibold">{t('parkingHistory.exportError')}</p>
@@ -265,7 +265,7 @@ export function OwnerParkingHistoryRoute() {
           <h2 className="type-label text-muted-foreground" id="history-summary-title">
             {t('parkingHistory.summary')}
           </h2>
-          <dl className="mt-5 grid gap-5 sm:grid-cols-2 wide:grid-cols-[repeat(4,minmax(0,1fr))_minmax(15rem,auto)]">
+          <dl className="mt-5 grid gap-5 sm:grid-cols-2 wide:grid-cols-history-summary">
             <HistoryMetric
               label={t('parkingHistory.total')}
               value={formatNumber(aggregate.totalSessions, locale)}
@@ -322,7 +322,7 @@ export function OwnerParkingHistoryRoute() {
           </div>
         ) : (
           <>
-            <div className="mt-4 hidden grid-cols-[minmax(10rem,1.25fr)_minmax(9rem,1fr)_minmax(7rem,0.9fr)_minmax(8rem,auto)_auto] gap-x-4 border-b border-border-subtle px-1 py-3 md:grid">
+            <div className="mt-4 hidden grid-cols-session-history-row gap-x-4 border-b border-border-subtle px-1 py-3 md:grid">
               <span className="type-label text-muted-foreground">{t('session.plate')}</span>
               <span className="type-label text-muted-foreground">{t('session.date')}</span>
               <span className="type-label text-muted-foreground">{t('session.elapsed')}</span>
@@ -415,7 +415,7 @@ function HistoryFilters({
       <h2 className="type-label text-muted-foreground" id="history-filters-title">
         {t('parkingHistory.filters')}
       </h2>
-      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_12rem_12rem_auto]">
+      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-history-filters">
         <FormField htmlFor="session-plate" label={t('parkingHistory.plate')}>
           <Input
             id="session-plate"

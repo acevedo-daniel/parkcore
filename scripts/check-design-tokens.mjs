@@ -1,12 +1,55 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { readdirSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { dirname, relative, resolve } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
+const repositoryRoot = resolve(scriptDirectory, '..');
+const webRoot = resolve(repositoryRoot, 'apps/web');
+const sourceDirectory = resolve(webRoot, 'src');
 const stylesheetPath = resolve(scriptDirectory, '../apps/web/src/styles/index.css');
 const themeColorPath = resolve(scriptDirectory, '../apps/web/src/app/theme-color.ts');
 const themeInitPath = resolve(scriptDirectory, '../apps/web/public/theme-init.js');
+const requireFromWeb = createRequire(resolve(webRoot, 'package.json'));
+const typescript = requireFromWeb('typescript');
+
+const RAW_COLOR_PATTERN =
+  /#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})\b|\b(?:rgb|rgba|hsl|hsla|oklch|oklab|lab|lch|color)\s*\(/i;
+const RAW_COLOR_ALLOWLIST = new Set(['src/app/theme-color.ts']);
+const COLOR_PALETTE = `black white slate gray zinc neutral stone red orange amber yellow lime green
+  emerald teal cyan sky blue indigo violet purple fuchsia pink rose`.split(/\s+/);
+const PALETTE_COLOR_UTILITY_PATTERN = new RegExp(
+  `^(?:bg|text|border(?:-(?:x|y|s|e|t|r|b|l))?|divide|outline|ring(?:-offset)?|shadow|fill|stroke|accent|caret|decoration|placeholder|from|via|to|marker|selection)-(?:${COLOR_PALETTE.join('|')})(?:-\\d{2,3})?(?:/[\\w.%-]+)?$`,
+  'i',
+);
+const CSS_COLOR_FUNCTION_OR_HEX_PATTERN =
+  /#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})\b|\b(?:rgb|rgba|hsl|hsla|oklch|oklab|lab|lch|color)\s*\(/i;
+const CSS_COLOR_NAMES = `aliceblue antiquewhite aqua aquamarine azure beige bisque black
+  blanchedalmond blue blueviolet brown burlywood cadetblue chartreuse chocolate coral
+  cornflowerblue cornsilk crimson cyan darkblue darkcyan darkgoldenrod darkgray darkgreen
+  darkgrey darkkhaki darkmagenta darkolivegreen darkorange darkorchid darkred darksalmon
+  darkseagreen darkslateblue darkslategray darkslategrey darkturquoise darkviolet deeppink
+  deepskyblue dimgray dimgrey dodgerblue firebrick floralwhite forestgreen fuchsia gainsboro
+  ghostwhite gold goldenrod gray green greenyellow grey honeydew hotpink indianred indigo ivory
+  khaki lavender lavenderblush lawngreen lemonchiffon lightblue lightcoral lightcyan
+  lightgoldenrodyellow lightgray lightgreen lightgrey lightpink lightsalmon lightseagreen
+  lightskyblue lightslategray lightslategrey lightsteelblue lightyellow lime limegreen linen
+  magenta maroon mediumaquamarine mediumblue mediumorchid mediumpurple mediumseagreen
+  mediumslateblue mediumspringgreen mediumturquoise mediumvioletred midnightblue mintcream
+  mistyrose moccasin navajowhite navy oldlace olive olivedrab orange orangered orchid
+  palegoldenrod palegreen paleturquoise palevioletred papayawhip peachpuff peru pink plum
+  powderblue purple rebeccapurple red rosybrown royalblue saddlebrown salmon sandybrown
+  seagreen seashell sienna silver skyblue slateblue slategray slategrey snow springgreen
+  steelblue tan teal thistle tomato transparent turquoise violet wheat white whitesmoke yellow
+  yellowgreen`.split(/\s+/);
+const CSS_NAMED_COLOR_PATTERN = new RegExp(`\\b(?:${CSS_COLOR_NAMES.join('|')})\\b`, 'i');
+const TOKENIZED_CSS_PROPERTIES = new Set([
+  'font-size',
+  'letter-spacing',
+  'border-radius',
+  'box-shadow',
+]);
 
 export const COLOR_TOKENS = [
   'background',
@@ -169,6 +212,300 @@ const CONTRAST_PAIRS = [
   ['chart-2', 'card', 3],
 ];
 
+function splitTopLevelVariants(candidate) {
+  const segments = [];
+  let segmentStart = 0;
+  let bracketDepth = 0;
+  let parenthesisDepth = 0;
+
+  for (let index = 0; index < candidate.length; index += 1) {
+    const character = candidate[index];
+    if (character === '[') bracketDepth += 1;
+    if (character === ']') bracketDepth = Math.max(0, bracketDepth - 1);
+    if (character === '(') parenthesisDepth += 1;
+    if (character === ')') parenthesisDepth = Math.max(0, parenthesisDepth - 1);
+
+    if (character === ':' && bracketDepth === 0 && parenthesisDepth === 0) {
+      segments.push(candidate.slice(segmentStart, index));
+      segmentStart = index + 1;
+    }
+  }
+
+  segments.push(candidate.slice(segmentStart));
+  return segments;
+}
+
+function hasArbitraryUtility(utility) {
+  return (
+    /^\[(?:--)?-?[a-z][a-z0-9-]*:/i.test(utility) ||
+    /^[a-z0-9-]+-\[[^\s]*\]?$/i.test(utility) ||
+    /^[a-z0-9-]+-\(--[^\s]*\)?$/i.test(utility) ||
+    /\/\[[^\s]*\]?$/i.test(utility)
+  );
+}
+
+function collectLiteralViolations(literal, sourceFile, start, relativeSourcePath) {
+  const violations = [];
+  const allowRawColors = RAW_COLOR_ALLOWLIST.has(relativeSourcePath);
+
+  for (const match of literal.matchAll(/\S+/g)) {
+    const className = match[0];
+    const utility = splitTopLevelVariants(className).at(-1);
+    const isArbitrary = hasArbitraryUtility(utility);
+    const isPaletteColor = PALETTE_COLOR_UTILITY_PATTERN.test(utility);
+    const isRawColor = !allowRawColors && RAW_COLOR_PATTERN.test(className);
+
+    if (isArbitrary || isPaletteColor || isRawColor) {
+      const position = Math.min(start + match.index, sourceFile.text.length);
+      const line = sourceFile.getLineAndCharacterOfPosition(position).line + 1;
+      violations.push({ line, className });
+    }
+  }
+
+  return violations;
+}
+
+export function findProductSourceViolations(source, relativeSourcePath) {
+  const normalizedPath = relativeSourcePath.replaceAll('\\', '/');
+  const scriptKind = normalizedPath.endsWith('.tsx')
+    ? typescript.ScriptKind.TSX
+    : typescript.ScriptKind.TS;
+  const sourceFile = typescript.createSourceFile(
+    normalizedPath,
+    source,
+    typescript.ScriptTarget.Latest,
+    true,
+    scriptKind,
+  );
+  const violations = [];
+
+  function inspectTemplateText(text, node) {
+    const start = node.getStart(sourceFile) + 1;
+    violations.push(...collectLiteralViolations(text, sourceFile, start, normalizedPath));
+  }
+
+  function visit(node) {
+    if (typescript.isTemplateExpression(node)) {
+      inspectTemplateText(node.head.text, node.head);
+      for (const span of node.templateSpans) {
+        inspectTemplateText(span.literal.text, span.literal);
+        visit(span.expression);
+      }
+      return;
+    }
+
+    if (typescript.isStringLiteralLike(node)) {
+      violations.push(
+        ...collectLiteralViolations(
+          node.text,
+          sourceFile,
+          node.getStart(sourceFile) + 1,
+          normalizedPath,
+        ),
+      );
+      return;
+    }
+
+    typescript.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return violations;
+}
+
+function collectProductSourceFiles(directory, relativeDirectory = '') {
+  return readdirSync(directory, { withFileTypes: true })
+    .sort((left, right) => left.name.localeCompare(right.name))
+    .flatMap((entry) => {
+      const relativePath = relativeDirectory ? `${relativeDirectory}/${entry.name}` : entry.name;
+      const absolutePath = resolve(directory, entry.name);
+
+      if (entry.isDirectory()) {
+        if (relativePath === 'test') return [];
+        return collectProductSourceFiles(absolutePath, relativePath);
+      }
+
+      if (!entry.isFile() || !/\.tsx?$/.test(entry.name)) return [];
+      if (/\.test\.(?:ts|tsx)$/.test(entry.name)) return [];
+      return [{ absolutePath, relativePath: `src/${relativePath}` }];
+    });
+}
+
+function stripCssComments(stylesheet) {
+  let output = '';
+  let comment = false;
+  let quote = '';
+  let escaped = false;
+
+  for (let index = 0; index < stylesheet.length; index += 1) {
+    const character = stylesheet[index];
+    const next = stylesheet[index + 1];
+
+    if (comment) {
+      if (character === '*' && next === '/') {
+        output += '  ';
+        index += 1;
+        comment = false;
+      } else {
+        output += character === '\n' || character === '\r' ? character : ' ';
+      }
+      continue;
+    }
+
+    if (quote) {
+      output += character;
+      if (escaped) escaped = false;
+      else if (character === '\\') escaped = true;
+      else if (character === quote) quote = '';
+      continue;
+    }
+
+    if (character === '/' && next === '*') {
+      output += '  ';
+      index += 1;
+      comment = true;
+    } else {
+      output += character;
+      if (character === '"' || character === "'") quote = character;
+    }
+  }
+
+  return output;
+}
+
+function isThemeTokenSelector(selector) {
+  const normalized = selector.replace(/\s+/g, '').replaceAll('"', "'");
+  const allowed = new Set([':root', "[data-theme='light']", "[data-theme='dark']"]);
+  const selectors = normalized.split(',');
+  return selectors.length > 0 && selectors.every((part) => allowed.has(part));
+}
+
+function parseCssDeclarations(stylesheet) {
+  const source = stripCssComments(stylesheet);
+  const declarations = [];
+  const selectors = [];
+  let statementStart = 0;
+  let quote = '';
+  let escaped = false;
+  let parenthesisDepth = 0;
+  let bracketDepth = 0;
+
+  function addDeclaration(end) {
+    if (selectors.length === 0) return;
+    const declaration = source.slice(statementStart, end).trim();
+    const colon = declaration.indexOf(':');
+    if (colon < 1) return;
+
+    const property = declaration.slice(0, colon).trim().toLowerCase();
+    if (!/^(?:--)?[a-z][a-z0-9-]*$/i.test(property)) return;
+    const value = declaration.slice(colon + 1).trim();
+    if (!value) return;
+
+    const offset = source.indexOf(declaration, statementStart);
+    declarations.push({
+      property,
+      value,
+      selector: selectors.at(-1),
+      line: source.slice(0, offset === -1 ? statementStart : offset).split(/\r?\n/).length,
+    });
+  }
+
+  for (let index = 0; index < source.length; index += 1) {
+    const character = source[index];
+
+    if (quote) {
+      if (escaped) escaped = false;
+      else if (character === '\\') escaped = true;
+      else if (character === quote) quote = '';
+      continue;
+    }
+
+    if (character === '"' || character === "'") {
+      quote = character;
+      continue;
+    }
+    if (character === '(') parenthesisDepth += 1;
+    if (character === ')') parenthesisDepth = Math.max(0, parenthesisDepth - 1);
+    if (character === '[') bracketDepth += 1;
+    if (character === ']') bracketDepth = Math.max(0, bracketDepth - 1);
+    if (parenthesisDepth > 0 || bracketDepth > 0) continue;
+
+    if (character === '{') {
+      selectors.push(source.slice(statementStart, index).trim());
+      statementStart = index + 1;
+    } else if (character === ';') {
+      addDeclaration(index);
+      statementStart = index + 1;
+    } else if (character === '}') {
+      addDeclaration(index);
+      selectors.pop();
+      statementStart = index + 1;
+    }
+  }
+
+  return declarations;
+}
+
+const CSS_COLOR_PROPERTIES = new Set([
+  'accent-color',
+  'background',
+  'background-color',
+  'border',
+  'border-color',
+  'box-shadow',
+  'caret-color',
+  'color',
+  'column-rule-color',
+  'fill',
+  'flood-color',
+  'lighting-color',
+  'outline',
+  'outline-color',
+  'stroke',
+  'text-decoration-color',
+  'text-shadow',
+]);
+
+function hasCssColorLiteral(value, property) {
+  if (CSS_COLOR_FUNCTION_OR_HEX_PATTERN.test(value)) return true;
+  if (!property.startsWith('--') && !CSS_COLOR_PROPERTIES.has(property)) return false;
+  const withoutSimpleVariables = value.replace(/var\(\s*--[\w-]+\s*\)/gi, '');
+  return CSS_NAMED_COLOR_PATTERN.test(withoutSimpleVariables);
+}
+
+export function findStylesheetViolations(stylesheet) {
+  const violations = [];
+
+  for (const declaration of parseCssDeclarations(stylesheet)) {
+    const isThemeToken = isThemeTokenSelector(declaration.selector);
+    const isAllowedColorToken = isThemeToken && declaration.property.startsWith('--');
+
+    if (
+      TOKENIZED_CSS_PROPERTIES.has(declaration.property) &&
+      !isThemeToken &&
+      !/(?:var\s*\(|--spacing\s*\()/i.test(declaration.value)
+    ) {
+      violations.push({
+        line: declaration.line,
+        className: `${declaration.property}: ${declaration.value}`,
+      });
+    }
+
+    if (hasCssColorLiteral(declaration.value, declaration.property) && !isAllowedColorToken) {
+      violations.push({
+        line: declaration.line,
+        className: `${declaration.property}: ${declaration.value}`,
+      });
+    }
+  }
+
+  return [
+    ...new Map(
+      violations.map((violation) => [`${violation.line}:${violation.className}`, violation]),
+    ).values(),
+  ];
+}
+
 export function extractCssBlock(stylesheet, marker) {
   const markerIndex = stylesheet.indexOf(marker);
   assert.notEqual(markerIndex, -1, `Could not find CSS block: ${marker}`);
@@ -293,11 +630,6 @@ export function validateDesignTokens({ stylesheet, themeColorSource, themeInitSo
 
   assert.match(stylesheet, /--color-\*:\s*initial;/, 'Tailwind palette must be reset');
   assert.match(stylesheet, /--shadow-\*:\s*initial;/, 'Tailwind shadow scale must be reset');
-  assert.doesNotMatch(
-    stylesheet,
-    /#[0-9a-f]{3,8}\b|rgba?\s*\(/i,
-    'CSS must not contain hex or rgb colors',
-  );
   assert.doesNotMatch(stylesheet, /brand-yellow|surface-warm|--ink-|--canvas\b/);
 
   for (const [scheme, tokens] of [
@@ -381,6 +713,32 @@ function run() {
   const themeColorSource = readFileSync(themeColorPath, 'utf8');
   const themeInitSource = readFileSync(themeInitPath, 'utf8');
   validateDesignTokens({ stylesheet, themeColorSource, themeInitSource });
+
+  const violations = findStylesheetViolations(stylesheet).map(({ line, className }) => ({
+    path: 'apps/web/src/styles/index.css',
+    line,
+    className,
+  }));
+
+  for (const { absolutePath, relativePath } of collectProductSourceFiles(sourceDirectory)) {
+    const source = readFileSync(absolutePath, 'utf8');
+    violations.push(
+      ...findProductSourceViolations(source, relativePath).map(({ line, className }) => ({
+        path: `apps/web/${relativePath}`,
+        line,
+        className,
+      })),
+    );
+  }
+
+  if (violations.length > 0) {
+    for (const violation of violations) {
+      console.error(`${violation.path}:${violation.line}: ${violation.className}`);
+    }
+    process.exitCode = 1;
+    return;
+  }
+
   console.log(`Design token contract passed for ${stylesheetPath}`);
 }
 

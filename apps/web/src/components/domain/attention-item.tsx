@@ -57,7 +57,7 @@ export function AttentionItem({
             {description}
           </p>
           <Link
-            className="mt-3 inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-brand decoration-2 underline-offset-4"
+            className="mt-3 inline-flex min-h-11 items-center gap-1 text-sm font-bold underline decoration-brand decoration-2 underline-offset-4"
             to={to}
           >
             {t('attention.open')}

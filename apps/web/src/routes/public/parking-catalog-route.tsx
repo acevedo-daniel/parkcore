@@ -144,7 +144,7 @@ export function ParkingCatalogRoute() {
           <div className="min-w-0 lg:col-span-7">
             <p className="type-label text-muted-foreground">{t('public.catalog.eyebrow')}</p>
             <h1
-              className="mt-4 max-w-full break-words font-display text-4xl font-bold leading-[1.02] tracking-[-0.05em] sm:text-5xl lg:text-6xl"
+              className="mt-4 max-w-full break-words font-display text-4xl font-bold leading-tight tracking-display sm:text-5xl lg:text-6xl"
               id="public-catalog-title"
             >
               {t('public.catalog.title')}
@@ -328,7 +328,7 @@ function CatalogFilters({
     <form
       aria-describedby={filterError ? `${idPrefix}-filter-error` : undefined}
       aria-label={t('public.catalog.filterAction')}
-      className="grid gap-4 rounded-[var(--radius-xl)] border border-border bg-card p-5 shadow-xs md:grid-cols-2 md:items-end lg:grid-cols-12 lg:p-6"
+      className="grid gap-4 rounded-2xl border border-border bg-card p-5 shadow-xs md:grid-cols-2 md:items-end lg:grid-cols-12 lg:p-6"
       noValidate
       onSubmit={onSubmit}
     >
@@ -364,7 +364,7 @@ function CatalogFilters({
         onClear={onClear}
       />
       <div className="flex items-center md:col-span-1 lg:col-span-2">
-        <label className="flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-muted px-3.5 py-3 text-sm font-semibold text-foreground">
+        <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border-subtle bg-muted px-3.5 py-3 text-sm font-semibold text-foreground">
           <Checkbox
             defaultChecked={searchParams.get('availableNow') === 'true'}
             id={`${idPrefix}-available-now`}
@@ -401,11 +401,8 @@ function CatalogSkeleton() {
       role="status"
     >
       {Array.from({ length: 6 }, (_, index) => (
-        <div
-          className="overflow-hidden rounded-[var(--radius-xl)] border border-border bg-card"
-          key={index}
-        >
-          <Skeleton className="aspect-[4/3] rounded-none" />
+        <div className="overflow-hidden rounded-2xl border border-border bg-card" key={index}>
+          <Skeleton className="aspect-4/3 rounded-none" />
           <div className="space-y-4 p-6">
             <Skeleton className="h-7 w-3/4" />
             <Skeleton className="h-4 w-full" />

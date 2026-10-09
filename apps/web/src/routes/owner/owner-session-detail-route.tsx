@@ -181,7 +181,7 @@ export function OwnerSessionDetailRoute() {
     <section className="owner-page space-y-9" aria-labelledby="session-detail-title">
       <header className="border-b border-border-strong pb-7">
         <Link
-          className="inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-brand decoration-4 underline-offset-4"
+          className="inline-flex min-h-11 items-center gap-1 text-sm font-bold underline decoration-brand decoration-4 underline-offset-4"
           to={`/app/parkings/${session.parkingId}`}
         >
           <ChevronLeft aria-hidden="true" className="size-4" /> {t('session.operation')}
@@ -196,7 +196,7 @@ export function OwnerSessionDetailRoute() {
               <SessionStatus status={session.status} />
             </div>
             <h1
-              className="mt-5 break-words font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] sm:text-5xl"
+              className="mt-5 break-words font-display text-4xl font-bold leading-display tracking-display sm:text-5xl"
               id="session-detail-title"
             >
               {getVehicleTypeLabel(session.vehicle.type, t)}
@@ -229,7 +229,7 @@ export function OwnerSessionDetailRoute() {
 
       {hasStaleSessionData || hasStaleParkingData ? (
         <div
-          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-lg border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="break-words text-sm font-semibold">{t('session.staleData')}</p>
@@ -273,7 +273,7 @@ export function OwnerSessionDetailRoute() {
           ]}
           title={t('session.visit')}
         />
-        <section className="min-w-0 rounded-[var(--radius-lg)] border border-border bg-card p-5">
+        <section className="min-w-0 rounded-xl border border-border bg-card p-5">
           <p className="type-label text-muted-foreground">{t('session.parking')}</p>
           <dl className="mt-5 space-y-4">
             <DetailItem label={t('session.facility')}>
@@ -404,7 +404,7 @@ function formatSessionTotal(session: ParkingSession, translate: Translator, loca
 function ActionError({ message }: { message: string }) {
   return (
     <p
-      className="break-words rounded-[var(--radius-md)] border border-destructive-soft-foreground bg-destructive-soft p-3 text-sm font-semibold text-destructive-soft-foreground"
+      className="break-words rounded-lg border border-destructive-soft-foreground bg-destructive-soft p-3 text-sm font-semibold text-destructive-soft-foreground"
       role="alert"
     >
       {message}
@@ -414,7 +414,7 @@ function ActionError({ message }: { message: string }) {
 
 function DetailCard({ entries, title }: { entries: [string, string][]; title: string }) {
   return (
-    <section className="min-w-0 rounded-[var(--radius-lg)] border border-border bg-card p-5">
+    <section className="min-w-0 rounded-xl border border-border bg-card p-5">
       <p className="type-label text-muted-foreground">{title}</p>
       <dl className="mt-5 space-y-4">
         {entries.map(([label, value]) => (
@@ -441,11 +441,11 @@ function SessionDetailSkeleton() {
   return (
     <div aria-busy="true" aria-label={t('api.loadSession')} className="space-y-8" role="status">
       <h1 className="sr-only">{t('session.operation')}</h1>
-      <Skeleton className="h-56 rounded-[var(--radius-xl)]" />
+      <Skeleton className="h-56 rounded-2xl" />
       <div className="grid gap-4 lg:grid-cols-3">
-        <Skeleton className="h-64 rounded-[var(--radius-lg)]" />
-        <Skeleton className="h-64 rounded-[var(--radius-lg)]" />
-        <Skeleton className="h-64 rounded-[var(--radius-lg)]" />
+        <Skeleton className="h-64 rounded-xl" />
+        <Skeleton className="h-64 rounded-xl" />
+        <Skeleton className="h-64 rounded-xl" />
       </div>
     </div>
   );

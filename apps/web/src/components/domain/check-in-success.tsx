@@ -28,7 +28,7 @@ export function CheckInSuccess({
   return (
     <section
       aria-label={t('checkInSuccess.region')}
-      className="rounded-[var(--radius-xl)] border border-success-soft-foreground bg-success-soft p-5 text-foreground shadow-xs sm:p-6"
+      className="rounded-2xl border border-success-soft-foreground bg-success-soft p-5 text-foreground shadow-xs sm:p-6"
       role="status"
     >
       <div className="flex items-start gap-3">
@@ -37,7 +37,7 @@ export function CheckInSuccess({
         </span>
         <div className="min-w-0">
           <p className="type-label text-success-soft-foreground">{t('checkInSuccess.eyebrow')}</p>
-          <h2 className="mt-1 font-display text-2xl font-bold tracking-[-0.04em]">
+          <h2 className="mt-1 font-display text-2xl font-bold tracking-heading">
             {t('checkInSuccess.title')}
           </h2>
         </div>

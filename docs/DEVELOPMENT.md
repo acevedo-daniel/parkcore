@@ -84,41 +84,41 @@ Typical local URLs:
 
 ## Commands
 
-| Task                      | Command                                                       | Purpose                                                                    |
-| ------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Start database            | `pnpm docker:up`                                              | Start local PostgreSQL.                                                    |
-| Stop database             | `pnpm docker:down`                                            | Stop local PostgreSQL without deleting its volume.                         |
-| Reset database container  | `pnpm docker:reset`                                           | Remove the local volume and start a clean database. Destructive.           |
-| Follow database logs      | `pnpm docker:logs`                                            | Follow output from local Compose services.                                 |
-| Inspect database service  | `pnpm docker:ps`                                              | List the state of local Compose services.                                  |
-| Start isolated E2E DB     | `pnpm e2e:local:db:up`                                        | Start the disposable PostgreSQL service for local real-stack E2E.          |
-| Stop isolated E2E DB      | `pnpm e2e:local:db:down`                                      | Remove the disposable PostgreSQL service and its data.                     |
-| Prepare database          | `pnpm db:setup`                                               | Generate Prisma, apply committed migrations, and seed OWNER/SHOWCASE data. |
-| Clean expired demos       | `pnpm --filter @parkcore/api demo:cleanup`                    | Remove one bounded batch of expired DEMO owners and dependent records.     |
-| Refresh public showcase   | `pnpm --filter @parkcore/api showcase:refresh`                | Rebase canonical SHOWCASE activity around an optional reference time.      |
-| Develop                   | `pnpm dev`                                                    | Run API and web in parallel.                                               |
-| Develop API               | `pnpm dev:api`                                                | Run only the API development server.                                       |
-| Develop web               | `pnpm dev:web`                                                | Run only the web development server.                                       |
-| Format check              | `pnpm format:check`                                           | Verify repository formatting.                                              |
-| Authored text check       | `pnpm text:check`                                             | Reject forbidden em dash characters in authored repository text.           |
-| Localization parity       | `pnpm locales:check`                                          | Verify locale keys, values, and interpolation placeholders match safely.   |
-| Design token check        | `pnpm tokens:check`                                           | Verify locked light and dark token mappings and readable pairings.         |
-| Generate canonical assets | `pnpm assets:canonical`                                       | Create canonical WebP assets from source images in `temp/` with ffmpeg.    |
-| Lint                      | `pnpm lint`                                                   | Run lint checks across API, client, and web workspaces.                    |
-| Typecheck                 | `pnpm typecheck`                                              | Type-check the TypeScript workspaces.                                      |
-| Test                      | `pnpm test`                                                   | Run API and web test suites.                                               |
-| Coverage                  | `pnpm test:coverage`                                          | Run coverage-enforced API and web tests.                                   |
-| Repository script tests   | `pnpm test:scripts`                                           | Run Node.js tests for repository scripts.                                  |
-| E2E                       | `pnpm --filter @parkcore/web test:e2e`                        | Run the default mocked browser workflow.                                   |
-| Hardening E2E             | `pnpm --filter @parkcore/web test:e2e:hardening`              | Run the local viewport, accessibility, and state matrix.                   |
-| Local real-stack E2E      | `pnpm --filter @parkcore/web test:e2e:local`                  | Run the owner workflow against local API and PostgreSQL.                   |
-| Generate contract         | `pnpm contract:generate`                                      | Regenerate OpenAPI and the TypeScript API client.                          |
-| Verify contract           | `pnpm contract:check`                                         | Fail if regenerated contract artifacts differ from Git.                    |
-| Check OpenAPI             | `pnpm openapi:check`                                          | Validate required paths and schemas in the generated OpenAPI document.     |
-| Build                     | `pnpm build`                                                  | Generate the contract and build API, client, and web.                      |
-| Production API smoke      | `SMOKE_BASE_URL=... pnpm --filter @parkcore/api smoke:remote` | Check API health and root service response.                                |
-| Verify demo cleanup       | `pnpm --filter @parkcore/api demo:cleanup:check`              | Check bounded cleanup on a disposable database only.                       |
-| Local preflight           | `pnpm preflight`                                              | Reproduce all CI gates with isolated disposable services.                  |
+| Task                      | Command                                                       | Purpose                                                                                                            |
+| ------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Start database            | `pnpm docker:up`                                              | Start local PostgreSQL.                                                                                            |
+| Stop database             | `pnpm docker:down`                                            | Stop local PostgreSQL without deleting its volume.                                                                 |
+| Reset database container  | `pnpm docker:reset`                                           | Remove the local volume and start a clean database. Destructive.                                                   |
+| Follow database logs      | `pnpm docker:logs`                                            | Follow output from local Compose services.                                                                         |
+| Inspect database service  | `pnpm docker:ps`                                              | List the state of local Compose services.                                                                          |
+| Start isolated E2E DB     | `pnpm e2e:local:db:up`                                        | Start the disposable PostgreSQL service for local real-stack E2E.                                                  |
+| Stop isolated E2E DB      | `pnpm e2e:local:db:down`                                      | Remove the disposable PostgreSQL service and its data.                                                             |
+| Prepare database          | `pnpm db:setup`                                               | Generate Prisma, apply committed migrations, and seed OWNER/SHOWCASE data.                                         |
+| Clean expired demos       | `pnpm --filter @parkcore/api demo:cleanup`                    | Remove one bounded batch of expired DEMO owners and dependent records.                                             |
+| Refresh public showcase   | `pnpm --filter @parkcore/api showcase:refresh`                | Rebase canonical SHOWCASE activity around an optional reference time.                                              |
+| Develop                   | `pnpm dev`                                                    | Run API and web in parallel.                                                                                       |
+| Develop API               | `pnpm dev:api`                                                | Run only the API development server.                                                                               |
+| Develop web               | `pnpm dev:web`                                                | Run only the web development server.                                                                               |
+| Format check              | `pnpm format:check`                                           | Verify repository formatting.                                                                                      |
+| Authored text check       | `pnpm text:check`                                             | Reject forbidden em dash characters in authored repository text.                                                   |
+| Localization parity       | `pnpm locales:check`                                          | Verify locale keys, values, and interpolation placeholders match safely.                                           |
+| Design token check        | `pnpm tokens:check`                                           | Verify the token registry in both schemes, readable pairings, and no arbitrary values or raw colors in web source. |
+| Generate canonical assets | `pnpm assets:canonical`                                       | Create canonical WebP assets from source images in `temp/` with ffmpeg.                                            |
+| Lint                      | `pnpm lint`                                                   | Run lint checks across API, client, and web workspaces.                                                            |
+| Typecheck                 | `pnpm typecheck`                                              | Type-check the TypeScript workspaces.                                                                              |
+| Test                      | `pnpm test`                                                   | Run API and web test suites.                                                                                       |
+| Coverage                  | `pnpm test:coverage`                                          | Run coverage-enforced API and web tests.                                                                           |
+| Repository script tests   | `pnpm test:scripts`                                           | Run Node.js tests for repository scripts.                                                                          |
+| E2E                       | `pnpm --filter @parkcore/web test:e2e`                        | Run the default mocked browser workflow.                                                                           |
+| Hardening E2E             | `pnpm --filter @parkcore/web test:e2e:hardening`              | Run the local viewport, accessibility, and state matrix.                                                           |
+| Local real-stack E2E      | `pnpm --filter @parkcore/web test:e2e:local`                  | Run the owner workflow against local API and PostgreSQL.                                                           |
+| Generate contract         | `pnpm contract:generate`                                      | Regenerate OpenAPI and the TypeScript API client.                                                                  |
+| Verify contract           | `pnpm contract:check`                                         | Fail if regenerated contract artifacts differ from Git.                                                            |
+| Check OpenAPI             | `pnpm openapi:check`                                          | Validate required paths and schemas in the generated OpenAPI document.                                             |
+| Build                     | `pnpm build`                                                  | Generate the contract and build API, client, and web.                                                              |
+| Production API smoke      | `SMOKE_BASE_URL=... pnpm --filter @parkcore/api smoke:remote` | Check API health and root service response.                                                                        |
+| Verify demo cleanup       | `pnpm --filter @parkcore/api demo:cleanup:check`              | Check bounded cleanup on a disposable database only.                                                               |
+| Local preflight           | `pnpm preflight`                                              | Reproduce all CI gates with isolated disposable services.                                                          |
 
 Additional production verification commands:
 

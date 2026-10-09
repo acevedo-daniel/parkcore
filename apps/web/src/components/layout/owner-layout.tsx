@@ -33,8 +33,8 @@ function OwnerLink({
       className={({ isActive }: NavLinkRenderProps) =>
         cn(
           compact
-            ? 'owner-nav-link flex min-h-[var(--touch-target-min)] min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-medium transition-colors'
-            : 'owner-nav-link flex min-h-[var(--touch-target-min)] items-center gap-3 rounded-[var(--radius-sm)] px-3.5 py-2.5 text-sm font-medium transition-colors',
+            ? 'owner-nav-link flex min-h-11 min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-2xs font-medium transition-colors'
+            : 'owner-nav-link flex min-h-11 items-center gap-3 rounded-md px-3.5 py-2.5 text-sm font-medium transition-colors',
           isActive
             ? 'is-active bg-primary text-primary-foreground font-semibold'
             : 'text-foreground-secondary hover:bg-muted hover:text-foreground',
@@ -81,12 +81,12 @@ export function OwnerLayout() {
       <a className="skip-link" href="#owner-main">
         {t('nav.skipMain')}
       </a>
-      <aside className="owner-sidebar hidden shrink-0 border-r border-border-strong bg-card p-6 wide:sticky wide:top-0 wide:flex wide:h-screen wide:w-[var(--owner-sidebar-width)] wide:flex-col wide:justify-between">
+      <aside className="owner-sidebar hidden shrink-0 border-r border-border-strong bg-card p-6 wide:sticky wide:top-0 wide:flex wide:h-screen wide:w-60 wide:flex-col wide:justify-between">
         <div className="flex flex-col gap-6">
           <div className="owner-brand-block border-b border-border-strong pb-5">
             <Link
               aria-label={t('shell.ownerHome')}
-              className="brand-mark inline-flex min-h-[var(--touch-target-min)] items-center font-display text-lg font-bold tracking-[-0.035em] text-foreground transition-colors hover:text-foreground-secondary"
+              className="brand-mark inline-flex min-h-11 items-center font-display text-lg font-bold tracking-title text-foreground transition-colors hover:text-foreground-secondary"
               to="/app"
             >
               PARKCORE
@@ -111,20 +111,20 @@ export function OwnerLayout() {
               }).format(clock)}
             </time>
           </div>
-          <section className="rounded-[var(--radius-sm)] border border-border-subtle bg-muted p-3">
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+          <section className="rounded-md border border-border-subtle bg-muted p-3">
+            <p className="mb-2 text-2xs font-bold uppercase tracking-eyebrow text-muted-foreground">
               {t('nav.preferences')}
             </p>
             <AppearanceControls compact />
           </section>
           <section className="border-t border-border-subtle pt-3">
-            <p className="mb-1 px-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+            <p className="mb-1 px-1 text-2xs font-bold uppercase tracking-eyebrow text-muted-foreground">
               {t('nav.account')}
             </p>
             <NavLink
               className={({ isActive }: NavLinkRenderProps) =>
                 cn(
-                  'owner-nav-link flex min-h-[var(--touch-target-min)] items-center gap-3 px-3.5 py-2 rounded-[var(--radius-sm)] text-sm font-medium transition-colors',
+                  'owner-nav-link flex min-h-11 items-center gap-3 px-3.5 py-2 rounded-md text-sm font-medium transition-colors',
                   isActive
                     ? 'is-active bg-primary text-primary-foreground font-semibold'
                     : 'text-foreground-secondary hover:bg-muted hover:text-foreground',
@@ -147,9 +147,9 @@ export function OwnerLayout() {
           </section>
         </div>
       </aside>
-      <header className="owner-mobile-header sticky top-0 z-30 flex min-h-14 items-center justify-between gap-1 border-b border-border-strong bg-card px-3 pb-2 pt-[max(0.5rem,env(safe-area-inset-top,0px))] wide:hidden">
+      <header className="owner-mobile-header sticky top-0 z-30 flex min-h-14 items-center justify-between gap-1 border-b border-border-strong bg-card px-3 pb-2 pt-safe-header wide:hidden">
         <Link
-          className="brand-mark flex min-h-[var(--touch-target-min)] items-center font-display text-base font-bold tracking-[-0.035em] text-foreground"
+          className="brand-mark flex min-h-11 items-center font-display text-base font-bold tracking-title text-foreground"
           to="/app"
         >
           PARKCORE
@@ -178,7 +178,7 @@ export function OwnerLayout() {
         </div>
       ) : null}
       <main
-        className="owner-main mx-auto w-full max-w-[var(--owner-max-width)] flex-1 p-5 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] sm:px-7 sm:pt-7 sm:pb-[calc(6rem+env(safe-area-inset-bottom,0px))] lg:px-10 lg:pt-10 lg:pb-[calc(6rem+env(safe-area-inset-bottom,0px))] wide:pb-10"
+        className="owner-main mx-auto w-full max-w-owner flex-1 p-5 pb-safe-owner-content sm:px-7 sm:pt-7 sm:pb-safe-owner-content lg:px-10 lg:pt-10 lg:pb-safe-owner-content wide:pb-10"
         id="owner-main"
         tabIndex={-1}
       >
@@ -194,7 +194,7 @@ export function OwnerLayout() {
         <NavLink
           className={({ isActive }: NavLinkRenderProps) =>
             cn(
-              'owner-nav-link flex min-h-[var(--touch-target-min)] min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-medium transition-colors',
+              'owner-nav-link flex min-h-11 min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-2xs font-medium transition-colors',
               isActive
                 ? 'is-active text-foreground font-semibold'
                 : 'text-foreground-secondary hover:text-foreground',

@@ -237,7 +237,7 @@ export function OwnerOverviewRoute() {
 
       {facilitiesSnapshotIsStale ? (
         <div
-          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-lg border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="break-words text-sm font-semibold">{t('overview.facilitiesStale')}</p>
@@ -257,14 +257,14 @@ export function OwnerOverviewRoute() {
         </div>
       ) : null}
 
-      <div className="grid gap-5 wide:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
+      <div className="grid gap-5 wide:grid-cols-owner-overview">
         <section
-          className="rounded-[var(--radius-xl)] border border-border bg-card p-6 shadow-xs sm:p-8"
+          className="rounded-2xl border border-border bg-card p-6 shadow-xs sm:p-8"
           aria-labelledby="network-now-title"
         >
           <p className="type-label text-muted-foreground">{t('overview.networkNow')}</p>
           <h2
-            className="mt-4 max-w-2xl font-display text-3xl font-bold leading-tight tracking-[-0.045em] sm:text-4xl"
+            className="mt-4 max-w-2xl font-display text-3xl font-bold leading-tight tracking-heading sm:text-4xl"
             id="network-now-title"
           >
             {tPlural(
@@ -350,12 +350,12 @@ export function OwnerOverviewRoute() {
         </section>
 
         <section
-          className="rounded-[var(--radius-xl)] border border-border bg-muted p-6 sm:p-8"
+          className="rounded-2xl border border-border bg-muted p-6 sm:p-8"
           aria-labelledby="attention-title"
         >
           <p className="type-label text-muted-foreground">{t('overview.attentionEyebrow')}</p>
           <h2
-            className="mt-4 font-display text-2xl font-bold tracking-[-0.04em]"
+            className="mt-4 font-display text-2xl font-bold tracking-heading"
             id="attention-title"
           >
             {attentionItems.length > 0
@@ -382,7 +382,7 @@ export function OwnerOverviewRoute() {
           )}
           {attentionQueryHasError ? (
             <div
-              className="mt-5 flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground"
+              className="mt-5 flex flex-col gap-3 rounded-lg border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground"
               role="alert"
             >
               <p className="text-sm font-semibold">{t('overview.attentionDataError')}</p>
@@ -400,7 +400,7 @@ export function OwnerOverviewRoute() {
           <div>
             <p className="type-label text-muted-foreground">{t('overview.networkNow')}</p>
             <h2
-              className="mt-2 font-display text-3xl font-bold leading-none tracking-[-0.055em]"
+              className="mt-2 font-display text-3xl font-bold leading-none tracking-display"
               id="facilities-title"
             >
               {t('overview.facilityOverview')}
@@ -432,7 +432,7 @@ export function OwnerOverviewRoute() {
       {summaryQuery.isError ? <AnalyticsNotice onRetry={retrySummary} /> : null}
 
       <section
-        className="overflow-hidden rounded-[var(--radius-xl)] border border-border bg-accent text-foreground"
+        className="overflow-hidden rounded-2xl border border-border bg-accent text-foreground"
         aria-labelledby="activity-title"
       >
         <div className="flex flex-col justify-between gap-5 border-b border-border p-6 sm:p-8 lg:flex-row lg:items-start">
@@ -444,7 +444,7 @@ export function OwnerOverviewRoute() {
               <p className="type-label text-muted-foreground">{t('overview.activityEyebrow')}</p>
             </div>
             <h2
-              className="mt-4 font-display text-3xl font-bold leading-none tracking-[-0.055em]"
+              className="mt-4 font-display text-3xl font-bold leading-none tracking-display"
               id="activity-title"
             >
               {t('overview.activityTitle')}
@@ -512,11 +512,11 @@ export function OwnerOverviewRoute() {
               className="h-56"
               role="status"
             >
-              <Skeleton className="h-full w-full rounded-[var(--radius-lg)]" />
+              <Skeleton className="h-full w-full rounded-xl" />
             </div>
           ) : activityHasError ? (
             <div
-              className="flex min-h-56 flex-col items-center justify-center gap-4 rounded-[var(--radius-lg)] border border-border-subtle bg-card px-5 text-center"
+              className="flex min-h-56 flex-col items-center justify-center gap-4 rounded-xl border border-border-subtle bg-card px-5 text-center"
               role="alert"
             >
               <p className="text-sm font-semibold text-foreground-secondary">
@@ -528,7 +528,7 @@ export function OwnerOverviewRoute() {
               </Button>
             </div>
           ) : chartPoints.length === 0 ? (
-            <div className="flex min-h-56 items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-border-strong bg-card px-5 text-center text-sm text-foreground-secondary">
+            <div className="flex min-h-56 items-center justify-center rounded-xl border border-dashed border-border-strong bg-card px-5 text-center text-sm text-foreground-secondary">
               {t('overview.chartEmpty')}
             </div>
           ) : (
@@ -590,7 +590,7 @@ export function OwnerOverviewRoute() {
               <div className="mt-2 flex gap-1.5 sm:gap-3">
                 {chartPoints.map((point, index) => (
                   <span
-                    className="min-w-0 flex-1 truncate text-center font-mono text-[10px] text-muted-foreground"
+                    className="min-w-0 flex-1 truncate text-center font-mono text-2xs text-muted-foreground"
                     key={point.date}
                   >
                     {days === 30 && index % 4 !== 0 && index !== chartPoints.length - 1
@@ -657,7 +657,7 @@ function AnalyticsNotice({ onRetry }: { onRetry: () => void }) {
 
   return (
     <div
-      className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+      className="flex flex-col gap-4 rounded-xl border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
       role="alert"
     >
       <p className="text-sm font-semibold">{t('overview.analyticsDegraded')}</p>
@@ -692,15 +692,15 @@ function OwnerOverviewSkeleton() {
   return (
     <div aria-busy="true" aria-label={t('overview.loading')} className="space-y-10" role="status">
       <h1 className="sr-only">{t('overview.title')}</h1>
-      <div className="grid gap-5 wide:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
-        <Skeleton className="h-72 rounded-[var(--radius-xl)]" />
-        <Skeleton className="h-72 rounded-[var(--radius-xl)]" />
+      <div className="grid gap-5 wide:grid-cols-owner-overview">
+        <Skeleton className="h-72 rounded-2xl" />
+        <Skeleton className="h-72 rounded-2xl" />
       </div>
-      <Skeleton className="h-80 rounded-[var(--radius-xl)]" />
+      <Skeleton className="h-80 rounded-2xl" />
       <div className="grid gap-4 md:grid-cols-2 wide:grid-cols-3">
-        <Skeleton className="h-96 rounded-[var(--radius-lg)]" />
-        <Skeleton className="h-96 rounded-[var(--radius-lg)]" />
-        <Skeleton className="h-96 rounded-[var(--radius-lg)]" />
+        <Skeleton className="h-96 rounded-xl" />
+        <Skeleton className="h-96 rounded-xl" />
+        <Skeleton className="h-96 rounded-xl" />
       </div>
     </div>
   );

@@ -33,7 +33,7 @@ export function PageHeader({
         <div className="min-w-0 max-w-3xl">
           {eyebrow ? <p className="type-label text-muted-foreground">{eyebrow}</p> : null}
           <h1
-            className="mt-3 break-words font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] sm:text-5xl"
+            className="mt-3 break-words font-display text-4xl font-bold leading-display tracking-display sm:text-5xl"
             id={id}
           >
             {title}

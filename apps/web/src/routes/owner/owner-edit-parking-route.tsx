@@ -112,7 +112,7 @@ export function OwnerEditParkingRoute() {
       />
       {hasStaleData ? (
         <div
-          className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-4 rounded-xl border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="break-words text-sm font-semibold">{t('parkingRoute.stale')}</p>

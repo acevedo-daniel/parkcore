@@ -256,7 +256,7 @@ export function CheckInPanel({
 
       {error ? (
         <p
-          className="break-words rounded-[var(--radius-md)] border border-warning-soft-foreground bg-warning-soft p-3 text-sm font-semibold text-warning-soft-foreground"
+          className="break-words rounded-lg border border-warning-soft-foreground bg-warning-soft p-3 text-sm font-semibold text-warning-soft-foreground"
           role="alert"
         >
           {error}

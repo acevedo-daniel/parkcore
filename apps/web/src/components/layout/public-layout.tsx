@@ -37,7 +37,7 @@ function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
           key={link.to}
           className={({ isActive }: NavLinkRenderProps) =>
             cn(
-              'public-nav-link flex min-h-[var(--touch-target-min)] items-center rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px',
+              'public-nav-link flex min-h-11 items-center rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px',
               isActive
                 ? 'is-active bg-muted text-foreground'
                 : 'text-foreground-secondary hover:bg-muted hover:text-foreground',
@@ -95,7 +95,7 @@ function PublicMobileMenu() {
             <nav aria-label={t('nav.public')} className="public-mobile-links flex flex-col gap-2">
               <DialogClose asChild>
                 <Link
-                  className="flex min-h-[var(--touch-target-min)] items-center rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-muted"
+                  className="flex min-h-11 items-center rounded-lg px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-muted"
                   to="/parkings"
                 >
                   {t('nav.parkings')}
@@ -103,7 +103,7 @@ function PublicMobileMenu() {
               </DialogClose>
               <DialogClose asChild>
                 <Link
-                  className="flex min-h-[var(--touch-target-min)] items-center rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-muted"
+                  className="flex min-h-11 items-center rounded-lg px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-muted"
                   to="/#como-funciona"
                 >
                   {t('nav.howItWorks')}
@@ -111,7 +111,7 @@ function PublicMobileMenu() {
               </DialogClose>
               <DialogClose asChild>
                 <Link
-                  className="flex min-h-[var(--touch-target-min)] items-center rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-muted"
+                  className="flex min-h-11 items-center rounded-lg px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-muted"
                   to="/login"
                 >
                   {t('nav.signIn')}
@@ -157,7 +157,7 @@ export function PublicLayout() {
           <div className="flex items-center gap-10">
             <Link
               aria-label={t('shell.publicHome')}
-              className="brand-mark group flex min-h-[var(--touch-target-min)] items-center gap-2 font-display text-xl font-black tracking-tight text-foreground sm:text-2xl"
+              className="brand-mark group flex min-h-11 items-center gap-2 font-display text-xl font-black tracking-tight text-foreground sm:text-2xl"
               to="/"
             >
               <span>PARKCORE</span>
@@ -181,7 +181,7 @@ export function PublicLayout() {
             <NavLink
               className={({ isActive }: NavLinkRenderProps) =>
                 cn(
-                  'public-nav-link hidden min-h-[var(--touch-target-min)] rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px wide:inline-flex',
+                  'public-nav-link hidden min-h-11 rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px wide:inline-flex',
                   isActive
                     ? 'is-active bg-muted text-foreground'
                     : 'text-foreground-secondary hover:bg-muted hover:text-foreground',
