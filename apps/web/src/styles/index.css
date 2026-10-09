@@ -560,43 +560,15 @@
   transform-origin: var(--radix-tooltip-content-transform-origin);
 }
 
+@utility max-h-dropdown-available {
+  max-height: var(--radix-dropdown-menu-content-available-height);
+}
+
+@utility origin-dropdown-menu {
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+}
+
 @layer components {
-  .parkcore-toast-viewport {
-    position: fixed;
-    right: max(1rem, env(safe-area-inset-right, 0px));
-    bottom: max(1rem, env(safe-area-inset-bottom, 0px));
-    z-index: 100;
-    display: flex;
-    width: min(calc(100vw - 2rem), 24rem);
-    flex-direction: column;
-    gap: 0.75rem;
-    margin: 0;
-    padding: 0;
-    pointer-events: none;
-    outline: none;
-  }
-
-  .parkcore-toast {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-md);
-    background: var(--popover);
-    color: var(--foreground);
-    padding: 0.75rem 0.75rem 0.75rem 1rem;
-    box-shadow: var(--shadow-xl);
-    pointer-events: auto;
-  }
-
-  .parkcore-skeleton {
-    min-height: 1rem;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    background: var(--accent);
-  }
-
   @keyframes parkcore-reveal {
     from {
       opacity: 0;
@@ -636,72 +608,5 @@
     padding-right: max(1rem, env(safe-area-inset-right, 0px));
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
     padding-left: max(1rem, env(safe-area-inset-left, 0px));
-  }
-
-  .occupancy-neutral,
-  .occupancy-optimal {
-    color: var(--success-soft-foreground);
-  }
-
-  .occupancy-warning {
-    color: var(--warning-soft-foreground);
-  }
-
-  .occupancy-critical,
-  .occupancy-full {
-    color: var(--destructive-soft-foreground);
-  }
-
-  .capacity-gauge {
-    display: grid;
-    gap: 8px;
-    padding: 16px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--card);
-  }
-
-  .capacity-gauge-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .capacity-gauge-track {
-    height: 8px;
-    border-radius: var(--radius-3xl);
-    background: var(--muted);
-    overflow: hidden;
-  }
-
-  .capacity-gauge-fill {
-    height: 100%;
-    border-radius: var(--radius-3xl);
-    background: var(--success);
-    transition: width var(--motion-overlay) var(--ease-out);
-  }
-
-  .capacity-gauge-warning .capacity-gauge-fill {
-    background: var(--warning);
-  }
-
-  .capacity-gauge-critical .capacity-gauge-fill,
-  .capacity-gauge-full .capacity-gauge-fill {
-    background: var(--destructive);
-  }
-
-  .plate {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 3px 8px;
-    border-radius: var(--radius-xs);
-    border: 1px solid var(--border-strong);
-    background: var(--popover);
-    color: var(--foreground);
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: var(--text-sm);
-    letter-spacing: var(--tracking-label);
   }
 }

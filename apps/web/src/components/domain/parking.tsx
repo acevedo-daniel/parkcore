@@ -6,6 +6,7 @@ import { useAppearance } from '../../app/appearance-provider.js';
 import { cn } from '../../lib/cn.js';
 import { formatMoney, formatNumber } from '../../lib/format.js';
 import { ParkingStatus } from './status.js';
+import { Progress, type ProgressTone } from '../ui/progress.js';
 
 type Parking = components['schemas']['ParkingResponse'];
 
@@ -96,22 +97,23 @@ export function OccupancyMeter({
         : threshold === 'warning'
           ? t('parking.elevatedOccupancy')
           : t('parking.optimalCapacity');
+  const tone: ProgressTone =
+    threshold === 'optimal' ? 'success' : threshold === 'warning' ? 'warning' : 'destructive';
   return (
     <div
       className={cn(
-        'capacity-gauge',
+        'capacity-gauge grid gap-2 rounded-lg border border-border bg-card p-4',
         compact && 'border-0 bg-transparent p-0 shadow-none',
-        `capacity-gauge-${threshold}`,
-        `occupancy-${threshold === 'optimal' ? 'neutral' : threshold}`,
       )}
+      data-slot="capacity-gauge"
     >
-      <div className="capacity-gauge-heading">
+      <div className="flex items-center justify-between gap-2">
         <span className="type-label">{t('parking.occupancyGauge')}</span>
-        <span className="type-operational">
+        <span className="type-operational text-sm">
           {formattedActive} / {formattedCapacity} {t('parking.inside')}
         </span>
       </div>
-      <div
+      <Progress
         aria-label={t('parkingOperation.occupancyLabel', {
           active: formattedActive,
           capacity: formattedCapacity,
@@ -125,21 +127,38 @@ export function OccupancyMeter({
           capacity: formattedCapacity,
           percent: formattedPercentage,
         })}
-        className="capacity-gauge-track"
-        role="progressbar"
-      >
-        <div className="capacity-gauge-fill" style={{ width: `${String(percentage)}%` }} />
-      </div>
-      <p className="capacity-gauge-status break-words">
-        <span aria-hidden="true">●</span> {status} · {formattedAvailable}{' '}
-        {tPlural(
-          safeAvailable,
-          { one: 'parking.spot', other: 'parking.spots' },
-          {
-            count: formattedAvailable,
-          },
-        )}{' '}
-        {t('parking.openSpots')}
+        className="h-2"
+        max={Math.max(safeCapacity, 1)}
+        tone={tone}
+        value={safeActive}
+      />
+      <p className="flex flex-wrap items-center gap-2 break-words text-xs text-foreground-secondary">
+        <span className="flex min-w-0 items-center gap-1.5 font-medium">
+          <span
+            aria-hidden="true"
+            className={cn(
+              'size-1.5 shrink-0 rounded-full',
+              tone === 'success'
+                ? 'bg-success'
+                : tone === 'warning'
+                  ? 'bg-warning'
+                  : 'bg-destructive',
+            )}
+          />
+          {status}
+        </span>
+        <span aria-hidden="true">·</span>
+        <span>
+          {formattedAvailable}{' '}
+          {tPlural(
+            safeAvailable,
+            { one: 'parking.spot', other: 'parking.spots' },
+            {
+              count: formattedAvailable,
+            },
+          )}{' '}
+          {t('parking.openSpots')}
+        </span>
       </p>
     </div>
   );

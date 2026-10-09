@@ -8,8 +8,9 @@ import { MonetaryFilterGroup } from '../../components/domain/monetary-filter-gro
 import { ParkingDiscoveryCard } from '../../components/domain/parking-discovery-card.js';
 import { Button } from '../../components/ui/button.js';
 import { Checkbox } from '../../components/ui/checkbox.js';
-import { Sheet } from '../../components/ui/dialog.js';
-import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
+import { AppSheet } from '../../components/domain/app-dialog.js';
+import { EmptyState, ErrorState } from '../../components/domain/feedback.js';
+import { Skeleton } from '../../components/ui/skeleton.js';
 import {
   InputGroup,
   InputGroupAddon,
@@ -181,7 +182,7 @@ export function ParkingCatalogRoute() {
           />
         </div>
 
-        <Sheet
+        <AppSheet
           description={t('public.catalog.filterDescription')}
           onOpenChange={setMobileFiltersOpen}
           open={mobileFiltersOpen}
@@ -198,7 +199,7 @@ export function ParkingCatalogRoute() {
               currency={currency}
             />
           </div>
-        </Sheet>
+        </AppSheet>
 
         {parkingQuery.isFetching && !parkingQuery.isLoading ? (
           <p className="mt-5 text-sm font-medium text-foreground-secondary" role="status">

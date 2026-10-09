@@ -2,7 +2,8 @@ import { Navigate, Outlet, useLocation, useSearchParams } from 'react-router';
 import type { ReactNode } from 'react';
 
 import { useAppearance } from '../../app/appearance-provider.js';
-import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
+import { ErrorState } from '../../components/domain/feedback.js';
+import { Skeleton } from '../../components/ui/skeleton.js';
 import { useAuth } from '../../features/auth/use-auth.js';
 import { getReturnTo } from './auth-redirect.js';
 

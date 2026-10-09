@@ -5,7 +5,8 @@ import { Link, useLocation, useNavigate } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { ParkingDiscoveryCard } from '../../components/domain/parking-discovery-card.js';
-import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
+import { EmptyState, ErrorState } from '../../components/domain/feedback.js';
+import { Skeleton } from '../../components/ui/skeleton.js';
 import {
   Accordion,
   AccordionContent,

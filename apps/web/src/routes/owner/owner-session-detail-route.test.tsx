@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ToastProvider } from '../../components/ui/feedback.js';
+import { Toaster } from '../../components/ui/sonner.js';
 import { ApiError } from '../../lib/api/api-error.js';
 import { parkingFixture, parkingSessionFixture } from '../../test/fixtures.js';
 import { OwnerSessionDetailRoute } from './owner-session-detail-route.js';
@@ -23,15 +23,16 @@ function renderSessionDetail() {
     defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
   });
   return render(
-    <QueryClientProvider client={queryClient}>
-      <ToastProvider>
+    <>
+      <Toaster containerAriaLabel="Notifications" duration={Infinity} position="bottom-right" />
+      <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={['/app/sessions/session-1']}>
           <Routes>
             <Route path="/app/sessions/:sessionId" element={<OwnerSessionDetailRoute />} />
           </Routes>
         </MemoryRouter>
-      </ToastProvider>
-    </QueryClientProvider>,
+      </QueryClientProvider>
+    </>,
   );
 }
 

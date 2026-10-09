@@ -2,7 +2,7 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { forwardRef, useId, useState, type FocusEventHandler } from 'react';
 
 import { useAppearance } from '../../app/appearance-provider.js';
-import { useFieldControlProps } from '../ui/field.js';
+import { useFieldControlProps } from '../../lib/field-control-context.js';
 import { Button } from '../ui/button.js';
 import { HiddenInput } from '../ui/input.js';
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from '../ui/command.js';

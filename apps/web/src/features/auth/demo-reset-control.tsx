@@ -3,18 +3,17 @@ import { RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
+import { Button } from '../../components/ui/button.js';
+import { AppDialog } from '../../components/domain/app-dialog.js';
+import { localizeApiError } from '../../lib/api/api-error.js';
 import { useAppearance } from '../../app/appearance-provider.js';
 import { resetDemo } from '../../lib/api/auth-api.js';
-import { Button } from '../../components/ui/button.js';
-import { Dialog } from '../../components/ui/dialog.js';
-import { localizeApiError } from '../../lib/api/api-error.js';
-import { useToast } from '../../components/ui/toast-context.js';
+import { toast } from 'sonner';
 
 export function DemoResetControl() {
   const { t } = useAppearance();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { showToast } = useToast();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string>();
   const resetMutation = useMutation({ mutationFn: resetDemo });
@@ -24,7 +23,7 @@ export function DemoResetControl() {
     try {
       await resetMutation.mutateAsync();
       await queryClient.invalidateQueries();
-      showToast(t('demo.restoreSuccess'));
+      toast.success(t('demo.restoreSuccess'));
       setOpen(false);
       void navigate('/app', { replace: true });
     } catch (reason) {
@@ -51,7 +50,7 @@ export function DemoResetControl() {
         <RotateCcw aria-hidden="true" className="size-4" />
         {t('demo.restore')}
       </Button>
-      <Dialog
+      <AppDialog
         description={t('demo.restoreDescription')}
         onOpenChange={(nextOpen) => {
           setOpen(nextOpen);
@@ -80,7 +79,7 @@ export function DemoResetControl() {
             {resetMutation.isPending ? t('demo.restoring') : t('demo.restore')}
           </Button>
         </div>
-      </Dialog>
+      </AppDialog>
     </>
   );
 }

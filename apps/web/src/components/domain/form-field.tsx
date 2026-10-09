@@ -1,12 +1,7 @@
 import type { ReactNode } from 'react';
 
-import {
-  Field,
-  FieldControlProvider,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-} from '@/components/ui/field';
+import { FieldControlProvider } from '../../lib/field-control-provider.js';
+import { Label } from '../ui/label.js';
 
 export interface FormFieldProps {
   children: ReactNode;
@@ -21,30 +16,30 @@ export function FormField({ children, error, help, htmlFor, label }: FormFieldPr
 
   return (
     <FieldControlProvider value={{ id: htmlFor, describedBy, invalid: Boolean(error) }}>
-      <Field className="field space-y-1.5 gap-1.5">
-        <FieldLabel
-          className="field-label block text-xs font-bold text-foreground"
-          htmlFor={htmlFor}
-        >
+      <div className="field space-y-1.5 gap-1.5" data-slot="field" role="group">
+        <Label className="field-label block text-xs font-bold text-foreground" htmlFor={htmlFor}>
           {label}
-        </FieldLabel>
+        </Label>
         {children}
         {error ? (
-          <FieldError
+          <div
             className="field-error text-sm font-medium text-destructive-soft-foreground"
+            data-slot="field-error"
             id={describedBy}
+            role="alert"
           >
             {error}
-          </FieldError>
+          </div>
         ) : help ? (
-          <FieldDescription
+          <p
             className="field-help text-sm leading-relaxed text-muted-foreground"
+            data-slot="field-description"
             id={describedBy}
           >
             {help}
-          </FieldDescription>
+          </p>
         ) : null}
-      </Field>
+      </div>
     </FieldControlProvider>
   );
 }

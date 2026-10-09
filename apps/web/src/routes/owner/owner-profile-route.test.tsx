@@ -5,7 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AppearanceProvider } from '../../app/appearance-provider.js';
-import { ToastProvider } from '../../components/ui/feedback.js';
+
 import { ApiError } from '../../lib/api/api-error.js';
 import type { User } from '../../lib/api/auth-api.js';
 import { userFixture } from '../../test/fixtures.js';
@@ -29,6 +29,10 @@ vi.mock('../../features/auth/use-auth.js', () => ({
   useAuth: () => auth,
 }));
 
+vi.mock('../../lib/timezones.js', () => ({
+  getTimezoneOptions: () => ['America/Argentina/Buenos_Aires', 'Europe/Madrid'],
+}));
+
 vi.mock('../../lib/api/owner-api.js', () => api);
 vi.mock('../../lib/api/auth-api.js', () => demoApi);
 
@@ -41,15 +45,13 @@ function renderProfile(user: User | undefined) {
   const view = render(
     <AppearanceProvider>
       <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          <MemoryRouter initialEntries={['/app/profile']}>
-            <Routes>
-              <Route path="/app/profile" element={<OwnerProfileRoute />} />
-              <Route path="/app" element={<p>Overview</p>} />
-              <Route path="/login" element={<p>Login</p>} />
-            </Routes>
-          </MemoryRouter>
-        </ToastProvider>
+        <MemoryRouter initialEntries={['/app/profile']}>
+          <Routes>
+            <Route path="/app/profile" element={<OwnerProfileRoute />} />
+            <Route path="/app" element={<p>Overview</p>} />
+            <Route path="/login" element={<p>Login</p>} />
+          </Routes>
+        </MemoryRouter>
       </QueryClientProvider>
     </AppearanceProvider>,
   );
@@ -98,9 +100,9 @@ describe('owner profile route', () => {
     const lastName = screen.getByLabelText<HTMLInputElement>('Last name');
     const email = screen.getByLabelText<HTMLInputElement>('Email');
     await user.clear(name);
-    await user.type(name, 'Grace');
+    await user.paste('Grace');
     await user.clear(lastName);
-    await user.type(lastName, 'Hopper');
+    await user.paste('Hopper');
     expect(screen.getByRole('combobox', { name: 'Timezone' }).getAttribute('aria-required')).toBe(
       'true',
     );

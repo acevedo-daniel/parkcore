@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest';
 import { OwnerLayout } from './owner-layout.js';
 import { PublicLayout } from './public-layout.js';
 import { AppearanceProvider } from '../../app/appearance-provider.js';
-import { ToastProvider } from '../ui/feedback.js';
+
 import { AuthProvider } from '../../features/auth/auth-provider.js';
 
 function renderRoute(element: ReactNode, path: string) {
@@ -20,9 +20,7 @@ function renderRoute(element: ReactNode, path: string) {
     <AppearanceProvider>
       <QueryClientProvider client={new QueryClient()}>
         <AuthProvider>
-          <ToastProvider>
-            <RouterProvider router={router} />
-          </ToastProvider>
+          <RouterProvider router={router} />
         </AuthProvider>
       </QueryClientProvider>
     </AppearanceProvider>,

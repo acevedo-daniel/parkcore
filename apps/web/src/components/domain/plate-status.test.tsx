@@ -12,12 +12,12 @@ describe('operational domain indicators', () => {
   });
 
   it.each([
-    [6, 'neutral'],
+    [6, 'success'],
     [7, 'warning'],
-    [9, 'critical'],
-  ])('applies the %s/10 occupancy threshold as %s', (active, threshold) => {
-    const { container } = render(<OccupancyMeter active={active} capacity={10} />);
-    expect(container.firstElementChild?.getAttribute('class')).toContain(`occupancy-${threshold}`);
+    [9, 'destructive'],
+  ])('exposes the %s/10 occupancy tone as %s', (active, tone) => {
+    render(<OccupancyMeter active={active} capacity={10} />);
+    expect(screen.getByRole('progressbar').getAttribute('data-tone')).toBe(tone);
   });
 
   it('communicates parking and session states in plain language', () => {

@@ -503,7 +503,7 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
   const ownerAppearance = page.locator('.owner-sidebar [data-slot="appearance-controls"]');
   await ownerAppearance.getByRole('radio', { exact: true, name: 'Spanish' }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-AR');
-  await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+  await expect(page.locator('[data-sonner-toast]')).toHaveCount(0);
   await expectNoHorizontalOverflow(page, 'wide dark operation');
   await page.screenshot({
     fullPage: false,

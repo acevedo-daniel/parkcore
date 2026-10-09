@@ -801,6 +801,11 @@ async function visitFixture(
 
 async function expectOverlayWithinViewport(locator: Locator, label: string) {
   await expect(locator).toBeVisible();
+  await locator.evaluate(async (element) => {
+    await Promise.all(
+      element.getAnimations().map((animation) => animation.finished.catch(() => undefined)),
+    );
+  });
   const box = await locator.boundingBox();
   const viewport = locator.page().viewportSize();
   expect(box, `${label} should have a bounding box.`).not.toBeNull();

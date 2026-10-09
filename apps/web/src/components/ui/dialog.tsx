@@ -1,133 +1,134 @@
-import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
-import { useLayoutEffect, useRef, type ReactNode } from 'react';
+import * as React from 'react';
+import { XIcon } from 'lucide-react';
+import { Dialog as DialogPrimitive } from 'radix-ui';
 
-import { useAppearance } from '../../app/appearance-provider.js';
-import { Button } from './button.js';
+import { Button } from '@/components/ui/button.js';
+import { cn } from '@/lib/cn.js';
 
-export interface DialogProps {
-  children: ReactNode;
-  closeLabel?: string;
-  description: string;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  title: string;
+function Dialog(props: React.ComponentProps<typeof DialogPrimitive.Root>) {
+  return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
 
-const overlayClassName =
-  'fixed inset-0 z-50 bg-overlay backdrop-blur-sm data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:fade-in';
-
-function useFocusRestoration(open: boolean) {
-  const focusBeforeOpen = useRef<HTMLElement | null>(null);
-  const wasOpen = useRef(open);
-
-  useLayoutEffect(() => {
-    if (open && !wasOpen.current) {
-      focusBeforeOpen.current =
-        document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    }
-    wasOpen.current = open;
-  }, [open]);
-
-  return (event: Event) => {
-    const target = focusBeforeOpen.current;
-    if (!target?.isConnected) return;
-
-    event.preventDefault();
-    target.focus();
-    focusBeforeOpen.current = null;
-  };
+function DialogTrigger(props: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
+  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
 }
 
-function DialogHeader({
-  closeLabel,
-  description,
-  title,
-}: Pick<DialogProps, 'closeLabel' | 'description' | 'title'>) {
-  const { t } = useAppearance();
+function DialogPortal(props: React.ComponentProps<typeof DialogPrimitive.Portal>) {
+  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
+}
+
+function DialogClose(props: React.ComponentProps<typeof DialogPrimitive.Close>) {
+  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
+}
+
+function DialogOverlay({
+  className,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
   return (
-    <header
-      className="flex items-start justify-between gap-5 border-b border-border-strong pb-5"
-      data-slot="dialog-header"
+    <DialogPrimitive.Overlay
+      data-slot="dialog-overlay"
+      className={cn(
+        'fixed inset-0 z-50 bg-overlay backdrop-blur-sm data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+function DialogContent({
+  className,
+  children,
+  showCloseButton = false,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Content> & { showCloseButton?: boolean }) {
+  return (
+    <DialogPortal>
+      <DialogOverlay />
+      <DialogPrimitive.Content
+        data-slot="dialog-content"
+        className={cn(
+          'fixed inset-x-4 top-1/2 z-50 mx-auto grid max-h-dvh w-auto max-w-xl -translate-y-1/2 gap-4 overflow-y-auto rounded-xl border border-border-strong bg-popover p-6 pb-safe-overlay text-foreground shadow-xl duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:p-8 sm:pb-safe-overlay',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+        {showCloseButton ? (
+          <DialogPrimitive.Close
+            data-slot="dialog-close"
+            className="absolute right-4 top-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+          >
+            <XIcon />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        ) : null}
+      </DialogPrimitive.Content>
+    </DialogPortal>
+  );
+}
+
+function DialogHeader({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div data-slot="dialog-header" className={cn('flex flex-col gap-2', className)} {...props} />
+  );
+}
+
+function DialogFooter({
+  className,
+  showCloseButton = false,
+  children,
+  ...props
+}: React.ComponentProps<'div'> & { showCloseButton?: boolean }) {
+  return (
+    <div
+      data-slot="dialog-footer"
+      className={cn('flex flex-col-reverse gap-2 sm:flex-row sm:justify-end', className)}
+      {...props}
     >
-      <div className="min-w-0">
-        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-          {t('dialog.eyebrow')}
-        </p>
-        <DialogPrimitive.Title className="mt-3 break-words font-display text-3xl font-bold leading-none tracking-[-0.055em] text-foreground">
-          {title}
-        </DialogPrimitive.Title>
-        <DialogPrimitive.Description className="mt-3 max-w-xl break-words text-sm leading-relaxed text-foreground-secondary">
-          {description}
-        </DialogPrimitive.Description>
-      </div>
-      <DialogPrimitive.Close asChild>
-        <Button
-          aria-label={closeLabel ?? t('dialog.close', { title })}
-          className="rounded-full"
-          data-slot="dialog-close"
-          size="icon"
-          variant="ghost"
-        >
-          <X aria-hidden="true" className="size-4" />
-        </Button>
-      </DialogPrimitive.Close>
-    </header>
+      {children}
+      {showCloseButton ? (
+        <DialogPrimitive.Close asChild>
+          <Button variant="outline">Close</Button>
+        </DialogPrimitive.Close>
+      ) : null}
+    </div>
   );
 }
 
-function DialogOverlay() {
-  return <DialogPrimitive.Overlay className={overlayClassName} data-slot="dialog-overlay" />;
-}
-
-export function Dialog({
-  children,
-  closeLabel,
-  description,
-  onOpenChange,
-  open,
-  title,
-}: DialogProps) {
-  const restoreFocus = useFocusRestoration(open);
+function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
-      <DialogPrimitive.Portal>
-        <DialogOverlay />
-        <DialogPrimitive.Content
-          className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[var(--radius-xl)] border border-border-strong bg-popover p-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] text-foreground shadow-xl focus:outline-none sm:p-8"
-          data-slot="dialog-content"
-          onCloseAutoFocus={restoreFocus}
-        >
-          <DialogHeader closeLabel={closeLabel} description={description} title={title} />
-          {children}
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+    <DialogPrimitive.Title
+      data-slot="dialog-title"
+      className={cn('text-lg font-semibold leading-none', className)}
+      {...props}
+    />
   );
 }
 
-export function Sheet({
-  children,
-  closeLabel,
-  description,
-  onOpenChange,
-  open,
-  title,
-}: DialogProps) {
-  const restoreFocus = useFocusRestoration(open);
+function DialogDescription({
+  className,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Description>) {
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
-      <DialogPrimitive.Portal>
-        <DialogOverlay />
-        <DialogPrimitive.Content
-          className="fixed inset-y-0 right-0 z-50 h-dvh max-h-dvh w-full max-w-2xl overflow-x-hidden overflow-y-auto overscroll-contain border-l border-border-strong bg-popover p-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] text-foreground shadow-xl focus:outline-none sm:rounded-l-[var(--radius-xl)] sm:p-8"
-          data-slot="sheet-content"
-          onCloseAutoFocus={restoreFocus}
-        >
-          <DialogHeader closeLabel={closeLabel} description={description} title={title} />
-          {children}
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+    <DialogPrimitive.Description
+      data-slot="dialog-description"
+      className={cn('text-sm text-foreground-secondary', className)}
+      {...props}
+    />
   );
 }
+
+export {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+};

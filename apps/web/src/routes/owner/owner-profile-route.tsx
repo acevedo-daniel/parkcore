@@ -12,9 +12,9 @@ import { AppearanceControls } from '../../components/domain/appearance-controls.
 import { FormField } from '../../components/domain/form-field.js';
 import { Button } from '../../components/ui/button.js';
 import { Combobox, type ComboboxOption } from '../../components/domain/combobox.js';
-import { Skeleton } from '../../components/ui/feedback.js';
+import { Skeleton } from '../../components/ui/skeleton.js';
 import { Input } from '../../components/ui/input.js';
-import { useToast } from '../../components/ui/toast-context.js';
+import { toast } from 'sonner';
 import { DemoResetControl } from '../../features/auth/demo-reset-control.js';
 import { useAuth } from '../../features/auth/use-auth.js';
 import { localizeApiError } from '../../lib/api/api-error.js';
@@ -67,7 +67,6 @@ function OwnerProfileContent({ user }: { user: User }) {
   const { locale, t } = useAppearance();
   const navigate = useNavigate();
   const { logout, updateUser } = useAuth();
-  const { showToast } = useToast();
   const isOwner = user.kind === 'OWNER';
   const isDemo = user.kind === 'DEMO';
   const schema = useMemo(() => createProfileSchema(t), [t]);
@@ -113,7 +112,7 @@ function OwnerProfileContent({ user }: { user: User }) {
         timezone: updated.timezone,
       });
       setSaveStatus('success');
-      showToast(t('profile.updated'));
+      toast.success(t('profile.updated'));
     } catch (reason) {
       form.setError('root', {
         message: localizeApiError(reason, t, 'api.updateProfile'),

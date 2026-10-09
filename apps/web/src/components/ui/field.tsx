@@ -1,44 +1,9 @@
-import { createContext, useContext, useMemo, type AriaAttributes, type ReactNode } from 'react';
+import { useMemo } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/cn';
 
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-
-export interface FieldControlContextValue {
-  describedBy?: string;
-  id: string;
-  invalid: boolean;
-}
-
-const FieldControlContext = createContext<FieldControlContextValue | null>(null);
-
-export function FieldControlProvider({
-  children,
-  value,
-}: {
-  children: ReactNode;
-  value: FieldControlContextValue;
-}) {
-  return <FieldControlContext.Provider value={value}>{children}</FieldControlContext.Provider>;
-}
-
-interface FieldControlAttributes {
-  id?: string;
-  'aria-describedby'?: string;
-  'aria-invalid'?: AriaAttributes['aria-invalid'];
-}
-
-export function useFieldControlProps(props: FieldControlAttributes): FieldControlAttributes {
-  const field = useContext(FieldControlContext);
-  const describedBy = [props['aria-describedby'], field?.describedBy].filter(Boolean).join(' ');
-
-  return {
-    id: props.id ?? field?.id,
-    'aria-describedby': describedBy || undefined,
-    'aria-invalid': props['aria-invalid'] ?? (field?.invalid ? true : undefined),
-  };
-}
 
 function FieldSet({ className, ...props }: React.ComponentProps<'fieldset'>) {
   return (

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/lib/cn';
-import { useFieldControlProps } from '@/components/ui/field';
+import { useFieldControlProps } from '@/lib/field-control-context';
 
 function Input({ className, type, ...props }: React.ComponentProps<'input'>) {
   const fieldProps = useFieldControlProps(props);

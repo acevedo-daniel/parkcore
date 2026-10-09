@@ -13,9 +13,10 @@ import {
 } from '../../components/domain/session.js';
 import { SessionStatus } from '../../components/domain/status.js';
 import { Button } from '../../components/ui/button.js';
-import { Dialog } from '../../components/ui/dialog.js';
-import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
-import { useToast } from '../../components/ui/toast-context.js';
+import { AppDialog } from '../../components/domain/app-dialog.js';
+import { ErrorState } from '../../components/domain/feedback.js';
+import { Skeleton } from '../../components/ui/skeleton.js';
+import { toast } from 'sonner';
 import {
   ApiError,
   getApiErrorCode,
@@ -48,7 +49,6 @@ export function OwnerSessionDetailRoute() {
   const { locale, t } = useAppearance();
   const { sessionId } = useParams();
   const queryClient = useQueryClient();
-  const { showToast } = useToast();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [actionError, setActionError] = useState<string>();
@@ -157,7 +157,7 @@ export function OwnerSessionDetailRoute() {
     try {
       const completedSession = await checkoutMutation.mutateAsync();
       setResolvedSession(completedSession);
-      showToast(t('session.checkedOut'));
+      toast.success(t('session.checkedOut'));
       setCheckoutOpen(false);
       await refreshOperation().catch(() => undefined);
     } catch (reason) {
@@ -169,7 +169,7 @@ export function OwnerSessionDetailRoute() {
     try {
       const cancelledSession = await cancelMutation.mutateAsync();
       setResolvedSession(cancelledSession);
-      showToast(t('session.cancelled'));
+      toast.success(t('session.cancelled'));
       setCancelOpen(false);
       await refreshOperation().catch(() => undefined);
     } catch (reason) {
@@ -325,7 +325,7 @@ export function OwnerSessionDetailRoute() {
 
       {actionError && !checkoutOpen && !cancelOpen ? <ActionError message={actionError} /> : null}
 
-      <Dialog
+      <AppDialog
         closeLabel={t('session.checkoutClose')}
         description={t('session.checkoutDescription')}
         onOpenChange={setCheckoutOpen}
@@ -349,9 +349,9 @@ export function OwnerSessionDetailRoute() {
             {checkoutMutation.isPending ? t('session.completing') : t('session.completeCheckout')}
           </Button>
         </div>
-      </Dialog>
+      </AppDialog>
 
-      <Dialog
+      <AppDialog
         closeLabel={t('session.cancelClose')}
         description={t('session.cancelDescription', { plate: session.vehicle.plate })}
         onOpenChange={setCancelOpen}
@@ -372,7 +372,7 @@ export function OwnerSessionDetailRoute() {
             {cancelMutation.isPending ? t('session.cancelling') : t('session.cancel')}
           </Button>
         </div>
-      </Dialog>
+      </AppDialog>
     </section>
   );
 }

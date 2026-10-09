@@ -11,15 +11,16 @@ import { SessionRow } from '../../components/domain/session.js';
 import { AvailabilityIndicator } from '../../components/domain/availability-indicator.js';
 import { PageHeader } from '../../components/domain/page-header.js';
 import { Button } from '../../components/ui/button.js';
-import { Sheet } from '../../components/ui/dialog.js';
-import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
+import { AppSheet } from '../../components/domain/app-dialog.js';
+import { EmptyState, ErrorState } from '../../components/domain/feedback.js';
+import { Skeleton } from '../../components/ui/skeleton.js';
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
   InputGroupText,
 } from '../../components/ui/input-group.js';
-import { useToast } from '../../components/ui/toast-context.js';
+import { toast } from 'sonner';
 import { localizeApiError, type ApiErrorCodeMessages } from '../../lib/api/api-error.js';
 import {
   checkIn,
@@ -60,7 +61,6 @@ export function OwnerParkingOverviewRoute() {
   const { locale, t } = useAppearance();
   const { parkingId } = useParams();
   const queryClient = useQueryClient();
-  const { showToast } = useToast();
   const [checkInOpen, setCheckInOpen] = useState(false);
   const [checkInError, setCheckInError] = useState<string>();
   const [checkInSuccess, setCheckInSuccess] = useState<ParkingSession>();
@@ -419,7 +419,7 @@ export function OwnerParkingOverviewRoute() {
         </div>
       </section>
 
-      <Sheet
+      <AppSheet
         description={t('parkingOperation.sheetDescription')}
         onOpenChange={(open) => {
           setCheckInOpen(open);
@@ -441,7 +441,7 @@ export function OwnerParkingOverviewRoute() {
             try {
               const session = await checkInMutation.mutateAsync(input);
               setCheckInSuccess(session);
-              showToast(t('parkingOperation.checkInSuccess', { plate: session.vehicle.plate }));
+              toast.success(t('parkingOperation.checkInSuccess', { plate: session.vehicle.plate }));
               setCheckInOpen(false);
               try {
                 await invalidateOwnerMutationQueries(queryClient, {
@@ -459,7 +459,7 @@ export function OwnerParkingOverviewRoute() {
             }
           }}
         />
-      </Sheet>
+      </AppSheet>
     </section>
   );
 }

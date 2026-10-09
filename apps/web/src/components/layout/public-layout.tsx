@@ -1,4 +1,3 @@
-import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Menu, X } from 'lucide-react';
 import {
   Link,
@@ -14,6 +13,16 @@ import { DemoLoginButton } from '../../features/auth/demo-login-button.js';
 import { cn } from '../../lib/cn.js';
 import { AppearanceControls } from '../domain/appearance-controls.js';
 import { Button } from '../ui/button.js';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+} from '../ui/dialog.js';
 
 function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useAppearance();
@@ -48,8 +57,8 @@ function PublicMobileMenu() {
   const { t } = useAppearance();
   const navigate = useNavigate();
   return (
-    <DialogPrimitive.Root>
-      <DialogPrimitive.Trigger asChild>
+    <Dialog>
+      <DialogTrigger asChild>
         <Button
           aria-label={t('nav.open')}
           className="public-menu-trigger"
@@ -60,19 +69,17 @@ function PublicMobileMenu() {
         >
           <Menu aria-hidden="true" size={20} />
         </Button>
-      </DialogPrimitive.Trigger>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="public-menu-overlay fixed inset-0 z-50 bg-overlay backdrop-blur-xs animate-in fade-in" />
-        <DialogPrimitive.Content className="public-menu-content fixed inset-y-0 right-0 z-50 flex w-full max-w-xs flex-col justify-between overflow-x-hidden overflow-y-auto border-l border-border bg-card p-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] pt-[max(1.5rem,env(safe-area-inset-top,0px))] shadow-xl animate-in fade-in">
+      </DialogTrigger>
+      <DialogPortal>
+        <DialogOverlay className="public-menu-overlay backdrop-blur-xs animate-in fade-in" />
+        <DialogContent className="public-menu-content fixed inset-y-0 left-auto right-0 top-0 z-50 mx-0 flex h-dvh w-full max-w-xs translate-y-0 flex-col justify-between overflow-x-hidden overflow-y-auto rounded-l-xl border-l border-border bg-card p-6 pb-safe-overlay pt-safe-overlay shadow-xl animate-in fade-in">
           <div>
             <header className="public-menu-header mb-6 flex items-center justify-between border-b border-border-subtle pb-4">
-              <DialogPrimitive.Title className="brand-mark font-display text-lg font-extrabold tracking-tight text-foreground">
+              <DialogTitle className="brand-mark font-display text-lg font-extrabold tracking-tight text-foreground">
                 PARKCORE
-              </DialogPrimitive.Title>
-              <DialogPrimitive.Description className="sr-only">
-                {t('nav.public')}
-              </DialogPrimitive.Description>
-              <DialogPrimitive.Close asChild>
+              </DialogTitle>
+              <DialogDescription className="sr-only">{t('nav.public')}</DialogDescription>
+              <DialogClose asChild>
                 <Button
                   aria-label={t('nav.close')}
                   shape="pill"
@@ -82,34 +89,34 @@ function PublicMobileMenu() {
                 >
                   <X aria-hidden="true" size={18} />
                 </Button>
-              </DialogPrimitive.Close>
+              </DialogClose>
             </header>
 
             <nav aria-label={t('nav.public')} className="public-mobile-links flex flex-col gap-2">
-              <DialogPrimitive.Close asChild>
+              <DialogClose asChild>
                 <Link
                   className="flex min-h-[var(--touch-target-min)] items-center rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-muted"
                   to="/parkings"
                 >
                   {t('nav.parkings')}
                 </Link>
-              </DialogPrimitive.Close>
-              <DialogPrimitive.Close asChild>
+              </DialogClose>
+              <DialogClose asChild>
                 <Link
                   className="flex min-h-[var(--touch-target-min)] items-center rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-muted"
                   to="/#como-funciona"
                 >
                   {t('nav.howItWorks')}
                 </Link>
-              </DialogPrimitive.Close>
-              <DialogPrimitive.Close asChild>
+              </DialogClose>
+              <DialogClose asChild>
                 <Link
                   className="flex min-h-[var(--touch-target-min)] items-center rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-muted"
                   to="/login"
                 >
                   {t('nav.signIn')}
                 </Link>
-              </DialogPrimitive.Close>
+              </DialogClose>
             </nav>
           </div>
 
@@ -127,9 +134,9 @@ function PublicMobileMenu() {
               <AppearanceControls compact />
             </div>
           </div>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+        </DialogContent>
+      </DialogPortal>
+    </Dialog>
   );
 }
 

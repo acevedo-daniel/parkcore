@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/lib/cn';
-import { useFieldControlProps } from '@/components/ui/field';
+import { useFieldControlProps } from '@/lib/field-control-context';
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { Select as SelectPrimitive } from 'radix-ui';
 

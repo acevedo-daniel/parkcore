@@ -5,7 +5,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AppearanceProvider } from '../../app/appearance-provider.js';
-import { ToastProvider } from '../../components/ui/feedback.js';
+
 import { parkingFixture } from '../../test/fixtures.js';
 import { OwnerParkingsRoute } from './owner-parkings-route.js';
 
@@ -32,9 +32,7 @@ function renderParkings(locale: 'es-AR' | 'en-US' = 'en-US') {
   return render(
     <AppearanceProvider>
       <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          <RouterProvider router={router} />
-        </ToastProvider>
+        <RouterProvider router={router} />
       </QueryClientProvider>
     </AppearanceProvider>,
   );

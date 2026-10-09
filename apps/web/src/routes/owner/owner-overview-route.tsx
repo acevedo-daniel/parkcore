@@ -7,7 +7,8 @@ import { useAppearance } from '../../app/appearance-provider.js';
 import { AttentionItem } from '../../components/domain/attention-item.js';
 import { PageHeader } from '../../components/domain/page-header.js';
 import { Button } from '../../components/ui/button.js';
-import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
+import { EmptyState, ErrorState } from '../../components/domain/feedback.js';
+import { Skeleton } from '../../components/ui/skeleton.js';
 import { ToggleGroup, ToggleGroupItem } from '../../components/ui/toggle-group.js';
 import {
   useAnalyticsRevenue,

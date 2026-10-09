@@ -5,7 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AppearanceProvider } from '../../app/appearance-provider.js';
-import { ToastProvider } from '../../components/ui/feedback.js';
+
 import { parkingFixture } from '../../test/fixtures.js';
 import { OwnerOverviewRoute } from './owner-overview-route.js';
 
@@ -75,13 +75,11 @@ function renderOverview(locale: 'es-AR' | 'en-US' = 'en-US') {
   return render(
     <AppearanceProvider>
       <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          <MemoryRouter initialEntries={['/app']}>
-            <Routes>
-              <Route path="/app" element={<OwnerOverviewRoute />} />
-            </Routes>
-          </MemoryRouter>
-        </ToastProvider>
+        <MemoryRouter initialEntries={['/app']}>
+          <Routes>
+            <Route path="/app" element={<OwnerOverviewRoute />} />
+          </Routes>
+        </MemoryRouter>
       </QueryClientProvider>
     </AppearanceProvider>,
   );

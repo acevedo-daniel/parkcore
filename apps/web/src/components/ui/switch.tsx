@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/lib/cn';
-import { useFieldControlProps } from '@/components/ui/field';
+import { useFieldControlProps } from '@/lib/field-control-context';
 import { Switch as SwitchPrimitive } from 'radix-ui';
 
 function Switch({

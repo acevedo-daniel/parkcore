@@ -2,8 +2,8 @@ import { useCallback, useEffect, type RefObject } from 'react';
 import { useBeforeUnload, useBlocker } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
-import { Button } from './button.js';
-import { Dialog } from './dialog.js';
+import { Button } from '../ui/button.js';
+import { AppDialog } from './app-dialog.js';
 
 export function UnsavedChangesPrompt({
   allowNavigationRef,
@@ -39,7 +39,7 @@ export function UnsavedChangesPrompt({
   }, [blocker, when]);
 
   return (
-    <Dialog
+    <AppDialog
       description={t('dirty.description')}
       onOpenChange={(open) => {
         if (!open && blocker.state === 'blocked') blocker.reset();
@@ -67,6 +67,6 @@ export function UnsavedChangesPrompt({
           {t('dirty.leave')}
         </Button>
       </div>
-    </Dialog>
+    </AppDialog>
   );
 }
