@@ -93,7 +93,7 @@ export function ParkingDetailRoute() {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link
-          className="inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold text-foreground underline decoration-brand decoration-2 underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold text-foreground underline decoration-brand decoration-2 underline-offset-4 outline-none"
           to="/parkings"
         >
           <ArrowLeft aria-hidden="true" className="size-4" />
@@ -181,7 +181,7 @@ export function ParkingDetailRoute() {
               </p>
               <a
                 aria-label={t('public.detail.directionsAction', { title: parking.title })}
-                className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-bold text-brand-foreground outline-none transition-colors hover:bg-brand/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-bold text-brand-foreground outline-none transition-colors hover:bg-brand/90"
                 href={directionsUrl}
                 rel="noopener noreferrer"
                 target="_blank"

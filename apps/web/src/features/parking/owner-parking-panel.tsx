@@ -225,7 +225,7 @@ function FacilityActions({
     >
       <Link
         aria-label={t('ownerParkings.openAria', { title: parking.title })}
-        className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-md bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-md bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-primary/90"
         to={`/app/parkings/${parking.id}`}
       >
         {t('ownerParkings.open')}
@@ -239,7 +239,7 @@ function FacilityActions({
       >
         <Link
           aria-label={t('ownerParkings.editAria', { title: parking.title })}
-          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md px-2 py-2 text-sm font-semibold text-foreground-secondary underline decoration-brand decoration-2 underline-offset-4 transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md px-2 py-2 text-sm font-semibold text-foreground-secondary underline decoration-brand decoration-2 underline-offset-4 transition-colors hover:bg-muted hover:text-foreground"
           to={`/app/parkings/${parking.id}/edit`}
         >
           <Pencil aria-hidden="true" className="size-3.5" />
@@ -247,7 +247,7 @@ function FacilityActions({
         </Link>
         <Link
           aria-label={t('ownerParkings.historyAria', { title: parking.title })}
-          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md px-2 py-2 text-sm font-semibold text-foreground-secondary underline decoration-brand decoration-2 underline-offset-4 transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-md px-2 py-2 text-sm font-semibold text-foreground-secondary underline decoration-brand decoration-2 underline-offset-4 transition-colors hover:bg-muted hover:text-foreground"
           to={`/app/parkings/${parking.id}/sessions`}
         >
           <HistoryIcon aria-hidden="true" className="size-3.5" />

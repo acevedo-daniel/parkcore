@@ -93,19 +93,19 @@ export function AppearanceControls({
             position="popper"
           >
             <SelectItem
-              className="min-h-11 rounded-lg font-medium focus:bg-brand-soft"
+              className="min-h-11 rounded-lg border border-transparent font-medium focus-visible:border-border-strong"
               value="system"
             >
               {t('theme.system')}
             </SelectItem>
             <SelectItem
-              className="min-h-11 rounded-lg font-medium focus:bg-brand-soft"
+              className="min-h-11 rounded-lg border border-transparent font-medium focus-visible:border-border-strong"
               value="light"
             >
               {t('theme.light')}
             </SelectItem>
             <SelectItem
-              className="min-h-11 rounded-lg font-medium focus:bg-brand-soft"
+              className="min-h-11 rounded-lg border border-transparent font-medium focus-visible:border-border-strong"
               value="dark"
             >
               {t('theme.dark')}

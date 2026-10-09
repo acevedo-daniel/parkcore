@@ -20,7 +20,7 @@ export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps)
     <Link
       aria-label={`${t('parking.open')} ${parking.title}`}
       aria-describedby={availabilityId}
-      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card text-foreground shadow-xs transition-lift duration-200 hover:-translate-y-1 hover:border-border-strong hover:shadow-md focus-visible:outline-none"
+      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card text-foreground shadow-xs transition-lift duration-200 hover:-translate-y-1 hover:border-border-strong hover:shadow-md"
       to={to}
     >
       <div className="relative aspect-4/3 overflow-hidden bg-accent">

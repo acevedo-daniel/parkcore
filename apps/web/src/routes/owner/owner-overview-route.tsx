@@ -563,7 +563,7 @@ export function OwnerOverviewRoute() {
                           revenue: revenueLabel,
                           sessions: formatCount(point.completedSessions),
                         })}
-                        className="group relative h-full min-w-0 flex-1 items-end p-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        className="group relative h-full min-w-0 flex-1 items-end p-0"
                         key={point.date}
                         onBlur={() => {
                           setActiveBarIndex(null);

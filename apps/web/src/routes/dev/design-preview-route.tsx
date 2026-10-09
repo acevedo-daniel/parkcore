@@ -242,7 +242,7 @@ export function DesignPreviewRoute() {
               <div className="space-y-2">
                 <p className="type-label text-muted-foreground">focus</p>
                 <Button
-                  className="ring-2 ring-ring ring-offset-2 ring-offset-background"
+                  className="outline-2 outline-solid outline-ring outline-offset-1"
                   type="button"
                   variant="outline"
                 >

@@ -5,7 +5,7 @@ import { Slot } from 'radix-ui';
 import { cn } from '@/lib/cn';
 
 const buttonVariants = cva(
-  'inline-flex max-w-full cursor-pointer select-none items-center justify-center gap-2 break-words text-center text-sm font-semibold outline-none transition-control focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 active:scale-98 [&_svg]:pointer-events-none [&_svg:not([class*="size-"])]:size-4 [&_svg]:shrink-0',
+  'inline-flex max-w-full cursor-pointer select-none items-center justify-center gap-2 break-words text-center text-sm font-semibold outline-none transition-control disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 active:scale-98 [&_svg]:pointer-events-none [&_svg:not([class*="size-"])]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
@@ -18,7 +18,7 @@ const buttonVariants = cva(
         outline: 'border-2 border-border-strong bg-card text-foreground shadow-xs hover:bg-accent',
         ghost: 'text-foreground hover:bg-accent',
         destructive:
-          'border-2 border-destructive-soft-foreground bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20',
+          'border-2 border-destructive-soft-foreground bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90',
         link: 'text-foreground underline-offset-4 hover:underline',
       },
       size: {

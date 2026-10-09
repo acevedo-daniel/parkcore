@@ -121,7 +121,7 @@ export function SessionHistoryRow({
   return (
     <Link
       aria-label={t('session.openFor', { plate: session.vehicle.plate })}
-      className="session-history-row group grid min-w-0 gap-x-4 gap-y-4 border-b border-border-subtle py-5 text-foreground transition-colors duration-200 hover:bg-muted focus-visible:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:grid-cols-session-history-row md:items-center"
+      className="session-history-row group grid min-w-0 gap-x-4 gap-y-4 border-b border-border-subtle py-5 text-foreground transition-colors duration-200 hover:bg-muted focus-visible:bg-muted md:grid-cols-session-history-row md:items-center"
       to={to}
     >
       <div className="min-w-0">

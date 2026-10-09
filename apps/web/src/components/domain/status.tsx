@@ -11,7 +11,7 @@ export function ParkingStatus({ isActive }: { isActive: boolean }) {
     <Badge
       dot
       dotColor={isActive ? undefined : 'bg-muted-foreground'}
-      variant={isActive ? 'success' : 'outline'}
+      variant={isActive ? 'success' : 'secondary'}
     >
       {isActive ? t('parking.active') : t('parking.inactive')}
     </Badge>
