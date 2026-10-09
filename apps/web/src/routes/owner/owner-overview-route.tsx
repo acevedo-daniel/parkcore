@@ -436,7 +436,7 @@ export function OwnerOverviewRoute() {
         <div className="flex flex-col justify-between gap-5 border-b border-border p-6 sm:p-8 lg:flex-row lg:items-start">
           <div>
             <div className="flex items-center gap-2">
-              <span className="flex size-7 items-center justify-center rounded-full bg-brand text-brand-foreground">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-brand-soft text-foreground">
                 <BarChart3 aria-hidden="true" className="size-4" />
               </span>
               <p className="type-label text-muted-foreground">{t('overview.activityEyebrow')}</p>

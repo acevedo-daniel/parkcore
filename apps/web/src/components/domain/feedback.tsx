@@ -1,4 +1,4 @@
-import { AlertTriangle, Inbox, RefreshCw } from 'lucide-react';
+import { CloudAlert, FolderOpen, RefreshCw } from 'lucide-react';
 import { useId, type ReactNode } from 'react';
 
 import { useAppearance } from '../../app/appearance-provider.js';
@@ -50,10 +50,10 @@ export function EmptyState({
       ) : (
         <EmptyHeader className="max-w-none items-start gap-0 text-left">
           <EmptyMedia
-            className="mb-0 size-10 rounded-full bg-brand text-brand-foreground"
+            className="mb-0 size-11 rounded-xl border border-border-subtle bg-brand-soft text-foreground shadow-xs"
             variant="icon"
           >
-            <Inbox aria-hidden="true" className="size-5" />
+            <FolderOpen aria-hidden="true" className="size-5" />
           </EmptyMedia>
           <p className="mt-5 type-eyebrow text-muted-foreground">{t('feedback.emptyEyebrow')}</p>
           <h2 className="mt-2 type-heading" id={titleId}>
@@ -96,16 +96,16 @@ export function ErrorState({
     <Empty
       aria-atomic="true"
       aria-labelledby={titleId}
-      className="min-h-56 flex-none items-start gap-0 rounded-xl border border-border-strong bg-accent p-6 text-left text-foreground sm:p-8"
+      className="min-h-56 flex-none items-start gap-0 rounded-2xl border border-border-subtle border-solid bg-card p-6 text-left text-foreground shadow-xs sm:p-8"
       data-slot="error-state"
       role="alert"
     >
       <EmptyHeader className="max-w-none items-start gap-0 text-left">
         <EmptyMedia
-          className="mb-0 size-10 rounded-full border border-border-strong bg-card text-foreground"
+          className="mb-0 size-11 rounded-xl border border-destructive-soft-foreground/20 bg-destructive-soft text-destructive-soft-foreground"
           variant="icon"
         >
-          <AlertTriangle aria-hidden="true" className="size-5" />
+          <CloudAlert aria-hidden="true" className="size-5" />
         </EmptyMedia>
         <p className="mt-5 type-eyebrow text-muted-foreground">{t('feedback.errorEyebrow')}</p>
         <h2 className="mt-2 type-heading" id={titleId}>
@@ -117,7 +117,7 @@ export function ErrorState({
       </EmptyHeader>
       {onRetry ? (
         <EmptyContent className="mt-6 items-start gap-0">
-          <Button className="rounded-full" onClick={onRetry} type="button" variant="outline">
+          <Button onClick={onRetry} type="button" variant="outline">
             <RefreshCw aria-hidden="true" className="size-4" />
             {t('feedback.retry')}
           </Button>
@@ -130,7 +130,7 @@ export function ErrorState({
 function cnEmptyState(isCompact: boolean, isSplitCompact: boolean, className?: string) {
   const base = isCompact
     ? 'flex-none min-w-0 flex-col items-start justify-center gap-0 rounded-none border-0 bg-transparent p-0 text-left text-foreground'
-    : 'min-h-56 flex-none flex-col items-start justify-center gap-0 rounded-xl border border-dashed border-border-strong bg-card p-6 text-left text-foreground sm:p-8';
+    : 'min-h-56 flex-none flex-col items-start justify-center gap-0 rounded-2xl border border-border-subtle border-solid bg-card p-6 text-left text-foreground shadow-xs sm:p-8';
   return [
     base,
     isSplitCompact && 'sm:flex-row sm:items-center sm:justify-between sm:gap-8',

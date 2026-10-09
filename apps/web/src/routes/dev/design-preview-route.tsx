@@ -242,7 +242,7 @@ export function DesignPreviewRoute() {
               <div className="space-y-2">
                 <p className="type-label text-muted-foreground">focus</p>
                 <Button
-                  className="outline-2 outline-solid outline-ring outline-offset-1"
+                  className="outline-2 outline-solid outline-border-strong outline-offset-2"
                   type="button"
                   variant="outline"
                 >
@@ -390,7 +390,7 @@ export function DesignPreviewRoute() {
       </PreviewSection>
 
       <PreviewSection title="ErrorState">
-        <ErrorState>{t('api.loadParkings')}</ErrorState>
+        <ErrorState onRetry={() => undefined}>{t('api.loadParkings')}</ErrorState>
       </PreviewSection>
     </main>
   );

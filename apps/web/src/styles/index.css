@@ -429,8 +429,8 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--ring) !important;
-    outline-offset: 1px !important;
+    outline: 2px solid var(--border-strong) !important;
+    outline-offset: 2px !important;
   }
 
   [data-slot='select-item']:focus-visible {
@@ -442,8 +442,8 @@
   }
 
   [data-slot='input-group']:has([data-slot='input-group-control']:focus-visible) {
-    outline: 2px solid var(--ring) !important;
-    outline-offset: 1px !important;
+    outline: 2px solid var(--border-strong) !important;
+    outline-offset: 2px !important;
   }
 
   [data-slot='input-group']:has([data-slot][aria-invalid='true']:focus-visible) {

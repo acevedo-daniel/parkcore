@@ -1,5 +1,5 @@
 import type { components } from '@parkcore/api-client';
-import { CheckCircle2, ExternalLink, Plus } from 'lucide-react';
+import { Check, ExternalLink, Plus } from 'lucide-react';
 import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
@@ -32,8 +32,8 @@ export function CheckInSuccess({
       role="status"
     >
       <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-success text-success-foreground">
-          <CheckCircle2 aria-hidden="true" className="size-5" />
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-success text-success-foreground">
+          <Check aria-hidden="true" className="size-5" />
         </span>
         <div className="min-w-0">
           <p className="type-label text-success-soft-foreground">{t('checkInSuccess.eyebrow')}</p>
