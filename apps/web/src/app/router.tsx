@@ -11,7 +11,15 @@ import {
 } from '../routes/owner/owner-redirects.js';
 import { OwnerRouteErrorBoundary, PublicRouteErrorBoundary } from '../routes/route-boundaries.js';
 
+const designPreviewRoute = {
+  path: 'design-preview',
+  lazy: async () => ({
+    Component: (await import('../routes/dev/design-preview-route.js')).DesignPreviewRoute,
+  }),
+};
+
 export const router = createBrowserRouter([
+  ...(import.meta.env.DEV ? [designPreviewRoute] : []),
   {
     element: <PublicLayout />,
     children: [

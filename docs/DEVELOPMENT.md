@@ -120,6 +120,8 @@ Typical local URLs:
 | Verify demo cleanup       | `pnpm --filter @parkcore/api demo:cleanup:check`              | Check bounded cleanup on a disposable database only.                                                               |
 | Local preflight           | `pnpm preflight`                                              | Reproduce all CI gates with isolated disposable services.                                                          |
 
+The web development server serves a design preview at `/design-preview` with the token registry and every primitive. Production builds exclude it.
+
 Additional production verification commands:
 
 - `pnpm --filter @parkcore/web build:check` builds the web artifact and verifies route chunks, canonical assets, and the server-secret boundary.

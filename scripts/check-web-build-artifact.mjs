@@ -139,6 +139,12 @@ try {
 
   const violations = [];
 
+  for (const file of files) {
+    if (file.normalizedPath.includes('design-preview')) {
+      violations.push(`${file.normalizedPath} contains the development-only design preview marker`);
+    }
+  }
+
   for (const file of canonicalAssets) {
     if (!file) continue;
 
@@ -172,6 +178,10 @@ try {
     }
 
     const content = await readFile(file.absolutePath, 'utf8');
+
+    if (content.includes('design-preview')) {
+      violations.push(`${file.normalizedPath} contains the development-only design preview marker`);
+    }
 
     for (const runtimeName of privateRuntimeNames) {
       if (content.includes(runtimeName)) {
