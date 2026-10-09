@@ -1,3 +1,4 @@
+import { SunMoon } from 'lucide-react';
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select.js';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group.js';
@@ -31,7 +32,7 @@ export function AppearanceControls({
         ) : null}
         <ToggleGroup
           aria-label={isProfile ? t('appearance.languageLabel') : t('appearance.language')}
-          className="shrink-0 rounded-full border border-border bg-card p-1"
+          className="shrink-0 rounded-xl border-2 border-border-strong bg-muted p-1"
           onValueChange={(value) => {
             if (value === 'es-AR' || value === 'en-US') {
               setLanguage(value);
@@ -43,14 +44,14 @@ export function AppearanceControls({
         >
           <ToggleGroupItem
             aria-label={t('appearance.languageSpanish')}
-            className="min-w-11 rounded-full px-2.5 text-xs"
+            className="min-w-11 rounded-md border border-transparent px-2.5 text-xs font-bold data-[state=on]:border-brand-strong data-[state=on]:shadow-xs"
             value="es-AR"
           >
             ES
           </ToggleGroupItem>
           <ToggleGroupItem
             aria-label={t('appearance.languageEnglish')}
-            className="min-w-11 rounded-full px-2.5 text-xs"
+            className="min-w-11 rounded-md border border-transparent px-2.5 text-xs font-bold data-[state=on]:border-brand-strong data-[state=on]:shadow-xs"
             value="en-US"
           >
             EN
@@ -78,14 +79,37 @@ export function AppearanceControls({
         >
           <SelectTrigger
             aria-label={isProfile ? undefined : t('appearance.theme')}
-            className={cn('min-h-11 rounded-full px-3 text-xs', isProfile && 'w-full')}
+            className={cn(
+              'min-h-11 rounded-lg border-2 border-border-strong bg-card px-3 text-xs font-semibold shadow-xs hover:bg-muted',
+              isProfile && 'w-full',
+            )}
           >
+            <SunMoon aria-hidden="true" className="size-4 text-foreground-secondary" />
             <SelectValue />
           </SelectTrigger>
-          <SelectContent align="end" position="popper">
-            <SelectItem value="system">{t('theme.system')}</SelectItem>
-            <SelectItem value="light">{t('theme.light')}</SelectItem>
-            <SelectItem value="dark">{t('theme.dark')}</SelectItem>
+          <SelectContent
+            align="end"
+            className="rounded-xl border-2 border-border-strong bg-card p-1.5 shadow-xl"
+            position="popper"
+          >
+            <SelectItem
+              className="min-h-11 rounded-lg font-medium focus:bg-brand-soft"
+              value="system"
+            >
+              {t('theme.system')}
+            </SelectItem>
+            <SelectItem
+              className="min-h-11 rounded-lg font-medium focus:bg-brand-soft"
+              value="light"
+            >
+              {t('theme.light')}
+            </SelectItem>
+            <SelectItem
+              className="min-h-11 rounded-lg font-medium focus:bg-brand-soft"
+              value="dark"
+            >
+              {t('theme.dark')}
+            </SelectItem>
           </SelectContent>
         </Select>
       </label>

@@ -151,7 +151,7 @@ export function DesignPreviewRoute() {
       <div className="rounded-signature bg-inverse p-6 text-inverse-foreground sm:p-8">
         <PageHeader
           actions={
-            <div className="w-full rounded-lg border border-border bg-card p-2 text-foreground sm:w-auto">
+            <div className="w-full rounded-2xl border-2 border-border-strong bg-card p-1.5 text-foreground shadow-xs sm:w-auto">
               <AppearanceControls compact />
             </div>
           }
@@ -246,7 +246,7 @@ export function DesignPreviewRoute() {
                   type="button"
                   variant="outline"
                 >
-                  {t('common.tryAgain')}
+                  {t('parkingForm.saveChanges')}
                 </Button>
               </div>
               <div className="space-y-2">

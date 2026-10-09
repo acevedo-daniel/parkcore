@@ -8,7 +8,11 @@ type SessionStatusValue = components['schemas']['ParkingSessionResponse']['statu
 export function ParkingStatus({ isActive }: { isActive: boolean }) {
   const { t } = useAppearance();
   return (
-    <Badge variant={isActive ? 'success' : 'secondary'} dot>
+    <Badge
+      dot
+      dotColor={isActive ? undefined : 'bg-muted-foreground'}
+      variant={isActive ? 'success' : 'outline'}
+    >
       {isActive ? t('parking.active') : t('parking.inactive')}
     </Badge>
   );
@@ -16,8 +20,7 @@ export function ParkingStatus({ isActive }: { isActive: boolean }) {
 
 export function SessionStatus({ status }: { status: SessionStatusValue }) {
   const { t } = useAppearance();
-  const variant =
-    status === 'ACTIVE' ? 'success' : status === 'COMPLETED' ? 'secondary' : 'destructive';
+  const variant = status === 'ACTIVE' ? 'success' : status === 'COMPLETED' ? 'info' : 'destructive';
   const label =
     status === 'ACTIVE'
       ? t('session.active')

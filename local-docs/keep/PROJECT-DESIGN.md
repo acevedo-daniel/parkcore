@@ -28,9 +28,9 @@ Language selects copy; locale formats dates, numbers, and currency; register set
 ## Visual rules
 
 - Typography roles: Outfit sets display, page-title, heading, eyebrow, and metric styles through `type-display`, `type-page-title`, `type-heading`, `type-section-title`, `type-eyebrow`, and `type-metric`. Nunito Sans carries interface, labels, body copy, and operational values. Use tabular numerals for values that need to scan quickly. Reserve JetBrains Mono for vehicle plates, keyboard shortcuts, and short identifiers through `type-code`.
-- Color character: Keep ParkCore yellow as the brand anchor against warm neutrals and ink. Use a softened gold for selected brand surfaces, blue-teal for information and focus, forest green for success, amber for warnings, and brick red for destructive states. Reuse those hues in charts and keep semantic colors local to status.
+- Color character: Keep ParkCore yellow as the brand anchor against warm neutrals and ink. Use a softened gold for selected brand surfaces, blue-teal for information and completed stays, forest green for active and successful states, amber for warnings, and brick red for destructive states. Inactive items use a defined neutral outline. Reuse the same hues in charts and keep semantic colors local to status.
 - Accent usage: Use `brand` only on the landing hero band, login brand panel, empty-state media, selected segmented options, and route loading bar. Keep at most one brand surface per view and never use brand for body text. Use neutral `accent` for hover and selected menu or ghost-control surfaces.
-- Shape character: Buttons use `rounded-lg` (12px); fields and compact controls use `rounded-md` (10px); cards use `rounded-lg` (12px); dialogs and sheets use `rounded-xl` (16px); marketing panels use `rounded-3xl` (32px); plates use `rounded-xs` (4px). Reserve pill shapes for badges, status, navigation actions, and segmented filters. The signature panel uses three 32px corners and a 64px bottom-right corner.
+- Shape character: Buttons use `rounded-lg` (12px) with a 2px border; the appearance selector uses a 12px outer frame and 10px inner segments; status badges use `rounded-md` (10px); fields use `rounded-md` (10px); cards use `rounded-lg` (12px); dialogs and sheets use `rounded-xl` (16px); marketing panels use `rounded-3xl` (32px); plates use `rounded-xs` (4px). Reserve pills for navigation actions and filter segments. The signature panel uses three 32px corners and a 64px bottom-right corner.
 - Depth: Static surfaces use a border without a shadow. Controls use `shadow-xs`; clickable discovery cards use `shadow-md` on hover; menus and popovers use `shadow-lg`; dialogs and sheets use `shadow-xl`.
 - Motion character: Use 140ms micro feedback, 180ms standard transitions, and 220ms overlays with `--ease-out` (`cubic-bezier(0.16, 1, 0.3, 1)`). Animate color, background, border, shadow, opacity, and transform. Press feedback uses `scale-98`. Hover lift is limited to clickable discovery cards.
 - Icon family and stroke: Use Lucide icons at stroke width 2. Controls use `size-4`; feature media uses `size-5`.
@@ -130,9 +130,9 @@ The light warning solid is adjusted from `oklch(0.580 0.141 54.6)` to `oklch(0.5
   --brand-soft: oklch(0.963 0.050 93.0);
   --brand-strong: oklch(0.790 0.145 88.0);
   --foreground-secondary: oklch(0.406 0.012 105.0);
-  --border: oklch(0.835 0.012 105.0);
-  --border-subtle: oklch(0.916 0.010 105.0);
-  --border-strong: oklch(0.628 0.012 105.0);
+  --border: oklch(0.790 0.014 105.0);
+  --border-subtle: oklch(0.890 0.010 105.0);
+  --border-strong: oklch(0.570 0.014 105.0);
   --input: var(--border);
   --ring: oklch(0.520 0.140 222.0);
   --inverse: oklch(0.190 0.007 258.4);
@@ -195,9 +195,9 @@ The light warning solid is adjusted from `oklch(0.580 0.141 54.6)` to `oklch(0.5
   --brand-soft: oklch(0.297 0.040 91.0);
   --brand-strong: oklch(0.820 0.145 89.0);
   --foreground-secondary: oklch(0.843 0.012 103.0);
-  --border: oklch(0.405 0.012 108.0);
-  --border-subtle: oklch(0.319 0.010 103.0);
-  --border-strong: oklch(0.660 0.015 105.0);
+  --border: oklch(0.460 0.012 108.0);
+  --border-subtle: oklch(0.360 0.010 103.0);
+  --border-strong: oklch(0.720 0.015 105.0);
   --input: var(--border);
   --ring: oklch(0.740 0.105 222.0);
   --inverse: oklch(0.968 0.008 114.2);
