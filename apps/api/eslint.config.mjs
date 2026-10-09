@@ -31,5 +31,21 @@ export default defineConfig(
     files: ['*.config.{js,mjs,cjs,ts,mts,cts}'],
     extends: [tseslint.configs.disableTypeChecked],
   },
+  {
+    files: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'CallExpression[callee.name=/^(it|test)$/][arguments.length=3]',
+          message: 'Configure test budgets globally.',
+        },
+        {
+          selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='only']",
+          message: 'Do not commit focused tests.',
+        },
+      ],
+    },
+  },
   eslintConfigPrettier,
 );

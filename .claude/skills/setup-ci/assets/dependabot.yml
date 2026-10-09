@@ -1,0 +1,61 @@
+# TEMPLATE - dependabot.yml
+# Place: /.github/dependabot.yml
+# When: the project uses GitHub Actions or package dependencies and wants low-noise updates.
+# Rules:
+# - Keep the github-actions entry so workflow actions are maintained automatically.
+# - Uncomment and adapt one package-ecosystem entry for each ecosystem the project actually uses.
+# - Keep monthly updates and low pull-request limits unless the project needs a faster cadence.
+# - Keep development dependency grouping only when the ecosystem supports dependency scopes.
+# - Keep the 7-day cooldown: new releases wait a week before an update PR opens; security updates are not delayed.
+# - Remove this header comment after adapting the file.
+
+version: 2
+
+updates:
+  # GitHub Actions are available in every repository that uses workflows.
+  - package-ecosystem: "github-actions"
+    # Dependabot checks .github/workflows from directory "/".
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    cooldown:
+      default-days: 7
+    # Keep routine action updates consolidated and bounded.
+    open-pull-requests-limit: 2
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Add one entry per package ecosystem used by the project.
+  # Do not enable an ecosystem just because it appears in this example.
+  # Map the project's package manager to a valid Dependabot ecosystem value:
+  # npm / pnpm / yarn -> "npm"
+  # pip / pipenv / poetry -> "pip"
+  # uv -> "uv"
+  # nuget -> "nuget"
+  # maven -> "maven"
+  # gradle -> "gradle"
+  # Do not use pnpm, yarn, or poetry as direct package-ecosystem values.
+  # Other valid ecosystems include gomod, cargo, composer, bundler, and docker.
+  # Use directory: "/" when manifests are at the repository root.
+  # For manifests in multiple locations, use directories: instead.
+
+  # Generic package ecosystem example - uncomment and adapt:
+  # - package-ecosystem: "<FILL: valid Dependabot ecosystem, e.g. npm, pip, uv, nuget, maven, or gradle>"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "monthly"
+  #   cooldown:
+  #     default-days: 7
+  #   open-pull-requests-limit: 3
+  #   # Keep this group when the ecosystem can distinguish development dependencies.
+  #   groups:
+  #     development-dependencies:
+  #       dependency-type: "development"
+  #       update-types:
+  #         - "minor"
+  #         - "patch"

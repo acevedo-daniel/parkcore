@@ -17,7 +17,7 @@ flowchart LR
 
 The API owns domain rules and persistence. The browser application owns presentation and client state. The generated `@parkcore/api-client` is the contract boundary between them.
 
-## Workspace boundaries
+## Component boundaries
 
 | Workspace             | Owns                                                                                         | Must not own                                      |
 | --------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------- |
@@ -43,7 +43,7 @@ route -> controller -> service -> repository -> Prisma/PostgreSQL
 
 This separation keeps transport concerns away from persistence and makes the API the authoritative domain boundary.
 
-## Persistence and concurrency
+## Data and persistence
 
 PostgreSQL is the persistence source of truth. Prisma provides the schema, generated client, and committed forward migrations.
 

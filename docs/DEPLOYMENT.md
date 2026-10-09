@@ -18,19 +18,17 @@ Browser -> Vercel web -> Render API -> Neon PostgreSQL
 
 The repository keeps platform configuration at the deployment boundary through `vercel.json` and `render.yaml`.
 
-## Deployment flow
+## Release flow
 
-Render is configured to deploy the API from `main` after the linked branch's checks pass (`autoDeployTrigger: checksPass`). GitHub Actions verifies the source but does not deploy it. The web app is built and served by Vercel; `vercel.json` defines its build output and routing.
+Render is configured to deploy the API from `main` after the linked branch's checks pass (`autoDeployTrigger: checksPass`). GitHub Actions verifies the source but does not deploy it. Vercel deploys the web app to production from `main` and creates preview deployments for pull requests; `vercel.json` defines its build output and routing.
 
 The `Production` CI job checks the deployment build and startup path using a fresh, job-scoped PostgreSQL service. It installs from the frozen lockfile, audits production dependencies, applies forward migrations, builds the deployable workspaces, checks the compiled artifacts, starts the compiled API, and runs the startup smoke before the database is discarded.
 
-To reproduce the complete pull-request verification locally, run:
+Pull requests are verified by the required `CI Gate`; see [Testing](TESTING.md) for the local `pnpm preflight` equivalent.
 
-```bash
-pnpm preflight
-```
+## Rollback
 
-`pnpm preflight` requires Node.js 24, the pinned pnpm version, Docker Compose, and free application ports. It provisions isolated disposable PostgreSQL databases for API tests, browser E2E, and production checks, and never targets the hosted database or personal `.env` configuration. GitHub Actions runs for pull requests targeting `main` and manual dispatch; `CI Gate` requires every quality, coverage, contract, browser, and production job to succeed.
+Roll back by reverting the change in a pull request. After `CI Gate` passes and the revert is squash-merged to `main`, Render redeploys the API once checks pass and Vercel deploys the web app from `main`. Applied database migrations are not rolled back: recover through a reviewed forward migration or the database provider's recovery facilities.
 
 ## Render API
 
@@ -110,11 +108,15 @@ The Vercel configuration also applies browser protection headers, including a Co
 
 `render.yaml` marks `DATABASE_URL`, `JWT_SECRET`, and `CORS_ORIGINS` as values supplied outside Git.
 
+The API validates its required `DATABASE_URL`, `JWT_SECRET`, and production `CORS_ORIGINS` before it starts listening.
+
 ### Vercel / web
 
 | Variable       | Requirement                                      |
 | -------------- | ------------------------------------------------ |
 | `VITE_API_URL` | Public HTTPS base URL of the deployed Render API |
+
+The production web build fails when `VITE_API_URL` is missing.
 
 `VITE_API_URL` is browser configuration, not a secret. Do not add database credentials, JWT secrets, or other private values to Vercel's client build.
 

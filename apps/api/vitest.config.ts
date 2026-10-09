@@ -4,6 +4,8 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: false,
+    retry: 0,
+    testTimeout: 15_000,
     clearMocks: true,
     restoreMocks: true,
     setupFiles: ['./vitest.setup.ts'],

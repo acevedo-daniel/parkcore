@@ -1,0 +1,49 @@
+name: Task
+description: Work handed to a teammate
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What is true when this is done, and why it matters.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Tracked docs, routes, files, or URLs to read first.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps
+      description: "Concrete steps. For manual checks: route, input, and expected result for each step."
+    validations:
+      required: true
+  - type: textarea
+    id: done-when
+    attributes:
+      label: Done when
+      description: Observable results that close this issue.
+      value: "- [ ] "
+    validations:
+      required: true
+  - type: dropdown
+    id: deliver
+    attributes:
+      label: Deliver
+      options:
+        - Pull request that closes this issue
+        - Comment with the results
+        - File or data at the location given in Steps
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: What not to change.
+    validations:
+      required: false

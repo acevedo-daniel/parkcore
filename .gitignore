@@ -41,3 +41,8 @@ apps/api/prisma/generated/
 
 local-docs/
 AGENTS.md
+
+# Personal agent configuration
+CLAUDE.local.md
+.agents/
+.claude/

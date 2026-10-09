@@ -1,4 +1,6 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+
+import { expect, test } from './fixtures';
 
 const viewports = [
   { name: '360px', width: 360, height: 800 },
@@ -135,10 +137,6 @@ async function visitWithTheme(
 test('keeps the deployed public and owner surfaces usable at production viewports', async ({
   page,
 }, testInfo) => {
-  test.setTimeout(300_000);
-  page.setDefaultTimeout(10_000);
-  page.setDefaultNavigationTimeout(30_000);
-
   const timestamp = Date.now();
   const runId = Math.floor(timestamp / 1000)
     .toString(36)

@@ -29,13 +29,15 @@ export default defineConfig({
   testDir: './e2e',
   testMatch: /real-stack-smoke\.spec\.ts/,
   fullyParallel: false,
-  retries: 0,
+  forbidOnly: Boolean(process.env.CI),
+  retries: process.env.CI ? 1 : 0,
   timeout: 120_000,
   workers: 1,
   outputDir: 'test-results/local-real-stack',
   reporter: [
     ['list'],
     ['html', { outputFolder: 'playwright-report/local-real-stack', open: 'never' }],
+    ['json', { outputFile: 'playwright-report/local-real-stack-results.json' }],
   ],
   projects: [{ name: 'chromium' }],
   use: {

@@ -1,0 +1,21 @@
+# TEMPLATE - .gitignore
+# Place: /.gitignore
+# Rules:
+# - Keep these stack-agnostic entries; append the stack's entries from https://github.com/github/gitignore.
+# - Remove this header comment after adapting the file.
+
+# Local working space: plans, audits, review screenshots (never linked from tracked docs)
+local-docs/
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+
+# Personal agent configuration
+CLAUDE.local.md
+.claude/settings.local.json
+
+# OS files
+.DS_Store
+Thumbs.db

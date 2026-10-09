@@ -1,0 +1,197 @@
+# TEMPLATE — ci.yml
+# Place: /.github/workflows/ci.yml
+# When: the project protects main and validates changes through automated CI.
+# Rules:
+# - Standardize the contract, not the technology.
+# - The final branch protection required check MUST be `CI Gate`.
+# - PR-only CI requires the Ruleset to require up-to-date branches (setup-ci assets/ruleset.json).
+# - Procedure, gate vocabulary, and ruleset: the setup-ci skill.
+# - Keep job names conceptual and standardized: Quality, Tests, Integration, Contract, E2E, Production, Docker, CI Gate (scoped as <Gate> / <Scope> when needed).
+# - Fill commands with the project's real tools; comment or remove unused gates.
+# - Remove this header comment before committing to a project; the placeholder guard rejects any line starting with TEMPLATE.
+
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Check unfilled template placeholders
+        run: |
+          status=0
+          git grep -nE '<(FILL|OPTIONAL)[:>]|^(# )?TEMPLATE |^status: template$' -- . ':!.agents/' ':!.claude/' ':!*.template.*' || status=$?
+          if [ "$status" -ne 1 ]; then echo "::error::Unfilled template placeholders or template headers found"; exit 1; fi
+
+      - name: Set up runtime environment
+        # Replace with a project-specific setup action (e.g. actions/setup-node@v7, actions/setup-python@v7, actions/setup-dotnet)
+        # Node.js example:
+        # uses: actions/setup-node@v7
+        # with:
+        #   node-version-file: '.nvmrc'
+        #   cache: 'pnpm'
+        # Python example:
+        # uses: actions/setup-python@v7
+        # with:
+        #   python-version-file: '.python-version'
+        run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: replace this step with the project's setup action>
+
+      - name: Install dependencies (locked)
+        # Use locked dependency command: npm ci / pnpm install --frozen-lockfile / uv sync --locked
+        run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: locked dependency install command>
+
+      - name: Verify code formatting
+        run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: format check command, e.g. pnpm format:check / prettier --check .>
+
+      - name: Run linter
+        run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: lint command, e.g. pnpm lint / ruff check . / dotnet format --verify-no-changes>
+
+      - name: Run static type check
+        run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: typecheck command, e.g. pnpm typecheck / mypy .>
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # If integration tests require real infrastructure (e.g. PostgreSQL, Redis), declare service containers here:
+    # services:
+    #   postgres:
+    #     image: postgres:17-alpine
+    #     env:
+    #       POSTGRES_DB: app_test
+    #       POSTGRES_PASSWORD: testpassword
+    #     ports:
+    #       - 5432:5432
+    #     options: >-
+    #       --health-cmd pg_isready
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up runtime environment
+        run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: replace this step with the project's setup action>
+
+      - name: Install dependencies (locked)
+        run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: locked dependency install command>
+
+      - name: Run unit tests
+        run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: unit test command, e.g. pnpm test:unit / pytest tests/unit>
+
+      - name: Run integration tests
+        # Delete or omit if project does not separate unit and integration commands
+        run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: integration test command, e.g. pnpm test:integration / pytest tests/integration>
+
+  # <OPTIONAL: E2E gate - uncomment when the project has critical browser or full-system workflows>
+  # e2e:
+  #   name: E2E
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 15
+  #
+  #   steps:
+  #     - name: Check out repository
+  #       uses: actions/checkout@v7
+  #       with:
+  #         persist-credentials: false
+  #
+  #     - name: Set up runtime environment
+  #       run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: replace this step with the project's setup action>
+  #
+  #     - name: Install dependencies (locked)
+  #       run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: locked dependency install command>
+  #
+  #     - name: Install browser binaries
+  #       run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: e.g. npx playwright install --with-deps chromium>
+  #
+  #     - name: Run E2E test suite
+  #       run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: e2e test command, e.g. pnpm test:e2e>
+  #
+  #     - name: Report flaky E2E tests
+  #       # Reads the Playwright JSON reporter; adapt for other runners.
+  #       if: ${{ !cancelled() }}
+  #       run: |
+  #         report=playwright-report/results.json
+  #         [ -f "$report" ] || exit 0
+  #         jq -r '.. | objects | select(has("specs")) | .specs[] | select(any(.tests[]; .status == "flaky")) | "\(.file):\(.line) \(.title)"' "$report" \
+  #           | sort -u | while read -r entry; do
+  #               echo "::warning title=Flaky E2E test::$entry"
+  #               echo "- $entry" >> "$GITHUB_STEP_SUMMARY"
+  #             done
+  #
+  #     - name: Upload test artifacts
+  #       # keep traces of retried tests too
+  #       if: ${{ !cancelled() }}
+  #       uses: actions/upload-artifact@v7
+  #       with:
+  #         name: e2e-artifacts
+  #         path: |
+  #           playwright-report/
+  #           test-results/
+  #         retention-days: 7
+
+  production:
+    name: Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up runtime environment
+        run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: replace this step with the project's setup action>
+
+      - name: Install dependencies (locked)
+        run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: locked dependency install command>
+
+      - name: Verify production build
+        # e.g. pnpm build / dotnet publish -c Release / docker build .
+        run: echo "::error::Unfilled CI placeholder" && exit 1  # <FILL: production build or container verification command>
+
+  ci-gate:
+    name: CI Gate
+    if: always()
+    needs:
+      - quality
+      - tests
+      # - e2e # Uncomment if E2E gate is active
+      - production
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Verify required upstream jobs
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          for result in $RESULTS; do
+            if [ "$result" != "success" ]; then echo "::error::A required job finished with: $result"; exit 1; fi
+          done

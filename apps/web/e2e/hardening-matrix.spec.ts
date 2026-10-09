@@ -1,5 +1,7 @@
 import { AxeBuilder } from '@axe-core/playwright';
-import { expect, test, type Locator, type Page, type Route } from '@playwright/test';
+import type { Locator, Page, Route } from '@playwright/test';
+
+import { expect, test } from './fixtures';
 
 import type { components } from '@parkcore/api-client';
 
@@ -869,15 +871,12 @@ async function installInitStateScript(page: Page) {
 }
 
 test.beforeEach(async ({ page }) => {
-  page.setDefaultTimeout(10_000);
-  page.setDefaultNavigationTimeout(30_000);
   await installInitStateScript(page);
 });
 
 test('opens every P0 and P1 route in both shells and locales at authored viewports', async ({
   page,
 }) => {
-  test.setTimeout(420_000);
   const api = await installHardeningApiMock(page);
 
   for (const locale of ['es-AR', 'en-US'] as const) {
@@ -896,7 +895,6 @@ test('opens every P0 and P1 route in both shells and locales at authored viewpor
 test('keeps public and authentication routes within every viewport in both themes', async ({
   page,
 }) => {
-  test.setTimeout(420_000);
   const api = await installHardeningApiMock(page);
 
   for (const locale of ['es-AR', 'en-US'] as const) {
@@ -915,7 +913,6 @@ test('keeps public and authentication routes within every viewport in both theme
 });
 
 test('keeps owner operation routes within every viewport in both themes', async ({ page }) => {
-  test.setTimeout(420_000);
   const api = await installHardeningApiMock(page);
 
   for (const locale of ['es-AR', 'en-US'] as const) {
@@ -934,7 +931,6 @@ test('keeps owner operation routes within every viewport in both themes', async 
 });
 
 test('keeps multiple owner overview summaries inside their grid', async ({ page }) => {
-  test.setTimeout(120_000);
   const api = await installHardeningApiMock(page);
   api.setScenario('owner-multi');
 
@@ -958,7 +954,6 @@ test('keeps multiple owner overview summaries inside their grid', async ({ page 
 test('passes the serious and critical axe gate across route, shell, locale, and theme fixtures', async ({
   page,
 }) => {
-  test.setTimeout(420_000);
   const api = await installHardeningApiMock(page);
 
   for (const locale of ['es-AR', 'en-US'] as const) {
@@ -983,7 +978,6 @@ test('passes the serious and critical axe gate across route, shell, locale, and 
 test('keeps focus, compact overlays, and fixed navigation inside the viewport', async ({
   page,
 }) => {
-  test.setTimeout(240_000);
   const api = await installHardeningApiMock(page);
 
   for (const locale of ['es-AR', 'en-US'] as const) {
@@ -1036,7 +1030,6 @@ test('keeps focus, compact overlays, and fixed navigation inside the viewport', 
 });
 
 test('keeps profile preferences labeled and accessible at narrow widths', async ({ page }) => {
-  test.setTimeout(180_000);
   const api = await installHardeningApiMock(page);
 
   for (const locale of ['es-AR', 'en-US'] as const) {
@@ -1078,7 +1071,6 @@ test('keeps profile preferences labeled and accessible at narrow widths', async 
 test('covers deterministic loading, empty, error, blocked, and degraded states', async ({
   page,
 }) => {
-  test.setTimeout(180_000);
   const api = await installHardeningApiMock(page);
 
   await page.setViewportSize({ height: VIEWPORTS[1].height, width: VIEWPORTS[1].width });
@@ -1099,7 +1091,7 @@ test('covers deterministic loading, empty, error, blocked, and degraded states',
   api.setScenario('error');
   await page.goto('/parkings?search=offline');
   const catalogError = page.locator('[data-slot="error-state"]');
-  await expect(catalogError).toBeVisible({ timeout: 20_000 });
+  await expect(catalogError).toBeVisible();
   api.setScenario('success');
   await catalogError.getByRole('button').click();
   await expect(page.locator('a[href="/parkings/parking-1"]').first()).toBeVisible();
@@ -1137,7 +1129,7 @@ test('covers deterministic loading, empty, error, blocked, and degraded states',
   api.setScenario('degraded');
   await page.goto(overviewRoute.path);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByRole('alert').first()).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('alert').first()).toBeVisible();
 
   api.setScenario('owner-empty');
   await page.goto(ownerParkingsRoute.path);
@@ -1146,7 +1138,7 @@ test('covers deterministic loading, empty, error, blocked, and degraded states',
   api.setScenario('owner-error');
   await page.goto(ownerParkingsRoute.path);
   const ownerFacilitiesError = page.locator('[data-slot="error-state"]');
-  await expect(ownerFacilitiesError).toBeVisible({ timeout: 20_000 });
+  await expect(ownerFacilitiesError).toBeVisible();
   api.setScenario('success');
   await ownerFacilitiesError.getByRole('button').click();
   await expect(
@@ -1167,7 +1159,6 @@ test('covers deterministic loading, empty, error, blocked, and degraded states',
 });
 
 test('covers owner management, history, profile, and recovery interactions', async ({ page }) => {
-  test.setTimeout(240_000);
   const api = await installHardeningApiMock(page);
   await page.route('https://example.com/invalid-parking.jpg', async (route) => {
     await route.abort();
@@ -1335,7 +1326,6 @@ test('covers owner management, history, profile, and recovery interactions', asy
 });
 
 test('recovers management and history query failures with route context', async ({ page }) => {
-  test.setTimeout(120_000);
   const api = await installHardeningApiMock(page);
 
   await page.setViewportSize({ height: VIEWPORTS[1].height, width: VIEWPORTS[1].width });
@@ -1344,7 +1334,7 @@ test('recovers management and history query failures with route context', async 
   api.setScenario('owner-error');
   await page.goto(editParkingRoute.path);
   const editError = page.locator('[data-slot="error-state"]');
-  await expect(editError).toBeVisible({ timeout: 20_000 });
+  await expect(editError).toBeVisible();
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   api.setScenario('success');
   await editError.getByRole('button').click();
@@ -1353,7 +1343,7 @@ test('recovers management and history query failures with route context', async 
   api.setScenario('history-error');
   await page.goto(historyRoute.path);
   const historyError = page.locator('[data-slot="error-state"]');
-  await expect(historyError).toBeVisible({ timeout: 20_000 });
+  await expect(historyError).toBeVisible();
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   api.setScenario('success');
   await historyError.getByRole('button').click();
@@ -1363,7 +1353,6 @@ test('recovers management and history query failures with route context', async 
 });
 
 test('recovers identity, rate-limit, analytics, and demo lifecycle failures', async ({ page }) => {
-  test.setTimeout(240_000);
   const api = await installHardeningApiMock(page);
 
   for (const [index, state] of (
@@ -1488,7 +1477,7 @@ test('recovers identity, rate-limit, analytics, and demo lifecycle failures', as
         await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
         await expect(page.locator('a[href="/app/parkings/parking-1"]').first()).toBeVisible();
         const analyticsAlert = page.getByRole('alert').first();
-        await expect(analyticsAlert).toBeVisible({ timeout: 20_000 });
+        await expect(analyticsAlert).toBeVisible();
         await expect(analyticsAlert).not.toContainText(/simulated .* failure/i);
       });
     }

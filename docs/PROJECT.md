@@ -25,7 +25,9 @@ Driver information can be recorded as visit data during check-in, but drivers do
 
 ## Scope
 
-### Public experience
+### In scope
+
+#### Public experience
 
 - List active parking facilities.
 - Search and filter the catalog by address and hourly rate.
@@ -36,7 +38,7 @@ Driver information can be recorded as visit data during check-in, but drivers do
 - Receive a public not-found state for unavailable facilities.
 - Start an isolated operator demo without exposing its facilities through public discovery.
 
-### Owner experience
+#### Owner experience
 
 - Register and authenticate as an owner with a valid IANA timezone. The browser supplies its timezone when available, and the API falls back to `America/Argentina/Buenos_Aires`.
 - Use a responsive operations shell with persistent wide navigation and compact top and bottom navigation.
@@ -49,7 +51,7 @@ Driver information can be recorded as visit data during check-in, but drivers do
 - Complete or cancel active sessions.
 - Review paginated session history.
 
-### Operational model
+#### Operational model
 
 - Reuse a parking-scoped vehicle identity across visits.
 - Track `ACTIVE`, `COMPLETED`, and `CANCELLED` sessions.
@@ -58,7 +60,7 @@ Driver information can be recorded as visit data during check-in, but drivers do
 - Review history by parking-local today, 7-day, and 30-day periods.
 - Export complete filtered history and view revenue grouped by currency.
 
-### Client preferences
+#### Client preferences
 
 - The web client supports Spanish (`es-AR`) and English (`en-US`), with Spanish as the default.
 - Appearance supports `system`, `light`, and `dark` preferences.
@@ -67,7 +69,7 @@ Driver information can be recorded as visit data during check-in, but drivers do
 - Shared navigation, appearance, loading, error, and feedback messages use parity-checked Spanish and English catalogs.
 - Shared authentication, profile, parking, check-in, occupancy, and session workflows use the same catalogs for labels, validation, recovery messages, status announcements, and accessible names. Changing language revalidates visible form feedback without remounting the form or losing entered values.
 
-## Out of scope
+### Out of scope
 
 ParkCore does not include:
 

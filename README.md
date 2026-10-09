@@ -1,13 +1,12 @@
 # ParkCore
 
+[![CI](https://github.com/acevedo-daniel/parkcore/actions/workflows/ci.yml/badge.svg)](https://github.com/acevedo-daniel/parkcore/actions/workflows/ci.yml)
+
 > A bilingual demo app for everyday parking operations.
 
 ParkCore lets owners manage facilities, check vehicles in, follow active stays, and complete or cancel them using the rate recorded at check-in. Visitors can browse facilities listed for public discovery.
 
-## Demo
-
-- [Public web demo](https://parkcore-app.vercel.app/)
-- [API health](https://parkcore-api.onrender.com/healthz)
+**[Open the live demo](https://parkcore-app.vercel.app/)**
 
 The public catalog uses a stable fictional `SHOWCASE` scenario. The in-app demo creates an isolated four-hour `DEMO` workspace for owner workflows. Its facilities never appear in public discovery.
 
@@ -90,9 +89,11 @@ On macOS or Linux, replace `Copy-Item` with `cp`. The API starts at `http://loca
 
 ## Quality
 
-Run `pnpm preflight` to reproduce the complete CI gate locally. It requires Node.js 24, the repository-pinned pnpm version, Docker, free ports `3000` and `4173`, and an installable Chromium browser. It creates a unique disposable PostgreSQL project, runs every CI job including coverage, browser, audit, migration, artifact, startup, and cleanup checks, then removes its databases and container. It does not use local `.env` values or the development database.
+```bash
+pnpm preflight
+```
 
-GitHub Actions runs on pull requests targeting `main` and manual dispatch. The required `CI Gate` aggregates the quality, API, web, contract, browser, and production jobs. A standalone `pnpm build` requires `VITE_API_URL`, which is set in the web `.env` after setup. See [Testing](docs/TESTING.md) for the verification contract.
+`pnpm preflight` reproduces every check aggregated by the required `CI Gate` (quality, API and web tests with coverage, contract, browser, and production checks) against disposable services. See [Testing](docs/TESTING.md) for its requirements and the CI contract.
 
 ## Documentation
 
@@ -101,3 +102,7 @@ GitHub Actions runs on pull requests targeting `main` and manual dispatch. The r
 - [Development](docs/DEVELOPMENT.md): local environment and workspace workflow.
 - [Testing](docs/TESTING.md): test strategy, database setup, and quality gates.
 - [Deployment](docs/DEPLOYMENT.md): production configuration, migrations, and validation.
+
+## License
+
+[MIT](LICENSE)
