@@ -44,4 +44,5 @@ AGENTS.md
 
 # Personal agent configuration
 CLAUDE.local.md
-.claude/settings.local.json
+.agents/
+.claude/
