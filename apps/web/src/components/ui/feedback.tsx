@@ -4,7 +4,7 @@ import { useCallback, useId, useState, type ReactNode } from 'react';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { cn } from '../../lib/cn.js';
-import { Button, IconButton } from './button.js';
+import { Button } from './button.js';
 import { ToastContext } from './toast-context.js';
 
 interface ToastMessage {
@@ -38,9 +38,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           >
             <ToastPrimitive.Description>{message.message}</ToastPrimitive.Description>
             <ToastPrimitive.Close asChild>
-              <IconButton aria-label={t('feedback.dismiss')}>
+              <Button aria-label={t('feedback.dismiss')} size="icon" variant="ghost">
                 <X aria-hidden="true" size={16} />
-              </IconButton>
+              </Button>
             </ToastPrimitive.Close>
           </ToastPrimitive.Root>
         ))}

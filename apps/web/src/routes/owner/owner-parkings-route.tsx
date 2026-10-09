@@ -94,7 +94,7 @@ export function OwnerParkingsRoute() {
       {parkings.length === 0 ? (
         <EmptyState
           action={
-            <Button asChild variant="primary">
+            <Button asChild variant="default">
               <Link to="/app/parkings/new">
                 <Plus aria-hidden="true" className="size-4" />
                 {t('ownerParkings.createFacility')}

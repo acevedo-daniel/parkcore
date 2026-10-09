@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { useLayoutEffect, useRef, type ReactNode } from 'react';
 
 import { useAppearance } from '../../app/appearance-provider.js';
-import { IconButton } from './button.js';
+import { Button } from './button.js';
 
 export interface DialogProps {
   children: ReactNode;
@@ -62,13 +62,15 @@ function DialogHeader({
         </DialogPrimitive.Description>
       </div>
       <DialogPrimitive.Close asChild>
-        <IconButton
+        <Button
           aria-label={closeLabel ?? t('dialog.close', { title })}
           className="rounded-full"
           data-slot="dialog-close"
+          size="icon"
+          variant="ghost"
         >
           <X aria-hidden="true" className="size-4" />
-        </IconButton>
+        </Button>
       </DialogPrimitive.Close>
     </header>
   );

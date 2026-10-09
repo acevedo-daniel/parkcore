@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { AppearanceProvider } from '../../app/appearance-provider.js';
-import { Button, IconButton } from './button.js';
+import { Button } from './button.js';
 import { EmptyState, ErrorState, Skeleton, ToastProvider } from './feedback.js';
 import { useToast } from './toast-context.js';
 
@@ -26,9 +26,7 @@ describe('core UI feedback and actions', () => {
     const onClick = vi.fn();
     render(<Button onClick={onClick}>Start operation</Button>);
 
-    expect(screen.getByRole('button', { name: 'Start operation' }).className).toContain(
-      'min-h-[var(--touch-target-min)]',
-    );
+    expect(screen.getByRole('button', { name: 'Start operation' }).className).toContain('min-h-11');
     await user.tab();
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Start operation' }));
     await user.keyboard('{Enter}');
@@ -37,9 +35,9 @@ describe('core UI feedback and actions', () => {
 
   it('requires a name for icon-only actions', () => {
     render(
-      <IconButton aria-label="Close panel">
+      <Button aria-label="Close panel" size="icon">
         <span aria-hidden="true">x</span>
-      </IconButton>,
+      </Button>,
     );
     expect(screen.getByRole('button', { name: 'Close panel' })).toBeTruthy();
   });

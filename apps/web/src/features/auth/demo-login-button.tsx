@@ -12,7 +12,7 @@ export function DemoLoginButton({
   children,
 }: {
   onSuccess: () => void;
-  variant?: 'primary' | 'secondary';
+  variant?: 'default' | 'secondary';
   className?: string;
   children?: React.ReactNode;
 }) {

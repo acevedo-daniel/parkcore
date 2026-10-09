@@ -143,7 +143,7 @@ describe('owner profile route', () => {
     const name = screen.getByLabelText<HTMLInputElement>('Name');
     await user.clear(name);
     await user.type(name, 'Grace');
-    await user.click(screen.getByRole('button', { name: 'Spanish' }));
+    await user.click(screen.getByRole('radio', { name: 'Spanish' }));
 
     expect(screen.getByText('Idioma', { exact: true })).toBeTruthy();
     expect(screen.getByText('Apariencia', { exact: true })).toBeTruthy();
@@ -151,7 +151,8 @@ describe('owner profile route', () => {
     expect(screen.getByRole('heading', { name: 'Perfil' })).toBeTruthy();
 
     const theme = screen.getByRole('combobox', { name: 'Apariencia' });
-    await user.selectOptions(theme, 'dark');
+    await user.click(theme);
+    await user.click(await screen.findByRole('option', { name: 'Oscuro' }));
 
     expect(document.documentElement.dataset.theme).toBe('dark');
     expect(screen.getByLabelText<HTMLInputElement>('Nombre').value).toBe('Grace');

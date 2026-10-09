@@ -197,6 +197,12 @@ test('applies stored and system themes before the app mounts', async ({ page }) 
       metaThemeColor: expectedColor,
       theme: appearance.theme,
     });
-    await expect(page.getByRole('combobox', { name: 'Theme' })).toHaveValue(appearance.preference);
+    const themeLabel =
+      appearance.preference === 'system'
+        ? 'System'
+        : appearance.preference === 'dark'
+          ? 'Dark'
+          : 'Light';
+    await expect(page.getByRole('combobox', { name: 'Theme' })).toHaveText(themeLabel);
   }
 });

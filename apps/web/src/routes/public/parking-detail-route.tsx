@@ -61,7 +61,7 @@ export function ParkingDetailRoute() {
                 onClick={() => {
                   void parkingQuery.refetch();
                 }}
-                variant="primary"
+                variant="default"
               >
                 {t('public.detail.retry')}
               </Button>

@@ -1,0 +1,94 @@
+import { useAppearance } from '../../app/appearance-provider.js';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select.js';
+import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group.js';
+import { cn } from '../../lib/cn.js';
+
+export function AppearanceControls({
+  className,
+  compact = false,
+  presentation = 'compact',
+}: {
+  className?: string;
+  compact?: boolean;
+  presentation?: 'compact' | 'profile';
+}) {
+  const { locale, preference, setLanguage, setThemePreference, t } = useAppearance();
+  const isProfile = presentation === 'profile';
+
+  return (
+    <div
+      className={cn(
+        isProfile ? 'flex w-full min-w-0 flex-col gap-5' : 'flex min-w-0 items-center gap-2',
+        compact && !isProfile && 'w-full justify-between',
+        className,
+      )}
+      data-presentation={presentation}
+      data-slot="appearance-controls"
+    >
+      <div className={cn(isProfile ? 'min-w-0 space-y-2' : 'flex items-center')}>
+        {isProfile ? (
+          <p className="type-label text-muted-foreground">{t('appearance.languageLabel')}</p>
+        ) : null}
+        <ToggleGroup
+          aria-label={isProfile ? t('appearance.languageLabel') : t('appearance.language')}
+          className="shrink-0 rounded-full border border-border bg-card p-1"
+          onValueChange={(value) => {
+            if (value === 'es-AR' || value === 'en-US') {
+              setLanguage(value);
+            }
+          }}
+          type="single"
+          value={locale}
+          variant="brand"
+        >
+          <ToggleGroupItem
+            aria-label={t('appearance.languageSpanish')}
+            className="min-w-11 rounded-full px-2.5 text-xs"
+            value="es-AR"
+          >
+            ES
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            aria-label={t('appearance.languageEnglish')}
+            className="min-w-11 rounded-full px-2.5 text-xs"
+            value="en-US"
+          >
+            EN
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
+      <label
+        className={cn(
+          isProfile
+            ? 'flex min-w-0 flex-col items-start gap-2'
+            : 'appearance-theme flex min-w-0 items-center gap-2',
+          compact && !isProfile && 'grow justify-end',
+        )}
+      >
+        <span className={cn(isProfile ? 'type-label text-muted-foreground' : 'sr-only')}>
+          {isProfile ? t('appearance.appearanceLabel') : t('appearance.theme')}
+        </span>
+        <Select
+          onValueChange={(value) => {
+            if (value === 'system' || value === 'light' || value === 'dark') {
+              setThemePreference(value);
+            }
+          }}
+          value={preference}
+        >
+          <SelectTrigger
+            aria-label={isProfile ? undefined : t('appearance.theme')}
+            className={cn('min-h-11 rounded-full px-3 text-xs', isProfile && 'w-full')}
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent align="end" position="popper">
+            <SelectItem value="system">{t('theme.system')}</SelectItem>
+            <SelectItem value="light">{t('theme.light')}</SelectItem>
+            <SelectItem value="dark">{t('theme.dark')}</SelectItem>
+          </SelectContent>
+        </Select>
+      </label>
+    </div>
+  );
+}

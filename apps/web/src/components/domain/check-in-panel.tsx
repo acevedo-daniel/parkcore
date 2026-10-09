@@ -1,7 +1,7 @@
 import type { components } from '@parkcore/api-client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useMemo, useRef, useState, type SyntheticEvent } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
 import { useAppearance } from '../../app/appearance-provider.js';
@@ -9,8 +9,11 @@ import { lookupVehicle } from '../../lib/api/owner-api.js';
 import type { Translator } from '../../lib/localization.js';
 import { normalizePlate } from '../../lib/plate.js';
 import { useDebouncedValue } from '../../lib/use-debounced-value.js';
+import { FormField } from './form-field.js';
 import { Button } from '../ui/button.js';
-import { Field, Input, Select, Textarea } from '../ui/field.js';
+import { Input } from '../ui/input.js';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select.js';
+import { Textarea } from '../ui/textarea.js';
 
 function createCheckInFormSchema(t: Translator) {
   return z.object({
@@ -51,9 +54,6 @@ function createCheckInFormSchema(t: Translator) {
 type CheckInForm = z.infer<ReturnType<typeof createCheckInFormSchema>>;
 type CheckInRequest = components['schemas']['CheckInRequest'];
 type LookupState = 'loading' | 'match' | 'no-match' | 'error';
-
-const controlClassName =
-  'h-12 w-full rounded-[var(--radius-md)] border border-border bg-muted px-3.5 text-foreground shadow-xs focus:border-primary focus:ring-2 focus:ring-ring';
 
 export function CheckInPanel({
   error,
@@ -197,15 +197,15 @@ export function CheckInPanel({
 
   return (
     <form className="space-y-5 pt-6" noValidate onSubmit={onFormSubmit}>
-      <Field error={errors.plate?.message} htmlFor="check-in-plate" label={t('checkIn.plate')}>
+      <FormField error={errors.plate?.message} htmlFor="check-in-plate" label={t('checkIn.plate')}>
         <Input
           autoComplete="off"
-          className={`${controlClassName} font-mono font-bold tracking-[0.12em]`}
+          className="font-mono font-bold tracking-widest"
           id="check-in-plate"
           placeholder={t('checkIn.platePlaceholder')}
           {...register('plate')}
         />
-      </Field>
+      </FormField>
       <p className="text-sm leading-relaxed text-foreground-secondary">{t('checkIn.plateHelp')}</p>
       {lookupMessage ? (
         <p className="text-sm leading-relaxed text-foreground-secondary" role="status">
@@ -215,42 +215,44 @@ export function CheckInPanel({
 
       <FormDivider label={t('checkIn.vehicle')} />
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field error={errors.type?.message} htmlFor="check-in-type" label={t('checkIn.type')}>
-          <Select className={controlClassName} id="check-in-type" {...register('type')}>
-            <option value="CAR">{t('checkIn.car')}</option>
-            <option value="MOTORCYCLE">{t('checkIn.motorcycle')}</option>
-            <option value="LARGE">{t('checkIn.largeVehicle')}</option>
-          </Select>
-        </Field>
-        <Field htmlFor="check-in-brand" label={t('checkIn.brand')}>
-          <Input className={controlClassName} id="check-in-brand" {...register('brand')} />
-        </Field>
+        <FormField error={errors.type?.message} htmlFor="check-in-type" label={t('checkIn.type')}>
+          <Controller
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <Select name={field.name} onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger id="check-in-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CAR">{t('checkIn.car')}</SelectItem>
+                  <SelectItem value="MOTORCYCLE">{t('checkIn.motorcycle')}</SelectItem>
+                  <SelectItem value="LARGE">{t('checkIn.largeVehicle')}</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </FormField>
+        <FormField htmlFor="check-in-brand" label={t('checkIn.brand')}>
+          <Input id="check-in-brand" {...register('brand')} />
+        </FormField>
       </div>
-      <Field htmlFor="check-in-model" label={t('checkIn.model')}>
-        <Input className={controlClassName} id="check-in-model" {...register('model')} />
-      </Field>
+      <FormField htmlFor="check-in-model" label={t('checkIn.model')}>
+        <Input id="check-in-model" {...register('model')} />
+      </FormField>
 
       <FormDivider label={t('checkIn.visitorOptional')} />
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field htmlFor="check-in-name" label={t('checkIn.name')}>
-          <Input className={controlClassName} id="check-in-name" {...register('customerName')} />
-        </Field>
-        <Field htmlFor="check-in-phone" label={t('checkIn.phone')}>
-          <Input
-            className={controlClassName}
-            id="check-in-phone"
-            inputMode="tel"
-            {...register('customerPhone')}
-          />
-        </Field>
+        <FormField htmlFor="check-in-name" label={t('checkIn.name')}>
+          <Input id="check-in-name" {...register('customerName')} />
+        </FormField>
+        <FormField htmlFor="check-in-phone" label={t('checkIn.phone')}>
+          <Input id="check-in-phone" inputMode="tel" {...register('customerPhone')} />
+        </FormField>
       </div>
-      <Field htmlFor="check-in-notes" label={t('checkIn.notes')}>
-        <Textarea
-          className="min-h-24 w-full rounded-[var(--radius-md)] border border-border bg-muted px-3.5 py-3 text-foreground shadow-xs focus:border-primary focus:ring-2 focus:ring-ring"
-          id="check-in-notes"
-          {...register('notes')}
-        />
-      </Field>
+      <FormField htmlFor="check-in-notes" label={t('checkIn.notes')}>
+        <Textarea id="check-in-notes" {...register('notes')} />
+      </FormField>
 
       {error ? (
         <p
@@ -260,7 +262,7 @@ export function CheckInPanel({
           {error}
         </p>
       ) : null}
-      <Button disabled={isSubmitting} fullWidth type="submit">
+      <Button className="w-full" disabled={isSubmitting} type="submit">
         {isSubmitting ? t('checkIn.starting') : t('checkIn.start')}
       </Button>
     </form>

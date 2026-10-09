@@ -4,9 +4,11 @@ import { useId, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
-import { Combobox } from '../../components/ui/combobox.js';
+import { Combobox } from '../../components/domain/combobox.js';
+import { FormField } from '../../components/domain/form-field.js';
 import { Button } from '../../components/ui/button.js';
-import { Field, Input } from '../../components/ui/field.js';
+import { Input } from '../../components/ui/input.js';
+import { ToggleGroup, ToggleGroupItem } from '../../components/ui/toggle-group.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
 import { getPublicParkings, type PublicParking } from '../../lib/api/public-api.js';
 import { cn } from '../../lib/cn.js';
@@ -234,29 +236,29 @@ function CalculatorForm({
             {durationSummary}
           </span>
         </legend>
-        <div className="grid grid-cols-2 gap-1.5 @sm:grid-cols-5">
+        <ToggleGroup
+          aria-label={t('calculator.estimatedStay')}
+          className="grid w-full grid-cols-2 gap-1.5 @sm:grid-cols-5"
+          onValueChange={(value) => {
+            if (value) onDurationChange(value as (typeof DURATION_OPTIONS)[number]['id']);
+          }}
+          type="single"
+          value={selectedDuration}
+          variant="brand"
+        >
           {DURATION_OPTIONS.map((option) => (
-            <button
-              aria-pressed={selectedDuration === option.id}
-              className={cn(
-                'min-h-[var(--touch-target-min)] min-w-0 cursor-pointer break-words whitespace-normal rounded-[var(--radius-sm)] px-1 py-2 text-center text-xs font-bold leading-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                selectedDuration === option.id
-                  ? 'bg-primary text-primary-foreground'
-                  : 'border border-border bg-card text-foreground hover:bg-brand hover:text-brand-foreground',
-              )}
+            <ToggleGroupItem
+              className="min-w-0 whitespace-normal rounded-sm border border-border bg-card px-1 py-2 text-center text-xs font-bold leading-tight text-foreground data-[state=on]:border-brand data-[state=on]:text-brand-foreground"
               key={option.id}
-              onClick={() => {
-                onDurationChange(option.id);
-              }}
-              type="button"
+              value={option.id}
             >
               {t(option.label)}
-            </button>
+            </ToggleGroupItem>
           ))}
-        </div>
+        </ToggleGroup>
         {selectedDuration === 'custom' ? (
           <div className="mt-4 border-t border-border-subtle pt-4">
-            <Field
+            <FormField
               error={customDurationError}
               help={customDurationError ? undefined : t('calculator.customDurationHelp')}
               htmlFor="estimate-custom-duration"
@@ -274,7 +276,7 @@ function CalculatorForm({
                 type="number"
                 value={customDurationMinutes}
               />
-            </Field>
+            </FormField>
           </div>
         ) : null}
       </fieldset>

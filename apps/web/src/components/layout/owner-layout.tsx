@@ -13,7 +13,8 @@ import { useAppearance } from '../../app/appearance-provider.js';
 import { useAuth } from '../../features/auth/use-auth.js';
 import { cn } from '../../lib/cn.js';
 import { useDocumentMeta } from '../../lib/document-meta.js';
-import { AppearanceControls } from '../ui/appearance-controls.js';
+import { AppearanceControls } from '../domain/appearance-controls.js';
+import { Button } from '../ui/button.js';
 
 function OwnerLink({
   compact = false,
@@ -134,14 +135,15 @@ export function OwnerLayout() {
               <UserRound aria-hidden="true" size={16} />
               <span>{t('nav.profile')}</span>
             </NavLink>
-            <button
-              className="owner-nav-link owner-sign-out flex min-h-[var(--touch-target-min)] w-full cursor-pointer items-center gap-3 rounded-[var(--radius-sm)] px-3.5 py-2 text-left text-sm font-medium text-foreground-secondary transition-colors hover:bg-muted hover:text-foreground"
+            <Button
+              className="owner-nav-link owner-sign-out w-full justify-start px-3.5 text-left text-foreground-secondary"
               onClick={signOut}
               type="button"
+              variant="ghost"
             >
               <LogOut aria-hidden="true" size={16} />
               <span>{t('nav.signOut')}</span>
-            </button>
+            </Button>
           </section>
         </div>
       </aside>
@@ -155,14 +157,15 @@ export function OwnerLayout() {
         <div className="flex items-center gap-1">
           <AppearanceControls className="gap-1" />
           <span className="type-label hidden sm:inline">{t('nav.operations')}</span>
-          <button
+          <Button
             aria-label={t('nav.signOut')}
-            className="icon-button flex size-9 items-center justify-center rounded-md border border-border-strong bg-card text-foreground transition-colors hover:bg-accent"
+            size="icon-sm"
             onClick={signOut}
             type="button"
+            variant="outline"
           >
             <LogOut aria-hidden="true" size={16} />
-          </button>
+          </Button>
         </div>
       </header>
       {navigation.state !== 'idle' ? (

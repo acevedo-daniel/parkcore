@@ -12,7 +12,8 @@ import {
 import { useAppearance } from '../../app/appearance-provider.js';
 import { DemoLoginButton } from '../../features/auth/demo-login-button.js';
 import { cn } from '../../lib/cn.js';
-import { AppearanceControls } from '../ui/appearance-controls.js';
+import { AppearanceControls } from '../domain/appearance-controls.js';
+import { Button } from '../ui/button.js';
 
 function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useAppearance();
@@ -49,13 +50,16 @@ function PublicMobileMenu() {
   return (
     <DialogPrimitive.Root>
       <DialogPrimitive.Trigger asChild>
-        <button
+        <Button
           aria-label={t('nav.open')}
-          className="icon-button public-menu-trigger flex size-10 cursor-pointer items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:bg-brand"
+          className="public-menu-trigger"
+          shape="pill"
+          size="icon-sm"
           type="button"
+          variant="outline"
         >
           <Menu aria-hidden="true" size={20} />
-        </button>
+        </Button>
       </DialogPrimitive.Trigger>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="public-menu-overlay fixed inset-0 z-50 bg-overlay backdrop-blur-xs animate-in fade-in" />
@@ -69,13 +73,15 @@ function PublicMobileMenu() {
                 {t('nav.public')}
               </DialogPrimitive.Description>
               <DialogPrimitive.Close asChild>
-                <button
+                <Button
                   aria-label={t('nav.close')}
-                  className="icon-button flex size-9 cursor-pointer items-center justify-center rounded-full border border-border bg-card text-foreground transition-colors hover:bg-brand"
+                  shape="pill"
+                  size="icon-sm"
                   type="button"
+                  variant="outline"
                 >
                   <X aria-hidden="true" size={18} />
-                </button>
+                </Button>
               </DialogPrimitive.Close>
             </header>
 

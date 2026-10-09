@@ -59,17 +59,17 @@ describe('ParkingCalculatorWidget', () => {
 
     await screen.findByRole('combobox', { name: '¿Dónde vas a estacionar?' });
     expect(screen.getByText(/31,00/)).toBeTruthy();
-    expect(screen.getByRole('button', { name: '1 hora' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: '2 horas' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: '4 horas' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: '8 horas' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Personalizado' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: '2 horas' }).getAttribute('aria-pressed')).toBe(
+    expect(screen.getByRole('radio', { name: '1 hora' })).toBeTruthy();
+    expect(screen.getByRole('radio', { name: '2 horas' })).toBeTruthy();
+    expect(screen.getByRole('radio', { name: '4 horas' })).toBeTruthy();
+    expect(screen.getByRole('radio', { name: '8 horas' })).toBeTruthy();
+    expect(screen.getByRole('radio', { name: 'Personalizado' })).toBeTruthy();
+    expect(screen.getByRole('radio', { name: '2 horas' }).getAttribute('aria-checked')).toBe(
       'true',
     );
 
-    await user.click(screen.getByRole('button', { name: 'Personalizado' }));
-    expect(screen.getByRole('button', { name: 'Personalizado' }).getAttribute('aria-pressed')).toBe(
+    await user.click(screen.getByRole('radio', { name: 'Personalizado' }));
+    expect(screen.getByRole('radio', { name: 'Personalizado' }).getAttribute('aria-checked')).toBe(
       'true',
     );
     const durationInput = screen.getByLabelText('Duración en minutos');
@@ -104,7 +104,7 @@ describe('ParkingCalculatorWidget', () => {
     await user.click(facilityInput);
     await user.click(screen.getByRole('option', { name: 'North Garage' }));
 
-    expect((facilityInput as HTMLInputElement).value).toBe('North Garage');
+    expect(facilityInput.textContent).toContain('North Garage');
     expect(screen.getByText(/40,00/)).toBeTruthy();
   });
 
@@ -126,7 +126,11 @@ describe('ParkingCalculatorWidget', () => {
     queryClient.setQueryData(['public-parkings-widget'], listFixture([first]));
 
     await waitFor(() => {
-      expect(screen.getByRole<HTMLInputElement>('combobox').value).toBe('Central Parking');
+      expect(
+        screen.getByRole<HTMLButtonElement>('combobox', {
+          name: '¿Dónde vas a estacionar?',
+        }).textContent,
+      ).toContain('Central Parking');
     });
     expect(screen.getByText(/31,00/)).toBeTruthy();
   });

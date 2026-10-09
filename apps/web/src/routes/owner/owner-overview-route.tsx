@@ -8,6 +8,7 @@ import { AttentionItem } from '../../components/domain/attention-item.js';
 import { PageHeader } from '../../components/domain/page-header.js';
 import { Button } from '../../components/ui/button.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
+import { ToggleGroup, ToggleGroupItem } from '../../components/ui/toggle-group.js';
 import {
   useAnalyticsRevenue,
   useAnalyticsSummary,
@@ -186,7 +187,7 @@ export function OwnerOverviewRoute() {
         </h1>
         <EmptyState
           action={
-            <Button asChild variant="primary">
+            <Button asChild variant="default">
               <Link to="/app/parkings/new">
                 <Plus aria-hidden="true" className="size-4" />
                 {t('overview.newFacility')}
@@ -453,57 +454,51 @@ export function OwnerOverviewRoute() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <div
+            <ToggleGroup
               aria-label={t('overview.periodLabel')}
-              className="flex rounded-full border border-border-strong p-1"
-              role="group"
+              className="rounded-full border border-border-strong p-1"
+              onValueChange={(value) => {
+                if (value) {
+                  setActiveBarIndex(null);
+                  setDays(Number(value) as 7 | 30);
+                }
+              }}
+              type="single"
+              value={String(days)}
+              variant="brand"
             >
               {([7, 30] as const).map((period) => (
-                <button
+                <ToggleGroupItem
                   aria-label={t('overview.periodOption', { days: period })}
-                  aria-pressed={days === period}
-                  className={cn(
-                    'min-h-[var(--touch-target-min)] rounded-full px-3 py-2 font-mono text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-                    days === period
-                      ? 'bg-brand text-brand-foreground'
-                      : 'text-foreground-secondary hover:bg-accent hover:text-foreground',
-                  )}
+                  className="rounded-full px-3 py-2 font-mono text-xs font-bold"
                   key={period}
-                  onClick={() => {
-                    setActiveBarIndex(null);
-                    setDays(period);
-                  }}
-                  type="button"
+                  value={String(period)}
                 >
                   {t('overview.periodDays', { days: period })}
-                </button>
+                </ToggleGroupItem>
               ))}
-            </div>
+            </ToggleGroup>
             {revenueCurrencies.length > 1 ? (
-              <div
+              <ToggleGroup
                 aria-label={t('overview.currencyLabel')}
-                className="flex flex-wrap gap-2"
-                role="group"
+                className="flex-wrap gap-2"
+                onValueChange={(value) => {
+                  if (value) setSelectedCurrency(value as (typeof revenueCurrencies)[number]);
+                }}
+                type="single"
+                value={displayCurrency}
+                variant="brand"
               >
                 {revenueCurrencies.map((currency) => (
-                  <button
-                    aria-pressed={displayCurrency === currency}
-                    className={cn(
-                      'min-h-[var(--touch-target-min)] rounded-full border px-3 py-2 font-mono text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-                      displayCurrency === currency
-                        ? 'border-brand bg-brand text-brand-foreground'
-                        : 'border-border-strong text-foreground-secondary hover:bg-accent hover:text-foreground',
-                    )}
+                  <ToggleGroupItem
+                    className="rounded-full border border-border-strong px-3 py-2 font-mono text-xs font-bold data-[state=on]:border-brand"
                     key={currency}
-                    onClick={() => {
-                      setSelectedCurrency(currency);
-                    }}
-                    type="button"
+                    value={currency}
                   >
                     {currency}
-                  </button>
+                  </ToggleGroupItem>
                 ))}
-              </div>
+              </ToggleGroup>
             ) : null}
           </div>
         </div>
@@ -546,7 +541,15 @@ export function OwnerOverviewRoute() {
                     <span className="border-t border-border-subtle" key={index} />
                   ))}
                 </div>
-                <div className="relative flex h-full items-end gap-1.5 border-b border-muted-foreground pb-3 sm:gap-3">
+                <ToggleGroup
+                  aria-label={t('overview.activityTitle')}
+                  className="relative h-full w-full items-end gap-1.5 border-b border-muted-foreground pb-3 sm:gap-3"
+                  onValueChange={(value) => {
+                    setActiveBarIndex(value ? Number(value) : null);
+                  }}
+                  type="single"
+                  value={activeBarIndex === null ? '' : String(activeBarIndex)}
+                >
                   {chartPoints.map((point, index) => {
                     const isActive = activeBarIndex === index;
                     const pointRevenue = revenueForCurrency(point);
@@ -555,25 +558,21 @@ export function OwnerOverviewRoute() {
                     const revenueLabel = formatMoney(pointRevenue, displayCurrency, locale);
 
                     return (
-                      <button
+                      <ToggleGroupItem
                         aria-label={t('overview.chartPoint', {
                           date: dateLabel,
                           revenue: revenueLabel,
                           sessions: formatCount(point.completedSessions),
                         })}
-                        aria-pressed={isActive}
-                        className="group relative flex h-full min-w-0 flex-1 items-end focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                        className="group relative h-full min-w-0 flex-1 items-end p-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                         key={point.date}
                         onBlur={() => {
                           setActiveBarIndex(null);
                         }}
-                        onClick={() => {
-                          setActiveBarIndex(isActive ? null : index);
-                        }}
                         onFocus={() => {
                           setActiveBarIndex(index);
                         }}
-                        type="button"
+                        value={String(index)}
                       >
                         <span
                           className={cn(
@@ -582,10 +581,10 @@ export function OwnerOverviewRoute() {
                           )}
                           style={{ height: `${String(height)}%` }}
                         />
-                      </button>
+                      </ToggleGroupItem>
                     );
                   })}
-                </div>
+                </ToggleGroup>
               </div>
               <div className="mt-2 flex gap-1.5 sm:gap-3">
                 {chartPoints.map((point, index) => (

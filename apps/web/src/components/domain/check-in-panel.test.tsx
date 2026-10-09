@@ -19,6 +19,9 @@ function fieldValue(label: string): string {
   ) {
     return field.value;
   }
+  if (field instanceof HTMLButtonElement && field.getAttribute('role') === 'combobox') {
+    return field.textContent.trim();
+  }
   throw new Error(`Expected ${label} to be a form control`);
 }
 
@@ -69,7 +72,7 @@ describe('CheckInPanel', () => {
       );
     });
 
-    expect(fieldValue('Type')).toBe('MOTORCYCLE');
+    expect(fieldValue('Type')).toBe('Motorcycle');
     expect(fieldValue('Brand')).toBe('Honda');
     expect(fieldValue('Model')).toBe('CB500');
     expect(fieldValue('Name')).toBe('');
@@ -132,7 +135,7 @@ describe('CheckInPanel', () => {
 
     fireEvent.change(plateInput, { target: { value: 'ZZ999ZZ' } });
     await waitFor(() => {
-      expect(fieldValue('Type')).toBe('CAR');
+      expect(fieldValue('Type')).toBe('Car');
       expect(fieldValue('Brand')).toBe('');
       expect(fieldValue('Model')).toBe('');
     });
@@ -162,7 +165,8 @@ describe('CheckInPanel', () => {
     expect(onSubmit).not.toHaveBeenCalled();
 
     await user.type(screen.getByLabelText('Plate'), ' ab-123 cd ');
-    fireEvent.change(screen.getByLabelText('Type'), { target: { value: 'MOTORCYCLE' } });
+    await user.click(screen.getByLabelText('Type'));
+    await user.click(await screen.findByRole('option', { name: 'Motorcycle' }));
     await user.click(screen.getByRole('button', { name: 'Start session' }));
 
     await waitFor(() => {

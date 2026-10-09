@@ -7,7 +7,9 @@ import { z } from 'zod';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../../components/ui/button.js';
-import { Field, Input } from '../../components/ui/field.js';
+import { FormField } from '../../components/domain/form-field.js';
+import { Input } from '../../components/ui/input.js';
+import { Toggle } from '../../components/ui/toggle.js';
 import { localizeApiError } from '../../lib/api/api-error.js';
 import type { Translator } from '../../lib/localization.js';
 import { useAuth } from './use-auth.js';
@@ -148,7 +150,7 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         void submit(event);
       }}
     >
-      <Field
+      <FormField
         error={form.formState.errors.email?.message}
         htmlFor="email"
         label={t('auth.fields.email')}
@@ -161,7 +163,7 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           type="email"
           {...form.register('email')}
         />
-      </Field>
+      </FormField>
       <PasswordField
         autoComplete="current-password"
         error={form.formState.errors.password?.message}
@@ -175,12 +177,7 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           {form.formState.errors.root.message}
         </p>
       ) : null}
-      <Button
-        className="h-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
-        disabled={form.formState.isSubmitting}
-        fullWidth
-        type="submit"
-      >
+      <Button className="w-full rounded-full" disabled={form.formState.isSubmitting} type="submit">
         {form.formState.isSubmitting ? t('auth.actions.signingIn') : t('auth.actions.signIn')}
       </Button>
     </form>
@@ -229,21 +226,21 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         void submit(event);
       }}
     >
-      <Field
+      <FormField
         error={form.formState.errors.name?.message}
         htmlFor="name"
         label={t('auth.fields.firstName')}
       >
         <Input autoComplete="given-name" autoFocus id="name" {...form.register('name')} />
-      </Field>
-      <Field
+      </FormField>
+      <FormField
         error={form.formState.errors.lastName?.message}
         htmlFor="lastName"
         label={t('auth.fields.lastName')}
       >
         <Input autoComplete="family-name" id="lastName" {...form.register('lastName')} />
-      </Field>
-      <Field
+      </FormField>
+      <FormField
         error={form.formState.errors.email?.message}
         htmlFor="email"
         label={t('auth.fields.email')}
@@ -255,7 +252,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
           type="email"
           {...form.register('email')}
         />
-      </Field>
+      </FormField>
       <PasswordField
         autoComplete="new-password"
         error={form.formState.errors.password?.message}
@@ -270,12 +267,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
           {form.formState.errors.root.message}
         </p>
       ) : null}
-      <Button
-        className="h-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
-        disabled={form.formState.isSubmitting}
-        fullWidth
-        type="submit"
-      >
+      <Button className="w-full rounded-full" disabled={form.formState.isSubmitting} type="submit">
         {form.formState.isSubmitting
           ? t('auth.actions.creatingAccount')
           : t('auth.actions.createAccount')}
@@ -337,7 +329,7 @@ function PasswordField({
   const describedBy = error ? `${htmlFor}-error` : help ? `${htmlFor}-help` : undefined;
 
   return (
-    <Field error={error} help={help} htmlFor={htmlFor} label={label}>
+    <FormField error={error} help={help} htmlFor={htmlFor} label={label}>
       <div className="relative">
         <Input
           {...registration}
@@ -348,24 +340,26 @@ function PasswordField({
           id={htmlFor}
           type={isVisible ? 'text' : 'password'}
         />
-        <button
+        <Toggle
           aria-controls={htmlFor}
           aria-label={t(isVisible ? 'auth.actions.hidePassword' : 'auth.actions.showPassword')}
-          aria-pressed={isVisible}
-          className="absolute inset-y-0 right-0 inline-flex size-11 items-center justify-center rounded-[var(--radius-sm)] text-foreground-secondary transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background"
-          onClick={() => {
+          className="absolute inset-y-0 right-0 min-h-11 min-w-11 rounded-md p-0 text-foreground-secondary hover:bg-accent hover:text-foreground"
+          onPressedChange={() => {
             setIsVisible((current) => !current);
           }}
+          pressed={isVisible}
+          size="default"
           type="button"
+          variant="default"
         >
           {isVisible ? (
             <EyeOff aria-hidden="true" className="size-4" />
           ) : (
             <Eye aria-hidden="true" className="size-4" />
           )}
-        </button>
+        </Toggle>
       </div>
-    </Field>
+    </FormField>
   );
 }
 

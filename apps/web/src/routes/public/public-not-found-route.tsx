@@ -29,7 +29,7 @@ export function PublicNotFoundRoute() {
         <p className="mt-6 max-w-xl text-base leading-relaxed text-foreground-secondary sm:text-lg">
           {t('public.notFound.description')}
         </p>
-        <Button asChild className="mt-8 rounded-full" size="lg" variant="primary">
+        <Button asChild className="mt-8 rounded-full" size="lg" variant="default">
           <Link to="/parkings">{t('public.notFound.action')}</Link>
         </Button>
       </div>

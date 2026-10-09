@@ -60,7 +60,7 @@ function RouteRecovery({ notFound, owner }: { notFound: boolean; owner: boolean 
           {t(notFound ? 'route.error.notFoundDescription' : 'route.error.description')}
         </p>
         <div className="mt-7 flex flex-wrap gap-2">
-          <Button asChild className="rounded-full" variant="primary">
+          <Button asChild className="rounded-full" variant="default">
             <Link to={owner ? '/app' : '/'}>
               {t(owner ? 'route.error.ownerAction' : 'route.error.publicAction')}
             </Link>

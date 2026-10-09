@@ -1,6 +1,6 @@
 import type { Page, TestInfo } from '@playwright/test';
 
-import { expect, test } from './fixtures';
+import { chooseSelectOption, expect, test } from './fixtures';
 
 import type { components } from '@parkcore/api-client';
 
@@ -391,14 +391,14 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
     localStorage.setItem('parkcore-theme', 'light');
   });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Custom', exact: true }).click();
+  await page.getByRole('radio', { name: 'Custom', exact: true }).click();
   await page.getByLabel('Duration in minutes').fill('90');
   await expect(page.getByText('90 minutes', { exact: true })).toBeVisible();
   await expect(page.getByText('$31.00', { exact: true })).toBeVisible();
 
   await page.goto('/parkings');
   await page.getByLabel('Where are you parking?').fill('central');
-  await page.getByLabel('Currency').selectOption('USD');
+  await chooseSelectOption(page, page.getByRole('combobox', { name: 'Currency' }), 'USD');
   await page.getByLabel('Min. rate (USD)').fill('10');
   await page.getByLabel('Max. rate (USD)').fill('20');
   await page.getByLabel('Available now').check();
@@ -456,15 +456,15 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
   await expect(page.getByRole('textbox', { name: 'Password' })).toHaveAttribute('type', 'text');
   await page.getByRole('button', { name: 'Hide password' }).click();
   await expect(page.getByRole('textbox', { name: 'Password' })).toHaveAttribute('type', 'password');
-  await page.getByRole('button', { name: 'Spanish' }).click();
+  await page.getByRole('radio', { name: 'Spanish' }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-AR');
   await expect(page.getByRole('heading', { name: 'Crea tu cuenta.' })).toBeVisible();
-  await page.getByRole('button', { name: 'Inglés' }).click();
+  await page.getByRole('radio', { name: 'Inglés' }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
 
   await page.goto('/login?returnTo=%2Fapp');
   await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
-  await page.getByRole('combobox', { name: 'Theme' }).selectOption('system');
+  await chooseSelectOption(page, page.getByRole('combobox', { name: 'Theme' }), 'System');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(page.locator('html')).toHaveCSS('scroll-behavior', 'auto');
   await expectNoHorizontalOverflow(page, 'reduced-motion login');

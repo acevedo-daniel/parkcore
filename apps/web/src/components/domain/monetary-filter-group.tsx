@@ -2,7 +2,9 @@ import { useRef, useState } from 'react';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../ui/button.js';
-import { Field, Input, Select } from '../ui/field.js';
+import { FormField } from './form-field.js';
+import { Input } from '../ui/input.js';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select.js';
 
 export type MonetaryCurrency = 'ARS' | 'USD';
 
@@ -32,17 +34,17 @@ export function MonetaryFilterGroup({
   onClear,
 }: MonetaryFilterGroupProps) {
   const { t } = useAppearance();
-  const currencyRef = useRef<HTMLSelectElement>(null);
   const minRef = useRef<HTMLInputElement>(null);
   const maxRef = useRef<HTMLInputElement>(null);
   const [displayCurrency, setDisplayCurrency] = useState<MonetaryCurrency>(currency ?? 'USD');
+  const [filterCurrency, setFilterCurrency] = useState<MonetaryCurrency | 'all'>(currency ?? 'all');
   const [hasRate, setHasRate] = useState(Boolean(defaultMin || defaultMax));
 
   const clear = () => {
-    if (currencyRef.current) currencyRef.current.value = '';
     if (minRef.current) minRef.current.value = '';
     if (maxRef.current) maxRef.current.value = '';
     setDisplayCurrency('USD');
+    setFilterCurrency('all');
     setHasRate(false);
     onClear?.();
   };
@@ -51,28 +53,36 @@ export function MonetaryFilterGroup({
     <fieldset className={className}>
       <legend className="type-label text-muted-foreground">{t('filters.rate')}</legend>
       <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(8rem,0.8fr)_minmax(0,1fr)_minmax(0,1fr)]">
-        <Field htmlFor={`${idPrefix}-${currencyName}-filter`} label={t('filters.currency')}>
+        <FormField htmlFor={`${idPrefix}-${currencyName}-filter`} label={t('filters.currency')}>
           <Select
-            aria-required={hasRate || undefined}
-            className="h-12"
-            defaultValue={currency ?? ''}
-            id={`${idPrefix}-${currencyName}-filter`}
             name={currencyName}
-            onChange={(event) => {
-              const nextCurrency = event.target.value;
-              if (nextCurrency === 'ARS' || nextCurrency === 'USD')
+            onValueChange={(nextCurrency) => {
+              if (nextCurrency === 'ARS' || nextCurrency === 'USD') {
                 setDisplayCurrency(nextCurrency);
-              else setDisplayCurrency('USD');
+                setFilterCurrency(nextCurrency);
+              } else {
+                setDisplayCurrency('USD');
+                setFilterCurrency('all');
+              }
             }}
-            ref={currencyRef}
+            value={filterCurrency}
             required={hasRate}
           >
-            <option value="">{t('filters.allCurrencies')}</option>
-            <option value="ARS">ARS</option>
-            <option value="USD">USD</option>
+            <SelectTrigger
+              aria-required={hasRate || undefined}
+              id={`${idPrefix}-${currencyName}-filter`}
+              className="min-h-12"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('filters.allCurrencies')}</SelectItem>
+              <SelectItem value="ARS">ARS</SelectItem>
+              <SelectItem value="USD">USD</SelectItem>
+            </SelectContent>
           </Select>
-        </Field>
-        <Field
+        </FormField>
+        <FormField
           htmlFor={`${idPrefix}-${minName}-filter`}
           label={t('filters.minRate', { currency: displayCurrency })}
         >
@@ -90,8 +100,8 @@ export function MonetaryFilterGroup({
             step="0.01"
             type="number"
           />
-        </Field>
-        <Field
+        </FormField>
+        <FormField
           htmlFor={`${idPrefix}-${maxName}-filter`}
           label={t('filters.maxRate', { currency: displayCurrency })}
         >
@@ -109,7 +119,7 @@ export function MonetaryFilterGroup({
             step="0.01"
             type="number"
           />
-        </Field>
+        </FormField>
       </div>
       <Button className="mt-3" onClick={clear} size="sm" type="button" variant="ghost">
         {t('filters.clearRate')}

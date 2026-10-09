@@ -220,14 +220,14 @@ describe('owner overview briefing', () => {
     configureAnalytics();
     renderOverview();
 
-    const periodButton = await screen.findByRole('button', { name: 'View 30 days of activity' });
+    const periodButton = await screen.findByRole('radio', { name: 'View 30 days of activity' });
     await user.click(periodButton);
 
     await waitFor(() => {
       expect(api.getAnalyticsRevenue).toHaveBeenCalledWith(30);
       expect(api.getAnalyticsVolume).toHaveBeenCalledWith(30);
     });
-    expect(periodButton.getAttribute('aria-pressed')).toBe('true');
+    expect(periodButton.getAttribute('aria-checked')).toBe('true');
     expect(screen.getByRole('list', { name: 'Daily activity data' })).toBeTruthy();
   });
 

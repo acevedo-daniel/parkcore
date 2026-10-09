@@ -3,19 +3,19 @@ import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it } from 'vitest';
 
+import { FormField } from '../domain/form-field.js';
 import { Switch } from './switch.js';
 
 function SwitchHarness() {
   const [checked, setChecked] = useState(false);
   return (
-    <Switch
-      checked={checked}
-      description="Opening and closing times are not required."
+    <FormField
+      help="Opening and closing times are not required."
+      htmlFor="open"
       label="Open 24 hours"
-      onChange={(event) => {
-        setChecked(event.currentTarget.checked);
-      }}
-    />
+    >
+      <Switch checked={checked} id="open" onCheckedChange={setChecked} />
+    </FormField>
   );
 }
 
@@ -24,23 +24,25 @@ describe('Switch', () => {
     const user = userEvent.setup();
     render(<SwitchHarness />);
 
-    const control = screen.getByRole<HTMLInputElement>('switch', { name: 'Open 24 hours' });
-    expect(control.getAttribute('aria-describedby')).toBe(`${control.id}-description`);
-    expect(control.closest('label')?.className).toContain('min-h-[var(--touch-target-min)]');
-    expect(control.checked).toBe(false);
+    const control = screen.getByRole('switch', { name: 'Open 24 hours' });
+    expect(control.getAttribute('aria-describedby')).toBe('open-help');
+    expect(control.getAttribute('data-state')).toBe('unchecked');
 
     await user.tab();
     expect(document.activeElement).toBe(control);
     await user.keyboard(' ');
-    expect(control.checked).toBe(true);
+    expect(control.getAttribute('data-state')).toBe('checked');
   });
 
-  it('does not expose a disabled switch as an interactive control', () => {
-    render(<Switch disabled label="Accept new check-ins" />);
+  it('keeps a disabled switch disabled', () => {
+    render(
+      <FormField htmlFor="accept" label="Accept new check-ins">
+        <Switch disabled id="accept" />
+      </FormField>,
+    );
 
-    const control = screen.getByRole<HTMLInputElement>('switch', {
-      name: 'Accept new check-ins',
-    });
-    expect(control.disabled).toBe(true);
+    expect(
+      screen.getByRole('switch', { name: 'Accept new check-ins' }).hasAttribute('data-disabled'),
+    ).toBe(true);
   });
 });

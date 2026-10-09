@@ -108,13 +108,11 @@ describe('ParkingForm', () => {
       parking: parkingFixture({ isActive: false, isListed: true }),
     });
 
-    expect(screen.getByRole('switch', { name: 'Accept new check-ins' })).toHaveProperty(
-      'checked',
-      false,
-    );
-    expect(screen.getByRole('switch', { name: 'Visible in directory' })).toHaveProperty(
-      'checked',
-      true,
-    );
+    expect(
+      screen.getByRole('switch', { name: 'Accept new check-ins' }).getAttribute('aria-checked'),
+    ).toBe('false');
+    expect(
+      screen.getByRole('switch', { name: 'Visible in directory' }).getAttribute('aria-checked'),
+    ).toBe('true');
   });
 });

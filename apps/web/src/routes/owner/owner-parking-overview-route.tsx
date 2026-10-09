@@ -13,6 +13,12 @@ import { PageHeader } from '../../components/domain/page-header.js';
 import { Button } from '../../components/ui/button.js';
 import { Sheet } from '../../components/ui/dialog.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from '../../components/ui/input-group.js';
 import { useToast } from '../../components/ui/toast-context.js';
 import { localizeApiError, type ApiErrorCodeMessages } from '../../lib/api/api-error.js';
 import {
@@ -311,22 +317,25 @@ export function OwnerParkingOverviewRoute() {
           </div>
         </div>
 
-        <label className="relative mt-6 block max-w-md" htmlFor="active-session-plate">
-          <span className="sr-only">{t('parkingOperation.searchPlate')}</span>
-          <Search
-            aria-hidden="true"
-            className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-          />
-          <input
-            className="h-12 w-full rounded-full border border-border bg-muted pl-11 pr-4 text-sm font-semibold text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring"
-            id="active-session-plate"
-            onChange={(event) => {
-              setPlateSearch(event.target.value);
-            }}
-            placeholder={t('parkingOperation.searchPlatePlaceholder')}
-            value={plateSearch}
-          />
-        </label>
+        <div className="mt-6 max-w-md">
+          <InputGroup className="rounded-full bg-muted">
+            <InputGroupAddon>
+              <InputGroupText>
+                <Search aria-hidden="true" />
+              </InputGroupText>
+            </InputGroupAddon>
+            <InputGroupInput
+              aria-label={t('parkingOperation.searchPlate')}
+              className="h-12 rounded-full border-0 bg-transparent font-mono font-semibold"
+              id="active-session-plate"
+              onChange={(event) => {
+                setPlateSearch(event.target.value);
+              }}
+              placeholder={t('parkingOperation.searchPlatePlaceholder')}
+              value={plateSearch}
+            />
+          </InputGroup>
+        </div>
 
         {activeSessionsQuery.isFetching && !activeSessionsQuery.isLoading ? (
           <p className="mt-3 type-label text-muted-foreground" role="status">

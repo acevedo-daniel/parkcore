@@ -8,11 +8,12 @@ import { z } from 'zod';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { PageHeader } from '../../components/domain/page-header.js';
-import { AppearanceControls } from '../../components/ui/appearance-controls.js';
+import { AppearanceControls } from '../../components/domain/appearance-controls.js';
+import { FormField } from '../../components/domain/form-field.js';
 import { Button } from '../../components/ui/button.js';
-import { Combobox, type ComboboxOption } from '../../components/ui/combobox.js';
+import { Combobox, type ComboboxOption } from '../../components/domain/combobox.js';
 import { Skeleton } from '../../components/ui/feedback.js';
-import { Field, Input } from '../../components/ui/field.js';
+import { Input } from '../../components/ui/input.js';
 import { useToast } from '../../components/ui/toast-context.js';
 import { DemoResetControl } from '../../features/auth/demo-reset-control.js';
 import { useAuth } from '../../features/auth/use-auth.js';
@@ -156,7 +157,7 @@ function OwnerProfileContent({ user }: { user: User }) {
                 {t('profile.accountDescription')}
               </p>
               <div className="mt-6 grid gap-5 sm:grid-cols-2">
-                <Field
+                <FormField
                   error={errors.name?.message}
                   htmlFor="profile-name"
                   label={t('profile.name')}
@@ -167,8 +168,8 @@ function OwnerProfileContent({ user }: { user: User }) {
                     required
                     {...form.register('name', { onChange: clearSaveFeedback })}
                   />
-                </Field>
-                <Field
+                </FormField>
+                <FormField
                   error={errors.lastName?.message}
                   htmlFor="profile-last-name"
                   label={t('profile.lastName')}
@@ -179,8 +180,8 @@ function OwnerProfileContent({ user }: { user: User }) {
                     required
                     {...form.register('lastName', { onChange: clearSaveFeedback })}
                   />
-                </Field>
-                <Field
+                </FormField>
+                <FormField
                   help={t('profile.emailReadOnly')}
                   htmlFor="profile-email"
                   label={t('profile.email')}
@@ -193,7 +194,7 @@ function OwnerProfileContent({ user }: { user: User }) {
                     type="email"
                     value={user.email ?? ''}
                   />
-                </Field>
+                </FormField>
               </div>
             </>
           ) : (

@@ -55,7 +55,7 @@ describe('application shells', () => {
         .map((link) => link.textContent),
     ).toEqual(['Cocheras', 'Cómo funciona', 'Ingresar']);
     expect(within(dialog).getByRole('button', { name: 'Probar demo' })).toBeTruthy();
-    expect(within(dialog).getByRole('button', { name: 'Español' })).toBeTruthy();
+    expect(within(dialog).getByRole('radio', { name: 'Español' })).toBeTruthy();
     expect(within(dialog).getByRole('combobox', { name: 'Apariencia' })).toBeTruthy();
     expect(
       dialog

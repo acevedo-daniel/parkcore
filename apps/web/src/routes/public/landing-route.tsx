@@ -1,15 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, ArrowUpRight, ChevronDown, ReceiptText } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ArrowRight, ArrowUpRight, ReceiptText } from 'lucide-react';
+import { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { ParkingDiscoveryCard } from '../../components/domain/parking-discovery-card.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '../../components/ui/accordion.js';
 import { DemoLoginButton } from '../../features/auth/demo-login-button.js';
 import { ParkingCalculatorWidget } from '../../features/parking/parking-calculator-widget.js';
 import { getPublicParkings } from '../../lib/api/public-api.js';
-import { cn } from '../../lib/cn.js';
 import { useDocumentMeta } from '../../lib/document-meta.js';
 import type { MessageKey } from '../../lib/localization.js';
 
@@ -79,7 +84,6 @@ export function LandingRoute() {
   const { t } = useAppearance();
   const location = useLocation();
   const navigate = useNavigate();
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
   useDocumentMeta({
     description: t('public.landing.metaDescription'),
@@ -296,43 +300,29 @@ export function LandingRoute() {
               {t('public.landing.faqTitle')}
             </h2>
           </div>
-          <div className="mt-12 space-y-3">
-            {FAQS.map((faq, index) => {
-              const isOpen = openFaqIndex === index;
-              return (
-                <div
-                  className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card"
-                  key={faq.id}
-                >
-                  <button
-                    aria-controls={`faq-${faq.id}-answer`}
-                    aria-expanded={isOpen}
-                    className="flex w-full items-center justify-between gap-5 p-5 text-left font-display text-base font-bold transition-colors hover:bg-accent sm:p-6"
-                    onClick={() => {
-                      setOpenFaqIndex(isOpen ? null : index);
-                    }}
-                    type="button"
-                  >
-                    <span>{t(faq.question)}</span>
-                    <ChevronDown
-                      aria-hidden="true"
-                      className={cn('size-5 shrink-0 transition-transform', isOpen && 'rotate-180')}
-                    />
-                  </button>
-                  <p
-                    className={cn(
-                      'border-t border-border-subtle px-5 pb-6 pt-4 text-sm leading-relaxed text-foreground-secondary',
-                      isOpen && 'parkcore-reveal',
-                    )}
-                    hidden={!isOpen}
-                    id={`faq-${faq.id}-answer`}
-                  >
+          <Accordion
+            className="mt-12 space-y-3"
+            collapsible
+            defaultValue={FAQS[0].id}
+            type="single"
+          >
+            {FAQS.map((faq) => (
+              <AccordionItem
+                className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card"
+                key={faq.id}
+                value={faq.id}
+              >
+                <AccordionTrigger className="p-5 font-display text-base font-bold hover:bg-accent hover:no-underline sm:p-6">
+                  {t(faq.question)}
+                </AccordionTrigger>
+                <AccordionContent>
+                  <p className="border-t border-border-subtle px-5 pb-6 pt-4 text-sm leading-relaxed text-foreground-secondary sm:px-6">
                     {t(faq.answer)}
                   </p>
-                </div>
-              );
-            })}
-          </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
 

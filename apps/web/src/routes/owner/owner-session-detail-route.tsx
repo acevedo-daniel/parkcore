@@ -205,7 +205,7 @@ export function OwnerSessionDetailRoute() {
           {canOperate ? (
             <div className="flex min-w-0 flex-wrap gap-2">
               <Button
-                variant="primary"
+                variant="default"
                 onClick={() => {
                   setActionError(undefined);
                   setCheckoutOpen(true);
@@ -218,7 +218,7 @@ export function OwnerSessionDetailRoute() {
                   setActionError(undefined);
                   setCancelOpen(true);
                 }}
-                variant="danger"
+                variant="destructive"
               >
                 <Ban aria-hidden="true" className="size-4" /> {t('session.cancel')}
               </Button>
@@ -342,8 +342,8 @@ export function OwnerSessionDetailRoute() {
           <CheckoutSummary session={session} timezone={parking.timezone} />
           {actionError ? <ActionError message={actionError} /> : null}
           <Button
+            className="w-full"
             disabled={checkoutMutation.isPending}
-            fullWidth
             onClick={() => void completeCheckout()}
           >
             {checkoutMutation.isPending ? t('session.completing') : t('session.completeCheckout')}
@@ -365,8 +365,8 @@ export function OwnerSessionDetailRoute() {
           </p>
           {actionError ? <ActionError message={actionError} /> : null}
           <Button
+            className="w-full"
             disabled={cancelMutation.isPending}
-            fullWidth
             onClick={() => void cancelSession()}
           >
             {cancelMutation.isPending ? t('session.cancelling') : t('session.cancel')}

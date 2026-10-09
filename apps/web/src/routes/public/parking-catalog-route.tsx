@@ -7,9 +7,15 @@ import { useAppearance } from '../../app/appearance-provider.js';
 import { MonetaryFilterGroup } from '../../components/domain/monetary-filter-group.js';
 import { ParkingDiscoveryCard } from '../../components/domain/parking-discovery-card.js';
 import { Button } from '../../components/ui/button.js';
+import { Checkbox } from '../../components/ui/checkbox.js';
 import { Sheet } from '../../components/ui/dialog.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
-import { Input } from '../../components/ui/field.js';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from '../../components/ui/input-group.js';
 import { getPublicParkings, type PublicParkingQuery } from '../../lib/api/public-api.js';
 import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
 import { formatNumber } from '../../lib/format.js';
@@ -332,16 +338,21 @@ function CatalogFilters({
         >
           {t('public.catalog.searchLabel')}
         </label>
-        <div className="flex items-center gap-2 rounded-[var(--radius-md)] border border-border bg-muted px-3 focus-within:border-ring focus-within:bg-card">
-          <Search aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
-          <Input
-            className="public-discovery-search h-12 border-0 bg-transparent px-0 focus:bg-transparent focus-visible:outline-none focus-visible:ring-0"
+        <InputGroup className="border-border bg-muted focus-within:border-ring">
+          <InputGroupAddon>
+            <InputGroupText>
+              <Search aria-hidden="true" />
+            </InputGroupText>
+          </InputGroupAddon>
+          <InputGroupInput
             defaultValue={searchParams.get('search') ?? ''}
+            aria-label={t('public.catalog.searchLabel')}
             id={`${idPrefix}-search`}
             name="search"
+            className="h-12 border-0 bg-transparent px-0 focus:bg-transparent"
             placeholder={t('public.catalog.searchPlaceholder')}
           />
-        </div>
+        </InputGroup>
       </div>
       <MonetaryFilterGroup
         className="md:col-span-2 lg:col-span-5"
@@ -353,12 +364,10 @@ function CatalogFilters({
       />
       <div className="flex items-center md:col-span-1 lg:col-span-2">
         <label className="flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-muted px-3.5 py-3 text-sm font-semibold text-foreground">
-          <input
-            className="size-4 rounded border-border accent-primary focus-visible:ring-2 focus-visible:ring-ring"
+          <Checkbox
             defaultChecked={searchParams.get('availableNow') === 'true'}
             id={`${idPrefix}-available-now`}
             name="availableNow"
-            type="checkbox"
           />
           <span>{t('public.catalog.availableNow')}</span>
         </label>

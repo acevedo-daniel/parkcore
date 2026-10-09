@@ -1,6 +1,6 @@
 import type { Locator, Page } from '@playwright/test';
 
-import { expect, test } from './fixtures';
+import { chooseSelectOption, expect, test } from './fixtures';
 
 const viewports = [
   { name: '360px', width: 360, height: 800 },
@@ -184,7 +184,7 @@ test('keeps the deployed public and owner surfaces usable at production viewport
     await page.getByLabel('Latitude').fill('-34.61');
     await page.getByLabel('Longitude').fill('-58.38');
     await page.getByLabel('Capacity').fill('3');
-    await page.getByLabel('Currency').selectOption('USD');
+    await chooseSelectOption(page, page.getByRole('combobox', { name: 'Currency' }), 'USD');
     await page.getByLabel('Hourly rate (USD)').fill('12.34');
     await page.getByText('Visible in directory', { exact: true }).click();
     await page.getByRole('button', { name: 'Create parking' }).click();
@@ -196,7 +196,11 @@ test('keeps the deployed public and owner surfaces usable at production viewport
     await page.getByRole('button', { name: 'Check in', exact: true }).click();
     const initialCheckInSheet = page.getByRole('dialog', { name: 'Check in vehicle' });
     await initialCheckInSheet.getByLabel('Plate').fill(plate);
-    await initialCheckInSheet.getByLabel('Type').selectOption('CAR');
+    await chooseSelectOption(
+      page,
+      initialCheckInSheet.getByRole('combobox', { name: 'Type' }),
+      'Car',
+    );
     await initialCheckInSheet.getByRole('button', { name: 'Start session' }).click();
     const sessionLink = page.getByRole('link', { name: `Open session for ${plate}` });
     await expect(sessionLink).toBeVisible();

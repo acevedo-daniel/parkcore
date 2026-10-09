@@ -406,10 +406,6 @@
     outline-offset: 2px !important;
   }
 
-  .public-shell .public-discovery-search:focus-visible {
-    outline: none !important;
-  }
-
   ::selection {
     background: var(--primary);
     color: var(--primary-foreground);
@@ -526,6 +522,28 @@
   transition-timing-function: var(--ease-out);
 }
 
+@utility transition-control {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: var(--motion-micro);
+  transition-timing-function: var(--ease-out);
+}
+
+@utility scale-98 {
+  scale: 0.98;
+}
+
+@utility origin-select {
+  transform-origin: var(--radix-select-content-transform-origin);
+}
+
+@utility h-select-trigger {
+  height: var(--radix-select-trigger-height);
+}
+
+@utility min-w-select-trigger {
+  min-width: var(--radix-select-trigger-width);
+}
+
 @utility w-popover-trigger {
   width: var(--radix-popover-trigger-width);
 }
@@ -543,55 +561,6 @@
 }
 
 @layer components {
-  .parkcore-pressable {
-    transition-duration: var(--motion-micro);
-    transition-property: background-color, border-color, box-shadow, color, opacity, transform;
-    transition-timing-function: var(--ease-out);
-  }
-
-  @media (hover: hover) {
-    .parkcore-pressable:hover:not(:disabled):not([aria-disabled='true']) {
-      transform: translateY(-1px);
-    }
-  }
-
-  .parkcore-pressable:active:not(:disabled):not([aria-disabled='true']) {
-    transform: translateY(0) scale(0.98);
-  }
-
-  .icon-button {
-    min-width: var(--touch-target-min);
-    min-height: var(--touch-target-min);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    background: var(--popover);
-    color: var(--foreground);
-    cursor: pointer;
-    transition: all var(--motion-micro) var(--ease-out);
-  }
-
-  .icon-button:hover:not(:disabled) {
-    background: var(--accent);
-    transform: translateY(-1px);
-  }
-
-  .parkcore-raised-action {
-    box-shadow: var(--shadow-xs);
-  }
-
-  @media (hover: hover) {
-    .parkcore-raised-action:hover:not(:disabled):not([aria-disabled='true']) {
-      box-shadow: var(--shadow-md);
-    }
-  }
-
-  .parkcore-raised-action:active:not(:disabled):not([aria-disabled='true']) {
-    box-shadow: var(--shadow-xs);
-  }
-
   .parkcore-toast-viewport {
     position: fixed;
     right: max(1rem, env(safe-area-inset-right, 0px));
@@ -626,20 +595,6 @@
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     background: var(--accent);
-  }
-
-  .parkcore-field {
-    box-shadow: var(--shadow-xs);
-    transition-duration: var(--motion-micro);
-    transition-property: background-color, border-color, box-shadow, color;
-    transition-timing-function: var(--ease-out);
-  }
-
-  .public-shell .public-discovery-search,
-  .public-shell .public-discovery-search:focus,
-  .public-shell .public-discovery-search:focus-visible {
-    border: 0 !important;
-    box-shadow: none !important;
   }
 
   @keyframes parkcore-reveal {

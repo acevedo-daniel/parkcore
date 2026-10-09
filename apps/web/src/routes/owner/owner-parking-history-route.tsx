@@ -7,7 +7,15 @@ import { PageHeader } from '../../components/domain/page-header.js';
 import { SessionHistoryRow } from '../../components/domain/session.js';
 import { Button } from '../../components/ui/button.js';
 import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
-import { Field, Input, Select } from '../../components/ui/field.js';
+import { FormField } from '../../components/domain/form-field.js';
+import { Input } from '../../components/ui/input.js';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select.js';
 import { formatMoney, formatNumber } from '../../lib/format.js';
 import {
   getOwnedParkings,
@@ -407,7 +415,7 @@ function HistoryFilters({
         {t('parkingHistory.filters')}
       </h2>
       <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_12rem_12rem_auto]">
-        <Field htmlFor="session-plate" label={t('parkingHistory.plate')}>
+        <FormField htmlFor="session-plate" label={t('parkingHistory.plate')}>
           <Input
             id="session-plate"
             onChange={(event) => {
@@ -416,38 +424,46 @@ function HistoryFilters({
             placeholder={t('parkingHistory.platePlaceholder')}
             value={plateInput}
           />
-        </Field>
-        <Field htmlFor="session-status" label={t('parkingHistory.status')}>
+        </FormField>
+        <FormField htmlFor="session-status" label={t('parkingHistory.status')}>
           <Select
-            id="session-status"
             value={historyState.status ?? 'ALL'}
-            onChange={(event) => {
-              const value = event.target.value as SessionFilter;
+            onValueChange={(nextValue) => {
+              const value = nextValue as SessionFilter;
               updateSearch({ page: 1, status: value === 'ALL' ? undefined : value });
             }}
           >
-            <option value="ALL">{t('parkingHistory.allStatuses')}</option>
-            <option value="ACTIVE">{t('parkingHistory.active')}</option>
-            <option value="COMPLETED">{t('parkingHistory.completed')}</option>
-            <option value="CANCELLED">{t('parkingHistory.cancelled')}</option>
+            <SelectTrigger id="session-status">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">{t('parkingHistory.allStatuses')}</SelectItem>
+              <SelectItem value="ACTIVE">{t('parkingHistory.active')}</SelectItem>
+              <SelectItem value="COMPLETED">{t('parkingHistory.completed')}</SelectItem>
+              <SelectItem value="CANCELLED">{t('parkingHistory.cancelled')}</SelectItem>
+            </SelectContent>
           </Select>
-        </Field>
-        <Field htmlFor="session-period" label={t('parkingHistory.period')}>
+        </FormField>
+        <FormField htmlFor="session-period" label={t('parkingHistory.period')}>
           <Select
-            id="session-period"
             value={historyState.period}
-            onChange={(event) => {
+            onValueChange={(value) => {
               updateSearch({
                 page: 1,
-                period: event.target.value as ParkingHistoryUrlState['period'],
+                period: value as ParkingHistoryUrlState['period'],
               });
             }}
           >
-            <option value="today">{t('parkingHistory.today')}</option>
-            <option value="7d">{t('parkingHistory.sevenDays')}</option>
-            <option value="30d">{t('parkingHistory.thirtyDays')}</option>
+            <SelectTrigger id="session-period">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="today">{t('parkingHistory.today')}</SelectItem>
+              <SelectItem value="7d">{t('parkingHistory.sevenDays')}</SelectItem>
+              <SelectItem value="30d">{t('parkingHistory.thirtyDays')}</SelectItem>
+            </SelectContent>
           </Select>
-        </Field>
+        </FormField>
         <Button
           aria-busy={isFetching}
           className="self-end rounded-full"

@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures';
+import { chooseSelectOption, expect, test } from './fixtures';
 
 import type { components } from '@parkcore/api-client';
 
@@ -95,17 +95,17 @@ test('preserves an unsaved form while language and appearance change', async ({ 
 
   const email = page.getByLabel('Correo electrónico');
   await email.fill('owner@parkcore.test');
-  await page.getByRole('combobox', { name: 'Apariencia' }).selectOption('dark');
+  await chooseSelectOption(page, page.getByRole('combobox', { name: 'Apariencia' }), 'Oscuro');
 
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#111310');
   await expect(email).toHaveValue('owner@parkcore.test');
-  await page.getByRole('button', { name: 'Inglés' }).click();
+  await page.getByRole('radio', { name: 'Inglés' }).click();
 
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(page.getByLabel('Email')).toHaveValue('owner@parkcore.test');
-  await expect(page.getByRole('combobox', { name: 'Theme' })).toHaveValue('dark');
+  await expect(page.getByRole('combobox', { name: 'Theme' })).toHaveText('Dark');
   await expect(page).toHaveURL(/\/login$/);
   expect(await page.evaluate(() => localStorage.getItem('parkcore-lang'))).toBe('en-US');
 });
@@ -119,7 +119,7 @@ test('follows system appearance only while the system preference is selected', a
   await page.goto('/login');
 
   const theme = page.getByRole('combobox', { name: 'Theme' });
-  await expect(theme).toHaveValue('system');
+  await expect(theme).toHaveText('System');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#111310');
   await expect(page.locator('html')).toHaveCSS('scroll-behavior', 'auto');
@@ -128,12 +128,12 @@ test('follows system appearance only while the system preference is selected', a
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#f7f7f4');
 
-  await theme.selectOption('dark');
+  await chooseSelectOption(page, theme, 'Dark');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
-  await theme.selectOption('system');
+  await chooseSelectOption(page, theme, 'System');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 });
 
@@ -263,7 +263,7 @@ test('signs in, creates a parking, checks in, and completes a parking session', 
   await page.getByLabel('Latitude').fill('-34.61');
   await page.getByLabel('Longitude').fill('-58.38');
   await page.getByLabel('Capacity').fill('20');
-  await page.getByLabel('Currency').selectOption('USD');
+  await chooseSelectOption(page, page.getByRole('combobox', { name: 'Currency' }), 'USD');
   await page.getByLabel('Hourly rate (USD)').fill('18.5');
   await page.getByRole('button', { name: 'Create parking' }).click();
   await expect(page).toHaveURL(/\/app\/parkings\/parking-1$/);
