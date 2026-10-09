@@ -44,21 +44,21 @@ export function PublicParkingImage({
     <div
       aria-label={t('public.detail.imageUnavailable')}
       className={cn(
-        'flex h-full w-full items-end bg-surface-inverse text-foreground-on-inverse',
+        'flex h-full w-full items-end bg-inverse text-inverse-foreground',
         variant === 'card' ? 'p-5' : 'p-8',
       )}
       role="img"
     >
       <div
         className={cn(
-          'border-l-4 border-accent pl-4',
-          variant === 'card' ? 'max-w-52' : 'max-w-64 bg-surface p-5 text-foreground shadow-xs',
+          'border-l-4 border-brand pl-4',
+          variant === 'card' ? 'max-w-52' : 'max-w-64 bg-card p-5 text-foreground shadow-xs',
         )}
       >
         <p
           className={cn(
             'type-label',
-            variant === 'card' ? 'text-foreground-on-inverse' : 'text-foreground-muted',
+            variant === 'card' ? 'text-inverse-foreground' : 'text-muted-foreground',
           )}
         >
           {t('parking.fallbackEyebrow')}

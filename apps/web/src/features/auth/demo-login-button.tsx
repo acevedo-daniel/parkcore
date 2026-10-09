@@ -47,7 +47,7 @@ export function DemoLoginButton({
         {isSubmitting ? t('demo.opening') : (children ?? t('demo.try'))}
       </Button>
       {error ? (
-        <p className="text-sm font-medium text-danger-text" role="alert">
+        <p className="text-sm font-medium text-destructive-soft-foreground" role="alert">
           {error}
         </p>
       ) : null}

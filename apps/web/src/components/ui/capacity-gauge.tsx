@@ -66,7 +66,7 @@ export function CapacityGauge({
     <div
       data-slot="capacity-gauge"
       className={cn(
-        'capacity-gauge rounded-[var(--radius-md)] border border-border bg-surface p-4 shadow-xs',
+        'capacity-gauge rounded-[var(--radius-md)] border border-border bg-card p-4 shadow-xs',
         `capacity-gauge-${threshold}`,
         `occupancy-${threshold}`,
         className,
@@ -102,7 +102,7 @@ export function CapacityGauge({
           percent: formattedPercentage,
         })}
         className={cn(
-          'capacity-gauge-track relative w-full overflow-hidden rounded-full bg-surface-subtle',
+          'capacity-gauge-track relative w-full overflow-hidden rounded-full bg-muted',
           size === 'sm' && 'h-2',
           size === 'default' && 'h-2.5',
           size === 'lg' && 'h-3.5',
@@ -113,7 +113,7 @@ export function CapacityGauge({
           className={cn(
             'capacity-gauge-fill h-full rounded-full transition-all duration-300 ease-out',
             isLocked || threshold === 'critical'
-              ? 'bg-danger'
+              ? 'bg-destructive'
               : threshold === 'warning'
                 ? 'bg-warning'
                 : 'bg-success',
@@ -128,7 +128,7 @@ export function CapacityGauge({
             className={cn(
               'size-1.5 rounded-full shrink-0',
               isLocked || threshold === 'critical'
-                ? 'bg-danger'
+                ? 'bg-destructive'
                 : threshold === 'warning'
                   ? 'bg-warning'
                   : 'bg-success',
@@ -137,7 +137,7 @@ export function CapacityGauge({
           />
           {statusText}
         </p>
-        <span className="font-mono text-foreground-muted tabular-nums">
+        <span className="font-mono text-muted-foreground tabular-nums">
           {tPlural(
             available,
             { one: 'parking.spot', other: 'parking.spots' },

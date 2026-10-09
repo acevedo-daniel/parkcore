@@ -3,7 +3,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn.js';
 
 const controlClassName =
-  'control parkcore-field min-w-0 w-full rounded-[var(--radius-md)] border border-border bg-surface-subtle text-sm font-medium text-foreground outline-none transition-colors placeholder:text-foreground-muted focus:border-primary focus:bg-surface focus-visible:ring-2 focus-visible:ring-focus-ring disabled:cursor-not-allowed disabled:bg-disabled-surface disabled:text-disabled-foreground disabled:opacity-100';
+  'control parkcore-field min-w-0 w-full rounded-[var(--radius-md)] border border-border bg-muted text-sm font-medium text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:bg-card focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100';
 
 export interface FieldProps {
   children: React.ReactNode;
@@ -36,7 +36,7 @@ export function Field({ children, error, help, htmlFor, label }: FieldProps) {
       {control}
       {error ? (
         <p
-          className="field-error text-sm font-medium text-danger-text"
+          className="field-error text-sm font-medium text-destructive-soft-foreground"
           id={describedBy}
           role="alert"
         >
@@ -44,7 +44,7 @@ export function Field({ children, error, help, htmlFor, label }: FieldProps) {
         </p>
       ) : null}
       {!error && help ? (
-        <p className="field-help text-sm leading-relaxed text-foreground-muted" id={describedBy}>
+        <p className="field-help text-sm leading-relaxed text-muted-foreground" id={describedBy}>
           {help}
         </p>
       ) : null}
@@ -120,7 +120,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     return (
       <label
         className={cn(
-          'checkbox flex min-h-[var(--touch-target-min)] cursor-pointer items-center gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-surface-subtle px-3.5 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-surface-hover',
+          'checkbox flex min-h-[var(--touch-target-min)] cursor-pointer items-center gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-muted px-3.5 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-accent',
           disabled && 'cursor-not-allowed opacity-60',
         )}
         data-slot="checkbox"
@@ -129,7 +129,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         <input
           {...props}
           className={cn(
-            'checkbox-control size-4 rounded border-border accent-primary focus-visible:ring-2 focus-visible:ring-focus-ring disabled:cursor-not-allowed',
+            'checkbox-control size-4 rounded border-border accent-primary focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed',
             className,
           )}
           disabled={disabled}

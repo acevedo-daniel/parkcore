@@ -35,19 +35,19 @@ export function AppearanceControls({
         role="group"
       >
         {isProfile ? (
-          <span className="type-label text-foreground-muted" id={languageLabelId}>
+          <span className="type-label text-muted-foreground" id={languageLabelId}>
             {t('appearance.languageLabel')}
           </span>
         ) : null}
-        <div className="inline-flex max-w-full shrink-0 items-center rounded-full border border-border bg-surface p-1 shadow-sm">
+        <div className="inline-flex max-w-full shrink-0 items-center rounded-full border border-border bg-card p-1 shadow-sm">
           <button
             aria-label={t('appearance.languageSpanish')}
             aria-pressed={locale === 'es-AR'}
             className={cn(
-              'inline-flex min-h-[var(--touch-target-min)] min-w-[var(--touch-target-min)] items-center justify-center rounded-full px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset',
+              'inline-flex min-h-[var(--touch-target-min)] min-w-[var(--touch-target-min)] items-center justify-center rounded-full px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               locale === 'es-AR'
                 ? 'bg-primary text-primary-foreground'
-                : 'text-foreground hover:bg-accent hover:text-accent-foreground',
+                : 'text-foreground hover:bg-brand hover:text-brand-foreground',
             )}
             onClick={() => {
               setLanguage('es-AR');
@@ -60,10 +60,10 @@ export function AppearanceControls({
             aria-label={t('appearance.languageEnglish')}
             aria-pressed={locale === 'en-US'}
             className={cn(
-              'inline-flex min-h-[var(--touch-target-min)] min-w-[var(--touch-target-min)] items-center justify-center rounded-full px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset',
+              'inline-flex min-h-[var(--touch-target-min)] min-w-[var(--touch-target-min)] items-center justify-center rounded-full px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
               locale === 'en-US'
                 ? 'bg-primary text-primary-foreground'
-                : 'text-foreground hover:bg-accent hover:text-accent-foreground',
+                : 'text-foreground hover:bg-brand hover:text-brand-foreground',
             )}
             onClick={() => {
               setLanguage('en-US');
@@ -84,7 +84,7 @@ export function AppearanceControls({
         htmlFor={themeControlId}
       >
         <span
-          className={cn(isProfile ? 'type-label text-foreground-muted' : 'visually-hidden')}
+          className={cn(isProfile ? 'type-label text-muted-foreground' : 'sr-only')}
           id={themeLabelId}
         >
           {isProfile ? t('appearance.appearanceLabel') : t('appearance.theme')}
@@ -93,7 +93,7 @@ export function AppearanceControls({
           aria-label={isProfile ? undefined : t('appearance.theme')}
           aria-labelledby={isProfile ? themeLabelId : undefined}
           className={cn(
-            'min-h-[var(--touch-target-min)] max-w-full cursor-pointer rounded-[var(--radius-pill)] border border-border bg-surface px-3 text-xs font-semibold text-foreground outline-none transition-colors hover:bg-surface-hover focus-visible:ring-2 focus-visible:ring-focus-ring',
+            'min-h-[var(--touch-target-min)] max-w-full cursor-pointer rounded-[var(--radius-pill)] border border-border bg-card px-3 text-xs font-semibold text-foreground outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring',
             isProfile && 'w-full',
           )}
           onChange={(event) => {

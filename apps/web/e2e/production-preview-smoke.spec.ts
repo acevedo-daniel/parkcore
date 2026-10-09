@@ -176,7 +176,7 @@ test('applies stored and system themes before the app mounts', async ({ page }) 
       const root = document.documentElement;
       return {
         bootstrap: browser.__parkcoreThemeBootstrapObservations?.[0] ?? null,
-        canvas: getComputedStyle(root).getPropertyValue('--canvas').trim(),
+        background: getComputedStyle(root).getPropertyValue('--background').trim(),
         colorScheme: root.style.colorScheme,
         metaThemeColor: document.querySelector('meta[name="theme-color"]')?.getAttribute('content'),
         theme: root.dataset.theme,
@@ -184,13 +184,15 @@ test('applies stored and system themes before the app mounts', async ({ page }) 
     });
 
     const expectedColor = appearance.theme === 'dark' ? '#111310' : '#f7f7f4';
+    const expectedBackground =
+      appearance.theme === 'dark' ? 'oklch(18.3% .007 135)' : 'oklch(97.5% .004 106.5)';
     expect(observed.bootstrap).toEqual({
       colorScheme: appearance.theme,
       theme: appearance.theme,
       themeColor: expectedColor,
     });
     expect(observed).toMatchObject({
-      canvas: expectedColor,
+      background: expectedBackground,
       colorScheme: appearance.theme,
       metaThemeColor: expectedColor,
       theme: appearance.theme,

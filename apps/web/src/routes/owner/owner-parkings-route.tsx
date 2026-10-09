@@ -26,7 +26,7 @@ export function OwnerParkingsRoute() {
   if (parkingsQuery.isError && !parkingsQuery.data) {
     return (
       <section className="owner-page" aria-labelledby="owner-parkings-error-title">
-        <h1 className="visually-hidden" id="owner-parkings-error-title">
+        <h1 className="sr-only" id="owner-parkings-error-title">
           {t('ownerParkings.title')}
         </h1>
         <ErrorState onRetry={() => void parkingsQuery.refetch()}>
@@ -71,7 +71,7 @@ export function OwnerParkingsRoute() {
 
       {facilitiesSnapshotIsStale ? (
         <div
-          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="break-words text-sm font-semibold">{t('ownerParkings.stale')}</p>
@@ -127,16 +127,16 @@ export function OwnerParkingsRoute() {
           </div>
 
           {parkingsQuery.isFetching ? (
-            <p className="type-label text-foreground-muted" role="status">
+            <p className="type-label text-muted-foreground" role="status">
               {t('ownerParkings.refreshing')}
             </p>
           ) : null}
 
           <section aria-labelledby="owner-facility-list-title">
-            <h2 className="visually-hidden" id="owner-facility-list-title">
+            <h2 className="sr-only" id="owner-facility-list-title">
               {t('ownerParkings.facilityList')}
             </h2>
-            <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-surface">
+            <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card">
               {parkings.map(({ parking }, index) => (
                 <div className="border-b border-border-subtle last:border-b-0" key={parking.id}>
                   <OwnerParkingPanel identifier={index + 1} parking={parking} presentation="list" />
@@ -152,8 +152,8 @@ export function OwnerParkingsRoute() {
 
 function NetworkMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 bg-surface p-5 text-foreground">
-      <p className="type-label text-foreground-muted">{label}</p>
+    <div className="min-w-0 bg-card p-5 text-foreground">
+      <p className="type-label text-muted-foreground">{label}</p>
       <p className="mt-3 break-words type-metric">{value}</p>
     </div>
   );
@@ -168,7 +168,7 @@ function OwnerParkingsSkeleton() {
       className="space-y-8"
       role="status"
     >
-      <h1 className="visually-hidden">{t('ownerParkings.title')}</h1>
+      <h1 className="sr-only">{t('ownerParkings.title')}</h1>
       <div className="space-y-4 border-b border-border-strong pb-7">
         <Skeleton className="h-3 w-24 rounded-full" />
         <Skeleton className="h-12 w-3/4 rounded-[var(--radius-md)]" />
@@ -179,7 +179,7 @@ function OwnerParkingsSkeleton() {
           <Skeleton className="h-24 rounded-none border-0" key={index} />
         ))}
       </div>
-      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-surface">
+      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card">
         {Array.from({ length: 3 }).map((_, index) => (
           <div
             className="grid min-w-0 gap-6 border-b border-border-subtle p-5 last:border-b-0 sm:p-6 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] md:items-center md:gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,auto)]"

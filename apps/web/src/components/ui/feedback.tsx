@@ -91,7 +91,7 @@ export function EmptyState({
       className={cn(
         isCompact
           ? 'flex min-w-0 flex-col items-start text-foreground'
-          : 'flex min-h-56 flex-col items-start justify-center rounded-[var(--radius-xl)] border border-dashed border-border-strong bg-surface p-6 text-foreground sm:p-8',
+          : 'flex min-h-56 flex-col items-start justify-center rounded-[var(--radius-xl)] border border-dashed border-border-strong bg-card p-6 text-foreground sm:p-8',
         isSplitCompact && 'sm:flex-row sm:items-center sm:justify-between sm:gap-8',
         className,
       )}
@@ -102,7 +102,7 @@ export function EmptyState({
     >
       {isCompact ? (
         <div className={cn('min-w-0', isSplitCompact && 'sm:max-w-2xl')}>
-          <p className="type-label text-foreground-muted" id={titleId}>
+          <p className="type-label text-muted-foreground" id={titleId}>
             {title}
           </p>
           <p className="mt-2 max-w-lg text-sm leading-relaxed text-foreground-secondary">
@@ -111,10 +111,10 @@ export function EmptyState({
         </div>
       ) : (
         <>
-          <span className="flex size-10 items-center justify-center rounded-full bg-accent text-accent-foreground">
+          <span className="flex size-10 items-center justify-center rounded-full bg-brand text-brand-foreground">
             <Inbox aria-hidden="true" className="size-5" />
           </span>
-          <p className="mt-5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground-muted">
+          <p className="mt-5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
             {t('feedback.emptyEyebrow')}
           </p>
           <h2
@@ -153,14 +153,14 @@ export function ErrorState({
     <section
       aria-atomic="true"
       aria-labelledby={titleId}
-      className="flex min-h-56 flex-col items-start justify-center rounded-[var(--radius-xl)] border border-border-strong bg-surface-emphasis p-6 text-foreground sm:p-8"
+      className="flex min-h-56 flex-col items-start justify-center rounded-[var(--radius-xl)] border border-border-strong bg-accent p-6 text-foreground sm:p-8"
       data-slot="error-state"
       role="alert"
     >
-      <span className="flex size-10 items-center justify-center rounded-full border border-border-strong bg-surface text-foreground">
+      <span className="flex size-10 items-center justify-center rounded-full border border-border-strong bg-card text-foreground">
         <AlertTriangle aria-hidden="true" className="size-5" />
       </span>
-      <p className="mt-5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground-muted">
+      <p className="mt-5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
         {t('feedback.errorEyebrow')}
       </p>
       <h2

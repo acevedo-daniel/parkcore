@@ -69,7 +69,7 @@ export function OwnerSessionDetailRoute() {
   if ((sessionQuery.isError && !hasSessionSnapshot) || !sessionId) {
     return (
       <section className="owner-page" aria-labelledby="session-detail-error-title">
-        <h1 className="visually-hidden" id="session-detail-error-title">
+        <h1 className="sr-only" id="session-detail-error-title">
           {t('session.operation')}
         </h1>
         <ErrorState
@@ -86,7 +86,7 @@ export function OwnerSessionDetailRoute() {
   if (parkingsQuery.isError && !hasParkingsSnapshot) {
     return (
       <section className="owner-page" aria-labelledby="session-detail-error-title">
-        <h1 className="visually-hidden" id="session-detail-error-title">
+        <h1 className="sr-only" id="session-detail-error-title">
           {t('session.operation')}
         </h1>
         <ErrorState
@@ -110,7 +110,7 @@ export function OwnerSessionDetailRoute() {
   if (!parking) {
     return (
       <section className="owner-page" aria-labelledby="session-detail-error-title">
-        <h1 className="visually-hidden" id="session-detail-error-title">
+        <h1 className="sr-only" id="session-detail-error-title">
           {t('session.operation')}
         </h1>
         <ErrorState
@@ -181,14 +181,14 @@ export function OwnerSessionDetailRoute() {
     <section className="owner-page space-y-9" aria-labelledby="session-detail-title">
       <header className="border-b border-border-strong pb-7">
         <Link
-          className="inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
+          className="inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-brand decoration-4 underline-offset-4"
           to={`/app/parkings/${session.parkingId}`}
         >
           <ChevronLeft aria-hidden="true" className="size-4" /> {t('session.operation')}
         </Link>
         <div className="mt-7 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div className="min-w-0">
-            <p className="type-label text-foreground-muted">
+            <p className="type-label text-muted-foreground">
               {getSessionStateTitle(session.status, t)}
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-4">
@@ -229,7 +229,7 @@ export function OwnerSessionDetailRoute() {
 
       {hasStaleSessionData || hasStaleParkingData ? (
         <div
-          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="break-words text-sm font-semibold">{t('session.staleData')}</p>
@@ -273,12 +273,12 @@ export function OwnerSessionDetailRoute() {
           ]}
           title={t('session.visit')}
         />
-        <section className="min-w-0 rounded-[var(--radius-lg)] border border-border bg-surface p-5">
-          <p className="type-label text-foreground-muted">{t('session.parking')}</p>
+        <section className="min-w-0 rounded-[var(--radius-lg)] border border-border bg-card p-5">
+          <p className="type-label text-muted-foreground">{t('session.parking')}</p>
           <dl className="mt-5 space-y-4">
             <DetailItem label={t('session.facility')}>
               <Link
-                className="font-bold underline decoration-accent decoration-4 underline-offset-4"
+                className="font-bold underline decoration-brand decoration-4 underline-offset-4"
                 to={`/app/parkings/${parking.id}`}
               >
                 {parking.title}
@@ -360,7 +360,7 @@ export function OwnerSessionDetailRoute() {
       >
         <div className="space-y-5 pt-6">
           <Plate plate={session.vehicle.plate} />
-          <p className="border-l-4 border-accent pl-4 text-sm leading-relaxed text-foreground-secondary">
+          <p className="border-l-4 border-brand pl-4 text-sm leading-relaxed text-foreground-secondary">
             {t('session.availableAfterCancel')}
           </p>
           {actionError ? <ActionError message={actionError} /> : null}
@@ -404,7 +404,7 @@ function formatSessionTotal(session: ParkingSession, translate: Translator, loca
 function ActionError({ message }: { message: string }) {
   return (
     <p
-      className="break-words rounded-[var(--radius-md)] border border-danger-foreground bg-danger-surface p-3 text-sm font-semibold text-danger-text"
+      className="break-words rounded-[var(--radius-md)] border border-destructive-soft-foreground bg-destructive-soft p-3 text-sm font-semibold text-destructive-soft-foreground"
       role="alert"
     >
       {message}
@@ -414,8 +414,8 @@ function ActionError({ message }: { message: string }) {
 
 function DetailCard({ entries, title }: { entries: [string, string][]; title: string }) {
   return (
-    <section className="min-w-0 rounded-[var(--radius-lg)] border border-border bg-surface p-5">
-      <p className="type-label text-foreground-muted">{title}</p>
+    <section className="min-w-0 rounded-[var(--radius-lg)] border border-border bg-card p-5">
+      <p className="type-label text-muted-foreground">{title}</p>
       <dl className="mt-5 space-y-4">
         {entries.map(([label, value]) => (
           <DetailItem key={label} label={label}>
@@ -430,7 +430,7 @@ function DetailCard({ entries, title }: { entries: [string, string][]; title: st
 function DetailItem({ children, label }: { children: React.ReactNode; label: string }) {
   return (
     <div className="min-w-0">
-      <dt className="type-label text-foreground-muted">{label}</dt>
+      <dt className="type-label text-muted-foreground">{label}</dt>
       <dd className="mt-1 min-w-0 break-words text-sm font-semibold leading-relaxed">{children}</dd>
     </div>
   );
@@ -440,7 +440,7 @@ function SessionDetailSkeleton() {
   const { t } = useAppearance();
   return (
     <div aria-busy="true" aria-label={t('api.loadSession')} className="space-y-8" role="status">
-      <h1 className="visually-hidden">{t('session.operation')}</h1>
+      <h1 className="sr-only">{t('session.operation')}</h1>
       <Skeleton className="h-56 rounded-[var(--radius-xl)]" />
       <div className="grid gap-4 lg:grid-cols-3">
         <Skeleton className="h-64 rounded-[var(--radius-lg)]" />

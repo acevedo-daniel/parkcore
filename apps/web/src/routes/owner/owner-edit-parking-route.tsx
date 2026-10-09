@@ -29,10 +29,10 @@ export function OwnerEditParkingRoute() {
   if (parkingsQuery.isLoading) {
     return (
       <section aria-labelledby="edit-parking-loading-title" className="owner-page space-y-6">
-        <h1 className="visually-hidden" id="edit-parking-loading-title">
+        <h1 className="sr-only" id="edit-parking-loading-title">
           {t('parkingRoute.editTitle')}
         </h1>
-        <p className="visually-hidden" role="status">
+        <p className="sr-only" role="status">
           {t('parkingRoute.loading')}
         </p>
         <Skeleton className="min-h-96 w-full" />
@@ -42,7 +42,7 @@ export function OwnerEditParkingRoute() {
   if ((parkingsQuery.isError && parkingsQuery.data === undefined) || !parkingId)
     return (
       <section aria-labelledby="edit-parking-error-title" className="owner-page">
-        <h1 className="visually-hidden" id="edit-parking-error-title">
+        <h1 className="sr-only" id="edit-parking-error-title">
           {t('parkingRoute.editTitle')}
         </h1>
         <ErrorState
@@ -58,7 +58,7 @@ export function OwnerEditParkingRoute() {
   if (!parking)
     return (
       <section aria-labelledby="edit-parking-unavailable-title" className="owner-page">
-        <h1 className="visually-hidden" id="edit-parking-unavailable-title">
+        <h1 className="sr-only" id="edit-parking-unavailable-title">
           {t('parkingRoute.editTitle')}
         </h1>
         <ErrorState title={t('parkingOperation.unavailableTitle')}>
@@ -112,7 +112,7 @@ export function OwnerEditParkingRoute() {
       />
       {hasStaleData ? (
         <div
-          className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="break-words text-sm font-semibold">{t('parkingRoute.stale')}</p>

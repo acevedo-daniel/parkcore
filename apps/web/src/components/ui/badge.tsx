@@ -9,13 +9,14 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default: 'border-transparent bg-primary text-primary-foreground shadow-xs',
-        secondary: 'border-border bg-surface-subtle text-foreground border shadow-xs',
-        destructive: 'bg-danger-surface text-danger-text border border-danger/25',
-        danger: 'bg-danger-surface text-danger-text border border-danger/25',
-        success: 'bg-success-surface text-success-text border border-success/25',
-        warning: 'bg-warning-surface text-warning-text border border-warning/25',
-        info: 'bg-info-surface text-info-text border border-info/25',
-        outline: 'text-foreground border border-border bg-surface',
+        secondary: 'border-border bg-muted text-foreground border shadow-xs',
+        destructive:
+          'bg-destructive-soft text-destructive-soft-foreground border border-destructive/25',
+        danger: 'bg-destructive-soft text-destructive-soft-foreground border border-destructive/25',
+        success: 'bg-success-soft text-success-soft-foreground border border-success/25',
+        warning: 'bg-warning-soft text-warning-soft-foreground border border-warning/25',
+        info: 'bg-info-soft text-info-soft-foreground border border-info/25',
+        outline: 'text-foreground border border-border bg-card',
       },
       size: {
         default: 'px-2.5 py-0.5 text-xs',
@@ -57,7 +58,7 @@ export function Badge({
                 : variant === 'warning'
                   ? 'bg-warning'
                   : variant === 'danger' || variant === 'destructive'
-                    ? 'bg-danger'
+                    ? 'bg-destructive'
                     : variant === 'info'
                       ? 'bg-info'
                       : 'bg-current'),

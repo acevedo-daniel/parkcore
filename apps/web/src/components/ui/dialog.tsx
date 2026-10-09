@@ -15,7 +15,7 @@ export interface DialogProps {
 }
 
 const overlayClassName =
-  'fixed inset-0 z-50 bg-overlay-backdrop backdrop-blur-sm data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:fade-in';
+  'fixed inset-0 z-50 bg-overlay backdrop-blur-sm data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:animate-in data-[state=open]:fade-in';
 
 function useFocusRestoration(open: boolean) {
   const focusBeforeOpen = useRef<HTMLElement | null>(null);
@@ -51,7 +51,7 @@ function DialogHeader({
       data-slot="dialog-header"
     >
       <div className="min-w-0">
-        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground-muted">
+        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
           {t('dialog.eyebrow')}
         </p>
         <DialogPrimitive.Title className="mt-3 break-words font-display text-3xl font-bold leading-none tracking-[-0.055em] text-foreground">
@@ -92,7 +92,7 @@ export function Dialog({
       <DialogPrimitive.Portal>
         <DialogOverlay />
         <DialogPrimitive.Content
-          className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[var(--radius-xl)] border border-border-strong bg-surface-raised p-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] text-foreground shadow-dialog focus:outline-none sm:p-8"
+          className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-x-hidden overflow-y-auto overscroll-contain rounded-[var(--radius-xl)] border border-border-strong bg-popover p-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] text-foreground shadow-xl focus:outline-none sm:p-8"
           data-slot="dialog-content"
           onCloseAutoFocus={restoreFocus}
         >
@@ -118,7 +118,7 @@ export function Sheet({
       <DialogPrimitive.Portal>
         <DialogOverlay />
         <DialogPrimitive.Content
-          className="fixed inset-y-0 right-0 z-50 h-dvh max-h-dvh w-full max-w-2xl overflow-x-hidden overflow-y-auto overscroll-contain border-l border-border-strong bg-surface-raised p-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] text-foreground shadow-dialog focus:outline-none sm:rounded-l-[var(--radius-xl)] sm:p-8"
+          className="fixed inset-y-0 right-0 z-50 h-dvh max-h-dvh w-full max-w-2xl overflow-x-hidden overflow-y-auto overscroll-contain border-l border-border-strong bg-popover p-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] text-foreground shadow-xl focus:outline-none sm:rounded-l-[var(--radius-xl)] sm:p-8"
           data-slot="sheet-content"
           onCloseAutoFocus={restoreFocus}
         >

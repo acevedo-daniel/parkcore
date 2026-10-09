@@ -17,6 +17,7 @@ import {
   type PluralTranslator,
   type Translator,
 } from '../lib/localization.js';
+import { THEME_COLOR_BY_THEME } from './theme-color.js';
 
 export type Theme = 'dark' | 'light';
 export type ThemePreference = 'dark' | 'light' | 'system';
@@ -25,11 +26,6 @@ export type { Locale } from '../lib/localization.js';
 
 const THEME_STORAGE_KEY = 'parkcore-theme';
 const LOCALE_STORAGE_KEY = 'parkcore-lang';
-const THEME_COLOR_BY_THEME: Record<Theme, string> = {
-  dark: '#111310',
-  light: '#f7f7f4',
-};
-
 const noop = () => undefined;
 
 interface AppearanceContextValue {

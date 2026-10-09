@@ -24,7 +24,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
       <div className="space-y-2" data-slot="switch">
         <label
           className={cn(
-            'group flex min-h-[var(--touch-target-min)] cursor-pointer items-start gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-surface-subtle px-3.5 py-3 text-sm text-foreground transition-colors hover:bg-surface-hover',
+            'group flex min-h-[var(--touch-target-min)] cursor-pointer items-start gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-muted px-3.5 py-3 text-sm text-foreground transition-colors hover:bg-accent',
             disabled && 'cursor-not-allowed opacity-60',
           )}
           htmlFor={switchId}
@@ -33,7 +33,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
             {...inputProps}
             aria-describedby={describedBy}
             aria-labelledby={labelId}
-            className={cn('peer visually-hidden', className)}
+            className={cn('peer sr-only', className)}
             disabled={disabled}
             id={switchId}
             onKeyDown={(event) => {
@@ -50,16 +50,16 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
           />
           <span
             aria-hidden="true"
-            className="relative mt-0.5 h-6 w-11 shrink-0 rounded-full border border-border-strong bg-surface-emphasis p-0.5 transition-colors peer-checked:border-primary peer-checked:bg-primary peer-disabled:opacity-60 peer-focus-visible:ring-2 peer-focus-visible:ring-focus-ring"
+            className="relative mt-0.5 h-6 w-11 shrink-0 rounded-full border border-border-strong bg-accent p-0.5 transition-colors peer-checked:border-primary peer-checked:bg-primary peer-disabled:opacity-60 peer-focus-visible:ring-2 peer-focus-visible:ring-ring"
           >
-            <span className="block size-5 rounded-full bg-foreground-muted shadow-xs transition-transform peer-checked:translate-x-5 peer-checked:bg-primary-foreground" />
+            <span className="block size-5 rounded-full bg-muted-foreground shadow-xs transition-transform peer-checked:translate-x-5 peer-checked:bg-primary-foreground" />
           </span>
           <span className="min-w-0 font-semibold" id={labelId}>
             {label}
           </span>
         </label>
         {description ? (
-          <p className="pl-14 text-sm leading-relaxed text-foreground-muted" id={descriptionId}>
+          <p className="pl-14 text-sm leading-relaxed text-muted-foreground" id={descriptionId}>
             {description}
           </p>
         ) : null}

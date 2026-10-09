@@ -14,10 +14,10 @@ export function PublicNotFoundRoute() {
   return (
     <section
       aria-labelledby="public-not-found-title"
-      className="min-h-[65vh] bg-canvas px-4 py-16 text-foreground sm:px-6 lg:px-8"
+      className="min-h-[65vh] bg-background px-4 py-16 text-foreground sm:px-6 lg:px-8"
     >
-      <div className="mx-auto max-w-3xl rounded-[2rem] border border-border-strong bg-surface p-8 shadow-hover sm:p-10">
-        <p className="font-mono text-xs font-bold tracking-[0.16em] text-foreground-muted uppercase">
+      <div className="mx-auto max-w-3xl rounded-[2rem] border border-border-strong bg-card p-8 shadow-md sm:p-10">
+        <p className="font-mono text-xs font-bold tracking-[0.16em] text-muted-foreground uppercase">
           404
         </p>
         <h1

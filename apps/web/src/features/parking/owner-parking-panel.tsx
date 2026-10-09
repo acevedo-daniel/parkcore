@@ -12,8 +12,8 @@ import { formatMoney, formatNumber } from '../../lib/format.js';
 
 const occupancyFillByState: Record<AvailabilityState, string> = {
   AVAILABLE: 'bg-success',
-  CLOSED: 'bg-foreground-muted',
-  FULL: 'bg-danger',
+  CLOSED: 'bg-muted-foreground',
+  FULL: 'bg-destructive',
   LIMITED: 'bg-warning',
   PAUSED: 'bg-warning',
 };
@@ -46,7 +46,7 @@ export function OwnerParkingPanel({ identifier, parking, presentation }: OwnerPa
   return (
     <article
       className={cn(
-        'owner-parking-panel min-w-0 bg-surface p-5 text-foreground sm:p-6',
+        'owner-parking-panel min-w-0 bg-card p-5 text-foreground sm:p-6',
         presentation === 'overview'
           ? 'flex flex-col gap-5'
           : 'grid gap-6 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] md:items-center md:gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,auto)]',
@@ -79,7 +79,7 @@ function FacilityIdentity({ identifier, parking }: { identifier: number; parking
 
   return (
     <div className="min-w-0">
-      <p className="type-label text-foreground-muted">
+      <p className="type-label text-muted-foreground">
         {t('ownerParkings.facilityNumber', { number: String(identifier).padStart(2, '0') })}
       </p>
       <h3 className="mt-2 break-words font-display text-2xl font-bold leading-tight tracking-[-0.045em]">
@@ -94,7 +94,7 @@ function FacilityIdentity({ identifier, parking }: { identifier: number; parking
         </span>
       </p>
       <p className="mt-4 text-sm text-foreground-secondary">
-        <span className="type-label mr-2 text-foreground-muted">{t('ownerParkings.rate')}</span>
+        <span className="type-label mr-2 text-muted-foreground">{t('ownerParkings.rate')}</span>
         <span className="font-mono font-semibold tabular-nums">
           {formatMoney(parking.hourlyRateCents, parking.currency, locale)}
         </span>{' '}
@@ -133,7 +133,7 @@ function OccupancySummary({
     <div className="min-w-0">
       <div className="flex min-w-0 items-end justify-between gap-3">
         <div className="min-w-0">
-          <p className="type-label text-foreground-muted">{t('ownerParkings.occupancy')}</p>
+          <p className="type-label text-muted-foreground">{t('ownerParkings.occupancy')}</p>
           <p className="mt-2 break-words font-mono text-lg font-bold tabular-nums">
             {t('ownerParkings.occupancyValue', {
               active: activeSessionCount,
@@ -151,7 +151,7 @@ function OccupancySummary({
         aria-valuemin={0}
         aria-valuenow={occupancyPercentValue}
         aria-valuetext={occupancySummary}
-        className="mt-4 h-2 overflow-hidden rounded-full bg-surface-emphasis"
+        className="mt-4 h-2 overflow-hidden rounded-full bg-accent"
         role="progressbar"
       >
         <div
@@ -186,7 +186,7 @@ function FacilityState({
       )}
     >
       <div className="min-w-0">
-        <p className="type-label text-foreground-muted">{t('ownerParkings.status')}</p>
+        <p className="type-label text-muted-foreground">{t('ownerParkings.status')}</p>
         <AvailabilityIndicator
           className="mt-2"
           nextOpeningAt={parking.nextOpeningAt}
@@ -195,7 +195,7 @@ function FacilityState({
         />
       </div>
       <div className={cn('min-w-0', !isOverview && 'text-right md:text-left')}>
-        <p className="type-label text-foreground-muted">{t('ownerParkings.listing')}</p>
+        <p className="type-label text-muted-foreground">{t('ownerParkings.listing')}</p>
         <p className="mt-2 break-words text-sm font-semibold">
           {parking.isListed ? t('ownerParkings.listed') : t('ownerParkings.notListed')}
         </p>
@@ -225,7 +225,7 @@ function FacilityActions({
     >
       <Link
         aria-label={t('ownerParkings.openAria', { title: parking.title })}
-        className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset"
+        className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         to={`/app/parkings/${parking.id}`}
       >
         {t('ownerParkings.open')}
@@ -239,7 +239,7 @@ function FacilityActions({
       >
         <Link
           aria-label={t('ownerParkings.editAria', { title: parking.title })}
-          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] px-2 py-2 text-sm font-semibold text-foreground-secondary underline decoration-accent decoration-2 underline-offset-4 transition-colors hover:bg-surface-subtle hover:text-foreground focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] px-2 py-2 text-sm font-semibold text-foreground-secondary underline decoration-brand decoration-2 underline-offset-4 transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           to={`/app/parkings/${parking.id}/edit`}
         >
           <Pencil aria-hidden="true" className="size-3.5" />
@@ -247,7 +247,7 @@ function FacilityActions({
         </Link>
         <Link
           aria-label={t('ownerParkings.historyAria', { title: parking.title })}
-          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] px-2 py-2 text-sm font-semibold text-foreground-secondary underline decoration-accent decoration-2 underline-offset-4 transition-colors hover:bg-surface-subtle hover:text-foreground focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-[var(--radius-sm)] px-2 py-2 text-sm font-semibold text-foreground-secondary underline decoration-brand decoration-2 underline-offset-4 transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           to={`/app/parkings/${parking.id}/sessions`}
         >
           <HistoryIcon aria-hidden="true" className="size-3.5" />

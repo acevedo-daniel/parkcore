@@ -169,7 +169,7 @@ export function OwnerOverviewRoute() {
   if (parkingsQuery.isError && !parkingsQuery.data) {
     return (
       <section className="owner-page" aria-labelledby="overview-error-title">
-        <h1 className="visually-hidden" id="overview-error-title">
+        <h1 className="sr-only" id="overview-error-title">
           {t('overview.title')}
         </h1>
         <ErrorState onRetry={() => void parkingsQuery.refetch()}>
@@ -181,7 +181,7 @@ export function OwnerOverviewRoute() {
   if (parkings.length === 0) {
     return (
       <section className="owner-page" aria-labelledby="overview-empty-title">
-        <h1 className="visually-hidden" id="overview-empty-title">
+        <h1 className="sr-only" id="overview-empty-title">
           {t('overview.title')}
         </h1>
         <EmptyState
@@ -235,7 +235,7 @@ export function OwnerOverviewRoute() {
 
       {facilitiesSnapshotIsStale ? (
         <div
-          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="break-words text-sm font-semibold">{t('overview.facilitiesStale')}</p>
@@ -257,10 +257,10 @@ export function OwnerOverviewRoute() {
 
       <div className="grid gap-5 wide:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
         <section
-          className="rounded-[var(--radius-xl)] border border-border bg-surface p-6 shadow-xs sm:p-8"
+          className="rounded-[var(--radius-xl)] border border-border bg-card p-6 shadow-xs sm:p-8"
           aria-labelledby="network-now-title"
         >
-          <p className="type-label text-foreground-muted">{t('overview.networkNow')}</p>
+          <p className="type-label text-muted-foreground">{t('overview.networkNow')}</p>
           <h2
             className="mt-4 max-w-2xl font-display text-3xl font-bold leading-tight tracking-[-0.045em] sm:text-4xl"
             id="network-now-title"
@@ -293,7 +293,7 @@ export function OwnerOverviewRoute() {
           </dl>
 
           <div className="mt-6 border-t border-border-subtle pt-5">
-            <p className="type-label text-foreground-muted">{t('overview.facilityState')}</p>
+            <p className="type-label text-muted-foreground">{t('overview.facilityState')}</p>
             <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm font-semibold text-foreground-secondary">
               <span>
                 {tPlural(
@@ -319,7 +319,7 @@ export function OwnerOverviewRoute() {
           </div>
 
           <div className="mt-6 border-t border-border-subtle pt-5">
-            <p className="type-label text-foreground-muted">{t('overview.revenueToday')}</p>
+            <p className="type-label text-muted-foreground">{t('overview.revenueToday')}</p>
             {summaryQuery.isPending ? (
               <p className="mt-2 font-mono text-lg font-bold tabular-nums">
                 {t('overview.loadingValue')}
@@ -332,7 +332,7 @@ export function OwnerOverviewRoute() {
               <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2">
                 {summary.revenueToday.map(({ currency, revenueCents }) => (
                   <div className="flex items-baseline gap-2" key={currency}>
-                    <span className="type-label text-foreground-muted">{currency}</span>
+                    <span className="type-label text-muted-foreground">{currency}</span>
                     <span className="font-mono text-lg font-bold tabular-nums">
                       {formatMoney(revenueCents, currency, locale)}
                     </span>
@@ -348,10 +348,10 @@ export function OwnerOverviewRoute() {
         </section>
 
         <section
-          className="rounded-[var(--radius-xl)] border border-border bg-surface-subtle p-6 sm:p-8"
+          className="rounded-[var(--radius-xl)] border border-border bg-muted p-6 sm:p-8"
           aria-labelledby="attention-title"
         >
-          <p className="type-label text-foreground-muted">{t('overview.attentionEyebrow')}</p>
+          <p className="type-label text-muted-foreground">{t('overview.attentionEyebrow')}</p>
           <h2
             className="mt-4 font-display text-2xl font-bold tracking-[-0.04em]"
             id="attention-title"
@@ -380,7 +380,7 @@ export function OwnerOverviewRoute() {
           )}
           {attentionQueryHasError ? (
             <div
-              className="mt-5 flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-4 text-warning-text"
+              className="mt-5 flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground"
               role="alert"
             >
               <p className="text-sm font-semibold">{t('overview.attentionDataError')}</p>
@@ -396,7 +396,7 @@ export function OwnerOverviewRoute() {
       <section aria-labelledby="facilities-title">
         <div className="mb-5 flex items-end justify-between gap-4 border-b border-border-strong pb-4">
           <div>
-            <p className="type-label text-foreground-muted">{t('overview.networkNow')}</p>
+            <p className="type-label text-muted-foreground">{t('overview.networkNow')}</p>
             <h2
               className="mt-2 font-display text-3xl font-bold leading-none tracking-[-0.055em]"
               id="facilities-title"
@@ -405,7 +405,7 @@ export function OwnerOverviewRoute() {
             </h2>
           </div>
           <Link
-            className="group flex shrink-0 items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
+            className="group flex shrink-0 items-center gap-1 text-sm font-bold underline decoration-brand decoration-4 underline-offset-4"
             to="/app/parkings"
           >
             {t('overview.viewAllFacilities')}
@@ -430,16 +430,16 @@ export function OwnerOverviewRoute() {
       {summaryQuery.isError ? <AnalyticsNotice onRetry={retrySummary} /> : null}
 
       <section
-        className="overflow-hidden rounded-[var(--radius-xl)] border border-border bg-surface-emphasis text-foreground"
+        className="overflow-hidden rounded-[var(--radius-xl)] border border-border bg-accent text-foreground"
         aria-labelledby="activity-title"
       >
         <div className="flex flex-col justify-between gap-5 border-b border-border p-6 sm:p-8 lg:flex-row lg:items-start">
           <div>
             <div className="flex items-center gap-2">
-              <span className="flex size-7 items-center justify-center rounded-full bg-accent text-accent-foreground">
+              <span className="flex size-7 items-center justify-center rounded-full bg-brand text-brand-foreground">
                 <BarChart3 aria-hidden="true" className="size-4" />
               </span>
-              <p className="type-label text-foreground-muted">{t('overview.activityEyebrow')}</p>
+              <p className="type-label text-muted-foreground">{t('overview.activityEyebrow')}</p>
             </div>
             <h2
               className="mt-4 font-display text-3xl font-bold leading-none tracking-[-0.055em]"
@@ -463,10 +463,10 @@ export function OwnerOverviewRoute() {
                   aria-label={t('overview.periodOption', { days: period })}
                   aria-pressed={days === period}
                   className={cn(
-                    'min-h-[var(--touch-target-min)] rounded-full px-3 py-2 font-mono text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset',
+                    'min-h-[var(--touch-target-min)] rounded-full px-3 py-2 font-mono text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                     days === period
-                      ? 'bg-accent text-accent-foreground'
-                      : 'text-foreground-secondary hover:bg-surface-hover hover:text-foreground',
+                      ? 'bg-brand text-brand-foreground'
+                      : 'text-foreground-secondary hover:bg-accent hover:text-foreground',
                   )}
                   key={period}
                   onClick={() => {
@@ -489,10 +489,10 @@ export function OwnerOverviewRoute() {
                   <button
                     aria-pressed={displayCurrency === currency}
                     className={cn(
-                      'min-h-[var(--touch-target-min)] rounded-full border px-3 py-2 font-mono text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset',
+                      'min-h-[var(--touch-target-min)] rounded-full border px-3 py-2 font-mono text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                       displayCurrency === currency
-                        ? 'border-accent bg-accent text-accent-foreground'
-                        : 'border-border-strong text-foreground-secondary hover:bg-surface-hover hover:text-foreground',
+                        ? 'border-brand bg-brand text-brand-foreground'
+                        : 'border-border-strong text-foreground-secondary hover:bg-accent hover:text-foreground',
                     )}
                     key={currency}
                     onClick={() => {
@@ -520,7 +520,7 @@ export function OwnerOverviewRoute() {
             </div>
           ) : activityHasError ? (
             <div
-              className="flex min-h-56 flex-col items-center justify-center gap-4 rounded-[var(--radius-lg)] border border-border-subtle bg-surface px-5 text-center"
+              className="flex min-h-56 flex-col items-center justify-center gap-4 rounded-[var(--radius-lg)] border border-border-subtle bg-card px-5 text-center"
               role="alert"
             >
               <p className="text-sm font-semibold text-foreground-secondary">
@@ -532,7 +532,7 @@ export function OwnerOverviewRoute() {
               </Button>
             </div>
           ) : chartPoints.length === 0 ? (
-            <div className="flex min-h-56 items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-border-strong bg-surface px-5 text-center text-sm text-foreground-secondary">
+            <div className="flex min-h-56 items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-border-strong bg-card px-5 text-center text-sm text-foreground-secondary">
               {t('overview.chartEmpty')}
             </div>
           ) : (
@@ -543,10 +543,10 @@ export function OwnerOverviewRoute() {
                   className="pointer-events-none absolute inset-x-0 bottom-3 top-0 flex flex-col justify-between"
                 >
                   {Array.from({ length: 4 }).map((_, index) => (
-                    <span className="border-t border-chart-grid" key={index} />
+                    <span className="border-t border-border-subtle" key={index} />
                   ))}
                 </div>
-                <div className="relative flex h-full items-end gap-1.5 border-b border-chart-axis pb-3 sm:gap-3">
+                <div className="relative flex h-full items-end gap-1.5 border-b border-muted-foreground pb-3 sm:gap-3">
                   {chartPoints.map((point, index) => {
                     const isActive = activeBarIndex === index;
                     const pointRevenue = revenueForCurrency(point);
@@ -562,7 +562,7 @@ export function OwnerOverviewRoute() {
                           sessions: formatCount(point.completedSessions),
                         })}
                         aria-pressed={isActive}
-                        className="group relative flex h-full min-w-0 flex-1 items-end focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset"
+                        className="group relative flex h-full min-w-0 flex-1 items-end focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                         key={point.date}
                         onBlur={() => {
                           setActiveBarIndex(null);
@@ -578,9 +578,7 @@ export function OwnerOverviewRoute() {
                         <span
                           className={cn(
                             'w-full rounded-t-sm transition-all duration-200',
-                            isActive
-                              ? 'bg-chart-primary'
-                              : 'bg-chart-accent group-hover:bg-chart-primary',
+                            isActive ? 'bg-chart-1' : 'bg-chart-3 group-hover:bg-chart-1',
                           )}
                           style={{ height: `${String(height)}%` }}
                         />
@@ -592,7 +590,7 @@ export function OwnerOverviewRoute() {
               <div className="mt-2 flex gap-1.5 sm:gap-3">
                 {chartPoints.map((point, index) => (
                   <span
-                    className="min-w-0 flex-1 truncate text-center font-mono text-[10px] text-chart-axis"
+                    className="min-w-0 flex-1 truncate text-center font-mono text-[10px] text-muted-foreground"
                     key={point.date}
                   >
                     {days === 30 && index % 4 !== 0 && index !== chartPoints.length - 1
@@ -659,7 +657,7 @@ function AnalyticsNotice({ onRetry }: { onRetry: () => void }) {
 
   return (
     <div
-      className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+      className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
       role="alert"
     >
       <p className="text-sm font-semibold">{t('overview.analyticsDegraded')}</p>
@@ -673,7 +671,7 @@ function AnalyticsNotice({ onRetry }: { onRetry: () => void }) {
 function SummaryMetric({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
-      <dt className="type-label text-foreground-muted">{label}</dt>
+      <dt className="type-label text-muted-foreground">{label}</dt>
       <dd className="mt-2 break-words type-metric">{value}</dd>
     </div>
   );
@@ -682,7 +680,7 @@ function SummaryMetric({ label, value }: { label: string; value: string }) {
 function SummaryValue({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
-      <p className="type-label text-foreground-muted">{label}</p>
+      <p className="type-label text-muted-foreground">{label}</p>
       <p className="mt-1 break-words font-mono text-lg font-bold tabular-nums">{value}</p>
     </div>
   );
@@ -693,7 +691,7 @@ function OwnerOverviewSkeleton() {
 
   return (
     <div aria-busy="true" aria-label={t('overview.loading')} className="space-y-10" role="status">
-      <h1 className="visually-hidden">{t('overview.title')}</h1>
+      <h1 className="sr-only">{t('overview.title')}</h1>
       <div className="grid gap-5 wide:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
         <Skeleton className="h-72 rounded-[var(--radius-xl)]" />
         <Skeleton className="h-72 rounded-[var(--radius-xl)]" />

@@ -7,7 +7,7 @@ export function Card({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card"
       className={cn(
-        'rounded-[var(--radius-md)] border border-border bg-surface text-foreground shadow-xs',
+        'rounded-[var(--radius-md)] border border-border bg-card text-foreground shadow-xs',
         className,
       )}
       {...props}

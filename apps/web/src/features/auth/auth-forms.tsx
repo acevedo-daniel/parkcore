@@ -56,17 +56,17 @@ export function AuthFormFrame({
 }) {
   const { t } = useAppearance();
   return (
-    <section aria-labelledby="auth-title" className="min-h-full bg-canvas py-12 sm:py-20">
+    <section aria-labelledby="auth-title" className="min-h-full bg-background py-12 sm:py-20">
       <div className="mx-auto grid max-w-5xl gap-8 px-4 sm:px-6 wide:grid-cols-2 wide:items-stretch wide:px-8">
-        <div className="hidden min-w-0 rounded-[3rem_3rem_7rem_3rem] bg-surface-inverse p-10 text-foreground-on-inverse shadow-hover wide:flex wide:flex-col wide:justify-between">
+        <div className="hidden min-w-0 rounded-[3rem_3rem_7rem_3rem] bg-inverse p-10 text-inverse-foreground shadow-md wide:flex wide:flex-col wide:justify-between">
           <div>
             <Link
-              className="inline-flex min-h-[var(--touch-target-min)] items-center gap-2 rounded-sm font-display text-xl font-black tracking-tight text-foreground-on-inverse"
+              className="inline-flex min-h-[var(--touch-target-min)] items-center gap-2 rounded-sm font-display text-xl font-black tracking-tight text-inverse-foreground"
               to="/"
             >
               PARKCORE
             </Link>
-            <p className="mt-16 text-xs font-bold tracking-[0.12em] text-foreground-on-inverse uppercase">
+            <p className="mt-16 text-xs font-bold tracking-[0.12em] text-inverse-foreground uppercase">
               {eyebrow}
             </p>
             <p
@@ -75,15 +75,15 @@ export function AuthFormFrame({
             >
               {t('auth.frame.headline')}
             </p>
-            <p className="mt-6 max-w-sm text-base leading-relaxed text-foreground-on-inverse/80">
+            <p className="mt-6 max-w-sm text-base leading-relaxed text-inverse-foreground/80">
               {t('auth.frame.description')}
             </p>
           </div>
-          <p className="max-w-sm text-sm leading-relaxed text-foreground-on-inverse/70">
+          <p className="max-w-sm text-sm leading-relaxed text-inverse-foreground/70">
             {t('auth.frame.footer')}
           </p>
         </div>
-        <div className="min-w-0 rounded-[2rem_2rem_4.5rem_2rem] border border-border bg-surface p-6 shadow-hover sm:p-8 wide:p-10">
+        <div className="min-w-0 rounded-[2rem_2rem_4.5rem_2rem] border border-border bg-card p-6 shadow-md sm:p-8 wide:p-10">
           <div>
             <Link
               className="inline-flex min-h-[var(--touch-target-min)] items-center gap-2 rounded-sm font-display text-lg font-black tracking-tight text-foreground wide:hidden"
@@ -91,7 +91,7 @@ export function AuthFormFrame({
             >
               PARKCORE
             </Link>
-            <p className="mt-10 text-xs font-bold tracking-[0.12em] text-foreground-muted uppercase wide:mt-0">
+            <p className="mt-10 text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase wide:mt-0">
               {eyebrow}
             </p>
             <h1
@@ -101,7 +101,7 @@ export function AuthFormFrame({
               {title}
             </h1>
           </div>
-          <div className="mt-8 [&_.auth-form]:mt-6 [&_.auth-form]:flex [&_.auth-form]:flex-col [&_.auth-form]:gap-4 [&_.field]:space-y-1.5 [&_.field-label]:block [&_.field-label]:text-xs [&_.field-label]:font-bold [&_.field-label]:text-foreground [&_.control]:h-12 [&_.control]:w-full [&_.control]:rounded-2xl [&_.control]:border [&_.control]:border-border [&_.control]:bg-surface-subtle [&_.control]:px-4 [&_.control]:text-sm [&_.control]:font-medium [&_.control]:text-foreground [&_.control]:outline-none [&_.control]:transition-colors [&_.control]:focus:border-primary [&_.control]:focus:bg-surface [&_.form-error]:text-sm [&_.form-error]:font-medium [&_.form-error]:text-danger-text">
+          <div className="mt-8 [&_.auth-form]:mt-6 [&_.auth-form]:flex [&_.auth-form]:flex-col [&_.auth-form]:gap-4 [&_.field]:space-y-1.5 [&_.field-label]:block [&_.field-label]:text-xs [&_.field-label]:font-bold [&_.field-label]:text-foreground [&_.control]:h-12 [&_.control]:w-full [&_.control]:rounded-2xl [&_.control]:border [&_.control]:border-border [&_.control]:bg-muted [&_.control]:px-4 [&_.control]:text-sm [&_.control]:font-medium [&_.control]:text-foreground [&_.control]:outline-none [&_.control]:transition-colors [&_.control]:focus:border-primary [&_.control]:focus:bg-card [&_.form-error]:text-sm [&_.form-error]:font-medium [&_.form-error]:text-destructive-soft-foreground">
             {children}
           </div>
           <p className="mt-6 border-t border-border-subtle pt-5 text-sm leading-relaxed text-foreground-secondary">
@@ -176,7 +176,7 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         </p>
       ) : null}
       <Button
-        className="h-12 rounded-full bg-primary text-primary-foreground hover:bg-primary-hover"
+        className="h-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
         disabled={form.formState.isSubmitting}
         fullWidth
         type="submit"
@@ -271,7 +271,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         </p>
       ) : null}
       <Button
-        className="h-12 rounded-full bg-primary text-primary-foreground hover:bg-primary-hover"
+        className="h-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
         disabled={form.formState.isSubmitting}
         fullWidth
         type="submit"
@@ -290,7 +290,7 @@ export function LoginFooter({ registerHref = '/register' }: { registerHref?: str
     <>
       {t('auth.footer.login')}{' '}
       <Link
-        className="font-bold text-foreground underline decoration-accent underline-offset-4"
+        className="font-bold text-foreground underline decoration-brand underline-offset-4"
         to={registerHref}
       >
         {t('auth.footer.loginLink')}
@@ -305,7 +305,7 @@ export function RegisterFooter({ loginHref = '/login' }: { loginHref?: string } 
     <>
       {t('auth.footer.registerLead')}{' '}
       <Link
-        className="font-bold text-foreground underline decoration-accent underline-offset-4"
+        className="font-bold text-foreground underline decoration-brand underline-offset-4"
         to={loginHref}
       >
         {t('auth.footer.registerLink')}
@@ -352,7 +352,7 @@ function PasswordField({
           aria-controls={htmlFor}
           aria-label={t(isVisible ? 'auth.actions.hidePassword' : 'auth.actions.showPassword')}
           aria-pressed={isVisible}
-          className="absolute inset-y-0 right-0 inline-flex size-11 items-center justify-center rounded-[var(--radius-sm)] text-foreground-secondary transition-colors hover:bg-surface-hover hover:text-foreground focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-1 focus-visible:ring-offset-focus-ring-offset"
+          className="absolute inset-y-0 right-0 inline-flex size-11 items-center justify-center rounded-[var(--radius-sm)] text-foreground-secondary transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background"
           onClick={() => {
             setIsVisible((current) => !current);
           }}

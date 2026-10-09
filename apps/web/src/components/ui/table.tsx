@@ -18,7 +18,7 @@ export function TableHeader({ className, ...props }: React.ComponentProps<'thead
   return (
     <thead
       data-slot="table-header"
-      className={cn('[&_tr]:border-b border-border bg-surface-subtle/50', className)}
+      className={cn('[&_tr]:border-b border-border bg-muted/50', className)}
       {...props}
     />
   );
@@ -39,7 +39,7 @@ export function TableFooter({ className, ...props }: React.ComponentProps<'tfoot
     <tfoot
       data-slot="table-footer"
       className={cn(
-        'bg-surface-subtle/50 border-t border-border font-medium [&>tr]:last:border-b-0',
+        'bg-muted/50 border-t border-border font-medium [&>tr]:last:border-b-0',
         className,
       )}
       {...props}
@@ -52,7 +52,7 @@ export function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
     <tr
       data-slot="table-row"
       className={cn(
-        'hover:bg-surface-hover/60 data-[state=selected]:bg-surface-subtle border-b border-border-subtle transition-colors duration-150',
+        'hover:bg-accent/60 data-[state=selected]:bg-muted border-b border-border-subtle transition-colors duration-150',
         className,
       )}
       {...props}
@@ -87,7 +87,7 @@ export function TableCaption({ className, ...props }: React.ComponentProps<'capt
   return (
     <caption
       data-slot="table-caption"
-      className={cn('text-foreground-muted mt-4 text-xs italic', className)}
+      className={cn('text-muted-foreground mt-4 text-xs italic', className)}
       {...props}
     />
   );

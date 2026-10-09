@@ -49,7 +49,7 @@ export function MonetaryFilterGroup({
 
   return (
     <fieldset className={className}>
-      <legend className="type-label text-foreground-muted">{t('filters.rate')}</legend>
+      <legend className="type-label text-muted-foreground">{t('filters.rate')}</legend>
       <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(8rem,0.8fr)_minmax(0,1fr)_minmax(0,1fr)]">
         <Field htmlFor={`${idPrefix}-${currencyName}-filter`} label={t('filters.currency')}>
           <Select
@@ -115,7 +115,7 @@ export function MonetaryFilterGroup({
         {t('filters.clearRate')}
       </Button>
       {error ? (
-        <p className="mt-2 text-sm font-medium text-danger-text" role="alert">
+        <p className="mt-2 text-sm font-medium text-destructive-soft-foreground" role="alert">
           {error}
         </p>
       ) : null}

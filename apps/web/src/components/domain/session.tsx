@@ -63,7 +63,7 @@ export function SessionRow({
   return (
     <Link
       aria-label={t('session.openFor', { plate: session.vehicle.plate })}
-      className="group grid min-w-0 gap-4 border-b border-border-subtle bg-surface py-5 text-foreground transition-colors duration-200 hover:bg-surface-hover lg:grid-cols-[minmax(9rem,1.1fr)_minmax(7rem,0.8fr)_minmax(8rem,1fr)_auto] lg:items-center"
+      className="group grid min-w-0 gap-4 border-b border-border-subtle bg-card py-5 text-foreground transition-colors duration-200 hover:bg-accent lg:grid-cols-[minmax(9rem,1.1fr)_minmax(7rem,0.8fr)_minmax(8rem,1fr)_auto] lg:items-center"
       to={to}
     >
       <div className="flex min-w-0 items-center gap-3">
@@ -73,13 +73,13 @@ export function SessionRow({
         </span>
       </div>
       <div>
-        <p className="type-label text-foreground-muted">{t('session.arrived')}</p>
+        <p className="type-label text-muted-foreground">{t('session.arrived')}</p>
         <div className="mt-1 text-sm font-semibold">
           <OperationalTimestamp value={session.startTime} timezone={timezone} />
         </div>
       </div>
       <div>
-        <p className="type-label text-foreground-muted">{t('session.elapsed')}</p>
+        <p className="type-label text-muted-foreground">{t('session.elapsed')}</p>
         <div className="mt-1 text-sm font-semibold">
           {session.endTime ? (
             <span className="type-operational">
@@ -121,11 +121,11 @@ export function SessionHistoryRow({
   return (
     <Link
       aria-label={t('session.openFor', { plate: session.vehicle.plate })}
-      className="session-history-row group grid min-w-0 gap-x-4 gap-y-4 border-b border-border-subtle py-5 text-foreground transition-colors duration-200 hover:bg-surface-subtle focus-visible:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring md:grid-cols-[minmax(10rem,1.25fr)_minmax(9rem,1fr)_minmax(7rem,0.9fr)_minmax(8rem,auto)_auto] md:items-center"
+      className="session-history-row group grid min-w-0 gap-x-4 gap-y-4 border-b border-border-subtle py-5 text-foreground transition-colors duration-200 hover:bg-muted focus-visible:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:grid-cols-[minmax(10rem,1.25fr)_minmax(9rem,1fr)_minmax(7rem,0.9fr)_minmax(8rem,auto)_auto] md:items-center"
       to={to}
     >
       <div className="min-w-0">
-        <p className="type-label text-foreground-muted md:hidden">{t('session.plate')}</p>
+        <p className="type-label text-muted-foreground md:hidden">{t('session.plate')}</p>
         <div className="mt-1 flex items-center gap-3 md:mt-0">
           <Plate plate={session.vehicle.plate} />
           <span className="min-w-0 break-words text-xs font-semibold text-foreground-secondary">
@@ -134,13 +134,13 @@ export function SessionHistoryRow({
         </div>
       </div>
       <div className="min-w-0">
-        <p className="type-label text-foreground-muted md:hidden">{t('session.date')}</p>
+        <p className="type-label text-muted-foreground md:hidden">{t('session.date')}</p>
         <div className="mt-1 min-w-0 break-words text-sm font-semibold md:mt-0">
           <OperationalTimestamp value={session.startTime} timezone={timezone} />
         </div>
       </div>
       <div className="min-w-0">
-        <p className="type-label text-foreground-muted md:hidden">{t('session.elapsed')}</p>
+        <p className="type-label text-muted-foreground md:hidden">{t('session.elapsed')}</p>
         <div className="mt-1 min-w-0 break-words text-sm font-semibold md:mt-0">
           {session.endTime ? (
             <span className="type-operational">
@@ -152,12 +152,12 @@ export function SessionHistoryRow({
         </div>
       </div>
       <div className="flex items-center justify-between gap-4 md:block">
-        <p className="type-label text-foreground-muted md:hidden">{t('parkingHistory.status')}</p>
+        <p className="type-label text-muted-foreground md:hidden">{t('parkingHistory.status')}</p>
         <SessionStatus status={session.status} />
       </div>
       <div className="flex items-center justify-between gap-4 md:justify-end">
         <div className="text-right">
-          <p className="type-label text-foreground-muted md:hidden">{t('session.total')}</p>
+          <p className="type-label text-muted-foreground md:hidden">{t('session.total')}</p>
           <span className="type-operational">{total}</span>
         </div>
         <ArrowUpRight
@@ -189,15 +189,15 @@ export function CheckoutSummary({ session, timezone }: { session: Session; timez
   return (
     <section
       aria-label={t('session.checkoutSummary')}
-      className="rounded-[var(--radius-lg)] border border-border bg-surface-emphasis p-5 text-foreground"
+      className="rounded-[var(--radius-lg)] border border-border bg-accent p-5 text-foreground"
     >
       <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
-        <span className="type-label text-foreground-muted">{t('session.started')}</span>
+        <span className="type-label text-muted-foreground">{t('session.started')}</span>
         <OperationalTimestamp value={session.startTime} timezone={timezone} />
       </div>
       {!session.endTime ? (
         <div className="flex items-center justify-between gap-4 border-b border-border py-3">
-          <span className="type-label text-foreground-muted">
+          <span className="type-label text-muted-foreground">
             {t('session.currentCalculation')}
           </span>
           <time className="type-operational" dateTime={now.toISOString()}>
@@ -206,7 +206,7 @@ export function CheckoutSummary({ session, timezone }: { session: Session; timez
         </div>
       ) : null}
       <div className="flex items-center justify-between gap-4 border-b border-border py-3">
-        <span className="type-label text-foreground-muted">{t('session.rate')}</span>
+        <span className="type-label text-muted-foreground">{t('session.rate')}</span>
         <span className="type-operational">
           {formatMoney(session.hourlyRateCents, session.currency, locale)} /{' '}
           {t('session.perHourShort')}
@@ -214,14 +214,14 @@ export function CheckoutSummary({ session, timezone }: { session: Session; timez
       </div>
       {chargedHours ? (
         <div className="flex items-center justify-between gap-4 border-b border-border py-3">
-          <span className="type-label text-foreground-muted">{t('session.charged')}</span>
+          <span className="type-label text-muted-foreground">{t('session.charged')}</span>
           <span className="type-operational">
             {chargedHours} {tPlural(chargedHours, { one: 'session.hour', other: 'session.hours' })}
           </span>
         </div>
       ) : null}
       <div className="flex items-end justify-between gap-4 pt-5">
-        <span className="type-label text-foreground-muted">
+        <span className="type-label text-muted-foreground">
           {session.endTime ? t('session.confirmedTotal') : t('session.estimate')}
         </span>
         <strong className="font-display text-3xl font-bold leading-none tracking-[-0.055em] tabular-nums">
@@ -260,16 +260,18 @@ export function OperationalReceipt({
   return (
     <section
       aria-label={t('session.operationalReceipt')}
-      className="min-w-0 rounded-[var(--radius-xl)] border border-success-foreground bg-success-surface p-6 text-foreground sm:p-8"
+      className="min-w-0 rounded-[var(--radius-xl)] border border-success-soft-foreground bg-success-soft p-6 text-foreground sm:p-8"
     >
-      <div className="flex flex-col justify-between gap-5 border-b border-success-foreground/30 pb-5 sm:flex-row sm:items-start">
+      <div className="flex flex-col justify-between gap-5 border-b border-success-soft-foreground/30 pb-5 sm:flex-row sm:items-start">
         <div>
-          <p className="type-label text-success-text">{t('session.serverConfirmedCheckout')}</p>
+          <p className="type-label text-success-soft-foreground">
+            {t('session.serverConfirmedCheckout')}
+          </p>
           <h2 className="mt-3 font-display text-3xl font-bold tracking-[-0.045em]">
             {t('session.operationalReceipt')}
           </h2>
         </div>
-        <span className="rounded-full border border-success-foreground px-3 py-1.5 text-xs font-bold text-success-text">
+        <span className="rounded-full border border-success-soft-foreground px-3 py-1.5 text-xs font-bold text-success-soft-foreground">
           {t('session.completedLabel')}
         </span>
       </div>
@@ -323,8 +325,8 @@ export function OperationalReceipt({
         />
       </dl>
 
-      <div className="mt-7 flex items-end justify-between gap-4 border-t border-success-foreground/30 pt-5">
-        <span className="type-label text-success-text">{t('session.finalAmount')}</span>
+      <div className="mt-7 flex items-end justify-between gap-4 border-t border-success-soft-foreground/30 pt-5">
+        <span className="type-label text-success-soft-foreground">{t('session.finalAmount')}</span>
         <strong className="font-display text-4xl font-bold leading-none tracking-[-0.055em] tabular-nums">
           {total === null ? t('common.notAvailable') : formatMoney(total, session.currency, locale)}
         </strong>
@@ -364,10 +366,10 @@ export function OperationalCancellation({
   return (
     <section
       aria-label={t('session.cancelledRegion')}
-      className="min-w-0 rounded-[var(--radius-xl)] border border-warning-foreground bg-warning-surface p-6 text-warning-text sm:p-8"
+      className="min-w-0 rounded-[var(--radius-xl)] border border-warning-soft-foreground bg-warning-soft p-6 text-warning-soft-foreground sm:p-8"
       role="region"
     >
-      <div className="border-b border-warning-foreground/30 pb-5">
+      <div className="border-b border-warning-soft-foreground/30 pb-5">
         <p className="type-label">{t('session.terminalState')}</p>
         <h2 className="mt-3 font-display text-3xl font-bold tracking-[-0.045em]">
           {t('session.cancelledHeading')}
@@ -399,7 +401,7 @@ export function OperationalCancellation({
       </dl>
 
       {parkingHref || historyHref ? (
-        <div className="mt-7 flex flex-wrap gap-2 border-t border-warning-foreground/30 pt-5">
+        <div className="mt-7 flex flex-wrap gap-2 border-t border-warning-soft-foreground/30 pt-5">
           {parkingHref ? (
             <Button asChild size="sm" variant="secondary">
               <Link to={parkingHref}>{t('session.returnToParking')}</Link>
@@ -430,7 +432,7 @@ function getVehicleTypeLabel(
 function ReceiptItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
-      <dt className="type-label text-foreground-muted">{label}</dt>
+      <dt className="type-label text-muted-foreground">{label}</dt>
       <dd className="mt-1 break-words text-sm font-semibold leading-relaxed">{value}</dd>
     </div>
   );

@@ -49,10 +49,10 @@ export function OwnerProfileRoute() {
   if (!user) {
     return (
       <section aria-labelledby="profile-loading-title" className="owner-page space-y-6">
-        <h1 className="visually-hidden" id="profile-loading-title">
+        <h1 className="sr-only" id="profile-loading-title">
           {t('profile.title')}
         </h1>
-        <p className="visually-hidden" role="status">
+        <p className="sr-only" role="status">
           {t('profile.loading')}
         </p>
         <Skeleton className="min-h-96 w-full" />
@@ -146,7 +146,7 @@ function OwnerProfileContent({ user }: { user: User }) {
           aria-labelledby="profile-account-title"
           className="border-b border-border-subtle pb-8"
         >
-          <p className="type-label text-foreground-muted">{t('profile.accountSection')}</p>
+          <p className="type-label text-muted-foreground">{t('profile.accountSection')}</p>
           {isOwner ? (
             <>
               <h2 className="mt-3 type-section-title" id="profile-account-title">
@@ -205,7 +205,7 @@ function OwnerProfileContent({ user }: { user: User }) {
           aria-labelledby="profile-preferences-title"
           className="border-b border-border-subtle pb-8"
         >
-          <p className="type-label text-foreground-muted">{t('profile.preferences')}</p>
+          <p className="type-label text-muted-foreground">{t('profile.preferences')}</p>
           <h2 className="mt-3 type-section-title" id="profile-preferences-title">
             {t('profile.languageAppearance')}
           </h2>
@@ -244,8 +244,8 @@ function OwnerProfileContent({ user }: { user: User }) {
                     <p
                       className={
                         fieldState.error
-                          ? 'field-error text-sm font-medium text-danger-text'
-                          : 'field-help text-sm leading-relaxed text-foreground-muted'
+                          ? 'field-error text-sm font-medium text-destructive-soft-foreground'
+                          : 'field-help text-sm leading-relaxed text-muted-foreground'
                       }
                       id={messageId}
                       role={fieldState.error ? 'alert' : undefined}
@@ -264,11 +264,15 @@ function OwnerProfileContent({ user }: { user: User }) {
             {mutation.isPending ? t('profile.saving') : t('profile.save')}
           </Button>
           {errors.root?.message ? (
-            <p className="text-sm font-semibold text-danger-text" role="alert">
+            <p className="text-sm font-semibold text-destructive-soft-foreground" role="alert">
               {errors.root.message}
             </p>
           ) : saveStatus === 'success' ? (
-            <p aria-live="polite" className="text-sm font-semibold text-success-text" role="status">
+            <p
+              aria-live="polite"
+              className="text-sm font-semibold text-success-soft-foreground"
+              role="status"
+            >
               {t('profile.updated')}
             </p>
           ) : null}
@@ -280,7 +284,7 @@ function OwnerProfileContent({ user }: { user: User }) {
           aria-labelledby="profile-demo-data-title"
           className="border-b border-border-subtle pb-8"
         >
-          <p className="type-label text-foreground-muted">{t('profile.demoData')}</p>
+          <p className="type-label text-muted-foreground">{t('profile.demoData')}</p>
           <h2 className="mt-3 type-section-title" id="profile-demo-data-title">
             {t('profile.demoDataTitle')}
           </h2>
@@ -294,7 +298,7 @@ function OwnerProfileContent({ user }: { user: User }) {
       ) : null}
 
       <section aria-labelledby="profile-session-title">
-        <p className="type-label text-foreground-muted">{t('profile.session')}</p>
+        <p className="type-label text-muted-foreground">{t('profile.session')}</p>
         <h2 className="mt-3 type-section-title" id="profile-session-title">
           {t('profile.finished')}
         </h2>
@@ -312,9 +316,9 @@ function OwnerProfileContent({ user }: { user: User }) {
 
 function DemoSessionDisclosure({ locale, t, user }: { locale: Locale; t: Translator; user: User }) {
   return (
-    <div className="mt-4 flex min-w-0 flex-col gap-5 rounded-[var(--radius-lg)] border border-accent-foreground/30 bg-accent-soft p-5 text-foreground sm:flex-row sm:items-start sm:justify-between sm:p-6">
+    <div className="mt-4 flex min-w-0 flex-col gap-5 rounded-[var(--radius-lg)] border border-brand-foreground/30 bg-brand-soft p-5 text-foreground sm:flex-row sm:items-start sm:justify-between sm:p-6">
       <div className="flex min-w-0 items-start gap-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground">
           <UserRound aria-hidden="true" className="size-5" />
         </span>
         <div className="min-w-0">

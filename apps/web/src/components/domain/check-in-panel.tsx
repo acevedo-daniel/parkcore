@@ -53,7 +53,7 @@ type CheckInRequest = components['schemas']['CheckInRequest'];
 type LookupState = 'loading' | 'match' | 'no-match' | 'error';
 
 const controlClassName =
-  'h-12 w-full rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3.5 text-foreground shadow-xs focus:border-primary focus:ring-2 focus:ring-focus-ring';
+  'h-12 w-full rounded-[var(--radius-md)] border border-border bg-muted px-3.5 text-foreground shadow-xs focus:border-primary focus:ring-2 focus:ring-ring';
 
 export function CheckInPanel({
   error,
@@ -246,7 +246,7 @@ export function CheckInPanel({
       </div>
       <Field htmlFor="check-in-notes" label={t('checkIn.notes')}>
         <Textarea
-          className="min-h-24 w-full rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3.5 py-3 text-foreground shadow-xs focus:border-primary focus:ring-2 focus:ring-focus-ring"
+          className="min-h-24 w-full rounded-[var(--radius-md)] border border-border bg-muted px-3.5 py-3 text-foreground shadow-xs focus:border-primary focus:ring-2 focus:ring-ring"
           id="check-in-notes"
           {...register('notes')}
         />
@@ -254,7 +254,7 @@ export function CheckInPanel({
 
       {error ? (
         <p
-          className="break-words rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-3 text-sm font-semibold text-warning-text"
+          className="break-words rounded-[var(--radius-md)] border border-warning-soft-foreground bg-warning-soft p-3 text-sm font-semibold text-warning-soft-foreground"
           role="alert"
         >
           {error}
@@ -270,7 +270,7 @@ export function CheckInPanel({
 function FormDivider({ label }: { label: string }) {
   return (
     <div className="border-t border-border-subtle pt-5">
-      <span className="type-label text-foreground-muted">{label}</span>
+      <span className="type-label text-muted-foreground">{label}</span>
     </div>
   );
 }

@@ -36,18 +36,18 @@ function RouteRecovery({ notFound, owner }: { notFound: boolean; owner: boolean 
       className={
         owner
           ? 'owner-page flex min-h-[55vh] items-center'
-          : 'flex min-h-[65vh] items-center bg-canvas px-4 py-16 text-foreground sm:px-6 lg:px-8'
+          : 'flex min-h-[65vh] items-center bg-background px-4 py-16 text-foreground sm:px-6 lg:px-8'
       }
       role="alert"
     >
       <div
         className={
           owner
-            ? 'w-full min-w-0 max-w-xl rounded-[var(--radius-xl)] border border-accent-foreground/30 bg-accent-soft p-7 shadow-hover sm:p-10'
-            : 'mx-auto w-full max-w-3xl rounded-[var(--radius-xl)] border border-border-strong bg-surface p-8 shadow-hover sm:p-10'
+            ? 'w-full min-w-0 max-w-xl rounded-[var(--radius-xl)] border border-brand-foreground/30 bg-brand-soft p-7 shadow-md sm:p-10'
+            : 'mx-auto w-full max-w-3xl rounded-[var(--radius-xl)] border border-border-strong bg-card p-8 shadow-md sm:p-10'
         }
       >
-        <p className="font-mono text-xs font-bold tracking-[0.16em] text-foreground-muted uppercase">
+        <p className="font-mono text-xs font-bold tracking-[0.16em] text-muted-foreground uppercase">
           {notFound ? '404' : t('route.error.attention')}
         </p>
         <h1

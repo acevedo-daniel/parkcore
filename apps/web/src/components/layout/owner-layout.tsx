@@ -36,7 +36,7 @@ function OwnerLink({
             : 'owner-nav-link flex min-h-[var(--touch-target-min)] items-center gap-3 rounded-[var(--radius-sm)] px-3.5 py-2.5 text-sm font-medium transition-colors',
           isActive
             ? 'is-active bg-primary text-primary-foreground font-semibold'
-            : 'text-foreground-secondary hover:bg-surface-subtle hover:text-foreground',
+            : 'text-foreground-secondary hover:bg-muted hover:text-foreground',
         )
       }
       to={to}
@@ -76,11 +76,11 @@ export function OwnerLayout() {
     void navigate('/login', { replace: true });
   };
   return (
-    <div className="owner-theme owner-shell flex min-h-screen flex-col bg-canvas text-foreground wide:flex-row">
+    <div className="owner-theme owner-shell flex min-h-screen flex-col bg-background text-foreground wide:flex-row">
       <a className="skip-link" href="#owner-main">
         {t('nav.skipMain')}
       </a>
-      <aside className="owner-sidebar hidden shrink-0 border-r border-border-strong bg-surface p-6 wide:sticky wide:top-0 wide:flex wide:h-screen wide:w-[var(--owner-sidebar-width)] wide:flex-col wide:justify-between">
+      <aside className="owner-sidebar hidden shrink-0 border-r border-border-strong bg-card p-6 wide:sticky wide:top-0 wide:flex wide:h-screen wide:w-[var(--owner-sidebar-width)] wide:flex-col wide:justify-between">
         <div className="flex flex-col gap-6">
           <div className="owner-brand-block border-b border-border-strong pb-5">
             <Link
@@ -100,7 +100,7 @@ export function OwnerLayout() {
         <div className="owner-account flex flex-col gap-4 border-t border-border-strong pt-5">
           <div className="flex items-center justify-between">
             <time
-              className="system-clock font-mono text-xs text-foreground-muted tabular-nums"
+              className="system-clock font-mono text-xs text-muted-foreground tabular-nums"
               dateTime={clock.toISOString()}
             >
               {new Intl.DateTimeFormat(locale, {
@@ -110,14 +110,14 @@ export function OwnerLayout() {
               }).format(clock)}
             </time>
           </div>
-          <section className="rounded-[var(--radius-sm)] border border-border-subtle bg-surface-subtle p-3">
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-foreground-muted">
+          <section className="rounded-[var(--radius-sm)] border border-border-subtle bg-muted p-3">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
               {t('nav.preferences')}
             </p>
             <AppearanceControls compact />
           </section>
           <section className="border-t border-border-subtle pt-3">
-            <p className="mb-1 px-1 text-[10px] font-bold uppercase tracking-[0.12em] text-foreground-muted">
+            <p className="mb-1 px-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
               {t('nav.account')}
             </p>
             <NavLink
@@ -126,7 +126,7 @@ export function OwnerLayout() {
                   'owner-nav-link flex min-h-[var(--touch-target-min)] items-center gap-3 px-3.5 py-2 rounded-[var(--radius-sm)] text-sm font-medium transition-colors',
                   isActive
                     ? 'is-active bg-primary text-primary-foreground font-semibold'
-                    : 'text-foreground-secondary hover:bg-surface-subtle hover:text-foreground',
+                    : 'text-foreground-secondary hover:bg-muted hover:text-foreground',
                 )
               }
               to="/app/profile"
@@ -135,7 +135,7 @@ export function OwnerLayout() {
               <span>{t('nav.profile')}</span>
             </NavLink>
             <button
-              className="owner-nav-link owner-sign-out flex min-h-[var(--touch-target-min)] w-full cursor-pointer items-center gap-3 rounded-[var(--radius-sm)] px-3.5 py-2 text-left text-sm font-medium text-foreground-secondary transition-colors hover:bg-surface-subtle hover:text-foreground"
+              className="owner-nav-link owner-sign-out flex min-h-[var(--touch-target-min)] w-full cursor-pointer items-center gap-3 rounded-[var(--radius-sm)] px-3.5 py-2 text-left text-sm font-medium text-foreground-secondary transition-colors hover:bg-muted hover:text-foreground"
               onClick={signOut}
               type="button"
             >
@@ -145,7 +145,7 @@ export function OwnerLayout() {
           </section>
         </div>
       </aside>
-      <header className="owner-mobile-header sticky top-0 z-30 flex min-h-14 items-center justify-between gap-1 border-b border-border-strong bg-surface px-3 pb-2 pt-[max(0.5rem,env(safe-area-inset-top,0px))] wide:hidden">
+      <header className="owner-mobile-header sticky top-0 z-30 flex min-h-14 items-center justify-between gap-1 border-b border-border-strong bg-card px-3 pb-2 pt-[max(0.5rem,env(safe-area-inset-top,0px))] wide:hidden">
         <Link
           className="brand-mark flex min-h-[var(--touch-target-min)] items-center font-display text-base font-bold tracking-[-0.035em] text-foreground"
           to="/app"
@@ -157,7 +157,7 @@ export function OwnerLayout() {
           <span className="type-label hidden sm:inline">{t('nav.operations')}</span>
           <button
             aria-label={t('nav.signOut')}
-            className="icon-button flex size-9 items-center justify-center rounded-md border border-border-strong bg-surface text-foreground transition-colors hover:bg-surface-hover"
+            className="icon-button flex size-9 items-center justify-center rounded-md border border-border-strong bg-card text-foreground transition-colors hover:bg-accent"
             onClick={signOut}
             type="button"
           >
@@ -171,7 +171,7 @@ export function OwnerLayout() {
           className="route-loading-bar fixed inset-x-0 top-0 z-50 h-1 animate-pulse bg-primary"
           role="status"
         >
-          <span className="visually-hidden">{t('route.loading')}</span>
+          <span className="sr-only">{t('route.loading')}</span>
         </div>
       ) : null}
       <main
@@ -183,7 +183,7 @@ export function OwnerLayout() {
       </main>
       <nav
         aria-label={t('nav.ownerMobile')}
-        className="owner-mobile-nav fixed inset-x-0 bottom-0 z-30 flex items-center justify-around border-t border-border-strong bg-surface/95 px-4 backdrop-blur-md wide:hidden"
+        className="owner-mobile-nav fixed inset-x-0 bottom-0 z-30 flex items-center justify-around border-t border-border-strong bg-card/95 px-4 backdrop-blur-md wide:hidden"
       >
         {ownerLinks.map((link) => (
           <OwnerLink compact key={link.to} {...link} />

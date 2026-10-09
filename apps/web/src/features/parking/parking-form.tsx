@@ -225,11 +225,11 @@ export function ParkingForm({
           />
         </Field>
         {image ? (
-          <figure className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-surface-subtle">
+          <figure className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-muted">
             {imageLoadFailed ? (
               <div
                 aria-live="polite"
-                className="flex min-h-32 items-center justify-center px-5 py-8 text-center text-sm font-medium text-danger-text"
+                className="flex min-h-32 items-center justify-center px-5 py-8 text-center text-sm font-medium text-destructive-soft-foreground"
                 role="status"
               >
                 {t('parkingForm.imageLoadFailed')}
@@ -247,7 +247,7 @@ export function ParkingForm({
                 src={image}
               />
             )}
-            <figcaption className="border-t border-border-subtle px-4 py-2 text-xs text-foreground-muted">
+            <figcaption className="border-t border-border-subtle px-4 py-2 text-xs text-muted-foreground">
               {t('parkingForm.imagePreview')}
             </figcaption>
           </figure>
@@ -323,12 +323,15 @@ export function ParkingForm({
                   value={field.value}
                 />
                 {fieldState.error ? (
-                  <p className="field-error text-sm font-medium text-danger-text" id={messageId}>
+                  <p
+                    className="field-error text-sm font-medium text-destructive-soft-foreground"
+                    id={messageId}
+                  >
                     {fieldState.error.message}
                   </p>
                 ) : (
                   <p
-                    className="field-help text-sm leading-relaxed text-foreground-muted"
+                    className="field-help text-sm leading-relaxed text-muted-foreground"
                     id={messageId}
                   >
                     {t('parkingForm.timezoneHelp')}
@@ -474,7 +477,7 @@ function FormSection({
       aria-describedby={descriptionId}
       className={`space-y-5 border-b border-border-subtle pb-8 ${wide ? 'lg:col-span-2' : ''}`}
     >
-      <legend className="break-words px-0 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-foreground-muted">
+      <legend className="break-words px-0 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
         {title}
       </legend>
       <p

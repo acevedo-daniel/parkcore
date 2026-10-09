@@ -65,7 +65,7 @@ export function DemoResetControl() {
             {t('demo.restoreHelp')}
           </p>
           {error ? (
-            <p className="text-sm font-semibold text-danger-text" role="alert">
+            <p className="text-sm font-semibold text-destructive-soft-foreground" role="alert">
               {error}
             </p>
           ) : null}

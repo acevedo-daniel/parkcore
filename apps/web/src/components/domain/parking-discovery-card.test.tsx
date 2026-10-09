@@ -29,7 +29,7 @@ describe('public parking presentation', () => {
 
     expect(document.documentElement.dataset.theme).toBe('dark');
     const link = screen.getByRole('link', { name: 'Open Central Parking' });
-    expect(link.className).toContain('bg-surface');
+    expect(link.className).toContain('bg-card');
     expect(link.getAttribute('aria-describedby')).toBe('parking-parking-1-availability');
     expect(document.getElementById('parking-parking-1-availability')?.textContent).toBe(
       'Available',

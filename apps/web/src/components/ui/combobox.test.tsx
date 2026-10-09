@@ -20,7 +20,7 @@ describe('Combobox', () => {
 
     const input = screen.getByRole('combobox', { name: 'Facility' });
     await user.click(input);
-    expect(screen.getByRole('listbox').classList.contains('shadow-popover')).toBe(true);
+    expect(screen.getByRole('listbox').classList.contains('shadow-lg')).toBe(true);
 
     await user.keyboard('{ArrowDown}');
     expect(input.getAttribute('aria-activedescendant')).toContain('option-north');

@@ -130,12 +130,12 @@ export function ParkingCatalogRoute() {
   return (
     <section
       aria-labelledby="public-catalog-title"
-      className="min-h-full bg-canvas pb-20 pt-10 sm:pb-28 sm:pt-16"
+      className="min-h-full bg-background pb-20 pt-10 sm:pb-28 sm:pt-16"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <header className="grid gap-8 border-b border-border-subtle pb-10 lg:grid-cols-12 lg:items-end">
           <div className="min-w-0 lg:col-span-7">
-            <p className="type-label text-foreground-muted">{t('public.catalog.eyebrow')}</p>
+            <p className="type-label text-muted-foreground">{t('public.catalog.eyebrow')}</p>
             <h1
               className="mt-4 max-w-full break-words font-display text-4xl font-bold leading-[1.02] tracking-[-0.05em] sm:text-5xl lg:text-6xl"
               id="public-catalog-title"
@@ -321,7 +321,7 @@ function CatalogFilters({
     <form
       aria-describedby={filterError ? `${idPrefix}-filter-error` : undefined}
       aria-label={t('public.catalog.filterAction')}
-      className="grid gap-4 rounded-[var(--radius-xl)] border border-border bg-surface p-5 shadow-xs md:grid-cols-2 md:items-end lg:grid-cols-12 lg:p-6"
+      className="grid gap-4 rounded-[var(--radius-xl)] border border-border bg-card p-5 shadow-xs md:grid-cols-2 md:items-end lg:grid-cols-12 lg:p-6"
       noValidate
       onSubmit={onSubmit}
     >
@@ -332,8 +332,8 @@ function CatalogFilters({
         >
           {t('public.catalog.searchLabel')}
         </label>
-        <div className="flex items-center gap-2 rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3 focus-within:border-focus-ring focus-within:bg-surface">
-          <Search aria-hidden="true" className="size-4 shrink-0 text-foreground-muted" />
+        <div className="flex items-center gap-2 rounded-[var(--radius-md)] border border-border bg-muted px-3 focus-within:border-ring focus-within:bg-card">
+          <Search aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
           <Input
             className="public-discovery-search h-12 border-0 bg-transparent px-0 focus:bg-transparent focus-visible:outline-none focus-visible:ring-0"
             defaultValue={searchParams.get('search') ?? ''}
@@ -352,9 +352,9 @@ function CatalogFilters({
         onClear={onClear}
       />
       <div className="flex items-center md:col-span-1 lg:col-span-2">
-        <label className="flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-surface-subtle px-3.5 py-3 text-sm font-semibold text-foreground">
+        <label className="flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-muted px-3.5 py-3 text-sm font-semibold text-foreground">
           <input
-            className="size-4 rounded border-border accent-primary focus-visible:ring-2 focus-visible:ring-focus-ring"
+            className="size-4 rounded border-border accent-primary focus-visible:ring-2 focus-visible:ring-ring"
             defaultChecked={searchParams.get('availableNow') === 'true'}
             id={`${idPrefix}-available-now`}
             name="availableNow"
@@ -369,7 +369,7 @@ function CatalogFilters({
       </Button>
       {filterError ? (
         <p
-          className="text-sm font-medium text-danger-text lg:col-span-full"
+          className="text-sm font-medium text-destructive-soft-foreground lg:col-span-full"
           id={`${idPrefix}-filter-error`}
           role="alert"
         >
@@ -392,7 +392,7 @@ function CatalogSkeleton() {
     >
       {Array.from({ length: 6 }, (_, index) => (
         <div
-          className="overflow-hidden rounded-[var(--radius-xl)] border border-border bg-surface"
+          className="overflow-hidden rounded-[var(--radius-xl)] border border-border bg-card"
           key={index}
         >
           <Skeleton className="aspect-[4/3] rounded-none" />

@@ -106,7 +106,7 @@ export function OwnerParkingOverviewRoute() {
   if ((parkingsQuery.isError && !hasParkingSnapshot) || !parkingId) {
     return (
       <section className="owner-page" aria-labelledby="parking-overview-error-title">
-        <h1 className="visually-hidden" id="parking-overview-error-title">
+        <h1 className="sr-only" id="parking-overview-error-title">
           {t('parkingOperation.eyebrow')}
         </h1>
         <ErrorState onRetry={() => void parkingsQuery.refetch()}>
@@ -118,7 +118,7 @@ export function OwnerParkingOverviewRoute() {
   if (!parking) {
     return (
       <section className="owner-page" aria-labelledby="parking-overview-error-title">
-        <h1 className="visually-hidden" id="parking-overview-error-title">
+        <h1 className="sr-only" id="parking-overview-error-title">
           {t('parkingOperation.unavailableTitle')}
         </h1>
         <ErrorState title={t('parkingOperation.unavailableTitle')}>
@@ -174,7 +174,7 @@ export function OwnerParkingOverviewRoute() {
         }
         backAction={
           <Link
-            className="inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
+            className="inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-brand decoration-4 underline-offset-4"
             to="/app/parkings"
           >
             <ChevronLeft aria-hidden="true" className="size-4" />
@@ -194,7 +194,7 @@ export function OwnerParkingOverviewRoute() {
 
       {facilitySnapshotIsStale ? (
         <div
-          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="break-words text-sm font-semibold">{t('parkingOperation.staleFacility')}</p>
@@ -216,10 +216,10 @@ export function OwnerParkingOverviewRoute() {
 
       <div className="grid gap-4 wide:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
         <section
-          className="rounded-[var(--radius-xl)] border border-border bg-surface-emphasis p-6 text-foreground sm:p-8"
+          className="rounded-[var(--radius-xl)] border border-border bg-accent p-6 text-foreground sm:p-8"
           aria-labelledby="check-in-title"
         >
-          <p className="type-label text-foreground-muted">{t('parkingOperation.arrivals')}</p>
+          <p className="type-label text-muted-foreground">{t('parkingOperation.arrivals')}</p>
           <div className="mt-6 flex min-w-0 flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <div>
               <h2
@@ -248,10 +248,10 @@ export function OwnerParkingOverviewRoute() {
         </section>
 
         <section
-          className="rounded-[var(--radius-xl)] border border-border bg-surface p-6 sm:p-8"
+          className="rounded-[var(--radius-xl)] border border-border bg-card p-6 sm:p-8"
           aria-labelledby="capacity-title"
         >
-          <p className="type-label text-foreground-muted" id="capacity-title">
+          <p className="type-label text-muted-foreground" id="capacity-title">
             {t('parkingOperation.capacity')}
           </p>
           <div className="mt-5">
@@ -283,7 +283,7 @@ export function OwnerParkingOverviewRoute() {
       <section aria-labelledby="active-sessions-title">
         <div className="flex flex-col justify-between gap-5 border-b border-border-strong pb-5 sm:flex-row sm:items-end">
           <div>
-            <p className="type-label text-foreground-muted">{t('parkingOperation.onSite')}</p>
+            <p className="type-label text-muted-foreground">{t('parkingOperation.onSite')}</p>
             <h2
               className="mt-2 font-display text-3xl font-bold leading-none tracking-[-0.055em]"
               id="active-sessions-title"
@@ -312,13 +312,13 @@ export function OwnerParkingOverviewRoute() {
         </div>
 
         <label className="relative mt-6 block max-w-md" htmlFor="active-session-plate">
-          <span className="visually-hidden">{t('parkingOperation.searchPlate')}</span>
+          <span className="sr-only">{t('parkingOperation.searchPlate')}</span>
           <Search
             aria-hidden="true"
-            className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-foreground-muted"
+            className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
           />
           <input
-            className="h-12 w-full rounded-full border border-border bg-surface-subtle pl-11 pr-4 text-sm font-semibold text-foreground outline-none placeholder:text-foreground-muted focus:border-primary focus:ring-2 focus:ring-focus-ring"
+            className="h-12 w-full rounded-full border border-border bg-muted pl-11 pr-4 text-sm font-semibold text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring"
             id="active-session-plate"
             onChange={(event) => {
               setPlateSearch(event.target.value);
@@ -329,14 +329,14 @@ export function OwnerParkingOverviewRoute() {
         </label>
 
         {activeSessionsQuery.isFetching && !activeSessionsQuery.isLoading ? (
-          <p className="mt-3 type-label text-foreground-muted" role="status">
+          <p className="mt-3 type-label text-muted-foreground" role="status">
             {t('parkingOperation.refreshingActiveSessions')}
           </p>
         ) : null}
 
         {activeSessionsQuery.isError && hasActiveSessionData ? (
           <div
-            className="mt-4 flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+            className="mt-4 flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
             role="alert"
           >
             <p className="text-sm font-semibold">{t('parkingOperation.staleActiveSessions')}</p>
@@ -508,7 +508,7 @@ function OwnerParkingOperationSkeleton() {
       className="space-y-8"
       role="status"
     >
-      <h1 className="visually-hidden">{t('parkingOperation.eyebrow')}</h1>
+      <h1 className="sr-only">{t('parkingOperation.eyebrow')}</h1>
       <Skeleton className="h-48 rounded-[var(--radius-xl)]" />
       <div className="grid gap-4 wide:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
         <Skeleton className="h-64 rounded-[var(--radius-xl)]" />

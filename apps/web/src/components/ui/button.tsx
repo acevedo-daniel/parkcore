@@ -5,24 +5,24 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn.js';
 
 const buttonVariants = cva(
-  'parkcore-pressable inline-flex min-h-[var(--touch-target-min)] max-w-full cursor-pointer select-none items-center justify-center gap-2 break-words rounded-[var(--radius-sm)] text-center text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*="size-"])]:size-4 [&_svg]:shrink-0',
+  'parkcore-pressable inline-flex min-h-[var(--touch-target-min)] max-w-full cursor-pointer select-none items-center justify-center gap-2 break-words rounded-[var(--radius-sm)] text-center text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*="size-"])]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
         default:
-          'parkcore-raised-action border border-primary bg-primary text-primary-foreground hover:bg-primary-hover hover:border-primary-hover active:bg-primary-active',
+          'parkcore-raised-action border border-primary bg-primary text-primary-foreground hover:bg-primary/90 hover:border-primary/90 active:bg-primary/80',
         primary:
-          'parkcore-raised-action border border-primary bg-primary text-primary-foreground hover:bg-primary-hover hover:border-primary-hover active:bg-primary-active',
+          'parkcore-raised-action border border-primary bg-primary text-primary-foreground hover:bg-primary/90 hover:border-primary/90 active:bg-primary/80',
         secondary:
-          'parkcore-raised-action border border-border bg-surface text-foreground hover:bg-surface-hover hover:border-border-strong',
+          'parkcore-raised-action border border-border bg-card text-foreground hover:bg-accent hover:border-border-strong',
         destructive:
-          'parkcore-raised-action border border-danger bg-danger text-danger-on-solid hover:bg-danger/90',
+          'parkcore-raised-action border border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90',
         danger:
-          'parkcore-raised-action border border-danger bg-danger text-danger-on-solid hover:bg-danger/90',
+          'parkcore-raised-action border border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90',
         outline:
-          'parkcore-raised-action border border-border bg-surface text-foreground hover:bg-surface-hover',
-        ghost: 'hover:bg-surface-subtle text-foreground',
-        quiet: 'hover:bg-surface-subtle text-foreground',
+          'parkcore-raised-action border border-border bg-card text-foreground hover:bg-accent',
+        ghost: 'hover:bg-muted text-foreground',
+        quiet: 'hover:bg-muted text-foreground',
         link: 'text-foreground underline-offset-4 hover:underline',
       },
       size: {

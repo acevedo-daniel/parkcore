@@ -39,7 +39,7 @@ export interface ComboboxProps {
 }
 
 const controlClassName =
-  'control parkcore-field flex h-[var(--control-height-md)] min-w-0 w-full items-center justify-between gap-3 rounded-[var(--radius-md)] border border-border bg-surface-subtle px-3.5 text-left text-sm font-medium text-foreground outline-none transition-colors placeholder:text-foreground-muted focus-within:border-primary focus-within:bg-surface focus-visible:ring-2 focus-visible:ring-focus-ring disabled:cursor-not-allowed disabled:bg-disabled-surface disabled:text-disabled-foreground disabled:opacity-100';
+  'control parkcore-field flex h-[var(--control-height-md)] min-w-0 w-full items-center justify-between gap-3 rounded-[var(--radius-md)] border border-border bg-muted px-3.5 text-left text-sm font-medium text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-within:border-primary focus-within:bg-card focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100';
 
 export const Combobox = forwardRef<HTMLInputElement, ComboboxProps>(function Combobox(
   {
@@ -182,7 +182,7 @@ export const Combobox = forwardRef<HTMLInputElement, ComboboxProps>(function Com
           aria-invalid={ariaInvalid}
           aria-required={ariaRequired}
           aria-labelledby={`${inputId}-label`}
-          className="min-w-0 flex-1 overflow-hidden text-ellipsis bg-transparent text-foreground outline-none placeholder:text-foreground-muted"
+          className="min-w-0 flex-1 overflow-hidden text-ellipsis bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
           disabled={disabled}
           id={inputId}
           onBlur={(event) => {
@@ -237,7 +237,7 @@ export const Combobox = forwardRef<HTMLInputElement, ComboboxProps>(function Com
         />
         <button
           aria-label={label}
-          className="min-h-[var(--touch-target-min)] min-w-[var(--touch-target-min)] shrink-0 text-foreground-muted outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
+          className="min-h-[var(--touch-target-min)] min-w-[var(--touch-target-min)] shrink-0 text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
           disabled={disabled}
           onClick={() => {
             if (isOpen) close(false);
@@ -251,17 +251,17 @@ export const Combobox = forwardRef<HTMLInputElement, ComboboxProps>(function Com
         </button>
       </div>
       {name ? <input name={name} type="hidden" value={selectedValue} /> : null}
-      <span className="visually-hidden" id={`${inputId}-label`}>
+      <span className="sr-only" id={`${inputId}-label`}>
         {label}
       </span>
       {isOpen ? (
         <div
-          className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-[var(--radius-md)] border border-border bg-surface-raised p-1 text-sm shadow-popover"
+          className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-[var(--radius-md)] border border-border bg-popover p-1 text-sm shadow-lg"
           id={listboxId}
           role="listbox"
         >
           {filteredOptions.length === 0 ? (
-            <p className="px-3 py-2 text-foreground-muted" role="status">
+            <p className="px-3 py-2 text-muted-foreground" role="status">
               {emptyLabel ?? t('common.noOptions')}
             </p>
           ) : (
@@ -275,7 +275,7 @@ export const Combobox = forwardRef<HTMLInputElement, ComboboxProps>(function Com
                   aria-selected={isSelected}
                   className={cn(
                     'flex min-h-[var(--touch-target-min)] w-full items-center justify-between gap-3 rounded-[var(--radius-sm)] px-3 py-2 text-left font-medium text-foreground outline-none transition-colors',
-                    isActive && 'bg-surface-hover',
+                    isActive && 'bg-accent',
                     isSelected && 'font-bold',
                     option.disabled && 'cursor-not-allowed opacity-50',
                   )}
