@@ -441,13 +441,21 @@
     outline: none !important;
   }
 
-  [data-slot='input-group']:has([data-slot='input-group-control']:focus-visible) {
-    outline: 2px solid var(--border-strong) !important;
-    outline-offset: 2px !important;
+  [data-slot='combobox'] [role='combobox']:focus-visible {
+    outline: none !important;
+    border-color: var(--border-strong) !important;
+  }
+
+  [data-slot='command-input']:focus-visible {
+    outline: none !important;
+  }
+
+  [data-slot='command-input-wrapper']:has([data-slot='command-input']:focus-visible) {
+    border-bottom-color: var(--border-strong) !important;
   }
 
   [data-slot='input-group']:has([data-slot][aria-invalid='true']:focus-visible) {
-    outline-color: var(--destructive) !important;
+    border-color: var(--destructive) !important;
   }
 
   [aria-invalid='true']:focus-visible {

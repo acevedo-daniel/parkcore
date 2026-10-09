@@ -200,10 +200,10 @@ function CalculatorForm({
 
   return (
     <>
-      <div className="rounded-xl border border-border bg-muted p-4 transition-colors focus-within:border-primary focus-within:bg-card">
+      <div className="rounded-xl border border-border-subtle bg-transparent p-4">
         <div className="grid min-w-0 grid-cols-calculator-facility gap-x-3 gap-y-2 @sm:flex @sm:items-center @sm:gap-3">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground">
-            <MapPin aria-hidden="true" className="size-3.5" />
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-foreground">
+            <MapPin aria-hidden="true" className="size-4" />
           </span>
           <Combobox
             className="public-discovery-combobox min-w-0 @sm:flex-1"
@@ -225,7 +225,7 @@ function CalculatorForm({
         </div>
       </div>
 
-      <fieldset className="mt-3 rounded-xl border border-border bg-muted p-4">
+      <fieldset className="mt-3 rounded-xl border border-border-subtle bg-transparent p-4">
         <legend className="mb-3 flex w-full items-center justify-between gap-3">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
             <Clock aria-hidden="true" className="size-3.5" />

@@ -103,7 +103,7 @@ export const Combobox = forwardRef<HTMLButtonElement, ComboboxProps>(function Co
             aria-label={label}
             aria-required={ariaRequired === true || ariaRequired === 'true' || undefined}
             className={cn(
-              'justify-between border-input bg-muted text-left font-medium hover:bg-muted',
+              'justify-between border-input bg-card text-left font-medium hover:border-border-strong hover:bg-card',
               !selectedOption && 'text-muted-foreground',
             )}
             disabled={disabled}

@@ -339,7 +339,7 @@ function CatalogFilters({
         >
           {t('public.catalog.searchLabel')}
         </label>
-        <InputGroup className="border-border bg-muted focus-within:border-ring">
+        <InputGroup className="border-border-subtle bg-transparent dark:bg-transparent">
           <InputGroupAddon>
             <InputGroupText>
               <Search aria-hidden="true" />

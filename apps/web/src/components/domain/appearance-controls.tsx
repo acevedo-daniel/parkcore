@@ -1,4 +1,4 @@
-import { Languages, SunMoon } from 'lucide-react';
+import { SunMoon } from 'lucide-react';
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select.js';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group.js';
@@ -32,7 +32,7 @@ export function AppearanceControls({
         ) : null}
         <ToggleGroup
           aria-label={isProfile ? t('appearance.languageLabel') : t('appearance.language')}
-          className="shrink-0 gap-1 rounded-lg border border-border-strong bg-muted p-1"
+          className="shrink-0 gap-0.5 rounded-xl border border-border-subtle bg-transparent p-0.5"
           onValueChange={(value) => {
             if (value === 'es-AR' || value === 'en-US') {
               setLanguage(value);
@@ -41,19 +41,16 @@ export function AppearanceControls({
           type="single"
           value={locale}
         >
-          {!isProfile ? (
-            <Languages aria-hidden="true" className="ml-1 size-4 shrink-0 text-muted-foreground" />
-          ) : null}
           <ToggleGroupItem
             aria-label={t('appearance.languageSpanish')}
-            className="min-w-11 rounded-md border border-transparent px-2.5 text-xs font-bold text-foreground-secondary data-[state=on]:border-border-subtle data-[state=on]:bg-card data-[state=on]:text-foreground data-[state=on]:shadow-xs"
+            className="min-h-11 min-w-11 rounded-lg border border-transparent px-2.5 text-xs font-bold text-foreground-secondary data-[state=on]:bg-brand-soft data-[state=on]:text-foreground"
             value="es-AR"
           >
             ES
           </ToggleGroupItem>
           <ToggleGroupItem
             aria-label={t('appearance.languageEnglish')}
-            className="min-w-11 rounded-md border border-transparent px-2.5 text-xs font-bold text-foreground-secondary data-[state=on]:border-border-subtle data-[state=on]:bg-card data-[state=on]:text-foreground data-[state=on]:shadow-xs"
+            className="min-h-11 min-w-11 rounded-lg border border-transparent px-2.5 text-xs font-bold text-foreground-secondary data-[state=on]:bg-brand-soft data-[state=on]:text-foreground"
             value="en-US"
           >
             EN
