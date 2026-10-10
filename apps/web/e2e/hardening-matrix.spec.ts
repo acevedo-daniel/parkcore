@@ -848,6 +848,40 @@ async function expectPublicHeaderActionsAligned(page: Page, label: string) {
   }
 }
 
+async function expectCalculatorOptionsUnbroken(page: Page, label: string) {
+  const durationGroup = page.getByRole('radiogroup', {
+    name: /estimated stay|estadía estimada/i,
+  });
+  await expect(durationGroup).toBeVisible();
+  const options = durationGroup.getByRole('radio');
+  const measurements = await options.evaluateAll((elements) =>
+    elements.map((element) => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      return {
+        label: element.textContent.trim(),
+        clientWidth: element.clientWidth,
+        scrollWidth: element.scrollWidth,
+        textLines: range.getClientRects().length,
+      };
+    }),
+  );
+
+  expect(measurements, `${label} should expose all five duration options.`).toHaveLength(5);
+  for (const option of measurements) {
+    expect(
+      option.scrollWidth,
+      `${label} ${option.label} should not overflow its calculator option.`,
+    ).toBeLessThanOrEqual(option.clientWidth);
+    if (option.label === 'Custom' || option.label === 'Personalizado') {
+      expect(
+        option.textLines,
+        `${label} ${option.label} should fit on one line.`,
+      ).toBeLessThanOrEqual(1);
+    }
+  }
+}
+
 async function visitFixture(
   page: Page,
   route: RouteFixture,
@@ -870,6 +904,12 @@ async function visitFixture(
     `${viewport.name} ${locale} ${theme} ${route.name}`,
   );
   await expectNoHorizontalOverflow(page, `${viewport.name} ${locale} ${theme} ${route.name}`);
+  if (route.name === 'landing') {
+    await expectCalculatorOptionsUnbroken(
+      page,
+      `${viewport.name} ${locale} ${theme} ${route.name}`,
+    );
+  }
   await expectMobileNavigationDoesNotCoverContent(page, `${viewport.name} ${route.name}`);
   if (route.shell === 'public' && viewport.width >= 1280) {
     await expectPublicHeaderActionsAligned(
