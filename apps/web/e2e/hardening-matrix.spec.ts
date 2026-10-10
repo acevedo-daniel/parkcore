@@ -715,6 +715,37 @@ async function expectOwnerOverviewPanelsWithinViewport(page: Page, label: string
   });
 }
 
+async function expectOverviewMetricsAligned(page: Page, label: string) {
+  const metricsLocator = page.locator('section[aria-labelledby="network-now-title"] dl > div');
+  await expect(metricsLocator).toHaveCount(4);
+  const metrics = await metricsLocator.evaluateAll((elements) =>
+    elements.map((element) => {
+      const metric = element as HTMLElement;
+      const value = metric.querySelector('dd');
+
+      return {
+        bottom: value?.getBoundingClientRect().bottom ?? Number.NaN,
+        top: Math.round(metric.getBoundingClientRect().top),
+      };
+    }),
+  );
+  const rows = new Map<number, number[]>();
+
+  for (const { bottom, top } of metrics) {
+    const values = rows.get(top) ?? [];
+    values.push(bottom);
+    rows.set(top, values);
+  }
+
+  for (const [top, bottoms] of rows) {
+    const difference = Math.max(...bottoms) - Math.min(...bottoms);
+    expect(
+      difference,
+      `${label} KPI row at ${String(top)}px should align metric value bottoms.`,
+    ).toBeLessThanOrEqual(1);
+  }
+}
+
 async function expectMobileNavigationDoesNotCoverContent(page: Page, label: string) {
   const navigation = page.locator('.owner-mobile-nav');
   if ((await navigation.count()) === 0 || !(await navigation.isVisible())) return;
@@ -910,6 +941,9 @@ async function visitFixture(
       `${viewport.name} ${locale} ${theme} ${route.name}`,
     );
   }
+  if (route.name === 'overview') {
+    await expectOverviewMetricsAligned(page, `${viewport.name} ${locale} ${theme} ${route.name}`);
+  }
   await expectMobileNavigationDoesNotCoverContent(page, `${viewport.name} ${route.name}`);
   if (route.shell === 'public' && viewport.width >= 1280) {
     await expectPublicHeaderActionsAligned(
@@ -1064,6 +1098,10 @@ test('keeps multiple owner overview summaries inside their grid', async ({ page 
       for (const viewport of [VIEWPORTS[3], VIEWPORTS[4]] as const) {
         await test.step(`${locale} ${theme} ${viewport.name}`, async () => {
           await visitFixture(page, overviewRoute, viewport, locale, theme);
+          await expectOverviewMetricsAligned(
+            page,
+            `${viewport.name} ${locale} ${theme} owner overview with multiple facilities`,
+          );
           await expectOwnerOverviewPanelsWithinViewport(
             page,
             `${viewport.name} ${locale} ${theme} owner overview`,

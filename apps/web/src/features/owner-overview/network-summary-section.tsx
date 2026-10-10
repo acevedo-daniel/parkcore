@@ -129,9 +129,9 @@ export function NetworkSummarySection({ parkings, summaryQuery }: NetworkSummary
 
 function SummaryMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0">
+    <div className="flex h-full min-w-0 flex-col">
       <dt className="type-label text-muted-foreground">{label}</dt>
-      <dd className="mt-2 break-words type-metric">{value}</dd>
+      <dd className="mt-auto break-words pt-2 type-metric">{value}</dd>
     </div>
   );
 }
