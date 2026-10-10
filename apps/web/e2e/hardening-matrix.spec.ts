@@ -54,6 +54,10 @@ async function captureReview(page: Page, relativePath: string) {
     throw new Error('PARKCORE_REVIEW_DIR must be set before capturing review screenshots.');
   }
 
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, 0);
+  });
   await page.screenshot({ fullPage: true, path: path.resolve(REVIEW_DIR, relativePath) });
 }
 
