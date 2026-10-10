@@ -113,8 +113,11 @@ export function LandingRoute() {
 
   return (
     <div className="landing-page overflow-hidden bg-background text-foreground">
-      <section className="bg-brand text-brand-foreground">
-        <div className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-12 lg:items-center lg:gap-16 lg:px-8 lg:py-24">
+      <section
+        className="flex min-h-svh items-center bg-brand text-brand-foreground"
+        data-slot="landing-hero"
+      >
+        <div className="mx-auto grid w-full max-w-7xl gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-12 lg:items-center lg:gap-16 lg:px-8 lg:py-24">
           <div className="min-w-0 lg:col-span-7">
             <p className="type-label inline-flex items-center gap-2 rounded-full border border-brand-strong bg-brand/70 px-3 py-1.5 text-brand-foreground">
               <span aria-hidden="true" className="size-1.5 rounded-full bg-brand-foreground" />

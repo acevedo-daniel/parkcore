@@ -31,7 +31,7 @@ function listFixture(data: ParkingList['data']): ParkingList {
 }
 
 function renderLanding() {
-  render(
+  return render(
     <AppearanceProvider>
       <QueryClientProvider
         client={
@@ -55,6 +55,15 @@ afterEach(() => {
 });
 
 describe('public landing route', () => {
+  it('fills the first screen with the landing hero', () => {
+    api.getPublicParkings.mockResolvedValue(listFixture([]));
+    const { container } = renderLanding();
+
+    const hero = container.querySelector('[data-slot="landing-hero"]');
+    expect(hero?.getAttribute('data-slot')).toBe('landing-hero');
+    expect(hero?.classList.contains('min-h-svh')).toBe(true);
+  });
+
   it('uses public API facilities and labels operations proof as demonstration data', async () => {
     api.getPublicParkings.mockResolvedValue(
       listFixture([publicParkingFixture({ isShowcase: true })]),
