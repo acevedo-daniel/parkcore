@@ -789,6 +789,25 @@ async function expectVisibleFocus(locator: Locator, label: string) {
   expect(hasVisibleFocus, `${label} should have a visible focus indicator.`).toBe(true);
 }
 
+async function expectPreferenceSegmentsUntruncated(page: Page, label: string) {
+  const issues = await page
+    .locator('[data-slot="appearance-controls"] [role="radio"]:visible')
+    .evaluateAll((segments) =>
+      segments
+        .map((segment) => {
+          const element = segment as HTMLElement;
+          return {
+            clientWidth: element.clientWidth,
+            scrollWidth: element.scrollWidth,
+            width: element.getBoundingClientRect().width,
+          };
+        })
+        .filter(({ clientWidth, scrollWidth, width }) => scrollWidth > clientWidth || width < 44),
+    );
+
+  expect(issues, `${label} has truncated or undersized preference segments.`).toEqual([]);
+}
+
 async function visitFixture(
   page: Page,
   route: RouteFixture,
@@ -806,6 +825,10 @@ async function visitFixture(
   await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
   await expect(page.locator('html')).toHaveAttribute('lang', locale);
+  await expectPreferenceSegmentsUntruncated(
+    page,
+    `${viewport.name} ${locale} ${theme} ${route.name}`,
+  );
   await expectNoHorizontalOverflow(page, `${viewport.name} ${locale} ${theme} ${route.name}`);
   await expectMobileNavigationDoesNotCoverContent(page, `${viewport.name} ${route.name}`);
 }
@@ -1073,7 +1096,16 @@ test('keeps profile preferences labeled and accessible at narrow widths', async 
             `${viewport.name} ${locale} ${theme} profile language focus`,
           );
           await expectVisibleFocus(
-            controls.getByRole('combobox', { name: appearanceLabel }),
+            controls.getByRole('radiogroup', { name: appearanceLabel }).getByRole('radio', {
+              name:
+                locale === 'en-US'
+                  ? theme === 'dark'
+                    ? 'Dark'
+                    : 'Light'
+                  : theme === 'dark'
+                    ? 'Oscuro'
+                    : 'Claro',
+            }),
             `${viewport.name} ${locale} ${theme} profile appearance focus`,
           );
         });
@@ -1281,22 +1313,22 @@ test('covers owner management, history, profile, and recovery interactions', asy
       const name = profileMain.locator('#profile-name');
       await name.fill('Updated owner');
 
-      const profileTheme = profileMain.getByRole('combobox', {
-        name: /theme|appearance|apariencia/i,
+      const profileTheme = profileMain.getByRole('radiogroup', {
+        name: state.locale === 'en-US' ? 'Appearance' : 'Apariencia',
       });
       const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
-      await chooseSelectOption(
-        page,
-        profileTheme,
+      const nextThemeLabel =
         state.locale === 'en-US'
           ? nextTheme === 'dark'
             ? 'Dark'
             : 'Light'
           : nextTheme === 'dark'
             ? 'Oscuro'
-            : 'Claro',
-      );
+            : 'Claro';
+      const nextThemeRadio = profileTheme.getByRole('radio', { name: nextThemeLabel });
+      await nextThemeRadio.click();
       await expect(page.locator('html')).toHaveAttribute('data-theme', nextTheme);
+      await expect(nextThemeRadio).toHaveAttribute('aria-checked', 'true');
 
       await profileMain
         .getByRole('radio', { name: state.locale === 'en-US' ? 'Spanish' : 'Inglés' })
