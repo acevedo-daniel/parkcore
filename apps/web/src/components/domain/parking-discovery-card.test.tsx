@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it } from 'vitest';
 
@@ -35,7 +35,14 @@ describe('public parking presentation', () => {
       'Available',
     );
     expect(screen.getByRole('img', { name: 'Parking image not available' })).toBeTruthy();
-    expect(screen.getByText('Demo')).toBeTruthy();
+    const card = screen.getByRole('link', { name: 'Open Central Parking' });
+    const media = card.querySelector<HTMLElement>('[data-slot="discovery-card-media"]');
+    const demoBadge = within(card).getByText('Demo');
+    expect(media).not.toBeNull();
+    expect(media?.contains(demoBadge)).toBe(true);
+    expect(demoBadge.getAttribute('data-variant')).toBe('brand');
+    const title = within(card).getByRole('heading', { name: 'Central Parking' });
+    expect(title.nextElementSibling?.textContent).toBe('Downtown');
     expect(screen.getByText('Full')).toBeTruthy();
   });
 
@@ -43,7 +50,11 @@ describe('public parking presentation', () => {
     renderPublicContent('es-AR', 'light');
 
     expect(screen.getByRole('link', { name: 'Abrir Central Parking' })).toBeTruthy();
-    expect(screen.getByText('Demo')).toBeTruthy();
+    const card = screen.getByRole('link', { name: 'Abrir Central Parking' });
+    const media = card.querySelector<HTMLElement>('[data-slot="discovery-card-media"]');
+    const demoBadge = within(card).getByText('Demo');
+    expect(media?.contains(demoBadge)).toBe(true);
+    expect(within(card).getByRole('heading').nextElementSibling?.textContent).toBe('Downtown');
     expect(screen.getByText('Completa')).toBeTruthy();
     expect(screen.getByText('Tarifa por hora')).toBeTruthy();
   });

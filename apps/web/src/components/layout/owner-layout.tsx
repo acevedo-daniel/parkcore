@@ -111,11 +111,11 @@ export function OwnerLayout() {
               }).format(clock)}
             </time>
           </div>
-          <section className="rounded-md border border-border-subtle bg-muted p-3">
+          <section>
             <p className="mb-2 text-2xs font-bold uppercase tracking-eyebrow text-muted-foreground">
               {t('nav.preferences')}
             </p>
-            <AppearanceControls compact />
+            <AppearanceControls compact layout="stacked" />
           </section>
           <section className="border-t border-border-subtle pt-3">
             <p className="mb-1 px-1 text-2xs font-bold uppercase tracking-eyebrow text-muted-foreground">
@@ -147,14 +147,14 @@ export function OwnerLayout() {
           </section>
         </div>
       </aside>
-      <header className="owner-mobile-header sticky top-0 z-30 flex min-h-14 items-center justify-between gap-1 border-b border-border-strong bg-card px-3 pb-2 pt-safe-header wide:hidden">
+      <header className="owner-mobile-header sticky top-0 z-30 flex min-h-14 flex-wrap items-center justify-between gap-1 border-b border-border-strong bg-card px-3 pb-2 pt-safe-header wide:hidden">
         <Link
           className="brand-mark flex min-h-11 items-center font-display text-base font-bold tracking-title text-foreground"
           to="/app"
         >
           PARKCORE
         </Link>
-        <div className="flex items-center gap-1">
+        <div className="ml-auto flex items-center gap-1">
           <AppearanceControls className="gap-1" />
           <span className="type-label hidden sm:inline">{t('nav.operations')}</span>
           <Button

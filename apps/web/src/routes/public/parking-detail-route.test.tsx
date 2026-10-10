@@ -52,6 +52,10 @@ describe('public parking detail images', () => {
     expect(
       await screen.findByText('Fictional parking with demonstration data for exploring ParkCore.'),
     ).toBeTruthy();
+    const demoBadge = screen.getByText('Demo');
+    const availability = screen.getByText('Available');
+    expect(demoBadge.getAttribute('data-variant')).toBe('brand');
+    expect(demoBadge.parentElement).toBe(availability.parentElement);
   });
 
   it('renders a stable, asynchronously decoded primary parking image', async () => {

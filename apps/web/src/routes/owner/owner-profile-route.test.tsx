@@ -152,11 +152,11 @@ describe('owner profile route', () => {
     expect(screen.getByLabelText<HTMLInputElement>('Nombre').value).toBe('Grace');
     expect(screen.getByRole('heading', { name: 'Perfil' })).toBeTruthy();
 
-    const theme = screen.getByRole('combobox', { name: 'Apariencia' });
+    const theme = screen.getByRole('radio', { name: 'Oscuro' });
     await user.click(theme);
-    await user.click(await screen.findByRole('option', { name: 'Oscuro' }));
 
     expect(document.documentElement.dataset.theme).toBe('dark');
+    expect(theme.getAttribute('aria-checked')).toBe('true');
     expect(screen.getByLabelText<HTMLInputElement>('Nombre').value).toBe('Grace');
   });
 

@@ -5,6 +5,7 @@ import { Link, useParams } from 'react-router';
 import { useAppearance } from '../../app/appearance-provider.js';
 import { AvailabilityIndicator } from '../../components/domain/availability-indicator.js';
 import { PublicParkingImage } from '../../components/domain/public-parking-image.js';
+import { Badge } from '../../components/ui/badge.js';
 import { Button } from '../../components/ui/button.js';
 import { ParkingCalculatorWidget } from '../../features/parking/parking-calculator-widget.js';
 import { getPublicParking, PublicApiError } from '../../lib/api/public-api.js';
@@ -105,23 +106,24 @@ export function ParkingDetailRoute() {
           data-slot="parking-detail-layout"
         >
           <header className="min-w-0 lg:col-span-7">
-            {parking.isShowcase ? (
-              <span className="mb-4 inline-flex rounded-full border border-brand-strong bg-brand-soft px-3 py-1.5 text-xs font-bold text-foreground">
-                {t('parking.demo')}
-              </span>
-            ) : null}
             <h1
               className="mt-2 max-w-full break-words font-display text-5xl font-black leading-display tracking-display text-foreground sm:text-6xl"
               id="public-detail-title"
             >
               {parking.title}
             </h1>
-            <AvailabilityIndicator
-              className="mt-5"
-              nextOpeningAt={parking.nextOpeningAt}
-              state={parking.availabilityState}
-              timezone={parking.timezone}
-            />
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <AvailabilityIndicator
+                nextOpeningAt={parking.nextOpeningAt}
+                state={parking.availabilityState}
+                timezone={parking.timezone}
+              />
+              {parking.isShowcase ? (
+                <Badge size="sm" variant="brand">
+                  {t('parking.demo')}
+                </Badge>
+              ) : null}
+            </div>
             <p className="mt-5 flex min-w-0 max-w-xl items-start gap-2 text-base leading-relaxed text-foreground-secondary sm:text-lg">
               <MapPin aria-hidden="true" className="mt-1 size-5 shrink-0 text-foreground" />
               <span>

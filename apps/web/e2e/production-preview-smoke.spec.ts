@@ -203,6 +203,8 @@ test('applies stored and system themes before the app mounts', async ({ page }) 
         : appearance.preference === 'dark'
           ? 'Dark'
           : 'Light';
-    await expect(page.getByRole('combobox', { name: 'Theme' })).toHaveText(themeLabel);
+    await expect(
+      page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio', { name: themeLabel }),
+    ).toHaveAttribute('aria-checked', 'true');
   }
 });
