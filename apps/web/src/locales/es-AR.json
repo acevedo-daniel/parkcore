@@ -223,18 +223,6 @@
       "featuredEyebrow": "Cerca de donde vas",
       "featuredTitle": "Elige una cochera con la información necesaria.",
       "featuredAction": "Ver todas las cocheras",
-      "operationsEyebrow": "Datos de demostración",
-      "operationsTitle": "Tres momentos para entender la operación.",
-      "operationsDescription": "Esta escena muestra cómo ParkCore ordena la operación: registrar el ingreso de un vehículo, seguir la estadía y cerrar el día con claridad.",
-      "operationsNote": "No es actividad en tiempo real.",
-      "operationSteps": {
-        "arrivalTitle": "Entrada",
-        "arrivalDescription": "La patente o el código QR permiten registrar una estadía que puedes consultar después.",
-        "stayTitle": "Durante la estadía",
-        "stayDescription": "La tarifa y el tiempo quedan vinculados, sin registros innecesarios.",
-        "departureTitle": "Salida",
-        "departureDescription": "El cierre deja un comprobante y un registro para quien lo necesite."
-      },
       "faqEyebrow": "Preguntas frecuentes al estacionar",
       "faqTitle": "Respuestas claras antes de empezar.",
       "faq": {

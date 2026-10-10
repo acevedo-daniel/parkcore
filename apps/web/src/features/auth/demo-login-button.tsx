@@ -8,11 +8,13 @@ import { useAuth } from './use-auth.js';
 export function DemoLoginButton({
   onSuccess,
   variant = 'secondary',
+  shape = 'default',
   className,
   children,
 }: {
   onSuccess: () => void;
   variant?: 'default' | 'secondary';
+  shape?: 'default' | 'pill';
   className?: string;
   children?: React.ReactNode;
 }) {
@@ -42,6 +44,7 @@ export function DemoLoginButton({
         disabled={isSubmitting}
         onClick={() => void startDemo()}
         type="button"
+        shape={shape}
         variant={variant}
       >
         {isSubmitting ? t('demo.opening') : (children ?? t('demo.try'))}

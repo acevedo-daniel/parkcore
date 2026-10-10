@@ -223,18 +223,6 @@
       "featuredEyebrow": "Near where you are going",
       "featuredTitle": "Choose a facility with the information you need.",
       "featuredAction": "See all facilities",
-      "operationsEyebrow": "Demonstration data",
-      "operationsTitle": "Three moments that explain the operation.",
-      "operationsDescription": "This scene shows how ParkCore brings order to operations: record a vehicle's arrival, track the stay, and close the day clearly.",
-      "operationsNote": "This is not real-time activity.",
-      "operationSteps": {
-        "arrivalTitle": "Arrival",
-        "arrivalDescription": "Your plate or QR code lets you record a stay you can look up later.",
-        "stayTitle": "During the stay",
-        "stayDescription": "Rate and time stay connected, with no unnecessary notes.",
-        "departureTitle": "Departure",
-        "departureDescription": "Closeout leaves a receipt and a record for whoever needs it."
-      },
       "faqEyebrow": "Common questions about parking",
       "faqTitle": "Clear answers before you start.",
       "faq": {
