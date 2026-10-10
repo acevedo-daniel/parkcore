@@ -19,7 +19,7 @@ import { OwnerParkingPanel } from '../../features/parking/owner-parking-panel.js
 import { useOwnedParkingOperations } from '../../features/parking/use-owned-parking-operations.js';
 import { getActiveSessionsForOwner } from '../../lib/api/owner-api.js';
 import { cn } from '../../lib/cn.js';
-import { formatMoney, formatNumber } from '../../lib/format.js';
+import { formatElapsedHours, formatMoney, formatNumber } from '../../lib/format.js';
 import type { Locale } from '../../lib/localization.js';
 import { deriveOwnerAttentionItems } from './owner-overview-attention.js';
 
@@ -144,7 +144,7 @@ export function OwnerOverviewRoute() {
           ? t('overview.attentionLimited')
           : item.state === 'LONG_RUNNING'
             ? t('overview.attentionLongRunning', {
-                hours: formatCount(item.durationHours ?? 8),
+                duration: formatElapsedHours(item.durationHours ?? 8, locale),
               })
             : t('overview.attentionPaused'),
   }));
