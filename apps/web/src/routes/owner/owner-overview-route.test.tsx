@@ -229,6 +229,65 @@ describe('owner overview briefing', () => {
     expect(screen.getByRole('list', { name: 'Daily activity data' })).toBeTruthy();
   });
 
+  it('centers sparse chart bars and keeps their full-width hit areas at both periods', async () => {
+    const user = userEvent.setup();
+    const thirtyDayDates = Array.from(
+      { length: 30 },
+      (_, index) => `2026-09-${String(index + 1).padStart(2, '0')}`,
+    );
+    api.getOwnedParkings.mockResolvedValue([parkingFixture()]);
+    api.getAnalyticsSummary.mockResolvedValue(baseSummary);
+    api.getAnalyticsRevenue.mockImplementation((days: 7 | 30) =>
+      Promise.resolve(
+        days === 7
+          ? baseRevenue
+          : {
+              data: thirtyDayDates.map((date, index) => ({
+                date,
+                revenueByCurrency: [{ currency: 'USD', revenueCents: (index + 1) * 100 }],
+              })),
+              days,
+            },
+      ),
+    );
+    api.getAnalyticsVolume.mockImplementation((days: 7 | 30) =>
+      Promise.resolve(
+        days === 7
+          ? baseVolume
+          : {
+              data: thirtyDayDates.map((date, index) => ({
+                completedSessions: index,
+                date,
+              })),
+              days,
+            },
+      ),
+    );
+    const { container } = renderOverview();
+
+    const dailyData = await screen.findByRole('list', { name: 'Daily activity data' });
+    const chartBars = () => container.querySelectorAll('[data-slot="toggle-group-item"] > span');
+    const expectBoundedBars = (expectedCount: number) => {
+      const bars = chartBars();
+      expect(bars).toHaveLength(expectedCount);
+      for (const bar of bars) {
+        expect(bar.classList.contains('mx-auto')).toBe(true);
+        expect(bar.classList.contains('w-full')).toBe(true);
+        expect(bar.classList.contains('max-w-12')).toBe(true);
+        expect(bar.parentElement?.classList.contains('flex-1')).toBe(true);
+      }
+    };
+
+    expect(dailyData.children).toHaveLength(2);
+    expectBoundedBars(2);
+    await user.click(screen.getByRole('radio', { name: 'View 30 days of activity' }));
+    await waitFor(() => {
+      expect(api.getAnalyticsRevenue).toHaveBeenCalledWith(30);
+      expect(api.getAnalyticsVolume).toHaveBeenCalledWith(30);
+      expectBoundedBars(30);
+    });
+  });
+
   it('keeps the operational briefing usable when summary analytics fail', async () => {
     api.getOwnedParkings.mockResolvedValue([parkingFixture({ activeSessionCount: 2 })]);
     api.getActiveSessionsForOwner.mockResolvedValue([]);
