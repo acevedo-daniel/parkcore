@@ -60,6 +60,21 @@ const canonicalAssetNames = [
   'recoleta-patio.webp',
   'san-telmo-mercado.svg',
 ];
+const requiredPublicFiles = [
+  'favicon.svg',
+  'icons/favicon-32.png',
+  'icons/apple-touch-icon.png',
+  'icons/icon-192.png',
+  'icons/icon-512.png',
+  'icons/icon-maskable-512.png',
+  'social/parkcore-og.png',
+  'site.webmanifest',
+];
+const requiredIndexIconLinks = [
+  '/favicon.svg',
+  '/icons/favicon-32.png',
+  '/icons/apple-touch-icon.png',
+];
 
 function normalizePath(value) {
   return value.split(path.sep).join('/');
@@ -135,6 +150,70 @@ try {
 
   if (missingCanonicalAssets.length > 0) {
     throw new Error(`Missing canonical assets: ${missingCanonicalAssets.join(', ')}`);
+  }
+
+  const missingPublicFiles = requiredPublicFiles.filter(
+    (publicFile) => !files.some((file) => file.normalizedPath === publicFile),
+  );
+
+  if (missingPublicFiles.length > 0) {
+    throw new Error(`Missing public files: ${missingPublicFiles.join(', ')}`);
+  }
+
+  const manifestPath = path.join(distDirectory, 'site.webmanifest');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  if (!manifest || !Array.isArray(manifest.icons) || manifest.icons.length === 0) {
+    throw new Error('site.webmanifest must contain at least one icon.');
+  }
+
+  const filePaths = new Set(files.map((file) => file.normalizedPath));
+  const missingManifestIcons = manifest.icons.flatMap((icon) => {
+    if (!icon || typeof icon !== 'object') {
+      return ['(missing src)'];
+    }
+
+    const iconSource = icon.src;
+    if (typeof iconSource !== 'string' || iconSource.trim() === '') {
+      return [String(iconSource ?? '(missing src)')];
+    }
+
+    try {
+      const baseUrl = new URL('https://parkcore.invalid/');
+      const iconUrl = new URL(iconSource, baseUrl);
+      if (iconUrl.origin !== baseUrl.origin) {
+        return [iconSource];
+      }
+
+      const decodedPath = decodeURIComponent(iconUrl.pathname).replace(/^\/+/, '');
+      const absolutePath = path.resolve(distDirectory, decodedPath);
+      const relativePath = normalizePath(path.relative(distDirectory, absolutePath));
+      if (relativePath.startsWith('../') || path.isAbsolute(relativePath)) {
+        return [iconSource];
+      }
+
+      return filePaths.has(relativePath) ? [] : [iconSource];
+    } catch {
+      return [iconSource];
+    }
+  });
+
+  if (missingManifestIcons.length > 0) {
+    throw new Error(
+      `Manifest icon sources do not resolve to public files: ${missingManifestIcons.join(', ')}`,
+    );
+  }
+
+  const indexHtml = await readFile(path.join(distDirectory, 'index.html'), 'utf8');
+  const linkedAssets = [...indexHtml.matchAll(/<link\b[^>]*>/gi)].flatMap(([tag]) => {
+    const href = tag.match(/\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+    return href ? [href[1] ?? href[2] ?? href[3]] : [];
+  });
+  const missingIndexIconLinks = requiredIndexIconLinks.filter(
+    (requiredLink) => !linkedAssets.includes(requiredLink),
+  );
+
+  if (missingIndexIconLinks.length > 0) {
+    throw new Error(`Missing icon links in index.html: ${missingIndexIconLinks.join(', ')}`);
   }
 
   const violations = [];
