@@ -10,6 +10,7 @@ import { Button } from '../../components/ui/button.js';
 import { Checkbox } from '../../components/ui/checkbox.js';
 import { AppSheet } from '../../components/domain/app-dialog.js';
 import { EmptyState, ErrorState } from '../../components/domain/feedback.js';
+import { FormField } from '../../components/domain/form-field.js';
 import { Skeleton } from '../../components/ui/skeleton.js';
 import {
   InputGroup,
@@ -36,6 +37,7 @@ export function ParkingCatalogRoute() {
   const { locale, t, tPlural } = useAppearance();
   const [searchParams, setSearchParams] = useSearchParams();
   const [filterError, setFilterError] = useState<string>();
+  const [filterResetVersion, setFilterResetVersion] = useState(0);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const catalogState = parseParkingCatalogUrlState(searchParams);
   const currency = catalogState.currency;
@@ -123,6 +125,7 @@ export function ParkingCatalogRoute() {
 
   const clearMonetaryFilters = () => {
     setFilterError(undefined);
+    setFilterResetVersion((version) => version + 1);
     setSearchParams(
       parkingCatalogSearchParamsFromState({
         ...catalogState,
@@ -174,7 +177,7 @@ export function ParkingCatalogRoute() {
           <CatalogFilters
             filterError={filterError}
             idPrefix="catalog-desktop"
-            key={canonicalSearch}
+            key={`${canonicalSearch}-${filterResetVersion.toString()}`}
             onClear={clearMonetaryFilters}
             onSubmit={applyFilters}
             searchParams={canonicalSearchParams}
@@ -192,7 +195,7 @@ export function ParkingCatalogRoute() {
             <CatalogFilters
               filterError={filterError}
               idPrefix="catalog-mobile"
-              key={`mobile-${canonicalSearch}`}
+              key={`mobile-${canonicalSearch}-${filterResetVersion.toString()}`}
               onClear={clearMonetaryFilters}
               onSubmit={applyFilters}
               searchParams={canonicalSearchParams}
@@ -328,43 +331,43 @@ function CatalogFilters({
     <form
       aria-describedby={filterError ? `${idPrefix}-filter-error` : undefined}
       aria-label={t('public.catalog.filterAction')}
-      className="grid gap-4 rounded-2xl border border-border bg-card p-5 shadow-xs md:grid-cols-2 md:items-end lg:grid-cols-12 lg:p-6"
+      className="grid gap-5 rounded-2xl border border-border bg-card p-5 shadow-xs lg:p-6"
       noValidate
       onSubmit={onSubmit}
     >
-      <div className="md:col-span-2 lg:col-span-5">
-        <label
-          className="mb-2 block text-xs font-bold text-foreground"
-          htmlFor={`${idPrefix}-search`}
-        >
-          {t('public.catalog.searchLabel')}
-        </label>
-        <InputGroup className="border-border-subtle bg-transparent dark:bg-transparent">
-          <InputGroupAddon>
-            <InputGroupText>
-              <Search aria-hidden="true" />
-            </InputGroupText>
-          </InputGroupAddon>
-          <InputGroupInput
-            defaultValue={searchParams.get('search') ?? ''}
-            aria-label={t('public.catalog.searchLabel')}
-            id={`${idPrefix}-search`}
-            name="search"
-            className="h-12 border-0 bg-transparent px-0 focus:bg-transparent"
-            placeholder={t('public.catalog.searchPlaceholder')}
-          />
-        </InputGroup>
+      <div className="grid gap-4 lg:grid-cols-12 lg:items-end">
+        <div className="lg:col-span-5 lg:-translate-y-1">
+          <FormField htmlFor={`${idPrefix}-search`} label={t('public.catalog.searchLabel')}>
+            <InputGroup className="border-border-subtle bg-transparent dark:bg-transparent">
+              <InputGroupAddon>
+                <InputGroupText>
+                  <Search aria-hidden="true" />
+                </InputGroupText>
+              </InputGroupAddon>
+              <InputGroupInput
+                defaultValue={searchParams.get('search') ?? ''}
+                aria-label={t('public.catalog.searchLabel')}
+                id={`${idPrefix}-search`}
+                name="search"
+                className="h-12 border-0 bg-transparent px-0 focus:bg-transparent"
+                placeholder={t('public.catalog.searchPlaceholder')}
+              />
+            </InputGroup>
+          </FormField>
+        </div>
+        <MonetaryFilterGroup
+          className="lg:col-span-7 lg:[&>div]:mt-0"
+          currency={currency}
+          defaultMax={searchParams.get('maxRate') ?? ''}
+          defaultMin={searchParams.get('minRate') ?? ''}
+          hideClear
+          idPrefix={idPrefix}
+          legendClassName="sr-only"
+          onClear={onClear}
+        />
       </div>
-      <MonetaryFilterGroup
-        className="md:col-span-2 lg:col-span-5"
-        currency={currency}
-        defaultMax={searchParams.get('maxRate') ?? ''}
-        defaultMin={searchParams.get('minRate') ?? ''}
-        idPrefix={idPrefix}
-        onClear={onClear}
-      />
-      <div className="flex items-center md:col-span-1 lg:col-span-2">
-        <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border-subtle bg-muted px-3.5 py-3 text-sm font-semibold text-foreground">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <label className="flex cursor-pointer items-center gap-3 text-sm font-semibold text-foreground">
           <Checkbox
             defaultChecked={searchParams.get('availableNow') === 'true'}
             id={`${idPrefix}-available-now`}
@@ -372,11 +375,16 @@ function CatalogFilters({
           />
           <span>{t('public.catalog.availableNow')}</span>
         </label>
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <Button onClick={onClear} size="sm" type="button" variant="ghost">
+            {t('filters.clearRate')}
+          </Button>
+          <Button shape="pill" type="submit">
+            <SlidersHorizontal aria-hidden="true" className="size-4" />
+            {t('public.catalog.applyFilters')}
+          </Button>
+        </div>
       </div>
-      <Button className="rounded-full md:col-span-1 lg:col-span-full lg:w-fit" type="submit">
-        <SlidersHorizontal aria-hidden="true" className="size-4" />
-        {t('public.catalog.applyFilters')}
-      </Button>
       {filterError ? (
         <p
           className="text-sm font-medium text-destructive-soft-foreground lg:col-span-full"

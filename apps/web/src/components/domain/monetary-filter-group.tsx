@@ -15,7 +15,9 @@ interface MonetaryFilterGroupProps {
   defaultMax?: string;
   defaultMin?: string;
   error?: string;
+  hideClear?: boolean;
   idPrefix?: string;
+  legendClassName?: string;
   maxName?: string;
   minName?: string;
   onClear?: () => void;
@@ -28,7 +30,9 @@ export function MonetaryFilterGroup({
   defaultMax = '',
   defaultMin = '',
   error,
+  hideClear = false,
   idPrefix = 'monetary',
+  legendClassName,
   maxName = 'maxRate',
   minName = 'minRate',
   onClear,
@@ -51,7 +55,9 @@ export function MonetaryFilterGroup({
 
   return (
     <fieldset className={className}>
-      <legend className="type-label text-muted-foreground">{t('filters.rate')}</legend>
+      <legend className={legendClassName ?? 'type-label text-muted-foreground'}>
+        {t('filters.rate')}
+      </legend>
       <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-rate-filter">
         <FormField htmlFor={`${idPrefix}-${currencyName}-filter`} label={t('filters.currency')}>
           <Select
@@ -121,9 +127,11 @@ export function MonetaryFilterGroup({
           />
         </FormField>
       </div>
-      <Button className="mt-3" onClick={clear} size="sm" type="button" variant="ghost">
-        {t('filters.clearRate')}
-      </Button>
+      {!hideClear ? (
+        <Button className="mt-3" onClick={clear} size="sm" type="button" variant="ghost">
+          {t('filters.clearRate')}
+        </Button>
+      ) : null}
       {error ? (
         <p className="mt-2 text-sm font-medium text-destructive-soft-foreground" role="alert">
           {error}
