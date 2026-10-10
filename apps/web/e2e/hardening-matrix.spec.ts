@@ -686,6 +686,34 @@ async function expectLandingHeroFillsFirstScreen(page: Page, label: string) {
   ).toBeGreaterThanOrEqual(viewport.height - 1);
 }
 
+async function expectCatalogFilterRowAligned(page: Page, label: string) {
+  const controls = [
+    { name: 'search', locator: page.locator('#catalog-desktop-search') },
+    { name: 'currency', locator: page.locator('#catalog-desktop-currency-filter') },
+    { name: 'minimum rate', locator: page.locator('#catalog-desktop-minRate-filter') },
+    { name: 'maximum rate', locator: page.locator('#catalog-desktop-maxRate-filter') },
+  ];
+  const boxes = await Promise.all(
+    controls.map(async ({ locator }) => {
+      await expect(locator).toBeVisible();
+      return locator.boundingBox();
+    }),
+  );
+  const reference = boxes[0];
+  expect(reference, `${label} should render catalog filter controls.`).not.toBeNull();
+  if (!reference) return;
+
+  boxes.slice(1).forEach((box, index) => {
+    expect(box, `${label} ${controls[index + 1]?.name} should have a bounding box.`).not.toBeNull();
+    if (!box) return;
+    expect(
+      Math.abs(box.y - reference.y),
+      `${label} ${controls[index + 1]?.name} should share the search control's top edge. ` +
+        `Search: ${JSON.stringify(reference)}. Control: ${JSON.stringify(box)}.`,
+    ).toBeLessThanOrEqual(1);
+  });
+}
+
 async function expectOwnerOverviewPanelsWithinViewport(page: Page, label: string) {
   const viewport = page.viewportSize();
   expect(viewport, `${label} should have a configured viewport.`).not.toBeNull();
@@ -817,6 +845,9 @@ async function visitFixture(
   await expect(page.locator('html')).toHaveAttribute('lang', locale);
   if (route.name === 'landing') {
     await expectLandingHeroFillsFirstScreen(page, `${viewport.name} ${locale} ${theme}`);
+  }
+  if (route.name === 'catalog' && viewport.width >= 1024) {
+    await expectCatalogFilterRowAligned(page, `${viewport.name} ${locale} ${theme}`);
   }
   await expectNoHorizontalOverflow(page, `${viewport.name} ${locale} ${theme} ${route.name}`);
   await expectMobileNavigationDoesNotCoverContent(page, `${viewport.name} ${route.name}`);
