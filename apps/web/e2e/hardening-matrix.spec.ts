@@ -1,5 +1,7 @@
-import { AxeBuilder } from '@axe-core/playwright';
+import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
+
+import { AxeBuilder } from '@axe-core/playwright';
 import type { Locator, Page, Route } from '@playwright/test';
 
 import { chooseSelectOption, expect, test } from './fixtures';
@@ -49,7 +51,7 @@ const REVIEW_DIR = process.env.PARKCORE_REVIEW_DIR;
 const REVIEW_VIEWPORTS = VIEWPORTS.filter((viewport) => viewport.width !== 1024);
 const A11Y_VIEWPORTS = [VIEWPORTS[1], VIEWPORTS[5]] as const;
 
-async function captureReview(page: Page, relativePath: string) {
+async function captureReview(page: Page, relativePath: string, fullPage = true) {
   if (!REVIEW_DIR) {
     throw new Error('PARKCORE_REVIEW_DIR must be set before capturing review screenshots.');
   }
@@ -58,7 +60,9 @@ async function captureReview(page: Page, relativePath: string) {
     document.documentElement.style.scrollBehavior = 'auto';
     window.scrollTo(0, 0);
   });
-  await page.screenshot({ fullPage: true, path: path.resolve(REVIEW_DIR, relativePath) });
+  const screenshotPath = path.resolve(REVIEW_DIR, relativePath);
+  await mkdir(path.dirname(screenshotPath), { recursive: true });
+  await page.screenshot({ fullPage, path: screenshotPath });
 }
 
 interface RouteFixture {
@@ -1739,6 +1743,38 @@ test('captures visual review screenshots', async ({ page }) => {
   test.skip(!REVIEW_DIR, 'Set PARKCORE_REVIEW_DIR to capture visual review screenshots.');
 
   const api = await installHardeningApiMock(page);
+
+  const landingReviewViewports = [
+    { height: 844, name: '390x844', width: 390 },
+    { height: 768, name: '1366x768', width: 1366 },
+    { height: 900, name: '1440x900', width: 1440 },
+    { height: 1080, name: '1920x1080', width: 1920 },
+  ] as const;
+
+  for (const locale of ['es-AR', 'en-US'] as const) {
+    for (const theme of ['light', 'dark'] as const) {
+      for (const viewport of landingReviewViewports) {
+        await test.step(`landing ${viewport.name} ${locale} ${theme}`, async () => {
+          api.setScenario('success');
+          await page.setViewportSize({ height: viewport.height, width: viewport.width });
+          await configureBrowserState(page, { authenticated: false, locale, theme });
+          await page.goto('/');
+          await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+          await expectLandingHeroFillsFirstScreen(page, `${viewport.name} ${locale} ${theme}`);
+          await expectNoHorizontalOverflow(page, `${viewport.name} ${locale} ${theme} landing`);
+          await captureReview(
+            page,
+            `landing-targets/${viewport.name}-${locale}-${theme}-full-page.png`,
+          );
+          await captureReview(
+            page,
+            `landing-targets/${viewport.name}-${locale}-${theme}-first-screen.png`,
+            false,
+          );
+        });
+      }
+    }
+  }
 
   for (const locale of ['es-AR', 'en-US'] as const) {
     for (const theme of ['light', 'dark'] as const) {
