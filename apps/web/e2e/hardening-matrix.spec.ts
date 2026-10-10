@@ -681,6 +681,26 @@ async function expectNoHorizontalOverflow(page: Page, label: string) {
   ).toBeLessThanOrEqual(geometry.clientWidth + 1);
 }
 
+async function expectLandingHeroFillsFirstScreen(page: Page, label: string) {
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, 0);
+  });
+
+  const hero = page.locator('[data-slot="landing-hero"]');
+  await expect(hero).toBeVisible();
+  const box = await hero.boundingBox();
+  const viewport = page.viewportSize();
+  expect(box, `${label} should have a landing hero bounding box.`).not.toBeNull();
+  expect(viewport, `${label} should have a configured viewport.`).not.toBeNull();
+  if (!box || !viewport) return;
+
+  expect(
+    box.y + box.height,
+    `${label} landing hero should fill the first screen.`,
+  ).toBeGreaterThanOrEqual(viewport.height - 1);
+}
+
 async function expectOwnerOverviewPanelsWithinViewport(page: Page, label: string) {
   const viewport = page.viewportSize();
   expect(viewport, `${label} should have a configured viewport.`).not.toBeNull();
@@ -940,6 +960,7 @@ async function visitFixture(
   );
   await expectNoHorizontalOverflow(page, `${viewport.name} ${locale} ${theme} ${route.name}`);
   if (route.name === 'landing') {
+    await expectLandingHeroFillsFirstScreen(page, `${viewport.name} ${locale} ${theme}`);
     await expectCalculatorOptionsUnbroken(
       page,
       `${viewport.name} ${locale} ${theme} ${route.name}`,
