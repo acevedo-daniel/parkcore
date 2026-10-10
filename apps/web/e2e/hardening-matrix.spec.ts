@@ -1,4 +1,5 @@
 import { AxeBuilder } from '@axe-core/playwright';
+import path from 'node:path';
 import type { Locator, Page, Route } from '@playwright/test';
 
 import { chooseSelectOption, expect, test } from './fixtures';
@@ -44,7 +45,17 @@ const VIEWPORTS = [
   { height: 960, name: '1440px', width: 1440 },
 ] as const;
 
+const REVIEW_DIR = process.env.PARKCORE_REVIEW_DIR;
+const REVIEW_VIEWPORTS = VIEWPORTS.filter((viewport) => viewport.width !== 1024);
 const A11Y_VIEWPORTS = [VIEWPORTS[1], VIEWPORTS[5]] as const;
+
+async function captureReview(page: Page, relativePath: string) {
+  if (!REVIEW_DIR) {
+    throw new Error('PARKCORE_REVIEW_DIR must be set before capturing review screenshots.');
+  }
+
+  await page.screenshot({ fullPage: true, path: path.resolve(REVIEW_DIR, relativePath) });
+}
 
 interface RouteFixture {
   name: string;
@@ -1506,6 +1517,108 @@ test('recovers identity, rate-limit, analytics, and demo lifecycle failures', as
         await expect(analyticsAlert).toBeVisible();
         await expect(analyticsAlert).not.toContainText(/simulated .* failure/i);
       });
+    }
+  }
+
+  expect(api.unexpectedRequests).toEqual([]);
+});
+
+test('captures visual review screenshots', async ({ page }) => {
+  test.skip(!REVIEW_DIR, 'Set PARKCORE_REVIEW_DIR to capture visual review screenshots.');
+
+  const api = await installHardeningApiMock(page);
+
+  for (const locale of ['es-AR', 'en-US'] as const) {
+    for (const theme of ['light', 'dark'] as const) {
+      for (const route of ROUTES) {
+        for (const viewport of REVIEW_VIEWPORTS) {
+          await test.step(`${route.name} ${viewport.name} ${locale} ${theme}`, async () => {
+            api.setProfileKind('OWNER');
+            api.setScenario('success');
+            await visitFixture(page, route, viewport, locale, theme);
+            await captureReview(
+              page,
+              `routes/${route.name}/${String(viewport.width)}-${locale}-${theme}.png`,
+            );
+          });
+        }
+      }
+    }
+  }
+
+  const stateFixtures = [
+    {
+      name: 'loading',
+      route: { ...catalogRoute, path: '/parkings?search=pending' },
+      scenario: 'loading',
+    },
+    {
+      name: 'empty',
+      route: { ...catalogRoute, path: '/parkings?search=empty' },
+      scenario: 'empty',
+    },
+    {
+      name: 'error',
+      route: { ...catalogRoute, path: '/parkings?search=offline' },
+      scenario: 'error',
+    },
+    { name: 'degraded', route: overviewRoute, scenario: 'degraded' },
+    { name: 'owner-empty', route: ownerParkingsRoute, scenario: 'owner-empty' },
+    { name: 'owner-error', route: ownerParkingsRoute, scenario: 'owner-error' },
+    { name: 'blocked', route: ownerParkingRoute, scenario: 'blocked' },
+    { name: 'closed', route: ownerParkingRoute, scenario: 'closed' },
+    { name: 'paused', route: ownerParkingRoute, scenario: 'paused' },
+    { name: 'success', route: overviewRoute, scenario: 'success' },
+    { name: 'success', route: ownerParkingRoute, scenario: 'success' },
+  ] as const;
+
+  for (const locale of ['es-AR', 'en-US'] as const) {
+    for (const theme of ['light', 'dark'] as const) {
+      for (const viewport of [VIEWPORTS[1], VIEWPORTS[5]] as const) {
+        for (const state of stateFixtures) {
+          await test.step(`${state.name} ${state.route.name} ${viewport.name} ${locale} ${theme}`, async () => {
+            api.setProfileKind('OWNER');
+            api.setScenario(state.scenario);
+            await visitFixture(page, state.route, viewport, locale, theme);
+
+            if (state.scenario === 'loading') {
+              await expect(
+                page.locator('[aria-label*="loading" i], [aria-label*="cargand" i]').first(),
+              ).toBeVisible();
+            } else if (state.scenario === 'empty' || state.scenario === 'owner-empty') {
+              await expect(page.locator('[data-slot="empty-state"]')).toBeVisible();
+            } else if (state.scenario === 'error' || state.scenario === 'owner-error') {
+              await expect(page.locator('[data-slot="error-state"]')).toBeVisible();
+            } else if (state.scenario === 'degraded') {
+              await expect(page.getByRole('alert').first()).toBeVisible();
+            } else if (
+              state.scenario === 'blocked' ||
+              state.scenario === 'closed' ||
+              state.scenario === 'paused'
+            ) {
+              await expect(
+                page.getByRole('button', { name: /check in|ingresar/i }).first(),
+              ).toBeDisabled();
+            } else if (state.route.name === 'overview') {
+              await expect(page.locator('a[href="/app/parkings/parking-1"]').first()).toBeVisible();
+            } else {
+              await expect(
+                page.getByRole('button', { name: /check in|ingresar/i }).first(),
+              ).toBeEnabled();
+            }
+
+            await captureReview(
+              page,
+              `states/${state.name}-${state.route.name}/${String(viewport.width)}-${locale}-${theme}.png`,
+            );
+
+            if (state.scenario === 'loading') {
+              api.releasePending();
+              await expect(page.locator('a[href="/parkings/parking-1"]').first()).toBeVisible();
+            }
+          });
+        }
+      }
     }
   }
 
