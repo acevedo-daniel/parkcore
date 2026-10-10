@@ -808,6 +808,46 @@ async function expectPreferenceSegmentsUntruncated(page: Page, label: string) {
   expect(issues, `${label} has truncated or undersized preference segments.`).toEqual([]);
 }
 
+async function expectPublicHeaderActionsAligned(page: Page, label: string) {
+  const appearanceSegments = page.locator(
+    '.public-header-tools [data-slot="appearance-controls"] [role="radio"]:visible',
+  );
+  const signIn = page.locator('.public-header').getByRole('link', { name: /sign in|ingresar/i });
+  const demo = page
+    .locator('.public-header')
+    .getByRole('button', { name: /try the demo|probar demo/i });
+  const appearanceBoxes = await appearanceSegments.evaluateAll((segments) =>
+    segments.map((segment, index) => {
+      const { height, y } = segment.getBoundingClientRect();
+      return { center: y + height / 2, height, label: `appearance segment ${String(index + 1)}` };
+    }),
+  );
+  const [signInBox, demoBox] = await Promise.all([
+    signIn.evaluate((element) => {
+      const { height, y } = element.getBoundingClientRect();
+      return { center: y + height / 2, height, label: 'sign-in link' };
+    }),
+    demo.evaluate((element) => {
+      const { height, y } = element.getBoundingClientRect();
+      return { center: y + height / 2, height, label: 'demo button' };
+    }),
+  ]);
+  const controls = [...appearanceBoxes, signInBox, demoBox];
+  const center = controls[0]?.center ?? 0;
+
+  expect(appearanceBoxes, `${label} should show the desktop appearance controls.`).toHaveLength(5);
+  for (const control of controls) {
+    expect(
+      Math.abs(control.height - 44),
+      `${label} ${control.label} should be 44px tall.`,
+    ).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs(control.center - center),
+      `${label} ${control.label} should share one vertical center.`,
+    ).toBeLessThanOrEqual(1);
+  }
+}
+
 async function visitFixture(
   page: Page,
   route: RouteFixture,
@@ -831,6 +871,12 @@ async function visitFixture(
   );
   await expectNoHorizontalOverflow(page, `${viewport.name} ${locale} ${theme} ${route.name}`);
   await expectMobileNavigationDoesNotCoverContent(page, `${viewport.name} ${route.name}`);
+  if (route.shell === 'public' && viewport.width >= 1280) {
+    await expectPublicHeaderActionsAligned(
+      page,
+      `${viewport.name} ${locale} ${theme} ${route.name}`,
+    );
+  }
 }
 
 async function expectOverlayWithinViewport(locator: Locator, label: string) {

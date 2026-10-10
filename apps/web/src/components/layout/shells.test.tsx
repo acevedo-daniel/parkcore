@@ -30,13 +30,22 @@ function renderRoute(element: ReactNode, path: string) {
 describe('application shells', () => {
   it('renders restrained public navigation in a semantic header', () => {
     renderRoute(<PublicLayout />, '/');
-    expect(screen.getByRole('banner')).toBeTruthy();
+    const header = screen.getByRole('banner');
     expect(screen.getByRole('navigation', { name: 'Navegación pública' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Cómo funciona' }).getAttribute('href')).toBe(
       '/#como-funciona',
     );
-    expect(screen.getByRole('link', { name: 'Ingresar' }).getAttribute('href')).toBe('/login');
-    expect(screen.getByRole('button', { name: 'Probar demo' })).toBeTruthy();
+    const signIn = within(header).getByRole('link', { name: 'Ingresar' });
+    expect(signIn.getAttribute('href')).toBe('/login');
+    expect(signIn.className).toContain('min-h-11');
+    expect(signIn.className).not.toContain('hover:-translate-y-px');
+    for (const link of within(header).getAllByRole('link')) {
+      expect(link.className).not.toContain('hover:-translate-y-px');
+    }
+    const demo = within(header).getByRole('button', { name: 'Probar demo' });
+    expect(demo.className).toContain('min-h-11');
+    expect(demo.className).toContain('rounded-full');
+    expect(demo.parentElement?.className).toContain('hidden wide:flex');
     expect(screen.queryByRole('link', { name: 'Get started' })).toBeNull();
   });
 
