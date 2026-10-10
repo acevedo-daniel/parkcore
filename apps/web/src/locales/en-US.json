@@ -114,8 +114,6 @@
     "occupied": "occupied",
     "openSpots": "open",
     "discoveryImageAlt": "{{title}} parking facility",
-    "fallbackEyebrow": "The facility",
-    "fallbackMessage": "Clear information before you arrive.",
     "demo": "Demo",
     "hourlyRate": "Hourly rate",
     "availableSpaces": "{{available}} / {{capacity}} open",
