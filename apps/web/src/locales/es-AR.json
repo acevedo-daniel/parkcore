@@ -114,8 +114,6 @@
     "occupied": "ocupados",
     "openSpots": "libres",
     "discoveryImageAlt": "Cochera {{title}}",
-    "fallbackEyebrow": "La cochera",
-    "fallbackMessage": "Todo lo necesario para llegar.",
     "demo": "Demo",
     "hourlyRate": "Tarifa por hora",
     "availableSpaces": "{{available}} / {{capacity}} libres",
