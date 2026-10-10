@@ -4,10 +4,13 @@ import { useId, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
-import { Combobox } from '../../components/ui/combobox.js';
+import { Combobox } from '../../components/domain/combobox.js';
+import { FormField } from '../../components/domain/form-field.js';
 import { Button } from '../../components/ui/button.js';
-import { Field, Input } from '../../components/ui/field.js';
-import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
+import { Input } from '../../components/ui/input.js';
+import { ToggleGroup, ToggleGroupItem } from '../../components/ui/toggle-group.js';
+import { EmptyState, ErrorState } from '../../components/domain/feedback.js';
+import { Skeleton } from '../../components/ui/skeleton.js';
 import { getPublicParkings, type PublicParking } from '../../lib/api/public-api.js';
 import { cn } from '../../lib/cn.js';
 import { formatMoney, formatNumber } from '../../lib/format.js';
@@ -59,14 +62,14 @@ export function ParkingCalculatorWidget({ className, parking }: ParkingCalculato
     <section
       aria-labelledby={titleId}
       className={cn(
-        'relative w-full max-w-[460px] @container rounded-[var(--radius-xl)] border border-border bg-surface-raised p-6 text-foreground shadow-hover sm:p-8',
+        'relative w-full max-w-md @container rounded-2xl border border-border bg-popover p-6 text-foreground shadow-md sm:p-8',
         className,
       )}
     >
       <div className="mb-5 flex items-start justify-between gap-4 border-b border-border-subtle pb-5">
         <div>
-          <p className="type-label text-foreground-muted">{t('calculator.eyebrow')}</p>
-          <h2 className="mt-2 font-display text-xl font-bold tracking-[-0.03em]" id={titleId}>
+          <p className="type-label text-muted-foreground">{t('calculator.eyebrow')}</p>
+          <h2 className="mt-2 font-display text-xl font-bold tracking-title" id={titleId}>
             {t('calculator.title')}
           </h2>
         </div>
@@ -84,7 +87,7 @@ export function ParkingCalculatorWidget({ className, parking }: ParkingCalculato
         >
           {t('calculator.errorDescription')}
           <Link
-            className="mt-4 inline-flex min-h-[var(--touch-target-min)] items-center rounded-sm text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4"
+            className="mt-4 inline-flex min-h-11 items-center rounded-sm text-sm font-bold text-foreground underline decoration-brand decoration-2 underline-offset-4"
             to="/parkings"
           >
             {t('calculator.browseAction')}
@@ -94,7 +97,7 @@ export function ParkingCalculatorWidget({ className, parking }: ParkingCalculato
         <EmptyState
           action={
             <Link
-              className="inline-flex min-h-[var(--touch-target-min)] items-center rounded-sm text-sm font-bold text-foreground underline decoration-accent decoration-2 underline-offset-4"
+              className="inline-flex min-h-11 items-center rounded-sm text-sm font-bold text-foreground underline decoration-brand decoration-2 underline-offset-4"
               to="/parkings"
             >
               {t('calculator.emptyAction')}
@@ -133,8 +136,8 @@ function CalculatorLoading() {
       <p className="mb-3 text-sm font-medium text-foreground-secondary">
         {t('calculator.loadingMessage')}
       </p>
-      <Skeleton className="h-24 rounded-[var(--radius-lg)]" />
-      <Skeleton className="mt-3 h-28 rounded-[var(--radius-lg)]" />
+      <Skeleton className="h-24 rounded-xl" />
+      <Skeleton className="mt-3 h-28 rounded-xl" />
       <Skeleton className="mt-6 h-12 rounded-full" />
     </div>
   );
@@ -197,10 +200,10 @@ function CalculatorForm({
 
   return (
     <>
-      <div className="rounded-[var(--radius-lg)] border border-border bg-surface-subtle p-4 transition-colors focus-within:border-primary focus-within:bg-surface">
-        <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-2 @sm:flex @sm:items-center @sm:gap-3">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
-            <MapPin aria-hidden="true" className="size-3.5" />
+      <div className="rounded-xl border border-border-subtle bg-transparent p-4">
+        <div className="grid min-w-0 grid-cols-calculator-facility gap-x-3 gap-y-2 @sm:flex @sm:items-center @sm:gap-3">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-foreground">
+            <MapPin aria-hidden="true" className="size-4" />
           </span>
           <Combobox
             className="public-discovery-combobox min-w-0 @sm:flex-1"
@@ -214,49 +217,47 @@ function CalculatorForm({
             value={selectedId}
           />
           <span className="col-start-2 flex items-baseline justify-end gap-1 text-right @sm:block @sm:shrink-0">
-            <span className="font-mono text-xs font-bold tabular-nums text-foreground">
+            <span className="type-operational text-xs font-bold text-foreground">
               {formatMoney(selectedFacility.hourlyRateCents, selectedFacility.currency, locale)}
             </span>
-            <span className="block text-[10px] text-foreground-muted">
-              {t('calculator.perHour')}
-            </span>
+            <span className="block text-2xs text-muted-foreground">{t('calculator.perHour')}</span>
           </span>
         </div>
       </div>
 
-      <fieldset className="mt-3 rounded-[var(--radius-lg)] border border-border bg-surface-subtle p-4">
+      <fieldset className="mt-3 rounded-xl border border-border-subtle bg-transparent p-4">
         <legend className="mb-3 flex w-full items-center justify-between gap-3">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
             <Clock aria-hidden="true" className="size-3.5" />
             {t('calculator.estimatedStay')}
           </span>
-          <span className="font-mono text-xs font-bold tabular-nums text-foreground">
+          <span className="type-operational text-xs font-bold text-foreground">
             {durationSummary}
           </span>
         </legend>
-        <div className="grid grid-cols-2 gap-1.5 @sm:grid-cols-5">
+        <ToggleGroup
+          aria-label={t('calculator.estimatedStay')}
+          className="grid w-full grid-cols-2 gap-1.5 @sm:grid-cols-5"
+          onValueChange={(value) => {
+            if (value) onDurationChange(value as (typeof DURATION_OPTIONS)[number]['id']);
+          }}
+          type="single"
+          value={selectedDuration}
+          variant="brand"
+        >
           {DURATION_OPTIONS.map((option) => (
-            <button
-              aria-pressed={selectedDuration === option.id}
-              className={cn(
-                'min-h-[var(--touch-target-min)] min-w-0 cursor-pointer break-words whitespace-normal rounded-[var(--radius-sm)] px-1 py-2 text-center text-xs font-bold leading-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring',
-                selectedDuration === option.id
-                  ? 'bg-primary text-primary-foreground'
-                  : 'border border-border bg-surface text-foreground hover:bg-accent hover:text-accent-foreground',
-              )}
+            <ToggleGroupItem
+              className="min-w-0 whitespace-normal rounded-sm border border-border bg-card px-1 py-2 text-center text-xs font-bold leading-tight text-foreground data-[state=on]:border-brand data-[state=on]:text-brand-foreground"
               key={option.id}
-              onClick={() => {
-                onDurationChange(option.id);
-              }}
-              type="button"
+              value={option.id}
             >
               {t(option.label)}
-            </button>
+            </ToggleGroupItem>
           ))}
-        </div>
+        </ToggleGroup>
         {selectedDuration === 'custom' ? (
           <div className="mt-4 border-t border-border-subtle pt-4">
-            <Field
+            <FormField
               error={customDurationError}
               help={customDurationError ? undefined : t('calculator.customDurationHelp')}
               htmlFor="estimate-custom-duration"
@@ -274,7 +275,7 @@ function CalculatorForm({
                 type="number"
                 value={customDurationMinutes}
               />
-            </Field>
+            </FormField>
           </div>
         ) : null}
       </fieldset>
@@ -285,7 +286,7 @@ function CalculatorForm({
             <span className="block text-xs font-semibold text-foreground">
               {t('calculator.estimateLabel')}
             </span>
-            <span className="text-[11px] text-foreground-muted">
+            <span className="text-2xs text-muted-foreground">
               {estimate
                 ? tPlural(estimate.chargedHours, {
                     one: 'calculator.chargedHour',
@@ -319,7 +320,7 @@ function CalculatorForm({
         </Link>
       </Button>
 
-      <p className="mt-4 text-center text-[11px] leading-relaxed text-foreground-muted">
+      <p className="mt-4 text-center text-2xs leading-relaxed text-muted-foreground">
         {t('calculator.estimateNote')}
       </p>
     </>

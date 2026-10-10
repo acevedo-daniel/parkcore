@@ -64,7 +64,7 @@
     "e2e:local:db:down": "docker compose -f docker-compose.e2e.yml down -v --remove-orphans",
     "db:setup": "pnpm --filter @parkcore/api db:setup",
     "preflight": "node scripts/preflight.mjs",
-    "test:scripts": "node --test scripts/check-authored-text.test.mjs scripts/preflight.test.mjs"
+    "test:scripts": "node --test scripts/check-authored-text.test.mjs scripts/check-design-tokens.test.mjs scripts/preflight.test.mjs scripts/raw-interactive-elements-rule.test.mjs"
   },
   "devDependencies": {
     "prettier": "3.9.9"

@@ -3,7 +3,16 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { AppearanceProvider, useAppearance } from './appearance-provider.js';
-import { AppearanceControls } from '../components/ui/appearance-controls.js';
+import { AppearanceControls } from '../components/domain/appearance-controls.js';
+
+async function chooseOption(
+  user: ReturnType<typeof userEvent.setup>,
+  control: HTMLElement,
+  name: string,
+) {
+  await user.click(control);
+  await user.click(await screen.findByRole('option', { name }));
+}
 
 function AppearanceProbe() {
   const { locale, preference, theme } = useAppearance();
@@ -96,7 +105,7 @@ describe('AppearanceProvider', () => {
     renderAppearance();
     const control = screen.getByRole('combobox', { name: 'Apariencia' });
 
-    await user.selectOptions(control, 'dark');
+    await chooseOption(user, control, 'Oscuro');
 
     expect(screen.getByTestId('appearance').textContent).toBe('dark:dark:es-AR');
     expect(window.localStorage.getItem('parkcore-theme')).toBe('dark');
@@ -114,7 +123,7 @@ describe('AppearanceProvider', () => {
     const control = screen.getByRole('combobox', { name: 'Apariencia' });
 
     expect(screen.getByTestId('appearance').textContent).toBe('light:light:es-AR');
-    await user.selectOptions(control, 'system');
+    await chooseOption(user, control, 'Sistema');
 
     expect(window.localStorage.getItem('parkcore-theme')).toBe('system');
     expect(screen.getByTestId('appearance').textContent).toBe('system:light:es-AR');
@@ -126,10 +135,10 @@ describe('AppearanceProvider', () => {
     renderAppearance();
 
     expect(screen.getByTestId('appearance').textContent).toBe('system:light:en-US');
-    expect(screen.getByRole('button', { name: 'English' }).getAttribute('aria-pressed')).toBe(
+    expect(screen.getByRole('radio', { name: 'English' }).getAttribute('aria-checked')).toBe(
       'true',
     );
-    expect(screen.getByRole('button', { name: 'Spanish' }).getAttribute('aria-pressed')).toBe(
+    expect(screen.getByRole('radio', { name: 'Spanish' }).getAttribute('aria-checked')).toBe(
       'false',
     );
 
@@ -145,9 +154,9 @@ describe('AppearanceProvider', () => {
     renderAppearance();
     const control = screen.getByRole('combobox', { name: 'Apariencia' });
 
-    await user.selectOptions(control, 'light');
+    await chooseOption(user, control, 'Claro');
     setSystemTheme(false);
-    await user.selectOptions(control, 'system');
+    await chooseOption(user, control, 'Sistema');
 
     await waitFor(() => {
       expect(screen.getByTestId('appearance').textContent).toBe('system:light:es-AR');
@@ -165,8 +174,8 @@ describe('AppearanceProvider', () => {
 
     const draft = screen.getByRole('textbox', { name: 'Draft value' });
     await user.type(draft, 'keep this draft');
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Apariencia' }), 'dark');
-    await user.click(screen.getByRole('button', { name: 'Inglés' }));
+    await chooseOption(user, screen.getByRole('combobox', { name: 'Apariencia' }), 'Oscuro');
+    await user.click(screen.getByRole('radio', { name: 'Inglés' }));
 
     expect((draft as HTMLInputElement).value).toBe('keep this draft');
     expect(document.documentElement.dataset.theme).toBe('dark');

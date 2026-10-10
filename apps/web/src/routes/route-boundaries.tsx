@@ -35,23 +35,23 @@ function RouteRecovery({ notFound, owner }: { notFound: boolean; owner: boolean 
       aria-labelledby="route-error-title"
       className={
         owner
-          ? 'owner-page flex min-h-[55vh] items-center'
-          : 'flex min-h-[65vh] items-center bg-canvas px-4 py-16 text-foreground sm:px-6 lg:px-8'
+          ? 'owner-page flex min-h-owner-state items-center'
+          : 'flex min-h-page-state items-center bg-background px-4 py-16 text-foreground sm:px-6 lg:px-8'
       }
       role="alert"
     >
       <div
         className={
           owner
-            ? 'w-full min-w-0 max-w-xl rounded-[var(--radius-xl)] border border-accent-foreground/30 bg-accent-soft p-7 shadow-hover sm:p-10'
-            : 'mx-auto w-full max-w-3xl rounded-[var(--radius-xl)] border border-border-strong bg-surface p-8 shadow-hover sm:p-10'
+            ? 'w-full min-w-0 max-w-xl rounded-2xl border border-brand-foreground/30 bg-brand-soft p-7 shadow-md sm:p-10'
+            : 'mx-auto w-full max-w-3xl rounded-2xl border border-border-strong bg-card p-8 shadow-md sm:p-10'
         }
       >
-        <p className="font-mono text-xs font-bold tracking-[0.16em] text-foreground-muted uppercase">
+        <p className="type-eyebrow text-muted-foreground">
           {notFound ? '404' : t('route.error.attention')}
         </p>
         <h1
-          className="mt-5 max-w-3xl font-display text-4xl font-bold leading-[0.95] tracking-[-0.055em] text-foreground sm:text-6xl"
+          className="mt-5 max-w-3xl font-display text-4xl font-bold leading-display tracking-display text-foreground sm:text-6xl"
           id="route-error-title"
         >
           {t(notFound ? 'route.error.notFoundTitle' : 'route.error.title')}
@@ -60,7 +60,7 @@ function RouteRecovery({ notFound, owner }: { notFound: boolean; owner: boolean 
           {t(notFound ? 'route.error.notFoundDescription' : 'route.error.description')}
         </p>
         <div className="mt-7 flex flex-wrap gap-2">
-          <Button asChild className="rounded-full" variant="primary">
+          <Button asChild className="rounded-full" variant="default">
             <Link to={owner ? '/app' : '/'}>
               {t(owner ? 'route.error.ownerAction' : 'route.error.publicAction')}
             </Link>

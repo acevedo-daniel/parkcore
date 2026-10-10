@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ToastProvider } from '../../components/ui/feedback.js';
 import { ApiError } from '../../lib/api/api-error.js';
 import { parkingFixture } from '../../test/fixtures.js';
 import { OwnerEditParkingRoute } from './owner-edit-parking-route.js';
@@ -27,9 +26,7 @@ function renderEditParking() {
   );
   return render(
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <RouterProvider router={router} />
-      </ToastProvider>
+      <RouterProvider router={router} />
     </QueryClientProvider>,
   );
 }

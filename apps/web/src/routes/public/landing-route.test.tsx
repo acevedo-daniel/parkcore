@@ -76,7 +76,7 @@ describe('public landing route', () => {
     );
     renderLanding();
 
-    expect(await screen.findByRole('button', { name: 'Custom' })).toBeTruthy();
+    expect(await screen.findByRole('radio', { name: 'Custom' })).toBeTruthy();
     expect(screen.getByText('Demonstration data')).toBeTruthy();
     expect(screen.getByText('This is not real-time activity.')).toBeTruthy();
   });

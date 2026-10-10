@@ -5,8 +5,17 @@ import { z } from 'zod';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../../components/ui/button.js';
-import { Combobox, type ComboboxOption } from '../../components/ui/combobox.js';
-import { Field, Input, Select, Textarea } from '../../components/ui/field.js';
+import { Combobox, type ComboboxOption } from '../../components/domain/combobox.js';
+import { FormField } from '../../components/domain/form-field.js';
+import { Input } from '../../components/ui/input.js';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select.js';
+import { Textarea } from '../../components/ui/textarea.js';
 import { Switch } from '../../components/ui/switch.js';
 import type { CreateParkingRequest, Parking } from '../../lib/api/owner-api.js';
 import type { Translator } from '../../lib/localization.js';
@@ -181,15 +190,19 @@ export function ParkingForm({
         title={t('parkingForm.general')}
         wide
       >
-        <Field error={errors.title?.message} htmlFor="parking-title" label={t('parkingForm.title')}>
+        <FormField
+          error={errors.title?.message}
+          htmlFor="parking-title"
+          label={t('parkingForm.title')}
+        >
           <Input
             autoComplete="organization"
             id="parking-title"
             required
             {...form.register('title')}
           />
-        </Field>
-        <Field
+        </FormField>
+        <FormField
           error={errors.neighborhood?.message}
           htmlFor="parking-neighborhood"
           label={t('parkingForm.neighborhood')}
@@ -200,15 +213,15 @@ export function ParkingForm({
             required
             {...form.register('neighborhood')}
           />
-        </Field>
-        <Field
+        </FormField>
+        <FormField
           error={errors.description?.message}
           htmlFor="parking-description"
           label={t('parkingForm.description')}
         >
           <Textarea id="parking-description" rows={4} {...form.register('description')} />
-        </Field>
-        <Field
+        </FormField>
+        <FormField
           error={errors.image?.message}
           htmlFor="parking-image"
           label={t('parkingForm.imageUrl')}
@@ -223,13 +236,13 @@ export function ParkingForm({
               void imageRegistration.onChange(event);
             }}
           />
-        </Field>
+        </FormField>
         {image ? (
-          <figure className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-surface-subtle">
+          <figure className="overflow-hidden rounded-xl border border-border bg-muted">
             {imageLoadFailed ? (
               <div
                 aria-live="polite"
-                className="flex min-h-32 items-center justify-center px-5 py-8 text-center text-sm font-medium text-danger-text"
+                className="flex min-h-32 items-center justify-center px-5 py-8 text-center text-sm font-medium text-destructive-soft-foreground"
                 role="status"
               >
                 {t('parkingForm.imageLoadFailed')}
@@ -247,7 +260,7 @@ export function ParkingForm({
                 src={image}
               />
             )}
-            <figcaption className="border-t border-border-subtle px-4 py-2 text-xs text-foreground-muted">
+            <figcaption className="border-t border-border-subtle px-4 py-2 text-xs text-muted-foreground">
               {t('parkingForm.imagePreview')}
             </figcaption>
           </figure>
@@ -258,7 +271,7 @@ export function ParkingForm({
         description={t('parkingForm.locationDescription')}
         title={t('parkingForm.location')}
       >
-        <Field
+        <FormField
           error={errors.address?.message}
           htmlFor="parking-address"
           label={t('parkingForm.address')}
@@ -269,9 +282,9 @@ export function ParkingForm({
             required
             {...form.register('address')}
           />
-        </Field>
+        </FormField>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field
+          <FormField
             error={errors.lat?.message}
             htmlFor="parking-lat"
             label={t('parkingForm.latitude')}
@@ -283,8 +296,8 @@ export function ParkingForm({
               type="number"
               {...form.register('lat', { valueAsNumber: true })}
             />
-          </Field>
-          <Field
+          </FormField>
+          <FormField
             error={errors.lng?.message}
             htmlFor="parking-lng"
             label={t('parkingForm.longitude')}
@@ -296,7 +309,7 @@ export function ParkingForm({
               type="number"
               {...form.register('lng', { valueAsNumber: true })}
             />
-          </Field>
+          </FormField>
         </div>
         <Controller
           control={form.control}
@@ -323,12 +336,15 @@ export function ParkingForm({
                   value={field.value}
                 />
                 {fieldState.error ? (
-                  <p className="field-error text-sm font-medium text-danger-text" id={messageId}>
+                  <p
+                    className="field-error text-sm font-medium text-destructive-soft-foreground"
+                    id={messageId}
+                  >
                     {fieldState.error.message}
                   </p>
                 ) : (
                   <p
-                    className="field-help text-sm leading-relaxed text-foreground-muted"
+                    className="field-help text-sm leading-relaxed text-muted-foreground"
                     id={messageId}
                   >
                     {t('parkingForm.timezoneHelp')}
@@ -341,28 +357,42 @@ export function ParkingForm({
       </FormSection>
 
       <FormSection description={t('parkingForm.hoursDescription')} title={t('parkingForm.hours')}>
-        <Switch
-          description={t('parkingForm.open24HoursDescription')}
-          id="parking-24-hours"
-          label={t('parkingForm.open24Hours')}
-          {...form.register('is24Hours')}
+        <Controller
+          control={form.control}
+          name="is24Hours"
+          render={({ field }) => (
+            <FormField
+              help={t('parkingForm.open24HoursDescription')}
+              htmlFor="parking-24-hours"
+              label={t('parkingForm.open24Hours')}
+            >
+              <Switch
+                checked={field.value}
+                id="parking-24-hours"
+                name={field.name}
+                onBlur={field.onBlur}
+                onCheckedChange={field.onChange}
+                ref={field.ref}
+              />
+            </FormField>
+          )}
         />
         {!is24Hours ? (
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field
+            <FormField
               error={errors.opensAt?.message}
               htmlFor="parking-opens-at"
               label={t('parkingForm.opening')}
             >
               <Input id="parking-opens-at" required type="time" {...form.register('opensAt')} />
-            </Field>
-            <Field
+            </FormField>
+            <FormField
               error={errors.closesAt?.message}
               htmlFor="parking-closes-at"
               label={t('parkingForm.closing')}
             >
               <Input id="parking-closes-at" required type="time" {...form.register('closesAt')} />
-            </Field>
+            </FormField>
           </div>
         ) : null}
       </FormSection>
@@ -372,7 +402,7 @@ export function ParkingForm({
         title={t('parkingForm.operations')}
       >
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field
+          <FormField
             error={errors.capacity?.message}
             htmlFor="parking-capacity"
             label={t('parkingForm.capacity')}
@@ -384,8 +414,8 @@ export function ParkingForm({
               required
               {...form.register('capacity', { valueAsNumber: true })}
             />
-          </Field>
-          <Field
+          </FormField>
+          <FormField
             error={errors.hourlyRate?.message}
             htmlFor="parking-rate"
             label={t('parkingForm.hourlyRate', { currency })}
@@ -398,14 +428,25 @@ export function ParkingForm({
               required
               {...form.register('hourlyRate', { valueAsNumber: true })}
             />
-          </Field>
+          </FormField>
         </div>
-        <Field htmlFor="parking-currency" label={t('parkingForm.currency')}>
-          <Select id="parking-currency" required {...form.register('currency')}>
-            <option value="ARS">ARS</option>
-            <option value="USD">USD</option>
-          </Select>
-        </Field>
+        <FormField htmlFor="parking-currency" label={t('parkingForm.currency')}>
+          <Controller
+            control={form.control}
+            name="currency"
+            render={({ field }) => (
+              <Select name={field.name} onValueChange={field.onChange} required value={field.value}>
+                <SelectTrigger id="parking-currency">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ARS">ARS</SelectItem>
+                  <SelectItem value="USD">USD</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </FormField>
       </FormSection>
 
       {parking ? (
@@ -414,11 +455,25 @@ export function ParkingForm({
           title={t('parkingForm.availability')}
           wide
         >
-          <Switch
-            description={t('parkingForm.acceptCheckInsDescription')}
-            id="parking-active"
-            label={t('parkingForm.acceptCheckIns')}
-            {...form.register('isActive')}
+          <Controller
+            control={form.control}
+            name="isActive"
+            render={({ field }) => (
+              <FormField
+                help={t('parkingForm.acceptCheckInsDescription')}
+                htmlFor="parking-active"
+                label={t('parkingForm.acceptCheckIns')}
+              >
+                <Switch
+                  checked={field.value}
+                  id="parking-active"
+                  name={field.name}
+                  onBlur={field.onBlur}
+                  onCheckedChange={field.onChange}
+                  ref={field.ref}
+                />
+              </FormField>
+            )}
           />
         </FormSection>
       ) : null}
@@ -428,11 +483,25 @@ export function ParkingForm({
         title={t('parkingForm.publication')}
         wide
       >
-        <Switch
-          description={t('parkingForm.visibleInDirectoryDescription')}
-          id="parking-listed"
-          label={t('parkingForm.visibleInDirectory')}
-          {...form.register('isListed')}
+        <Controller
+          control={form.control}
+          name="isListed"
+          render={({ field }) => (
+            <FormField
+              help={t('parkingForm.visibleInDirectoryDescription')}
+              htmlFor="parking-listed"
+              label={t('parkingForm.visibleInDirectory')}
+            >
+              <Switch
+                checked={field.value}
+                id="parking-listed"
+                name={field.name}
+                onBlur={field.onBlur}
+                onCheckedChange={field.onChange}
+                ref={field.ref}
+              />
+            </FormField>
+          )}
         />
       </FormSection>
 
@@ -474,9 +543,7 @@ function FormSection({
       aria-describedby={descriptionId}
       className={`space-y-5 border-b border-border-subtle pb-8 ${wide ? 'lg:col-span-2' : ''}`}
     >
-      <legend className="break-words px-0 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-foreground-muted">
-        {title}
-      </legend>
+      <legend className="break-words px-0 type-label text-muted-foreground">{title}</legend>
       <p
         className="max-w-2xl break-words text-sm leading-relaxed text-foreground-secondary"
         id={descriptionId}

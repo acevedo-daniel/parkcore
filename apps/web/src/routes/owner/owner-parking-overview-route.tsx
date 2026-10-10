@@ -11,9 +11,16 @@ import { SessionRow } from '../../components/domain/session.js';
 import { AvailabilityIndicator } from '../../components/domain/availability-indicator.js';
 import { PageHeader } from '../../components/domain/page-header.js';
 import { Button } from '../../components/ui/button.js';
-import { Sheet } from '../../components/ui/dialog.js';
-import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
-import { useToast } from '../../components/ui/toast-context.js';
+import { AppSheet } from '../../components/domain/app-dialog.js';
+import { EmptyState, ErrorState } from '../../components/domain/feedback.js';
+import { Skeleton } from '../../components/ui/skeleton.js';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from '../../components/ui/input-group.js';
+import { toast } from 'sonner';
 import { localizeApiError, type ApiErrorCodeMessages } from '../../lib/api/api-error.js';
 import {
   checkIn,
@@ -54,7 +61,6 @@ export function OwnerParkingOverviewRoute() {
   const { locale, t } = useAppearance();
   const { parkingId } = useParams();
   const queryClient = useQueryClient();
-  const { showToast } = useToast();
   const [checkInOpen, setCheckInOpen] = useState(false);
   const [checkInError, setCheckInError] = useState<string>();
   const [checkInSuccess, setCheckInSuccess] = useState<ParkingSession>();
@@ -106,7 +112,7 @@ export function OwnerParkingOverviewRoute() {
   if ((parkingsQuery.isError && !hasParkingSnapshot) || !parkingId) {
     return (
       <section className="owner-page" aria-labelledby="parking-overview-error-title">
-        <h1 className="visually-hidden" id="parking-overview-error-title">
+        <h1 className="sr-only" id="parking-overview-error-title">
           {t('parkingOperation.eyebrow')}
         </h1>
         <ErrorState onRetry={() => void parkingsQuery.refetch()}>
@@ -118,7 +124,7 @@ export function OwnerParkingOverviewRoute() {
   if (!parking) {
     return (
       <section className="owner-page" aria-labelledby="parking-overview-error-title">
-        <h1 className="visually-hidden" id="parking-overview-error-title">
+        <h1 className="sr-only" id="parking-overview-error-title">
           {t('parkingOperation.unavailableTitle')}
         </h1>
         <ErrorState title={t('parkingOperation.unavailableTitle')}>
@@ -174,7 +180,7 @@ export function OwnerParkingOverviewRoute() {
         }
         backAction={
           <Link
-            className="inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
+            className="inline-flex min-h-11 items-center gap-1 text-sm font-bold underline decoration-brand decoration-4 underline-offset-4"
             to="/app/parkings"
           >
             <ChevronLeft aria-hidden="true" className="size-4" />
@@ -194,7 +200,7 @@ export function OwnerParkingOverviewRoute() {
 
       {facilitySnapshotIsStale ? (
         <div
-          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-lg border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="break-words text-sm font-semibold">{t('parkingOperation.staleFacility')}</p>
@@ -214,16 +220,16 @@ export function OwnerParkingOverviewRoute() {
         </div>
       ) : null}
 
-      <div className="grid gap-4 wide:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
+      <div className="grid gap-4 wide:grid-cols-parking-overview">
         <section
-          className="rounded-[var(--radius-xl)] border border-border bg-surface-emphasis p-6 text-foreground sm:p-8"
+          className="rounded-2xl border border-border bg-accent p-6 text-foreground sm:p-8"
           aria-labelledby="check-in-title"
         >
-          <p className="type-label text-foreground-muted">{t('parkingOperation.arrivals')}</p>
+          <p className="type-label text-muted-foreground">{t('parkingOperation.arrivals')}</p>
           <div className="mt-6 flex min-w-0 flex-col justify-between gap-6 sm:flex-row sm:items-end">
             <div>
               <h2
-                className="font-display text-3xl font-bold leading-none tracking-[-0.055em]"
+                className="font-display text-3xl font-bold leading-none tracking-display"
                 id="check-in-title"
               >
                 {stateTitle}
@@ -239,7 +245,7 @@ export function OwnerParkingOverviewRoute() {
               <Plus aria-hidden="true" className="size-4" /> {t('parkingOperation.checkIn')}{' '}
               <kbd
                 aria-hidden="true"
-                className="ml-1 rounded border border-border-strong px-1.5 py-0.5 font-mono text-[10px]"
+                className="ml-1 type-code rounded border border-border-strong px-1.5 py-0.5 text-2xs"
               >
                 N
               </kbd>
@@ -248,10 +254,10 @@ export function OwnerParkingOverviewRoute() {
         </section>
 
         <section
-          className="rounded-[var(--radius-xl)] border border-border bg-surface p-6 sm:p-8"
+          className="rounded-2xl border border-border bg-card p-6 sm:p-8"
           aria-labelledby="capacity-title"
         >
-          <p className="type-label text-foreground-muted" id="capacity-title">
+          <p className="type-label text-muted-foreground" id="capacity-title">
             {t('parkingOperation.capacity')}
           </p>
           <div className="mt-5">
@@ -283,9 +289,9 @@ export function OwnerParkingOverviewRoute() {
       <section aria-labelledby="active-sessions-title">
         <div className="flex flex-col justify-between gap-5 border-b border-border-strong pb-5 sm:flex-row sm:items-end">
           <div>
-            <p className="type-label text-foreground-muted">{t('parkingOperation.onSite')}</p>
+            <p className="type-label text-muted-foreground">{t('parkingOperation.onSite')}</p>
             <h2
-              className="mt-2 font-display text-3xl font-bold leading-none tracking-[-0.055em]"
+              className="mt-2 font-display text-3xl font-bold leading-none tracking-display"
               id="active-sessions-title"
             >
               {t('parkingOperation.activeSessions')}
@@ -311,32 +317,35 @@ export function OwnerParkingOverviewRoute() {
           </div>
         </div>
 
-        <label className="relative mt-6 block max-w-md" htmlFor="active-session-plate">
-          <span className="visually-hidden">{t('parkingOperation.searchPlate')}</span>
-          <Search
-            aria-hidden="true"
-            className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-foreground-muted"
-          />
-          <input
-            className="h-12 w-full rounded-full border border-border bg-surface-subtle pl-11 pr-4 text-sm font-semibold text-foreground outline-none placeholder:text-foreground-muted focus:border-primary focus:ring-2 focus:ring-focus-ring"
-            id="active-session-plate"
-            onChange={(event) => {
-              setPlateSearch(event.target.value);
-            }}
-            placeholder={t('parkingOperation.searchPlatePlaceholder')}
-            value={plateSearch}
-          />
-        </label>
+        <div className="mt-6 max-w-md">
+          <InputGroup className="rounded-full bg-muted">
+            <InputGroupAddon>
+              <InputGroupText>
+                <Search aria-hidden="true" />
+              </InputGroupText>
+            </InputGroupAddon>
+            <InputGroupInput
+              aria-label={t('parkingOperation.searchPlate')}
+              className="h-12 rounded-full border-0 bg-transparent type-code font-semibold"
+              id="active-session-plate"
+              onChange={(event) => {
+                setPlateSearch(event.target.value);
+              }}
+              placeholder={t('parkingOperation.searchPlatePlaceholder')}
+              value={plateSearch}
+            />
+          </InputGroup>
+        </div>
 
         {activeSessionsQuery.isFetching && !activeSessionsQuery.isLoading ? (
-          <p className="mt-3 type-label text-foreground-muted" role="status">
+          <p className="mt-3 type-label text-muted-foreground" role="status">
             {t('parkingOperation.refreshingActiveSessions')}
           </p>
         ) : null}
 
         {activeSessionsQuery.isError && hasActiveSessionData ? (
           <div
-            className="mt-4 flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+            className="mt-4 flex flex-col gap-3 rounded-lg border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
             role="alert"
           >
             <p className="text-sm font-semibold">{t('parkingOperation.staleActiveSessions')}</p>
@@ -356,8 +365,8 @@ export function OwnerParkingOverviewRoute() {
         <div className="mt-5">
           {activeSessionsLoading ? (
             <div className="grid gap-3">
-              <Skeleton className="h-28 rounded-[var(--radius-lg)]" />
-              <Skeleton className="h-28 rounded-[var(--radius-lg)]" />
+              <Skeleton className="h-28 rounded-xl" />
+              <Skeleton className="h-28 rounded-xl" />
             </div>
           ) : activeSessionsQuery.isError && !hasActiveSessionData ? (
             <ErrorState
@@ -410,7 +419,7 @@ export function OwnerParkingOverviewRoute() {
         </div>
       </section>
 
-      <Sheet
+      <AppSheet
         description={t('parkingOperation.sheetDescription')}
         onOpenChange={(open) => {
           setCheckInOpen(open);
@@ -432,7 +441,7 @@ export function OwnerParkingOverviewRoute() {
             try {
               const session = await checkInMutation.mutateAsync(input);
               setCheckInSuccess(session);
-              showToast(t('parkingOperation.checkInSuccess', { plate: session.vehicle.plate }));
+              toast.success(t('parkingOperation.checkInSuccess', { plate: session.vehicle.plate }));
               setCheckInOpen(false);
               try {
                 await invalidateOwnerMutationQueries(queryClient, {
@@ -450,7 +459,7 @@ export function OwnerParkingOverviewRoute() {
             }
           }}
         />
-      </Sheet>
+      </AppSheet>
     </section>
   );
 }
@@ -508,13 +517,13 @@ function OwnerParkingOperationSkeleton() {
       className="space-y-8"
       role="status"
     >
-      <h1 className="visually-hidden">{t('parkingOperation.eyebrow')}</h1>
-      <Skeleton className="h-48 rounded-[var(--radius-xl)]" />
-      <div className="grid gap-4 wide:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]">
-        <Skeleton className="h-64 rounded-[var(--radius-xl)]" />
-        <Skeleton className="h-64 rounded-[var(--radius-xl)]" />
+      <h1 className="sr-only">{t('parkingOperation.eyebrow')}</h1>
+      <Skeleton className="h-48 rounded-2xl" />
+      <div className="grid gap-4 wide:grid-cols-parking-overview">
+        <Skeleton className="h-64 rounded-2xl" />
+        <Skeleton className="h-64 rounded-2xl" />
       </div>
-      <Skeleton className="h-72 rounded-[var(--radius-xl)]" />
+      <Skeleton className="h-72 rounded-2xl" />
     </div>
   );
 }

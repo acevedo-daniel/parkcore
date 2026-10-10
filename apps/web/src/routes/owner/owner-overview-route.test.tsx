@@ -5,7 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AppearanceProvider } from '../../app/appearance-provider.js';
-import { ToastProvider } from '../../components/ui/feedback.js';
+
 import { parkingFixture } from '../../test/fixtures.js';
 import { OwnerOverviewRoute } from './owner-overview-route.js';
 
@@ -75,13 +75,11 @@ function renderOverview(locale: 'es-AR' | 'en-US' = 'en-US') {
   return render(
     <AppearanceProvider>
       <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          <MemoryRouter initialEntries={['/app']}>
-            <Routes>
-              <Route path="/app" element={<OwnerOverviewRoute />} />
-            </Routes>
-          </MemoryRouter>
-        </ToastProvider>
+        <MemoryRouter initialEntries={['/app']}>
+          <Routes>
+            <Route path="/app" element={<OwnerOverviewRoute />} />
+          </Routes>
+        </MemoryRouter>
       </QueryClientProvider>
     </AppearanceProvider>,
   );
@@ -220,14 +218,14 @@ describe('owner overview briefing', () => {
     configureAnalytics();
     renderOverview();
 
-    const periodButton = await screen.findByRole('button', { name: 'View 30 days of activity' });
+    const periodButton = await screen.findByRole('radio', { name: 'View 30 days of activity' });
     await user.click(periodButton);
 
     await waitFor(() => {
       expect(api.getAnalyticsRevenue).toHaveBeenCalledWith(30);
       expect(api.getAnalyticsVolume).toHaveBeenCalledWith(30);
     });
-    expect(periodButton.getAttribute('aria-pressed')).toBe('true');
+    expect(periodButton.getAttribute('aria-checked')).toBe('true');
     expect(screen.getByRole('list', { name: 'Daily activity data' })).toBeTruthy();
   });
 

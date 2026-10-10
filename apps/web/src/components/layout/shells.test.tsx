@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest';
 import { OwnerLayout } from './owner-layout.js';
 import { PublicLayout } from './public-layout.js';
 import { AppearanceProvider } from '../../app/appearance-provider.js';
-import { ToastProvider } from '../ui/feedback.js';
+
 import { AuthProvider } from '../../features/auth/auth-provider.js';
 
 function renderRoute(element: ReactNode, path: string) {
@@ -20,9 +20,7 @@ function renderRoute(element: ReactNode, path: string) {
     <AppearanceProvider>
       <QueryClientProvider client={new QueryClient()}>
         <AuthProvider>
-          <ToastProvider>
-            <RouterProvider router={router} />
-          </ToastProvider>
+          <RouterProvider router={router} />
         </AuthProvider>
       </QueryClientProvider>
     </AppearanceProvider>,
@@ -55,7 +53,7 @@ describe('application shells', () => {
         .map((link) => link.textContent),
     ).toEqual(['Cocheras', 'Cómo funciona', 'Ingresar']);
     expect(within(dialog).getByRole('button', { name: 'Probar demo' })).toBeTruthy();
-    expect(within(dialog).getByRole('button', { name: 'Español' })).toBeTruthy();
+    expect(within(dialog).getByRole('radio', { name: 'Español' })).toBeTruthy();
     expect(within(dialog).getByRole('combobox', { name: 'Apariencia' })).toBeTruthy();
     expect(
       dialog
@@ -99,9 +97,7 @@ describe('application shells', () => {
     });
     expect(mobileNavigation.className).toContain('wide:hidden');
     expect(mobileNavigation.className).toContain('owner-mobile-nav');
-    expect(screen.getByRole('main').className).toContain(
-      'pb-[calc(6rem+env(safe-area-inset-bottom,0px))]',
-    );
+    expect(screen.getByRole('main').className).toContain('pb-safe-owner-content');
     expect(screen.getAllByRole('combobox', { name: 'Apariencia' })).toHaveLength(2);
     expect(
       Array.from(document.querySelectorAll<HTMLElement>('[data-slot="appearance-controls"]')).map(

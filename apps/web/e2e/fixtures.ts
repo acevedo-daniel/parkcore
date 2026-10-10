@@ -1,4 +1,13 @@
-import { expect, test as base, type Page, type Response } from '@playwright/test';
+import { expect, test as base, type Locator, type Page, type Response } from '@playwright/test';
+
+export async function chooseSelectOption(
+  page: Page,
+  combobox: Locator,
+  optionName: string,
+): Promise<void> {
+  await combobox.click();
+  await page.getByRole('option', { name: optionName, exact: true }).click();
+}
 
 export async function waitForHydration(page: Page): Promise<void> {
   await expect(page.locator('html')).toHaveAttribute('data-hydrated', 'true');

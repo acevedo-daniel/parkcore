@@ -1,70 +1,36 @@
 import * as React from 'react';
+import { cn } from '@/lib/cn';
+import { useFieldControlProps } from '@/lib/field-control-context';
+import { Switch as SwitchPrimitive } from 'radix-ui';
 
-import { cn } from '../../lib/cn.js';
+function Switch({
+  className,
+  size = 'default',
+  ...props
+}: React.ComponentProps<typeof SwitchPrimitive.Root> & {
+  size?: 'sm' | 'default';
+}) {
+  const fieldProps = useFieldControlProps(props);
 
-export interface SwitchProps extends Omit<
-  React.InputHTMLAttributes<HTMLInputElement>,
-  'children' | 'type'
-> {
-  description?: React.ReactNode;
-  label: string;
+  return (
+    <SwitchPrimitive.Root
+      {...props}
+      {...fieldProps}
+      data-slot="switch"
+      data-size={size}
+      className={cn(
+        'peer group/switch inline-flex shrink-0 items-center rounded-full border border-border-strong shadow-xs outline-none transition-control disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-5 data-[size=default]:w-8 data-[size=sm]:h-3.5 data-[size=sm]:w-6 data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=unchecked]:bg-accent',
+        className,
+      )}
+    >
+      <SwitchPrimitive.Thumb
+        data-slot="switch-thumb"
+        className={cn(
+          'pointer-events-none block rounded-full bg-background ring-0 transition-transform group-data-[size=default]/switch:size-4 group-data-[size=sm]/switch:size-3 group-data-[size=default]/switch:data-[state=checked]:translate-x-3.5 group-data-[size=sm]/switch:data-[state=checked]:translate-x-3 data-[state=unchecked]:translate-x-0',
+        )}
+      />
+    </SwitchPrimitive.Root>
+  );
 }
 
-export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
-  ({ className, description, disabled, id, label, ...props }, ref) => {
-    const { onKeyDown, ...inputProps } = props;
-    const generatedId = React.useId();
-    const switchId = id ?? generatedId;
-    const labelId = `${switchId}-label`;
-    const descriptionId = description ? `${switchId}-description` : undefined;
-    const describedBy =
-      [props['aria-describedby'], descriptionId].filter(Boolean).join(' ') || undefined;
-
-    return (
-      <div className="space-y-2" data-slot="switch">
-        <label
-          className={cn(
-            'group flex min-h-[var(--touch-target-min)] cursor-pointer items-start gap-3 rounded-[var(--radius-md)] border border-border-subtle bg-surface-subtle px-3.5 py-3 text-sm text-foreground transition-colors hover:bg-surface-hover',
-            disabled && 'cursor-not-allowed opacity-60',
-          )}
-          htmlFor={switchId}
-        >
-          <input
-            {...inputProps}
-            aria-describedby={describedBy}
-            aria-labelledby={labelId}
-            className={cn('peer visually-hidden', className)}
-            disabled={disabled}
-            id={switchId}
-            onKeyDown={(event) => {
-              onKeyDown?.(event);
-              if (event.defaultPrevented || disabled) return;
-              if (event.key === ' ' || event.key === 'Enter') {
-                event.preventDefault();
-                event.currentTarget.click();
-              }
-            }}
-            ref={ref}
-            role="switch"
-            type="checkbox"
-          />
-          <span
-            aria-hidden="true"
-            className="relative mt-0.5 h-6 w-11 shrink-0 rounded-full border border-border-strong bg-surface-emphasis p-0.5 transition-colors peer-checked:border-primary peer-checked:bg-primary peer-disabled:opacity-60 peer-focus-visible:ring-2 peer-focus-visible:ring-focus-ring"
-          >
-            <span className="block size-5 rounded-full bg-foreground-muted shadow-xs transition-transform peer-checked:translate-x-5 peer-checked:bg-primary-foreground" />
-          </span>
-          <span className="min-w-0 font-semibold" id={labelId}>
-            {label}
-          </span>
-        </label>
-        {description ? (
-          <p className="pl-14 text-sm leading-relaxed text-foreground-muted" id={descriptionId}>
-            {description}
-          </p>
-        ) : null}
-      </div>
-    );
-  },
-);
-Switch.displayName = 'Switch';
+export { Switch };

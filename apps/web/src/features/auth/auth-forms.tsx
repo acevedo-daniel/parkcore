@@ -7,7 +7,9 @@ import { z } from 'zod';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../../components/ui/button.js';
-import { Field, Input } from '../../components/ui/field.js';
+import { FormField } from '../../components/domain/form-field.js';
+import { Input } from '../../components/ui/input.js';
+import { Toggle } from '../../components/ui/toggle.js';
 import { localizeApiError } from '../../lib/api/api-error.js';
 import type { Translator } from '../../lib/localization.js';
 import { useAuth } from './use-auth.js';
@@ -56,52 +58,52 @@ export function AuthFormFrame({
 }) {
   const { t } = useAppearance();
   return (
-    <section aria-labelledby="auth-title" className="min-h-full bg-canvas py-12 sm:py-20">
+    <section aria-labelledby="auth-title" className="min-h-full bg-background py-12 sm:py-20">
       <div className="mx-auto grid max-w-5xl gap-8 px-4 sm:px-6 wide:grid-cols-2 wide:items-stretch wide:px-8">
-        <div className="hidden min-w-0 rounded-[3rem_3rem_7rem_3rem] bg-surface-inverse p-10 text-foreground-on-inverse shadow-hover wide:flex wide:flex-col wide:justify-between">
+        <div className="hidden min-w-0 rounded-signature bg-inverse p-10 text-inverse-foreground shadow-md wide:flex wide:flex-col wide:justify-between">
           <div>
             <Link
-              className="inline-flex min-h-[var(--touch-target-min)] items-center gap-2 rounded-sm font-display text-xl font-black tracking-tight text-foreground-on-inverse"
+              className="inline-flex min-h-11 items-center gap-2 rounded-sm font-display text-xl font-black tracking-tight text-inverse-foreground"
               to="/"
             >
               PARKCORE
             </Link>
-            <p className="mt-16 text-xs font-bold tracking-[0.12em] text-foreground-on-inverse uppercase">
+            <p className="mt-16 text-xs font-bold tracking-eyebrow text-inverse-foreground uppercase">
               {eyebrow}
             </p>
             <p
               aria-hidden="true"
-              className="mt-5 font-display text-4xl font-black leading-[1.02] tracking-[-0.05em]"
+              className="mt-5 font-display text-4xl font-black leading-tight tracking-display"
             >
               {t('auth.frame.headline')}
             </p>
-            <p className="mt-6 max-w-sm text-base leading-relaxed text-foreground-on-inverse/80">
+            <p className="mt-6 max-w-sm text-base leading-relaxed text-inverse-foreground/80">
               {t('auth.frame.description')}
             </p>
           </div>
-          <p className="max-w-sm text-sm leading-relaxed text-foreground-on-inverse/70">
+          <p className="max-w-sm text-sm leading-relaxed text-inverse-foreground/70">
             {t('auth.frame.footer')}
           </p>
         </div>
-        <div className="min-w-0 rounded-[2rem_2rem_4.5rem_2rem] border border-border bg-surface p-6 shadow-hover sm:p-8 wide:p-10">
+        <div className="min-w-0 rounded-signature border border-border bg-card p-6 shadow-md sm:p-8 wide:p-10">
           <div>
             <Link
-              className="inline-flex min-h-[var(--touch-target-min)] items-center gap-2 rounded-sm font-display text-lg font-black tracking-tight text-foreground wide:hidden"
+              className="inline-flex min-h-11 items-center gap-2 rounded-sm font-display text-lg font-black tracking-tight text-foreground wide:hidden"
               to="/"
             >
               PARKCORE
             </Link>
-            <p className="mt-10 text-xs font-bold tracking-[0.12em] text-foreground-muted uppercase wide:mt-0">
+            <p className="mt-10 text-xs font-bold tracking-eyebrow text-muted-foreground uppercase wide:mt-0">
               {eyebrow}
             </p>
             <h1
-              className="mt-3 max-w-full break-words font-display text-3xl font-black tracking-[-0.04em] text-foreground wide:text-4xl"
+              className="mt-3 max-w-full break-words font-display text-3xl font-black tracking-heading text-foreground wide:text-4xl"
               id="auth-title"
             >
               {title}
             </h1>
           </div>
-          <div className="mt-8 [&_.auth-form]:mt-6 [&_.auth-form]:flex [&_.auth-form]:flex-col [&_.auth-form]:gap-4 [&_.field]:space-y-1.5 [&_.field-label]:block [&_.field-label]:text-xs [&_.field-label]:font-bold [&_.field-label]:text-foreground [&_.control]:h-12 [&_.control]:w-full [&_.control]:rounded-2xl [&_.control]:border [&_.control]:border-border [&_.control]:bg-surface-subtle [&_.control]:px-4 [&_.control]:text-sm [&_.control]:font-medium [&_.control]:text-foreground [&_.control]:outline-none [&_.control]:transition-colors [&_.control]:focus:border-primary [&_.control]:focus:bg-surface [&_.form-error]:text-sm [&_.form-error]:font-medium [&_.form-error]:text-danger-text">
+          <div className="mt-8 [&_.auth-form]:mt-6 [&_.auth-form]:flex [&_.auth-form]:flex-col [&_.auth-form]:gap-4 [&_.field]:space-y-1.5 [&_.field-label]:block [&_.field-label]:text-xs [&_.field-label]:font-bold [&_.field-label]:text-foreground [&_.control]:h-12 [&_.control]:w-full [&_.control]:rounded-2xl [&_.control]:border [&_.control]:border-border [&_.control]:bg-muted [&_.control]:px-4 [&_.control]:text-sm [&_.control]:font-medium [&_.control]:text-foreground [&_.control]:outline-none [&_.control]:transition-colors [&_.control]:focus:border-primary [&_.control]:focus:bg-card [&_.form-error]:text-sm [&_.form-error]:font-medium [&_.form-error]:text-destructive-soft-foreground">
             {children}
           </div>
           <p className="mt-6 border-t border-border-subtle pt-5 text-sm leading-relaxed text-foreground-secondary">
@@ -148,7 +150,7 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         void submit(event);
       }}
     >
-      <Field
+      <FormField
         error={form.formState.errors.email?.message}
         htmlFor="email"
         label={t('auth.fields.email')}
@@ -161,7 +163,7 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           type="email"
           {...form.register('email')}
         />
-      </Field>
+      </FormField>
       <PasswordField
         autoComplete="current-password"
         error={form.formState.errors.password?.message}
@@ -175,12 +177,7 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           {form.formState.errors.root.message}
         </p>
       ) : null}
-      <Button
-        className="h-12 rounded-full bg-primary text-primary-foreground hover:bg-primary-hover"
-        disabled={form.formState.isSubmitting}
-        fullWidth
-        type="submit"
-      >
+      <Button className="w-full rounded-full" disabled={form.formState.isSubmitting} type="submit">
         {form.formState.isSubmitting ? t('auth.actions.signingIn') : t('auth.actions.signIn')}
       </Button>
     </form>
@@ -229,21 +226,21 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         void submit(event);
       }}
     >
-      <Field
+      <FormField
         error={form.formState.errors.name?.message}
         htmlFor="name"
         label={t('auth.fields.firstName')}
       >
         <Input autoComplete="given-name" autoFocus id="name" {...form.register('name')} />
-      </Field>
-      <Field
+      </FormField>
+      <FormField
         error={form.formState.errors.lastName?.message}
         htmlFor="lastName"
         label={t('auth.fields.lastName')}
       >
         <Input autoComplete="family-name" id="lastName" {...form.register('lastName')} />
-      </Field>
-      <Field
+      </FormField>
+      <FormField
         error={form.formState.errors.email?.message}
         htmlFor="email"
         label={t('auth.fields.email')}
@@ -255,7 +252,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
           type="email"
           {...form.register('email')}
         />
-      </Field>
+      </FormField>
       <PasswordField
         autoComplete="new-password"
         error={form.formState.errors.password?.message}
@@ -270,12 +267,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
           {form.formState.errors.root.message}
         </p>
       ) : null}
-      <Button
-        className="h-12 rounded-full bg-primary text-primary-foreground hover:bg-primary-hover"
-        disabled={form.formState.isSubmitting}
-        fullWidth
-        type="submit"
-      >
+      <Button className="w-full rounded-full" disabled={form.formState.isSubmitting} type="submit">
         {form.formState.isSubmitting
           ? t('auth.actions.creatingAccount')
           : t('auth.actions.createAccount')}
@@ -290,7 +282,7 @@ export function LoginFooter({ registerHref = '/register' }: { registerHref?: str
     <>
       {t('auth.footer.login')}{' '}
       <Link
-        className="font-bold text-foreground underline decoration-accent underline-offset-4"
+        className="font-bold text-foreground underline decoration-brand underline-offset-4"
         to={registerHref}
       >
         {t('auth.footer.loginLink')}
@@ -305,7 +297,7 @@ export function RegisterFooter({ loginHref = '/login' }: { loginHref?: string } 
     <>
       {t('auth.footer.registerLead')}{' '}
       <Link
-        className="font-bold text-foreground underline decoration-accent underline-offset-4"
+        className="font-bold text-foreground underline decoration-brand underline-offset-4"
         to={loginHref}
       >
         {t('auth.footer.registerLink')}
@@ -337,7 +329,7 @@ function PasswordField({
   const describedBy = error ? `${htmlFor}-error` : help ? `${htmlFor}-help` : undefined;
 
   return (
-    <Field error={error} help={help} htmlFor={htmlFor} label={label}>
+    <FormField error={error} help={help} htmlFor={htmlFor} label={label}>
       <div className="relative">
         <Input
           {...registration}
@@ -348,24 +340,26 @@ function PasswordField({
           id={htmlFor}
           type={isVisible ? 'text' : 'password'}
         />
-        <button
+        <Toggle
           aria-controls={htmlFor}
           aria-label={t(isVisible ? 'auth.actions.hidePassword' : 'auth.actions.showPassword')}
-          aria-pressed={isVisible}
-          className="absolute inset-y-0 right-0 inline-flex size-11 items-center justify-center rounded-[var(--radius-sm)] text-foreground-secondary transition-colors hover:bg-surface-hover hover:text-foreground focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-1 focus-visible:ring-offset-focus-ring-offset"
-          onClick={() => {
+          className="absolute inset-y-0 right-0 min-h-11 min-w-11 rounded-md p-0 text-foreground-secondary hover:bg-accent hover:text-foreground"
+          onPressedChange={() => {
             setIsVisible((current) => !current);
           }}
+          pressed={isVisible}
+          size="default"
           type="button"
+          variant="default"
         >
           {isVisible ? (
             <EyeOff aria-hidden="true" className="size-4" />
           ) : (
             <Eye aria-hidden="true" className="size-4" />
           )}
-        </button>
+        </Toggle>
       </div>
-    </Field>
+    </FormField>
   );
 }
 

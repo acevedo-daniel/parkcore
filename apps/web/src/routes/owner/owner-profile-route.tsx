@@ -8,12 +8,13 @@ import { z } from 'zod';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { PageHeader } from '../../components/domain/page-header.js';
-import { AppearanceControls } from '../../components/ui/appearance-controls.js';
+import { AppearanceControls } from '../../components/domain/appearance-controls.js';
+import { FormField } from '../../components/domain/form-field.js';
 import { Button } from '../../components/ui/button.js';
-import { Combobox, type ComboboxOption } from '../../components/ui/combobox.js';
-import { Skeleton } from '../../components/ui/feedback.js';
-import { Field, Input } from '../../components/ui/field.js';
-import { useToast } from '../../components/ui/toast-context.js';
+import { Combobox, type ComboboxOption } from '../../components/domain/combobox.js';
+import { Skeleton } from '../../components/ui/skeleton.js';
+import { Input } from '../../components/ui/input.js';
+import { toast } from 'sonner';
 import { DemoResetControl } from '../../features/auth/demo-reset-control.js';
 import { useAuth } from '../../features/auth/use-auth.js';
 import { localizeApiError } from '../../lib/api/api-error.js';
@@ -49,10 +50,10 @@ export function OwnerProfileRoute() {
   if (!user) {
     return (
       <section aria-labelledby="profile-loading-title" className="owner-page space-y-6">
-        <h1 className="visually-hidden" id="profile-loading-title">
+        <h1 className="sr-only" id="profile-loading-title">
           {t('profile.title')}
         </h1>
-        <p className="visually-hidden" role="status">
+        <p className="sr-only" role="status">
           {t('profile.loading')}
         </p>
         <Skeleton className="min-h-96 w-full" />
@@ -66,7 +67,6 @@ function OwnerProfileContent({ user }: { user: User }) {
   const { locale, t } = useAppearance();
   const navigate = useNavigate();
   const { logout, updateUser } = useAuth();
-  const { showToast } = useToast();
   const isOwner = user.kind === 'OWNER';
   const isDemo = user.kind === 'DEMO';
   const schema = useMemo(() => createProfileSchema(t), [t]);
@@ -112,7 +112,7 @@ function OwnerProfileContent({ user }: { user: User }) {
         timezone: updated.timezone,
       });
       setSaveStatus('success');
-      showToast(t('profile.updated'));
+      toast.success(t('profile.updated'));
     } catch (reason) {
       form.setError('root', {
         message: localizeApiError(reason, t, 'api.updateProfile'),
@@ -146,7 +146,7 @@ function OwnerProfileContent({ user }: { user: User }) {
           aria-labelledby="profile-account-title"
           className="border-b border-border-subtle pb-8"
         >
-          <p className="type-label text-foreground-muted">{t('profile.accountSection')}</p>
+          <p className="type-label text-muted-foreground">{t('profile.accountSection')}</p>
           {isOwner ? (
             <>
               <h2 className="mt-3 type-section-title" id="profile-account-title">
@@ -156,7 +156,7 @@ function OwnerProfileContent({ user }: { user: User }) {
                 {t('profile.accountDescription')}
               </p>
               <div className="mt-6 grid gap-5 sm:grid-cols-2">
-                <Field
+                <FormField
                   error={errors.name?.message}
                   htmlFor="profile-name"
                   label={t('profile.name')}
@@ -167,8 +167,8 @@ function OwnerProfileContent({ user }: { user: User }) {
                     required
                     {...form.register('name', { onChange: clearSaveFeedback })}
                   />
-                </Field>
-                <Field
+                </FormField>
+                <FormField
                   error={errors.lastName?.message}
                   htmlFor="profile-last-name"
                   label={t('profile.lastName')}
@@ -179,8 +179,8 @@ function OwnerProfileContent({ user }: { user: User }) {
                     required
                     {...form.register('lastName', { onChange: clearSaveFeedback })}
                   />
-                </Field>
-                <Field
+                </FormField>
+                <FormField
                   help={t('profile.emailReadOnly')}
                   htmlFor="profile-email"
                   label={t('profile.email')}
@@ -193,7 +193,7 @@ function OwnerProfileContent({ user }: { user: User }) {
                     type="email"
                     value={user.email ?? ''}
                   />
-                </Field>
+                </FormField>
               </div>
             </>
           ) : (
@@ -205,7 +205,7 @@ function OwnerProfileContent({ user }: { user: User }) {
           aria-labelledby="profile-preferences-title"
           className="border-b border-border-subtle pb-8"
         >
-          <p className="type-label text-foreground-muted">{t('profile.preferences')}</p>
+          <p className="type-label text-muted-foreground">{t('profile.preferences')}</p>
           <h2 className="mt-3 type-section-title" id="profile-preferences-title">
             {t('profile.languageAppearance')}
           </h2>
@@ -244,8 +244,8 @@ function OwnerProfileContent({ user }: { user: User }) {
                     <p
                       className={
                         fieldState.error
-                          ? 'field-error text-sm font-medium text-danger-text'
-                          : 'field-help text-sm leading-relaxed text-foreground-muted'
+                          ? 'field-error text-sm font-medium text-destructive-soft-foreground'
+                          : 'field-help text-sm leading-relaxed text-muted-foreground'
                       }
                       id={messageId}
                       role={fieldState.error ? 'alert' : undefined}
@@ -264,11 +264,15 @@ function OwnerProfileContent({ user }: { user: User }) {
             {mutation.isPending ? t('profile.saving') : t('profile.save')}
           </Button>
           {errors.root?.message ? (
-            <p className="text-sm font-semibold text-danger-text" role="alert">
+            <p className="text-sm font-semibold text-destructive-soft-foreground" role="alert">
               {errors.root.message}
             </p>
           ) : saveStatus === 'success' ? (
-            <p aria-live="polite" className="text-sm font-semibold text-success-text" role="status">
+            <p
+              aria-live="polite"
+              className="text-sm font-semibold text-success-soft-foreground"
+              role="status"
+            >
               {t('profile.updated')}
             </p>
           ) : null}
@@ -280,7 +284,7 @@ function OwnerProfileContent({ user }: { user: User }) {
           aria-labelledby="profile-demo-data-title"
           className="border-b border-border-subtle pb-8"
         >
-          <p className="type-label text-foreground-muted">{t('profile.demoData')}</p>
+          <p className="type-label text-muted-foreground">{t('profile.demoData')}</p>
           <h2 className="mt-3 type-section-title" id="profile-demo-data-title">
             {t('profile.demoDataTitle')}
           </h2>
@@ -294,7 +298,7 @@ function OwnerProfileContent({ user }: { user: User }) {
       ) : null}
 
       <section aria-labelledby="profile-session-title">
-        <p className="type-label text-foreground-muted">{t('profile.session')}</p>
+        <p className="type-label text-muted-foreground">{t('profile.session')}</p>
         <h2 className="mt-3 type-section-title" id="profile-session-title">
           {t('profile.finished')}
         </h2>
@@ -312,9 +316,9 @@ function OwnerProfileContent({ user }: { user: User }) {
 
 function DemoSessionDisclosure({ locale, t, user }: { locale: Locale; t: Translator; user: User }) {
   return (
-    <div className="mt-4 flex min-w-0 flex-col gap-5 rounded-[var(--radius-lg)] border border-accent-foreground/30 bg-accent-soft p-5 text-foreground sm:flex-row sm:items-start sm:justify-between sm:p-6">
+    <div className="mt-4 flex min-w-0 flex-col gap-5 rounded-xl border border-brand-foreground/30 bg-brand-soft p-5 text-foreground sm:flex-row sm:items-start sm:justify-between sm:p-6">
       <div className="flex min-w-0 items-start gap-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-foreground">
           <UserRound aria-hidden="true" className="size-5" />
         </span>
         <div className="min-w-0">

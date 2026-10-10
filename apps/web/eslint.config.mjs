@@ -80,6 +80,19 @@ export default defineConfig(
     },
   },
   {
+    files: ['src/**/*.tsx'],
+    ignores: ['src/components/ui/**', 'src/**/*.test.tsx'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...['button', 'input', 'select', 'textarea', 'dialog'].map((name) => ({
+          selector: `JSXOpeningElement[name.type='JSXIdentifier'][name.name='${name}']`,
+          message: 'Compose a primitive from components/ui instead of a raw interactive element.',
+        })),
+      ],
+    },
+  },
+  {
     files: ['src/**/*.test.{ts,tsx}'],
     rules: {
       'no-restricted-syntax': [

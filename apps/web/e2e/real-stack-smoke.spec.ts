@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 
-import { expect, test } from './fixtures';
+import { chooseSelectOption, expect, test } from './fixtures';
 
 interface ParkingSnapshot {
   id: string;
@@ -167,17 +167,21 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
   ).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  await publicAppearance.getByRole('combobox', { name: 'Theme' }).selectOption('dark');
+  await chooseSelectOption(page, publicAppearance.getByRole('combobox', { name: 'Theme' }), 'Dark');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await publicAppearance.getByRole('button', { exact: true, name: 'Spanish' }).click();
+  await publicAppearance.getByRole('radio', { exact: true, name: 'Spanish' }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-AR');
-  await expect(publicAppearance.getByRole('button', { exact: true, name: /Ingl/ })).toHaveAttribute(
-    'aria-pressed',
+  await expect(publicAppearance.getByRole('radio', { exact: true, name: /Ingl/ })).toHaveAttribute(
+    'aria-checked',
     'false',
   );
-  await publicAppearance.getByRole('button', { exact: true, name: /Ingl/ }).click();
+  await publicAppearance.getByRole('radio', { exact: true, name: /Ingl/ }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
-  await publicAppearance.getByRole('combobox', { name: 'Theme' }).selectOption('light');
+  await chooseSelectOption(
+    page,
+    publicAppearance.getByRole('combobox', { name: 'Theme' }),
+    'Light',
+  );
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
   await page.goto('/parkings');
@@ -220,9 +224,9 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
   const ownerMobileAppearance = page.locator(
     '.owner-mobile-header [data-slot="appearance-controls"]',
   );
-  await ownerMobileAppearance.getByRole('button', { exact: true, name: 'Spanish' }).click();
+  await ownerMobileAppearance.getByRole('radio', { exact: true, name: 'Spanish' }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-AR');
-  await ownerMobileAppearance.getByRole('button', { exact: true, name: /Ingl/ }).click();
+  await ownerMobileAppearance.getByRole('radio', { exact: true, name: /Ingl/ }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
 
   const publicListingBeforeOperations = await readPublicParkingList(page, apiBaseUrl, webOrigin);
@@ -325,7 +329,7 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
       { exact: true },
     ),
   ).toBeVisible();
-  await expect(checkInSheet.getByLabel('Type', { exact: true })).toHaveValue('CAR');
+  await expect(checkInSheet.getByRole('combobox', { name: 'Type' })).toHaveText('Car');
   await expect(checkInSheet.getByLabel('Brand', { exact: true })).toHaveValue('Volkswagen');
   await expect(checkInSheet.getByLabel('Model', { exact: true })).toHaveValue('Polo');
   await expect(checkInSheet.getByLabel('Name', { exact: true })).toHaveValue('');
@@ -472,10 +476,11 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
     path: testInfo.outputPath('canonical-receipt-compact-light.png'),
   });
 
-  await page
-    .locator('.owner-mobile-header')
-    .getByRole('combobox', { name: 'Theme' })
-    .selectOption('dark');
+  await chooseSelectOption(
+    page,
+    page.locator('.owner-mobile-header').getByRole('combobox', { name: 'Theme' }),
+    'Dark',
+  );
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expectNoHorizontalOverflow(page, 'compact dark receipt');
   await page.screenshot({
@@ -484,8 +489,8 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
   });
 
   await page.setViewportSize({ height: 960, width: 1440 });
-  await expect(page.locator('.owner-sidebar').getByRole('combobox', { name: 'Theme' })).toHaveValue(
-    'dark',
+  await expect(page.locator('.owner-sidebar').getByRole('combobox', { name: 'Theme' })).toHaveText(
+    'Dark',
   );
   await expectNoHorizontalOverflow(page, 'wide dark session detail');
   await page.screenshot({
@@ -496,15 +501,15 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
   await page.getByRole('link', { exact: true, name: 'Parking operation' }).click();
   await expect(page).toHaveURL(new RegExp(`/app/parkings/${central.id}$`));
   const ownerAppearance = page.locator('.owner-sidebar [data-slot="appearance-controls"]');
-  await ownerAppearance.getByRole('button', { exact: true, name: 'Spanish' }).click();
+  await ownerAppearance.getByRole('radio', { exact: true, name: 'Spanish' }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-AR');
-  await expect(page.locator('[data-slot="toast"]')).toHaveCount(0);
+  await expect(page.locator('[data-sonner-toast]')).toHaveCount(0);
   await expectNoHorizontalOverflow(page, 'wide dark operation');
   await page.screenshot({
     fullPage: false,
     path: testInfo.outputPath('canonical-operation-wide-dark.png'),
   });
-  await ownerAppearance.getByRole('button', { exact: true, name: /Ingl/ }).click();
+  await ownerAppearance.getByRole('radio', { exact: true, name: /Ingl/ }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
 
   await page.getByRole('link', { exact: true, name: 'History' }).click();

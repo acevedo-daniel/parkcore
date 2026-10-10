@@ -1,4 +1,4 @@
-import { ArrowUpRight, CircleAlert } from 'lucide-react';
+import { ArrowUpRight, Bell } from 'lucide-react';
 import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
@@ -43,12 +43,12 @@ export function AttentionItem({
       )}
     >
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-warning-surface text-warning-text">
-          <CircleAlert aria-hidden="true" className="size-4" />
+        <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg border border-warning-soft-foreground/15 bg-warning-soft text-warning-soft-foreground">
+          <Bell aria-hidden="true" className="size-4" />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <p className="type-label text-warning-text">{stateLabel}</p>
+            <p className="type-label text-warning-soft-foreground">{stateLabel}</p>
             {subject ? (
               <p className="min-w-0 break-words text-sm font-bold text-foreground">{subject}</p>
             ) : null}
@@ -57,7 +57,7 @@ export function AttentionItem({
             {description}
           </p>
           <Link
-            className="mt-3 inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-accent decoration-2 underline-offset-4"
+            className="mt-3 inline-flex min-h-11 items-center gap-1 text-sm font-bold underline decoration-brand decoration-2 underline-offset-4"
             to={to}
           >
             {t('attention.open')}

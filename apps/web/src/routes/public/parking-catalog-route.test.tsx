@@ -207,10 +207,11 @@ describe('public parking catalog', () => {
 
     await user.clear(screen.getByLabelText('Where are you parking?'));
     await user.type(screen.getByLabelText('Where are you parking?'), 'central');
-    await user.selectOptions(screen.getByLabelText('Currency'), 'USD');
+    await user.click(screen.getByRole('combobox', { name: 'Currency' }));
+    await user.click(await screen.findByRole('option', { name: 'USD' }));
     await user.type(screen.getByLabelText('Min. rate (USD)'), '10');
     await user.type(screen.getByLabelText('Max. rate (USD)'), '20');
-    await user.click(screen.getByLabelText('Available now'));
+    await user.click(screen.getByRole('checkbox', { name: 'Available now' }));
     await user.click(screen.getByRole('button', { name: 'Apply filters' }));
 
     await waitFor(() => {

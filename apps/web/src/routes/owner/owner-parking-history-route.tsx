@@ -6,8 +6,17 @@ import { useAppearance } from '../../app/appearance-provider.js';
 import { PageHeader } from '../../components/domain/page-header.js';
 import { SessionHistoryRow } from '../../components/domain/session.js';
 import { Button } from '../../components/ui/button.js';
-import { EmptyState, ErrorState, Skeleton } from '../../components/ui/feedback.js';
-import { Field, Input, Select } from '../../components/ui/field.js';
+import { EmptyState, ErrorState } from '../../components/domain/feedback.js';
+import { Skeleton } from '../../components/ui/skeleton.js';
+import { FormField } from '../../components/domain/form-field.js';
+import { Input } from '../../components/ui/input.js';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select.js';
 import { formatMoney, formatNumber } from '../../lib/format.js';
 import {
   getOwnedParkings,
@@ -104,10 +113,10 @@ export function OwnerParkingHistoryRoute() {
   if (parkingsQuery.isLoading || sessionsQuery.isLoading) {
     return (
       <section aria-labelledby="history-loading-title" className="owner-page space-y-6">
-        <h1 className="visually-hidden" id="history-loading-title">
+        <h1 className="sr-only" id="history-loading-title">
           {t('parkingHistory.title')}
         </h1>
-        <p className="visually-hidden" role="status">
+        <p className="sr-only" role="status">
           {t('parkingHistory.loading')}
         </p>
         <Skeleton className="owner-list-skeleton" />
@@ -121,7 +130,7 @@ export function OwnerParkingHistoryRoute() {
   ) {
     return (
       <section aria-labelledby="history-error-title" className="owner-page">
-        <h1 className="visually-hidden" id="history-error-title">
+        <h1 className="sr-only" id="history-error-title">
           {t('parkingHistory.title')}
         </h1>
         <ErrorState
@@ -138,7 +147,7 @@ export function OwnerParkingHistoryRoute() {
   if (!parking) {
     return (
       <section aria-labelledby="history-unavailable-title" className="owner-page">
-        <h1 className="visually-hidden" id="history-unavailable-title">
+        <h1 className="sr-only" id="history-unavailable-title">
           {t('parkingHistory.title')}
         </h1>
         <ErrorState title={t('parkingOperation.unavailableTitle')}>
@@ -171,7 +180,7 @@ export function OwnerParkingHistoryRoute() {
         }
         backAction={
           <Link
-            className="inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
+            className="inline-flex min-h-11 items-center gap-1 text-sm font-bold underline decoration-brand decoration-4 underline-offset-4"
             to={`/app/parkings/${parking.id}`}
           >
             {t('parkingHistory.backToParking')}
@@ -185,7 +194,7 @@ export function OwnerParkingHistoryRoute() {
 
       <div className="flex flex-col gap-2 border-b border-border-subtle pb-5 sm:flex-row sm:items-baseline sm:justify-between">
         <div>
-          <p className="type-label text-foreground-muted">{t('parkingHistory.timezone')}</p>
+          <p className="type-label text-muted-foreground">{t('parkingHistory.timezone')}</p>
           <p className="mt-1 type-operational">{historyTimezone}</p>
         </div>
         <p className="max-w-2xl text-sm leading-relaxed text-foreground-secondary">
@@ -205,7 +214,7 @@ export function OwnerParkingHistoryRoute() {
 
       {hasStaleData ? (
         <div
-          className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-4 rounded-xl border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="break-words text-sm font-semibold">{t('parkingHistory.stale')}</p>
@@ -238,7 +247,7 @@ export function OwnerParkingHistoryRoute() {
       {exportStatus === 'error' ? (
         <div
           aria-live="assertive"
-          className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-danger-foreground bg-danger-surface p-4 text-danger-text sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-4 rounded-xl border border-destructive-soft-foreground bg-destructive-soft p-4 text-destructive-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="text-sm font-semibold">{t('parkingHistory.exportError')}</p>
@@ -253,10 +262,10 @@ export function OwnerParkingHistoryRoute() {
           aria-labelledby="history-summary-title"
           className="border-b border-border-subtle pb-7"
         >
-          <h2 className="type-label text-foreground-muted" id="history-summary-title">
+          <h2 className="type-label text-muted-foreground" id="history-summary-title">
             {t('parkingHistory.summary')}
           </h2>
-          <dl className="mt-5 grid gap-5 sm:grid-cols-2 wide:grid-cols-[repeat(4,minmax(0,1fr))_minmax(15rem,auto)]">
+          <dl className="mt-5 grid gap-5 sm:grid-cols-2 wide:grid-cols-history-summary">
             <HistoryMetric
               label={t('parkingHistory.total')}
               value={formatNumber(aggregate.totalSessions, locale)}
@@ -301,7 +310,7 @@ export function OwnerParkingHistoryRoute() {
 
       <section aria-labelledby="history-results-title">
         <div className="flex items-baseline justify-between gap-4 border-b border-border-subtle pb-4">
-          <h2 className="type-label text-foreground-muted" id="history-results-title">
+          <h2 className="type-label text-muted-foreground" id="history-results-title">
             {t('parkingHistory.results')}
           </h2>
         </div>
@@ -313,12 +322,12 @@ export function OwnerParkingHistoryRoute() {
           </div>
         ) : (
           <>
-            <div className="mt-4 hidden grid-cols-[minmax(10rem,1.25fr)_minmax(9rem,1fr)_minmax(7rem,0.9fr)_minmax(8rem,auto)_auto] gap-x-4 border-b border-border-subtle px-1 py-3 md:grid">
-              <span className="type-label text-foreground-muted">{t('session.plate')}</span>
-              <span className="type-label text-foreground-muted">{t('session.date')}</span>
-              <span className="type-label text-foreground-muted">{t('session.elapsed')}</span>
-              <span className="type-label text-foreground-muted">{t('parkingHistory.status')}</span>
-              <span className="type-label text-right text-foreground-muted">
+            <div className="mt-4 hidden grid-cols-session-history-row gap-x-4 border-b border-border-subtle px-1 py-3 md:grid">
+              <span className="type-label text-muted-foreground">{t('session.plate')}</span>
+              <span className="type-label text-muted-foreground">{t('session.date')}</span>
+              <span className="type-label text-muted-foreground">{t('session.elapsed')}</span>
+              <span className="type-label text-muted-foreground">{t('parkingHistory.status')}</span>
+              <span className="type-label text-right text-muted-foreground">
                 {t('session.total')}
               </span>
             </div>
@@ -375,7 +384,7 @@ export function OwnerParkingHistoryRoute() {
 function HistoryMetric({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="min-w-0">
-      <dt className="type-label text-foreground-muted">{label}</dt>
+      <dt className="type-label text-muted-foreground">{label}</dt>
       <dd className="mt-2 min-w-0 break-words type-metric">{value}</dd>
     </div>
   );
@@ -403,11 +412,11 @@ function HistoryFilters({
 
   return (
     <section aria-labelledby="history-filters-title" className="border-b border-border-subtle pb-7">
-      <h2 className="type-label text-foreground-muted" id="history-filters-title">
+      <h2 className="type-label text-muted-foreground" id="history-filters-title">
         {t('parkingHistory.filters')}
       </h2>
-      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_12rem_12rem_auto]">
-        <Field htmlFor="session-plate" label={t('parkingHistory.plate')}>
+      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-history-filters">
+        <FormField htmlFor="session-plate" label={t('parkingHistory.plate')}>
           <Input
             id="session-plate"
             onChange={(event) => {
@@ -416,38 +425,46 @@ function HistoryFilters({
             placeholder={t('parkingHistory.platePlaceholder')}
             value={plateInput}
           />
-        </Field>
-        <Field htmlFor="session-status" label={t('parkingHistory.status')}>
+        </FormField>
+        <FormField htmlFor="session-status" label={t('parkingHistory.status')}>
           <Select
-            id="session-status"
             value={historyState.status ?? 'ALL'}
-            onChange={(event) => {
-              const value = event.target.value as SessionFilter;
+            onValueChange={(nextValue) => {
+              const value = nextValue as SessionFilter;
               updateSearch({ page: 1, status: value === 'ALL' ? undefined : value });
             }}
           >
-            <option value="ALL">{t('parkingHistory.allStatuses')}</option>
-            <option value="ACTIVE">{t('parkingHistory.active')}</option>
-            <option value="COMPLETED">{t('parkingHistory.completed')}</option>
-            <option value="CANCELLED">{t('parkingHistory.cancelled')}</option>
+            <SelectTrigger id="session-status">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">{t('parkingHistory.allStatuses')}</SelectItem>
+              <SelectItem value="ACTIVE">{t('parkingHistory.active')}</SelectItem>
+              <SelectItem value="COMPLETED">{t('parkingHistory.completed')}</SelectItem>
+              <SelectItem value="CANCELLED">{t('parkingHistory.cancelled')}</SelectItem>
+            </SelectContent>
           </Select>
-        </Field>
-        <Field htmlFor="session-period" label={t('parkingHistory.period')}>
+        </FormField>
+        <FormField htmlFor="session-period" label={t('parkingHistory.period')}>
           <Select
-            id="session-period"
             value={historyState.period}
-            onChange={(event) => {
+            onValueChange={(value) => {
               updateSearch({
                 page: 1,
-                period: event.target.value as ParkingHistoryUrlState['period'],
+                period: value as ParkingHistoryUrlState['period'],
               });
             }}
           >
-            <option value="today">{t('parkingHistory.today')}</option>
-            <option value="7d">{t('parkingHistory.sevenDays')}</option>
-            <option value="30d">{t('parkingHistory.thirtyDays')}</option>
+            <SelectTrigger id="session-period">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="today">{t('parkingHistory.today')}</SelectItem>
+              <SelectItem value="7d">{t('parkingHistory.sevenDays')}</SelectItem>
+              <SelectItem value="30d">{t('parkingHistory.thirtyDays')}</SelectItem>
+            </SelectContent>
           </Select>
-        </Field>
+        </FormField>
         <Button
           aria-busy={isFetching}
           className="self-end rounded-full"

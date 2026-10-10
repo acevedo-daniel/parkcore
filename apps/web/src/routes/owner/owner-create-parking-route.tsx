@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../../components/ui/button.js';
-import { UnsavedChangesPrompt } from '../../components/ui/unsaved-changes-prompt.js';
-import { useToast } from '../../components/ui/toast-context.js';
+import { UnsavedChangesPrompt } from '../../components/domain/unsaved-changes-prompt.js';
+import { toast } from 'sonner';
 import { useAuth } from '../../features/auth/use-auth.js';
 import { ParkingForm } from '../../features/parking/parking-form.js';
 import { createParking } from '../../lib/api/owner-api.js';
@@ -16,7 +16,6 @@ export function OwnerCreateParkingRoute() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { showToast } = useToast();
   const [error, setError] = useState<string>();
   const [isDirty, setIsDirty] = useState(false);
   const allowNavigationRef = useRef(false);
@@ -56,7 +55,7 @@ export function OwnerCreateParkingRoute() {
             allowNavigationRef.current = true;
             setIsDirty(false);
             await queryClient.invalidateQueries({ queryKey: ['owned-parkings'] });
-            showToast(t('parkingRoute.created'));
+            toast.success(t('parkingRoute.created'));
             await navigate(`/app/parkings/${parking.id}`, { replace: true });
           } catch (reason) {
             setError(localizeParkingMutationError(reason, t, 'api.createParking'));

@@ -1,7 +1,7 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import type { Locator, Page, Route } from '@playwright/test';
 
-import { expect, test } from './fixtures';
+import { chooseSelectOption, expect, test } from './fixtures';
 
 import type { components } from '@parkcore/api-client';
 
@@ -801,6 +801,11 @@ async function visitFixture(
 
 async function expectOverlayWithinViewport(locator: Locator, label: string) {
   await expect(locator).toBeVisible();
+  await locator.evaluate(async (element) => {
+    await Promise.all(
+      element.getAnimations().map((animation) => animation.finished.catch(() => undefined)),
+    );
+  });
   const box = await locator.boundingBox();
   const viewport = locator.page().viewportSize();
   expect(box, `${label} should have a bounding box.`).not.toBeNull();
@@ -1051,7 +1056,7 @@ test('keeps profile preferences labeled and accessible at narrow widths', async 
           await expect(controls.getByText(appearanceLabel, { exact: true })).toBeVisible();
 
           await expectVisibleFocus(
-            controls.getByRole('button', {
+            controls.getByRole('radio', {
               name: locale === 'en-US' ? 'English' : 'Español',
             }),
             `${viewport.name} ${locale} ${theme} profile language focus`,
@@ -1099,9 +1104,16 @@ test('covers deterministic loading, empty, error, blocked, and degraded states',
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   const faqTrigger = page.getByRole('button', { name: /do i need to download an app/i });
-  await expect(faqTrigger).toHaveAttribute('aria-controls', /faq-.*-answer/);
+  const faqContentId = await faqTrigger.getAttribute('aria-controls');
+  if (!faqContentId) {
+    throw new Error('FAQ trigger must reference its answer content.');
+  }
+  const faqContent = page.locator(`[id="${faqContentId}"]`);
+  await expect(faqContent).toHaveAttribute('data-slot', 'accordion-content');
+  await expect(faqContent).toBeVisible();
   await faqTrigger.press('Enter');
   await expect(faqTrigger).toHaveAttribute('aria-expanded', 'false');
+  await expect(faqContent).not.toBeVisible();
 
   await page.goto(detailRoute.path);
   await expect(page.getByText('Fictional parking with demonstration data')).toBeVisible();
@@ -1229,7 +1241,11 @@ test('covers owner management, history, profile, and recovery interactions', asy
         page.getByRole('link', { name: /open session|abrir.*sesi/i }).first(),
       ).toBeVisible();
 
-      await page.getByLabel(/status|estado/i).selectOption('COMPLETED');
+      await chooseSelectOption(
+        page,
+        page.getByRole('combobox', { name: /status|estado/i }),
+        state.locale === 'en-US' ? 'Completed' : 'Finalizadas',
+      );
       await expect.poll(() => new URL(page.url()).searchParams.get('status')).toBe('COMPLETED');
       await expect.poll(() => new URL(page.url()).searchParams.get('page')).toBeNull();
 
@@ -1258,11 +1274,21 @@ test('covers owner management, history, profile, and recovery interactions', asy
         name: /theme|appearance|apariencia/i,
       });
       const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
-      await profileTheme.selectOption(nextTheme);
+      await chooseSelectOption(
+        page,
+        profileTheme,
+        state.locale === 'en-US'
+          ? nextTheme === 'dark'
+            ? 'Dark'
+            : 'Light'
+          : nextTheme === 'dark'
+            ? 'Oscuro'
+            : 'Claro',
+      );
       await expect(page.locator('html')).toHaveAttribute('data-theme', nextTheme);
 
       await profileMain
-        .getByRole('button', { name: state.locale === 'en-US' ? 'Spanish' : 'Inglés' })
+        .getByRole('radio', { name: state.locale === 'en-US' ? 'Spanish' : 'Inglés' })
         .click();
       await expect(name).toHaveValue('Updated owner');
       await profileMain.getByRole('button', { name: /save changes|guardar cambios/i }).click();

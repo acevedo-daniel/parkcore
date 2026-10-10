@@ -25,7 +25,7 @@ describe('OwnerNotFoundRoute', () => {
     expect(screen.getByRole('heading', { name: 'This view is unavailable.' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Go to overview' }).getAttribute('href')).toBe('/app');
     expect(document.documentElement.dataset.theme).toBe('light');
-    expect(screen.getByRole('alert').querySelector('div')?.className).toContain('bg-accent-soft');
+    expect(screen.getByRole('alert').querySelector('div')?.className).toContain('bg-brand-soft');
     expect(document.title).toBe('ParkCore | Operations');
   });
 

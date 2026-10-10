@@ -13,9 +13,10 @@ import {
 } from '../../components/domain/session.js';
 import { SessionStatus } from '../../components/domain/status.js';
 import { Button } from '../../components/ui/button.js';
-import { Dialog } from '../../components/ui/dialog.js';
-import { ErrorState, Skeleton } from '../../components/ui/feedback.js';
-import { useToast } from '../../components/ui/toast-context.js';
+import { AppDialog } from '../../components/domain/app-dialog.js';
+import { ErrorState } from '../../components/domain/feedback.js';
+import { Skeleton } from '../../components/ui/skeleton.js';
+import { toast } from 'sonner';
 import {
   ApiError,
   getApiErrorCode,
@@ -48,7 +49,6 @@ export function OwnerSessionDetailRoute() {
   const { locale, t } = useAppearance();
   const { sessionId } = useParams();
   const queryClient = useQueryClient();
-  const { showToast } = useToast();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [actionError, setActionError] = useState<string>();
@@ -69,7 +69,7 @@ export function OwnerSessionDetailRoute() {
   if ((sessionQuery.isError && !hasSessionSnapshot) || !sessionId) {
     return (
       <section className="owner-page" aria-labelledby="session-detail-error-title">
-        <h1 className="visually-hidden" id="session-detail-error-title">
+        <h1 className="sr-only" id="session-detail-error-title">
           {t('session.operation')}
         </h1>
         <ErrorState
@@ -86,7 +86,7 @@ export function OwnerSessionDetailRoute() {
   if (parkingsQuery.isError && !hasParkingsSnapshot) {
     return (
       <section className="owner-page" aria-labelledby="session-detail-error-title">
-        <h1 className="visually-hidden" id="session-detail-error-title">
+        <h1 className="sr-only" id="session-detail-error-title">
           {t('session.operation')}
         </h1>
         <ErrorState
@@ -110,7 +110,7 @@ export function OwnerSessionDetailRoute() {
   if (!parking) {
     return (
       <section className="owner-page" aria-labelledby="session-detail-error-title">
-        <h1 className="visually-hidden" id="session-detail-error-title">
+        <h1 className="sr-only" id="session-detail-error-title">
           {t('session.operation')}
         </h1>
         <ErrorState
@@ -157,7 +157,7 @@ export function OwnerSessionDetailRoute() {
     try {
       const completedSession = await checkoutMutation.mutateAsync();
       setResolvedSession(completedSession);
-      showToast(t('session.checkedOut'));
+      toast.success(t('session.checkedOut'));
       setCheckoutOpen(false);
       await refreshOperation().catch(() => undefined);
     } catch (reason) {
@@ -169,7 +169,7 @@ export function OwnerSessionDetailRoute() {
     try {
       const cancelledSession = await cancelMutation.mutateAsync();
       setResolvedSession(cancelledSession);
-      showToast(t('session.cancelled'));
+      toast.success(t('session.cancelled'));
       setCancelOpen(false);
       await refreshOperation().catch(() => undefined);
     } catch (reason) {
@@ -181,14 +181,14 @@ export function OwnerSessionDetailRoute() {
     <section className="owner-page space-y-9" aria-labelledby="session-detail-title">
       <header className="border-b border-border-strong pb-7">
         <Link
-          className="inline-flex min-h-[var(--touch-target-min)] items-center gap-1 text-sm font-bold underline decoration-accent decoration-4 underline-offset-4"
+          className="inline-flex min-h-11 items-center gap-1 text-sm font-bold underline decoration-brand decoration-4 underline-offset-4"
           to={`/app/parkings/${session.parkingId}`}
         >
           <ChevronLeft aria-hidden="true" className="size-4" /> {t('session.operation')}
         </Link>
         <div className="mt-7 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div className="min-w-0">
-            <p className="type-label text-foreground-muted">
+            <p className="type-label text-muted-foreground">
               {getSessionStateTitle(session.status, t)}
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-4">
@@ -196,7 +196,7 @@ export function OwnerSessionDetailRoute() {
               <SessionStatus status={session.status} />
             </div>
             <h1
-              className="mt-5 break-words font-display text-4xl font-bold leading-[0.92] tracking-[-0.065em] sm:text-5xl"
+              className="mt-5 break-words font-display text-4xl font-bold leading-display tracking-display sm:text-5xl"
               id="session-detail-title"
             >
               {getVehicleTypeLabel(session.vehicle.type, t)}
@@ -205,7 +205,7 @@ export function OwnerSessionDetailRoute() {
           {canOperate ? (
             <div className="flex min-w-0 flex-wrap gap-2">
               <Button
-                variant="primary"
+                variant="default"
                 onClick={() => {
                   setActionError(undefined);
                   setCheckoutOpen(true);
@@ -218,7 +218,7 @@ export function OwnerSessionDetailRoute() {
                   setActionError(undefined);
                   setCancelOpen(true);
                 }}
-                variant="danger"
+                variant="destructive"
               >
                 <Ban aria-hidden="true" className="size-4" /> {t('session.cancel')}
               </Button>
@@ -229,7 +229,7 @@ export function OwnerSessionDetailRoute() {
 
       {hasStaleSessionData || hasStaleParkingData ? (
         <div
-          className="flex flex-col gap-3 rounded-[var(--radius-md)] border border-warning-foreground bg-warning-surface p-4 text-warning-text sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-lg border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <p className="break-words text-sm font-semibold">{t('session.staleData')}</p>
@@ -273,12 +273,12 @@ export function OwnerSessionDetailRoute() {
           ]}
           title={t('session.visit')}
         />
-        <section className="min-w-0 rounded-[var(--radius-lg)] border border-border bg-surface p-5">
-          <p className="type-label text-foreground-muted">{t('session.parking')}</p>
+        <section className="min-w-0 rounded-xl border border-border bg-card p-5">
+          <p className="type-label text-muted-foreground">{t('session.parking')}</p>
           <dl className="mt-5 space-y-4">
             <DetailItem label={t('session.facility')}>
               <Link
-                className="font-bold underline decoration-accent decoration-4 underline-offset-4"
+                className="font-bold underline decoration-brand decoration-4 underline-offset-4"
                 to={`/app/parkings/${parking.id}`}
               >
                 {parking.title}
@@ -325,7 +325,7 @@ export function OwnerSessionDetailRoute() {
 
       {actionError && !checkoutOpen && !cancelOpen ? <ActionError message={actionError} /> : null}
 
-      <Dialog
+      <AppDialog
         closeLabel={t('session.checkoutClose')}
         description={t('session.checkoutDescription')}
         onOpenChange={setCheckoutOpen}
@@ -342,16 +342,16 @@ export function OwnerSessionDetailRoute() {
           <CheckoutSummary session={session} timezone={parking.timezone} />
           {actionError ? <ActionError message={actionError} /> : null}
           <Button
+            className="w-full"
             disabled={checkoutMutation.isPending}
-            fullWidth
             onClick={() => void completeCheckout()}
           >
             {checkoutMutation.isPending ? t('session.completing') : t('session.completeCheckout')}
           </Button>
         </div>
-      </Dialog>
+      </AppDialog>
 
-      <Dialog
+      <AppDialog
         closeLabel={t('session.cancelClose')}
         description={t('session.cancelDescription', { plate: session.vehicle.plate })}
         onOpenChange={setCancelOpen}
@@ -360,19 +360,19 @@ export function OwnerSessionDetailRoute() {
       >
         <div className="space-y-5 pt-6">
           <Plate plate={session.vehicle.plate} />
-          <p className="border-l-4 border-accent pl-4 text-sm leading-relaxed text-foreground-secondary">
+          <p className="border-l-4 border-brand pl-4 text-sm leading-relaxed text-foreground-secondary">
             {t('session.availableAfterCancel')}
           </p>
           {actionError ? <ActionError message={actionError} /> : null}
           <Button
+            className="w-full"
             disabled={cancelMutation.isPending}
-            fullWidth
             onClick={() => void cancelSession()}
           >
             {cancelMutation.isPending ? t('session.cancelling') : t('session.cancel')}
           </Button>
         </div>
-      </Dialog>
+      </AppDialog>
     </section>
   );
 }
@@ -404,7 +404,7 @@ function formatSessionTotal(session: ParkingSession, translate: Translator, loca
 function ActionError({ message }: { message: string }) {
   return (
     <p
-      className="break-words rounded-[var(--radius-md)] border border-danger-foreground bg-danger-surface p-3 text-sm font-semibold text-danger-text"
+      className="break-words rounded-lg border border-destructive-soft-foreground bg-destructive-soft p-3 text-sm font-semibold text-destructive-soft-foreground"
       role="alert"
     >
       {message}
@@ -414,8 +414,8 @@ function ActionError({ message }: { message: string }) {
 
 function DetailCard({ entries, title }: { entries: [string, string][]; title: string }) {
   return (
-    <section className="min-w-0 rounded-[var(--radius-lg)] border border-border bg-surface p-5">
-      <p className="type-label text-foreground-muted">{title}</p>
+    <section className="min-w-0 rounded-xl border border-border bg-card p-5">
+      <p className="type-label text-muted-foreground">{title}</p>
       <dl className="mt-5 space-y-4">
         {entries.map(([label, value]) => (
           <DetailItem key={label} label={label}>
@@ -430,7 +430,7 @@ function DetailCard({ entries, title }: { entries: [string, string][]; title: st
 function DetailItem({ children, label }: { children: React.ReactNode; label: string }) {
   return (
     <div className="min-w-0">
-      <dt className="type-label text-foreground-muted">{label}</dt>
+      <dt className="type-label text-muted-foreground">{label}</dt>
       <dd className="mt-1 min-w-0 break-words text-sm font-semibold leading-relaxed">{children}</dd>
     </div>
   );
@@ -440,12 +440,12 @@ function SessionDetailSkeleton() {
   const { t } = useAppearance();
   return (
     <div aria-busy="true" aria-label={t('api.loadSession')} className="space-y-8" role="status">
-      <h1 className="visually-hidden">{t('session.operation')}</h1>
-      <Skeleton className="h-56 rounded-[var(--radius-xl)]" />
+      <h1 className="sr-only">{t('session.operation')}</h1>
+      <Skeleton className="h-56 rounded-2xl" />
       <div className="grid gap-4 lg:grid-cols-3">
-        <Skeleton className="h-64 rounded-[var(--radius-lg)]" />
-        <Skeleton className="h-64 rounded-[var(--radius-lg)]" />
-        <Skeleton className="h-64 rounded-[var(--radius-lg)]" />
+        <Skeleton className="h-64 rounded-xl" />
+        <Skeleton className="h-64 rounded-xl" />
+        <Skeleton className="h-64 rounded-xl" />
       </div>
     </div>
   );

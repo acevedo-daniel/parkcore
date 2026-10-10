@@ -1,82 +1,68 @@
 import * as React from 'react';
-import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { Slot } from 'radix-ui';
 
-import { cn } from '../../lib/cn.js';
+import { cn } from '@/lib/cn';
 
 const buttonVariants = cva(
-  'parkcore-pressable inline-flex min-h-[var(--touch-target-min)] max-w-full cursor-pointer select-none items-center justify-center gap-2 break-words rounded-[var(--radius-sm)] text-center text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-focus-ring-offset disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*="size-"])]:size-4 [&_svg]:shrink-0',
+  'inline-flex max-w-full cursor-pointer select-none items-center justify-center gap-2 break-words text-center text-sm font-semibold outline-none transition-control disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 active:scale-98 [&_svg]:pointer-events-none [&_svg:not([class*="size-"])]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
         default:
-          'parkcore-raised-action border border-primary bg-primary text-primary-foreground hover:bg-primary-hover hover:border-primary-hover active:bg-primary-active',
-        primary:
-          'parkcore-raised-action border border-primary bg-primary text-primary-foreground hover:bg-primary-hover hover:border-primary-hover active:bg-primary-active',
+          'border-2 border-border-strong bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+        brand:
+          'border-2 border-brand-strong bg-brand text-brand-foreground shadow-xs hover:bg-brand/90',
         secondary:
-          'parkcore-raised-action border border-border bg-surface text-foreground hover:bg-surface-hover hover:border-border-strong',
+          'border-2 border-border-strong bg-card text-foreground shadow-xs hover:bg-accent',
+        outline: 'border-2 border-border-strong bg-card text-foreground shadow-xs hover:bg-accent',
+        ghost: 'text-foreground hover:bg-accent',
         destructive:
-          'parkcore-raised-action border border-danger bg-danger text-danger-on-solid hover:bg-danger/90',
-        danger:
-          'parkcore-raised-action border border-danger bg-danger text-danger-on-solid hover:bg-danger/90',
-        outline:
-          'parkcore-raised-action border border-border bg-surface text-foreground hover:bg-surface-hover',
-        ghost: 'hover:bg-surface-subtle text-foreground',
-        quiet: 'hover:bg-surface-subtle text-foreground',
+          'border-2 border-destructive-soft-foreground bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90',
         link: 'text-foreground underline-offset-4 hover:underline',
       },
       size: {
-        default: 'h-[var(--control-height-md)] px-4 py-2 text-sm',
-        md: 'h-[var(--control-height-md)] px-4 py-2 text-sm',
-        sm: 'h-[var(--control-height-sm)] gap-1.5 px-3 text-xs',
-        lg: 'h-[var(--control-height-lg)] px-6 text-base',
-        icon: 'size-[var(--control-height-md)] p-0',
-        'icon-sm': 'size-[var(--control-height-sm)] p-0',
+        default: 'min-h-11 rounded-lg px-4 py-2',
+        sm: 'min-h-10 gap-1.5 rounded-lg px-3 py-2 text-xs',
+        lg: 'min-h-12 rounded-lg px-6 py-2 text-base',
+        icon: 'size-11 rounded-lg p-0',
+        'icon-sm': 'size-10 rounded-lg p-0',
       },
-      fullWidth: {
-        true: 'w-full',
+      shape: {
+        default: '',
+        pill: 'rounded-full',
       },
     },
     defaultVariants: {
       variant: 'default',
       size: 'default',
+      shape: 'default',
     },
   },
 );
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
-  fullWidth?: boolean;
+function Button({
+  className,
+  variant = 'default',
+  size = 'default',
+  shape = 'default',
+  asChild = false,
+  ...props
+}: React.ComponentProps<'button'> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+  }) {
+  const Comp = asChild ? Slot.Root : 'button';
+
+  return (
+    <Comp
+      data-slot="button"
+      data-variant={variant}
+      data-size={size}
+      className={cn(buttonVariants({ variant, size, shape, className }))}
+      {...props}
+    />
+  );
 }
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, fullWidth, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : 'button';
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, fullWidth, className }))}
-        data-slot="button"
-        ref={ref}
-        {...props}
-      />
-    );
-  },
-);
-Button.displayName = 'Button';
-
-export const IconButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, size = 'icon', variant = 'secondary', ...props }, ref) => {
-    return (
-      <Button
-        data-slot="icon-button"
-        variant={variant}
-        size={size}
-        className={className}
-        ref={ref}
-        {...props}
-      />
-    );
-  },
-);
-IconButton.displayName = 'IconButton';
+export { Button, buttonVariants };

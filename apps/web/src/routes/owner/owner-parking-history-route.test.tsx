@@ -135,7 +135,8 @@ describe('parking session history pagination', () => {
     );
 
     await screen.findByRole('link', { name: 'Open session for AB123CD' });
-    await user.selectOptions(screen.getByLabelText('Status'), 'CANCELLED');
+    await user.click(screen.getByRole('combobox', { name: 'Status' }));
+    await user.click(await screen.findByRole('option', { name: 'Cancelled' }));
 
     expect(await screen.findByText('No sessions found')).toBeTruthy();
     expect(api.getParkingSessions).toHaveBeenLastCalledWith('parking-1', {

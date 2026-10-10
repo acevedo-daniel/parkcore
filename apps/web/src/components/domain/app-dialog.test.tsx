@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it } from 'vitest';
 
-import { Button } from './button.js';
-import { Dialog, Sheet } from './dialog.js';
+import { Button } from '../ui/button.js';
+import { AppDialog, AppSheet } from './app-dialog.js';
 
 function DialogHarness() {
   const [open, setOpen] = useState(false);
@@ -17,14 +17,14 @@ function DialogHarness() {
       >
         Open checkout
       </Button>
-      <Dialog
+      <AppDialog
         description="Review the total before completing the checkout."
         onOpenChange={setOpen}
         open={open}
         title="Complete checkout"
       >
         <Button>Complete checkout</Button>
-      </Dialog>
+      </AppDialog>
     </>
   );
 }
@@ -40,27 +40,26 @@ function SheetHarness() {
       >
         Open filters
       </Button>
-      <Sheet
+      <AppSheet
         description="Choose which facilities should be visible."
         onOpenChange={setOpen}
         open={open}
         title="Filter facilities"
       >
         <Button>Apply filters</Button>
-      </Sheet>
+      </AppSheet>
     </>
   );
 }
 
-describe('Dialog', () => {
-  it('moves focus into the dialog and restores it to the trigger when closed', async () => {
+describe('app dialogs and sheets', () => {
+  it('moves focus into the dialog, traps it, and restores it to the trigger', async () => {
     const user = userEvent.setup();
     render(<DialogHarness />);
 
     const trigger = screen.getByRole('button', { name: 'Open checkout' });
     await user.click(trigger);
     const dialog = await screen.findByRole('dialog', { name: 'Complete checkout' });
-    expect(dialog).toBeTruthy();
     expect(dialog.getAttribute('aria-describedby')).not.toBeNull();
     await waitFor(() => {
       expect(document.activeElement).toBe(

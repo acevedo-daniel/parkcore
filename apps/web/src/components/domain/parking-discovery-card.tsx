@@ -20,17 +20,17 @@ export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps)
     <Link
       aria-label={`${t('parking.open')} ${parking.title}`}
       aria-describedby={availabilityId}
-      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-[var(--radius-xl)] border border-border bg-surface text-foreground shadow-xs transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-border-strong hover:shadow-hover focus-visible:outline-none"
+      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card text-foreground shadow-xs transition-lift duration-200 hover:-translate-y-1 hover:border-border-strong hover:shadow-md"
       to={to}
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-surface-emphasis">
+      <div className="relative aspect-4/3 overflow-hidden bg-accent">
         <PublicParkingImage
           alt={t('parking.discoveryImageAlt', { title: parking.title })}
           image={parking.image}
-          imageClassName="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+          imageClassName="h-full w-full object-cover transition-transform duration-500 group-hover:scale-102"
         />
         <AvailabilityIndicator
-          className="absolute left-4 top-4 bg-surface/95 backdrop-blur-sm"
+          className="absolute left-4 top-4 bg-card/95 backdrop-blur-sm"
           id={availabilityId}
           state={parking.availabilityState}
           timezone={parking.timezone}
@@ -40,11 +40,11 @@ export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps)
 
       <div className="flex min-w-0 flex-1 flex-col p-5 sm:p-6">
         <div className="flex-1">
-          <h2 className="max-w-full break-words font-display text-2xl font-bold leading-tight tracking-[-0.03em]">
+          <h2 className="max-w-full break-words font-display text-2xl font-bold leading-tight tracking-title">
             {parking.title}
           </h2>
           {parking.isShowcase ? (
-            <span className="mt-2 inline-flex rounded-full border border-accent-strong bg-accent-soft px-2.5 py-1 text-[10px] font-bold text-foreground">
+            <span className="mt-2 inline-flex rounded-full border border-brand-strong bg-brand-soft px-2.5 py-1 text-2xs font-bold text-foreground">
               {t('parking.demo')}
             </span>
           ) : null}
@@ -59,10 +59,10 @@ export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps)
 
         <div className="mt-8 flex flex-wrap items-end justify-between gap-4 border-t border-border-subtle pt-5">
           <span>
-            <span className="block text-xs font-medium text-foreground-muted">
+            <span className="block text-xs font-medium text-muted-foreground">
               {t('parking.hourlyRate')}
             </span>
-            <span className="font-mono text-lg font-bold tabular-nums">
+            <span className="type-operational text-lg font-bold">
               {formatMoney(parking.hourlyRateCents, parking.currency, locale)}
               <span className="text-xs font-medium"> / h</span>
             </span>

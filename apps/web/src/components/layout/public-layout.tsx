@@ -1,4 +1,3 @@
-import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Menu, X } from 'lucide-react';
 import {
   Link,
@@ -12,7 +11,18 @@ import {
 import { useAppearance } from '../../app/appearance-provider.js';
 import { DemoLoginButton } from '../../features/auth/demo-login-button.js';
 import { cn } from '../../lib/cn.js';
-import { AppearanceControls } from '../ui/appearance-controls.js';
+import { AppearanceControls } from '../domain/appearance-controls.js';
+import { Button } from '../ui/button.js';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+} from '../ui/dialog.js';
 
 function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useAppearance();
@@ -27,10 +37,10 @@ function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
           key={link.to}
           className={({ isActive }: NavLinkRenderProps) =>
             cn(
-              'public-nav-link flex min-h-[var(--touch-target-min)] items-center rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px',
+              'public-nav-link flex min-h-11 items-center rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px',
               isActive
-                ? 'is-active bg-surface-subtle text-foreground'
-                : 'text-foreground-secondary hover:bg-surface-subtle hover:text-foreground',
+                ? 'is-active bg-muted text-foreground'
+                : 'text-foreground-secondary hover:bg-muted hover:text-foreground',
             )
           }
           to={link.to}
@@ -47,63 +57,66 @@ function PublicMobileMenu() {
   const { t } = useAppearance();
   const navigate = useNavigate();
   return (
-    <DialogPrimitive.Root>
-      <DialogPrimitive.Trigger asChild>
-        <button
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
           aria-label={t('nav.open')}
-          className="icon-button public-menu-trigger flex size-10 cursor-pointer items-center justify-center rounded-full border border-border bg-surface text-foreground transition-colors hover:bg-accent"
+          className="public-menu-trigger"
+          shape="pill"
+          size="icon-sm"
           type="button"
+          variant="outline"
         >
           <Menu aria-hidden="true" size={20} />
-        </button>
-      </DialogPrimitive.Trigger>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="public-menu-overlay fixed inset-0 z-50 bg-overlay-backdrop backdrop-blur-xs animate-in fade-in" />
-        <DialogPrimitive.Content className="public-menu-content fixed inset-y-0 right-0 z-50 flex w-full max-w-xs flex-col justify-between overflow-x-hidden overflow-y-auto border-l border-border bg-surface p-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] pt-[max(1.5rem,env(safe-area-inset-top,0px))] shadow-dialog animate-in slide-in-from-right">
+        </Button>
+      </DialogTrigger>
+      <DialogPortal>
+        <DialogOverlay className="public-menu-overlay backdrop-blur-xs animate-in fade-in" />
+        <DialogContent className="public-menu-content fixed inset-y-0 left-auto right-0 top-0 z-50 mx-0 flex h-dvh w-full max-w-xs translate-y-0 flex-col justify-between overflow-x-hidden overflow-y-auto rounded-l-xl border-l border-border bg-card p-6 pb-safe-overlay pt-safe-overlay shadow-xl animate-in fade-in">
           <div>
             <header className="public-menu-header mb-6 flex items-center justify-between border-b border-border-subtle pb-4">
-              <DialogPrimitive.Title className="brand-mark font-display text-lg font-extrabold tracking-tight text-foreground">
+              <DialogTitle className="brand-mark font-display text-lg font-extrabold tracking-tight text-foreground">
                 PARKCORE
-              </DialogPrimitive.Title>
-              <DialogPrimitive.Description className="visually-hidden">
-                {t('nav.public')}
-              </DialogPrimitive.Description>
-              <DialogPrimitive.Close asChild>
-                <button
+              </DialogTitle>
+              <DialogDescription className="sr-only">{t('nav.public')}</DialogDescription>
+              <DialogClose asChild>
+                <Button
                   aria-label={t('nav.close')}
-                  className="icon-button flex size-9 cursor-pointer items-center justify-center rounded-full border border-border bg-surface text-foreground transition-colors hover:bg-accent"
+                  shape="pill"
+                  size="icon-sm"
                   type="button"
+                  variant="outline"
                 >
                   <X aria-hidden="true" size={18} />
-                </button>
-              </DialogPrimitive.Close>
+                </Button>
+              </DialogClose>
             </header>
 
             <nav aria-label={t('nav.public')} className="public-mobile-links flex flex-col gap-2">
-              <DialogPrimitive.Close asChild>
+              <DialogClose asChild>
                 <Link
-                  className="flex min-h-[var(--touch-target-min)] items-center rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-surface-subtle"
+                  className="flex min-h-11 items-center rounded-lg px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-muted"
                   to="/parkings"
                 >
                   {t('nav.parkings')}
                 </Link>
-              </DialogPrimitive.Close>
-              <DialogPrimitive.Close asChild>
+              </DialogClose>
+              <DialogClose asChild>
                 <Link
-                  className="flex min-h-[var(--touch-target-min)] items-center rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-surface-subtle"
+                  className="flex min-h-11 items-center rounded-lg px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-muted"
                   to="/#como-funciona"
                 >
                   {t('nav.howItWorks')}
                 </Link>
-              </DialogPrimitive.Close>
-              <DialogPrimitive.Close asChild>
+              </DialogClose>
+              <DialogClose asChild>
                 <Link
-                  className="flex min-h-[var(--touch-target-min)] items-center rounded-[var(--radius-md)] px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-surface-subtle"
+                  className="flex min-h-11 items-center rounded-lg px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-muted"
                   to="/login"
                 >
                   {t('nav.signIn')}
                 </Link>
-              </DialogPrimitive.Close>
+              </DialogClose>
             </nav>
           </div>
 
@@ -121,9 +134,9 @@ function PublicMobileMenu() {
               <AppearanceControls compact />
             </div>
           </div>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+        </DialogContent>
+      </DialogPortal>
+    </Dialog>
   );
 }
 
@@ -132,19 +145,19 @@ export function PublicLayout() {
   const navigate = useNavigate();
   const navigation = useNavigation();
   return (
-    <div className="public-shell flex min-h-screen flex-col bg-canvas font-sans text-foreground antialiased selection:bg-accent selection:text-accent-foreground">
+    <div className="public-shell flex min-h-screen flex-col bg-background font-sans text-foreground antialiased selection:bg-brand selection:text-brand-foreground">
       <a className="skip-link" href="#public-main">
         {t('nav.skipMain')}
       </a>
 
       {/* Unified, sleek, Wise-standard navbar */}
-      <header className="public-header sticky top-0 z-40 w-full border-b border-border-subtle bg-surface/90 backdrop-blur-md transition-all">
+      <header className="public-header sticky top-0 z-40 w-full border-b border-border-subtle bg-card/90 backdrop-blur-md transition-all">
         <div className="public-header-inner mx-auto flex h-18 max-w-7xl items-center justify-between px-4 sm:h-20 sm:px-6 lg:px-8">
           {/* Brand mark */}
           <div className="flex items-center gap-10">
             <Link
               aria-label={t('shell.publicHome')}
-              className="brand-mark group flex min-h-[var(--touch-target-min)] items-center gap-2 font-display text-xl font-black tracking-tight text-foreground sm:text-2xl"
+              className="brand-mark group flex min-h-11 items-center gap-2 font-display text-xl font-black tracking-tight text-foreground sm:text-2xl"
               to="/"
             >
               <span>PARKCORE</span>
@@ -168,10 +181,10 @@ export function PublicLayout() {
             <NavLink
               className={({ isActive }: NavLinkRenderProps) =>
                 cn(
-                  'public-nav-link hidden min-h-[var(--touch-target-min)] rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px wide:inline-flex',
+                  'public-nav-link hidden min-h-11 rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px wide:inline-flex',
                   isActive
-                    ? 'is-active bg-surface-subtle text-foreground'
-                    : 'text-foreground-secondary hover:bg-surface-subtle hover:text-foreground',
+                    ? 'is-active bg-muted text-foreground'
+                    : 'text-foreground-secondary hover:bg-muted hover:text-foreground',
                 )
               }
               to="/login"
@@ -183,7 +196,7 @@ export function PublicLayout() {
               onSuccess={() => {
                 void navigate('/app', { replace: true });
               }}
-              className="hidden rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground wide:inline-flex"
+              className="hidden rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-xs transition-colors hover:bg-brand hover:text-brand-foreground wide:inline-flex"
             />
 
             <div className="public-mobile-nav wide:hidden">
@@ -196,10 +209,10 @@ export function PublicLayout() {
       {navigation.state !== 'idle' ? (
         <div
           aria-live="polite"
-          className="route-loading-bar fixed inset-x-0 top-0 z-50 h-1 animate-pulse bg-accent"
+          className="route-loading-bar fixed inset-x-0 top-0 z-50 h-1 animate-pulse bg-brand"
           role="status"
         >
-          <span className="visually-hidden">{t('route.loading')}</span>
+          <span className="sr-only">{t('route.loading')}</span>
         </div>
       ) : null}
 
