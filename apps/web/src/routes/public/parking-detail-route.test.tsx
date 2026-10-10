@@ -72,14 +72,18 @@ describe('public parking detail images', () => {
     renderParkingDetail();
 
     fireEvent.error(await screen.findByRole('img', { name: 'Central Parking parking facility' }));
-    expect(await screen.findByLabelText('Parking image not available')).toBeTruthy();
+    const fallback = await screen.findByRole('img', { name: 'Parking image not available' });
+    expect(fallback.classList.contains('bg-muted')).toBe(true);
+    expect(fallback.querySelector('svg')).toBeTruthy();
   });
 
   it('uses the same fallback when a parking has no image', async () => {
     api.getPublicParking.mockResolvedValue(publicParkingFixture());
     renderParkingDetail();
 
-    expect(await screen.findByLabelText('Parking image not available')).toBeTruthy();
+    const fallback = await screen.findByRole('img', { name: 'Parking image not available' });
+    expect(fallback.classList.contains('bg-muted')).toBe(true);
+    expect(fallback.querySelector('svg')).toBeTruthy();
   });
 
   it('renders a configured schedule and handles missing schedule values', async () => {
@@ -112,6 +116,8 @@ describe('public parking detail', () => {
     );
     expect(directions.getAttribute('target')).toBe('_blank');
     expect(directions.getAttribute('rel')).toBe('noopener noreferrer');
+    expect(directions.getAttribute('data-variant')).toBe('secondary');
+    expect(directions.classList.contains('rounded-full')).toBe(true);
   });
 
   it('keeps availability states and next opening information distinct', async () => {

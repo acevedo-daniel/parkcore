@@ -575,7 +575,7 @@ export function OwnerOverviewRoute() {
                       >
                         <span
                           className={cn(
-                            'w-full rounded-t-sm transition-all duration-200',
+                            'mx-auto w-full max-w-12 rounded-t-sm transition-all duration-200',
                             isActive ? 'bg-chart-1' : 'bg-chart-3 group-hover:bg-chart-1',
                           )}
                           style={{ height: `${String(height)}%` }}

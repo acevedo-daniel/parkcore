@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, ArrowUpRight, ReceiptText } from 'lucide-react';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 
@@ -13,6 +13,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '../../components/ui/accordion.js';
+import { Button } from '../../components/ui/button.js';
 import { DemoLoginButton } from '../../features/auth/demo-login-button.js';
 import { ParkingCalculatorWidget } from '../../features/parking/parking-calculator-widget.js';
 import { getPublicParkings } from '../../lib/api/public-api.js';
@@ -66,21 +67,6 @@ const HOW_IT_WORKS_ITEMS = [
   },
 ] as const satisfies readonly { body: MessageKey; number: string; title: MessageKey }[];
 
-const OPERATION_ITEMS = [
-  {
-    body: 'public.landing.operationSteps.arrivalDescription',
-    title: 'public.landing.operationSteps.arrivalTitle',
-  },
-  {
-    body: 'public.landing.operationSteps.stayDescription',
-    title: 'public.landing.operationSteps.stayTitle',
-  },
-  {
-    body: 'public.landing.operationSteps.departureDescription',
-    title: 'public.landing.operationSteps.departureTitle',
-  },
-] as const satisfies readonly { body: MessageKey; title: MessageKey }[];
-
 export function LandingRoute() {
   const { t } = useAppearance();
   const location = useLocation();
@@ -113,8 +99,11 @@ export function LandingRoute() {
 
   return (
     <div className="landing-page overflow-hidden bg-background text-foreground">
-      <section className="bg-brand text-brand-foreground">
-        <div className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-12 lg:items-center lg:gap-16 lg:px-8 lg:py-24">
+      <section
+        className="flex min-h-svh items-center bg-brand text-brand-foreground"
+        data-slot="landing-hero"
+      >
+        <div className="mx-auto grid w-full max-w-7xl gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-12 lg:items-center lg:gap-16 lg:px-8 lg:py-24">
           <div className="min-w-0 lg:col-span-7">
             <p className="type-label inline-flex items-center gap-2 rounded-full border border-brand-strong bg-brand/70 px-3 py-1.5 text-brand-foreground">
               <span aria-hidden="true" className="size-1.5 rounded-full bg-brand-foreground" />
@@ -127,21 +116,22 @@ export function LandingRoute() {
               {t('public.landing.heroDescription')}
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Link
-                className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition-transform hover:-translate-y-0.5 hover:bg-primary/90 active:translate-y-0"
-                to="/parkings"
-              >
-                {t('public.landing.browseAction')}
-                <ArrowRight
-                  aria-hidden="true"
-                  className="size-4 transition-transform group-hover:translate-x-1"
-                />
-              </Link>
+              <Button asChild shape="pill" size="lg">
+                <Link className="group" to="/parkings">
+                  {t('public.landing.browseAction')}
+                  <ArrowRight
+                    aria-hidden="true"
+                    className="size-4 transition-transform group-hover:translate-x-1"
+                  />
+                </Link>
+              </Button>
               <DemoLoginButton
-                className="min-h-12 rounded-full border border-brand-strong bg-card px-6 py-3 text-sm font-bold text-foreground transition-colors hover:bg-accent"
+                className="min-h-12 px-6"
                 onSuccess={() => {
                   void navigate('/app', { replace: true });
                 }}
+                shape="pill"
+                variant="secondary"
               >
                 {t('public.landing.demoAction')}
               </DemoLoginButton>
@@ -157,7 +147,7 @@ export function LandingRoute() {
         </div>
       </section>
 
-      <section className="bg-card py-20 sm:py-28" id="como-funciona">
+      <section className="py-16 sm:py-24" id="como-funciona">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-5">
@@ -189,7 +179,7 @@ export function LandingRoute() {
         </div>
       </section>
 
-      <section className="border-y border-border bg-muted py-20 sm:py-28">
+      <section className="py-16 sm:py-24">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
           <article className="rounded-2xl bg-card p-8 shadow-md sm:p-10">
             <span className="inline-flex rounded-full bg-brand px-3 py-1.5 text-xs font-bold text-brand-foreground">
@@ -221,10 +211,11 @@ export function LandingRoute() {
               {t('public.landing.operatorDescription')}
             </p>
             <DemoLoginButton
-              className="mt-9 rounded-full bg-brand px-5 py-3 text-sm font-bold text-brand-foreground transition-colors hover:bg-brand/90"
               onSuccess={() => {
                 void navigate('/app', { replace: true });
               }}
+              shape="pill"
+              variant="secondary"
             >
               {t('public.landing.operatorAction')}
             </DemoLoginButton>
@@ -232,7 +223,7 @@ export function LandingRoute() {
         </div>
       </section>
 
-      <section className="bg-card py-20 sm:py-28">
+      <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -256,44 +247,7 @@ export function LandingRoute() {
         </div>
       </section>
 
-      <section className="bg-brand py-20 text-brand-foreground sm:py-28">
-        <div className="mx-auto grid max-w-7xl gap-14 px-4 sm:px-6 lg:grid-cols-12 lg:items-center lg:px-8">
-          <div className="lg:col-span-5">
-            <p className="type-label text-brand-foreground/75">
-              {t('public.landing.operationsEyebrow')}
-            </p>
-            <h2 className="mt-4 font-display text-4xl font-bold leading-tight tracking-heading sm:text-5xl">
-              {t('public.landing.operationsTitle')}
-            </h2>
-            <p className="mt-6 max-w-lg text-base leading-relaxed sm:text-lg">
-              {t('public.landing.operationsDescription')}
-            </p>
-            <p className="mt-4 text-sm font-semibold text-brand-foreground/75">
-              {t('public.landing.operationsNote')}
-            </p>
-          </div>
-          <ol className="grid gap-4 lg:col-span-6 lg:col-start-7">
-            {OPERATION_ITEMS.map((item, index) => (
-              <li
-                className="flex gap-5 rounded-xl bg-card p-5 text-foreground sm:p-6"
-                key={item.title}
-              >
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary font-display text-sm font-bold tabular-nums text-primary-foreground">
-                  0{index + 1}
-                </span>
-                <div>
-                  <h3 className="font-display text-lg font-bold">{t(item.title)}</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-foreground-secondary">
-                    {t(item.body)}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      <section className="bg-card py-20 sm:py-28">
+      <section className="py-16 sm:py-24">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="type-label text-muted-foreground">{t('public.landing.faqEyebrow')}</p>
@@ -327,10 +281,9 @@ export function LandingRoute() {
         </div>
       </section>
 
-      <section className="bg-inverse px-4 py-20 text-inverse-foreground sm:px-6 sm:py-28 lg:px-8">
-        <div className="mx-auto max-w-3xl text-center">
-          <ReceiptText aria-hidden="true" className="mx-auto size-8 text-brand" />
-          <h2 className="mt-6 font-display text-4xl font-bold leading-tight tracking-heading sm:text-5xl">
+      <section className="px-4 pb-16 sm:px-6 sm:pb-24 lg:px-8">
+        <div className="mx-auto max-w-5xl rounded-signature bg-inverse px-6 py-14 text-center text-inverse-foreground sm:px-12 sm:py-20">
+          <h2 className="font-display text-4xl font-bold leading-tight tracking-heading sm:text-5xl">
             {t('public.landing.finalTitle')}
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-inverse-foreground/75 sm:text-lg">
@@ -338,41 +291,43 @@ export function LandingRoute() {
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <DemoLoginButton
-              className="inline-flex min-h-12 items-center justify-center rounded-full bg-brand px-6 py-3 text-sm font-bold text-brand-foreground transition-colors hover:bg-brand/90"
+              className="min-h-12 px-6"
               onSuccess={() => {
                 void navigate('/app', { replace: true });
               }}
+              shape="pill"
+              variant="secondary"
             >
               {t('public.landing.finalDemoAction')}
             </DemoLoginButton>
-            <Link
-              className="inline-flex min-h-12 items-center justify-center rounded-full border border-inverse-foreground/50 px-6 py-3 text-sm font-bold text-inverse-foreground transition-colors hover:bg-inverse-foreground hover:text-inverse"
-              to="/parkings"
-            >
-              {t('public.landing.finalBrowseAction')}
-            </Link>
+            <Button asChild shape="pill" size="lg" variant="secondary">
+              <Link to="/parkings">{t('public.landing.finalBrowseAction')}</Link>
+            </Button>
           </div>
         </div>
       </section>
 
-      <footer className="bg-inverse px-4 py-10 text-inverse-foreground sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 border-t border-inverse-foreground/20 pt-8 sm:flex-row sm:items-end sm:justify-between">
+      <footer className="bg-background px-4 py-10 text-foreground sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-8 border-t border-border-subtle pt-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <Link className="inline-flex font-display text-xl font-bold tracking-tight" to="/">
+            <Link
+              className="inline-flex font-display text-xl font-bold tracking-tight hover:underline"
+              to="/"
+            >
               PARKCORE
             </Link>
-            <p className="mt-3 max-w-sm text-sm leading-relaxed text-inverse-foreground/70">
+            <p className="mt-3 max-w-sm text-sm leading-relaxed text-foreground-secondary">
               {t('public.landing.footerDescription')}
             </p>
           </div>
           <div className="flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold">
-            <Link className="hover:text-brand" to="/parkings">
+            <Link className="hover:underline" to="/parkings">
               {t('public.landing.footerFacilities')}
             </Link>
-            <Link className="hover:text-brand" to="/login">
+            <Link className="hover:underline" to="/login">
               {t('public.landing.footerSignIn')}
             </Link>
-            <span className="text-inverse-foreground/70">
+            <span className="text-muted-foreground">
               {t('public.landing.copyright', { year: new Date().getFullYear() })}
             </span>
           </div>

@@ -179,16 +179,17 @@ export function ParkingDetailRoute() {
               <p className="mt-3 text-sm leading-relaxed text-foreground-secondary">
                 {t('public.detail.directionsDescription')}
               </p>
-              <a
-                aria-label={t('public.detail.directionsAction', { title: parking.title })}
-                className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-bold text-brand-foreground outline-none transition-colors hover:bg-brand/90"
-                href={directionsUrl}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                {t('public.detail.directionsAction', { title: parking.title })}
-                <ArrowUpRight aria-hidden="true" className="size-4" />
-              </a>
+              <Button asChild className="mt-5" shape="pill" variant="secondary">
+                <a
+                  aria-label={t('public.detail.directionsAction', { title: parking.title })}
+                  href={directionsUrl}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  {t('public.detail.directionsAction', { title: parking.title })}
+                  <ArrowUpRight aria-hidden="true" className="size-4" />
+                </a>
+              </Button>
             </div>
             {parking.isShowcase ? (
               <p className="mt-5 rounded-2xl bg-brand-soft p-4 text-sm font-medium leading-relaxed text-foreground">
@@ -206,13 +207,12 @@ export function ParkingDetailRoute() {
               image={parking.image}
               imageClassName="h-full w-full object-cover"
               loading="eager"
-              variant="detail"
             />
           </div>
         </div>
 
-        <div className="mt-8 grid gap-8 md:grid-cols-12">
-          <section className="min-w-0 rounded-3xl border border-border bg-card p-6 sm:p-7 md:col-span-7">
+        <div className="mt-8 grid gap-8 md:grid-cols-12 md:items-start">
+          <section className="min-w-0 rounded-3xl border border-border bg-card p-6 sm:p-7 md:col-span-7 md:self-start">
             <p className="type-label text-muted-foreground">{t('public.detail.about')}</p>
             <p className="mt-4 text-base leading-relaxed text-foreground-secondary">
               {parking.description ?? t('public.detail.missingDescription')}

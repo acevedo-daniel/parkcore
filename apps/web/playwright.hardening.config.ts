@@ -6,7 +6,7 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
-  timeout: 420_000,
+  timeout: process.env.PARKCORE_REVIEW_DIR ? 600_000 : 420_000,
   expect: { timeout: 20_000 },
   workers: 1,
   outputDir: 'test-results/hardening',

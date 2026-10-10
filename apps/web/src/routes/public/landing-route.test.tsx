@@ -31,7 +31,7 @@ function listFixture(data: ParkingList['data']): ParkingList {
 }
 
 function renderLanding() {
-  render(
+  return render(
     <AppearanceProvider>
       <QueryClientProvider
         client={
@@ -55,7 +55,42 @@ afterEach(() => {
 });
 
 describe('public landing route', () => {
-  it('uses public API facilities and labels operations proof as demonstration data', async () => {
+  it('fills the first screen with the landing hero', () => {
+    api.getPublicParkings.mockResolvedValue(listFixture([]));
+    const { container } = renderLanding();
+
+    const hero = container.querySelector('[data-slot="landing-hero"]');
+    expect(hero?.getAttribute('data-slot')).toBe('landing-hero');
+    expect(hero?.classList.contains('min-h-svh')).toBe(true);
+  });
+
+  it('keeps one brand surface and contains the closing actions', () => {
+    api.getPublicParkings.mockResolvedValue(listFixture([]));
+    const { container } = renderLanding();
+
+    expect(container.querySelectorAll('section.bg-brand')).toHaveLength(1);
+    expect(container.querySelector('section.bg-card, section.bg-muted, section.bg-inverse')).toBe(
+      null,
+    );
+
+    const closingPanel = container.querySelector('.rounded-signature.bg-inverse');
+    expect(closingPanel).not.toBeNull();
+    const closingDemoAction = closingPanel?.querySelector(
+      'button[data-slot="button"][data-variant="secondary"]',
+    );
+    expect(closingDemoAction).not.toBeNull();
+    expect(closingDemoAction?.classList.contains('rounded-full')).toBe(true);
+    expect(closingPanel?.querySelector('a[data-slot="button"][data-size="lg"]')).not.toBeNull();
+    expect(
+      container.querySelector(
+        'section[data-slot="landing-hero"] a[data-slot="button"][data-size="lg"]',
+      ),
+    ).not.toBeNull();
+    expect(container.querySelector('footer.bg-background')).not.toBeNull();
+    expect(container.querySelector('footer [class*="text-brand"]')).toBeNull();
+  });
+
+  it('uses public API facilities and marks showcase parking', async () => {
     api.getPublicParkings.mockResolvedValue(
       listFixture([publicParkingFixture({ isShowcase: true })]),
     );
@@ -63,13 +98,11 @@ describe('public landing route', () => {
 
     expect(await screen.findByRole('link', { name: 'Abrir Central Parking' })).toBeTruthy();
     expect(screen.getByText('Demo', { exact: true })).toBeTruthy();
-    expect(screen.getByText('Datos de demostración')).toBeTruthy();
-    expect(screen.getByText('No es actividad en tiempo real.')).toBeTruthy();
     expect(api.getPublicParkings).toHaveBeenCalledWith({ limit: 10 });
     expect(api.getPublicParkings).toHaveBeenCalledWith({ limit: 6 });
   });
 
-  it('keeps the demonstration disclosure and estimator controls localized in English', async () => {
+  it('keeps the estimator controls localized in English', async () => {
     window.localStorage.setItem('parkcore-lang', 'en-US');
     api.getPublicParkings.mockResolvedValue(
       listFixture([publicParkingFixture({ isShowcase: true })]),
@@ -77,8 +110,6 @@ describe('public landing route', () => {
     renderLanding();
 
     expect(await screen.findByRole('radio', { name: 'Custom' })).toBeTruthy();
-    expect(screen.getByText('Demonstration data')).toBeTruthy();
-    expect(screen.getByText('This is not real-time activity.')).toBeTruthy();
   });
 
   it('keeps the landing featured region intentional when the public API has no facilities', async () => {
