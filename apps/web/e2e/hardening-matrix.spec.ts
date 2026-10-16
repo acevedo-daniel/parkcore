@@ -1,5 +1,7 @@
-import { AxeBuilder } from '@axe-core/playwright';
+import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
+
+import { AxeBuilder } from '@axe-core/playwright';
 import type { Locator, Page, Route } from '@playwright/test';
 
 import { chooseSelectOption, expect, test } from './fixtures';
@@ -49,7 +51,7 @@ const REVIEW_DIR = process.env.PARKCORE_REVIEW_DIR;
 const REVIEW_VIEWPORTS = VIEWPORTS.filter((viewport) => viewport.width !== 1024);
 const A11Y_VIEWPORTS = [VIEWPORTS[1], VIEWPORTS[5]] as const;
 
-async function captureReview(page: Page, relativePath: string) {
+async function captureReview(page: Page, relativePath: string, fullPage = true) {
   if (!REVIEW_DIR) {
     throw new Error('PARKCORE_REVIEW_DIR must be set before capturing review screenshots.');
   }
@@ -58,7 +60,9 @@ async function captureReview(page: Page, relativePath: string) {
     document.documentElement.style.scrollBehavior = 'auto';
     window.scrollTo(0, 0);
   });
-  await page.screenshot({ fullPage: true, path: path.resolve(REVIEW_DIR, relativePath) });
+  const screenshotPath = path.resolve(REVIEW_DIR, relativePath);
+  await mkdir(path.dirname(screenshotPath), { recursive: true });
+  await page.screenshot({ fullPage, path: screenshotPath });
 }
 
 interface RouteFixture {
@@ -681,6 +685,74 @@ async function expectNoHorizontalOverflow(page: Page, label: string) {
   ).toBeLessThanOrEqual(geometry.clientWidth + 1);
 }
 
+async function expectLandingHeroFillsFirstScreen(page: Page, label: string) {
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, 0);
+  });
+
+  const hero = page.locator('[data-slot="landing-hero"]');
+  await expect(hero).toBeVisible();
+  const box = await hero.boundingBox();
+  const viewport = page.viewportSize();
+  expect(box, `${label} should have a landing hero bounding box.`).not.toBeNull();
+  expect(viewport, `${label} should have a configured viewport.`).not.toBeNull();
+  if (!box || !viewport) return;
+
+  expect(
+    box.y + box.height,
+    `${label} landing hero should fill the first screen.`,
+  ).toBeGreaterThanOrEqual(viewport.height - 1);
+}
+
+async function expectCatalogFilterRowAligned(page: Page, label: string) {
+  const controls = [
+    {
+      name: 'search',
+      locator: page
+        .locator('[data-slot="input-group"]')
+        .filter({ has: page.locator('#catalog-desktop-search') }),
+    },
+    { name: 'currency', locator: page.locator('#catalog-desktop-currency-filter') },
+    { name: 'minimum rate', locator: page.locator('#catalog-desktop-minRate-filter') },
+    { name: 'maximum rate', locator: page.locator('#catalog-desktop-maxRate-filter') },
+  ];
+  const boxes = await Promise.all(
+    controls.map(async ({ locator }) => {
+      await expect(locator).toBeVisible();
+      return locator.boundingBox();
+    }),
+  );
+  const reference = boxes[0];
+  expect(reference, `${label} should render catalog filter controls.`).not.toBeNull();
+  if (!reference) return;
+
+  boxes.slice(1).forEach((box, index) => {
+    expect(box, `${label} ${controls[index + 1]?.name} should have a bounding box.`).not.toBeNull();
+    if (!box) return;
+    expect(
+      Math.abs(box.y - reference.y),
+      `${label} ${controls[index + 1]?.name} should share the search control's top edge. ` +
+        `Search: ${JSON.stringify(reference)}. Control: ${JSON.stringify(box)}.`,
+    ).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs(box.y + box.height - (reference.y + reference.height)),
+      `${label} ${controls[index + 1]?.name} should share the search control's bottom edge. ` +
+        `Search: ${JSON.stringify(reference)}. Control: ${JSON.stringify(box)}.`,
+    ).toBeLessThanOrEqual(1);
+  });
+
+  boxes.forEach((box, index) => {
+    expect(box, `${label} ${controls[index]?.name} should have a bounding box.`).not.toBeNull();
+    if (!box) return;
+    expect(
+      Math.abs(box.height - 44),
+      `${label} ${controls[index]?.name} should be 44px tall. ` +
+        `Control: ${JSON.stringify(box)}.`,
+    ).toBeLessThanOrEqual(1);
+  });
+}
+
 async function expectOwnerOverviewPanelsWithinViewport(page: Page, label: string) {
   const viewport = page.viewportSize();
   expect(viewport, `${label} should have a configured viewport.`).not.toBeNull();
@@ -843,6 +915,36 @@ async function expectPreferenceSegmentsUntruncated(page: Page, label: string) {
   expect(issues, `${label} has truncated or undersized preference segments.`).toEqual([]);
 }
 
+async function expectActiveThemeSegmentHighlighted(page: Page, locale: Locale, label: string) {
+  const groups = page.getByRole('radiogroup', {
+    name: locale === 'es-AR' ? 'Apariencia' : 'Theme',
+  });
+
+  for (let index = 0; index < (await groups.count()); index += 1) {
+    const group = groups.nth(index);
+    if (!(await group.isVisible())) continue;
+
+    const checked = group.locator('[aria-checked="true"]');
+    const unchecked = group.locator('[aria-checked="false"]').first();
+    await expect(checked).toHaveCount(1);
+    await expect(unchecked).toHaveCount(1);
+
+    const [checkedBackground, uncheckedBackground] = await Promise.all([
+      checked.evaluate((element) => getComputedStyle(element).backgroundColor),
+      unchecked.evaluate((element) => getComputedStyle(element).backgroundColor),
+    ]);
+
+    expect(
+      checkedBackground,
+      `${label} theme group ${String(index + 1)} should fill its active segment.`,
+    ).not.toBe('rgba(0, 0, 0, 0)');
+    expect(
+      checkedBackground,
+      `${label} theme group ${String(index + 1)} should distinguish the active segment.`,
+    ).not.toBe(uncheckedBackground);
+  }
+}
+
 async function expectPublicHeaderActionsAligned(page: Page, label: string) {
   const appearanceSegments = page.locator(
     '.public-header-tools [data-slot="appearance-controls"] [role="radio"]:visible',
@@ -938,8 +1040,14 @@ async function visitFixture(
     page,
     `${viewport.name} ${locale} ${theme} ${route.name}`,
   );
+  await expectActiveThemeSegmentHighlighted(
+    page,
+    locale,
+    `${viewport.name} ${locale} ${theme} ${route.name}`,
+  );
   await expectNoHorizontalOverflow(page, `${viewport.name} ${locale} ${theme} ${route.name}`);
   if (route.name === 'landing') {
+    await expectLandingHeroFillsFirstScreen(page, `${viewport.name} ${locale} ${theme}`);
     await expectCalculatorOptionsUnbroken(
       page,
       `${viewport.name} ${locale} ${theme} ${route.name}`,
@@ -947,6 +1055,9 @@ async function visitFixture(
   }
   if (route.name === 'overview') {
     await expectOverviewMetricsAligned(page, `${viewport.name} ${locale} ${theme} ${route.name}`);
+  }
+  if (route.name === 'catalog' && viewport.width >= 1024) {
+    await expectCatalogFilterRowAligned(page, `${viewport.name} ${locale} ${theme}`);
   }
   await expectMobileNavigationDoesNotCoverContent(page, `${viewport.name} ${route.name}`);
   if (route.shell === 'public' && viewport.width >= 1280) {
@@ -1687,6 +1798,38 @@ test('captures visual review screenshots', async ({ page }) => {
   test.skip(!REVIEW_DIR, 'Set PARKCORE_REVIEW_DIR to capture visual review screenshots.');
 
   const api = await installHardeningApiMock(page);
+
+  const landingReviewViewports = [
+    { height: 844, name: '390x844', width: 390 },
+    { height: 768, name: '1366x768', width: 1366 },
+    { height: 900, name: '1440x900', width: 1440 },
+    { height: 1080, name: '1920x1080', width: 1920 },
+  ] as const;
+
+  for (const locale of ['es-AR', 'en-US'] as const) {
+    for (const theme of ['light', 'dark'] as const) {
+      for (const viewport of landingReviewViewports) {
+        await test.step(`landing ${viewport.name} ${locale} ${theme}`, async () => {
+          api.setScenario('success');
+          await page.setViewportSize({ height: viewport.height, width: viewport.width });
+          await configureBrowserState(page, { authenticated: false, locale, theme });
+          await page.goto('/');
+          await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+          await expectLandingHeroFillsFirstScreen(page, `${viewport.name} ${locale} ${theme}`);
+          await expectNoHorizontalOverflow(page, `${viewport.name} ${locale} ${theme} landing`);
+          await captureReview(
+            page,
+            `landing-targets/${viewport.name}-${locale}-${theme}-full-page.png`,
+          );
+          await captureReview(
+            page,
+            `landing-targets/${viewport.name}-${locale}-${theme}-first-screen.png`,
+            false,
+          );
+        });
+      }
+    }
+  }
 
   for (const locale of ['es-AR', 'en-US'] as const) {
     for (const theme of ['light', 'dark'] as const) {

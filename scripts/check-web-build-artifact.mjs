@@ -60,6 +60,21 @@ const canonicalAssetNames = [
   'recoleta-patio.webp',
   'san-telmo-mercado.svg',
 ];
+const requiredPublicFiles = [
+  'favicon.svg',
+  'icons/favicon-32.png',
+  'icons/apple-touch-icon.png',
+  'icons/icon-192.png',
+  'icons/icon-512.png',
+  'icons/icon-maskable-512.png',
+  'social/parkcore-og.png',
+  'site.webmanifest',
+];
+const requiredIndexIconLinks = [
+  '/favicon.svg',
+  '/icons/favicon-32.png',
+  '/icons/apple-touch-icon.png',
+];
 
 function normalizePath(value) {
   return value.split(path.sep).join('/');
@@ -110,6 +125,55 @@ try {
   }
 
   const files = await collectFiles(distDirectory);
+  const cssAssets = files.filter(
+    (file) => file.normalizedPath.startsWith('assets/') && file.normalizedPath.endsWith('.css'),
+  );
+  const roundedSignatureRules = [];
+
+  for (const file of cssAssets) {
+    const stylesheet = await readFile(file.absolutePath, 'utf8');
+    for (const match of stylesheet.matchAll(/\.rounded-signature\s*\{([^}]*)\}/g)) {
+      roundedSignatureRules.push({
+        body: match[1],
+        path: file.normalizedPath,
+      });
+    }
+  }
+
+  if (roundedSignatureRules.length !== 1) {
+    throw new Error(
+      `Expected exactly one .rounded-signature rule in built CSS assets, found ${roundedSignatureRules.length}.`,
+    );
+  }
+
+  const roundedSignatureBody = roundedSignatureRules[0].body;
+  const roundedSignatureDeclarations = roundedSignatureBody
+    .split(';')
+    .map((declaration) => declaration.trim())
+    .filter((declaration) => {
+      const separator = declaration.indexOf(':');
+      return (
+        separator !== -1 && declaration.slice(0, separator).trim().toLowerCase() === 'border-radius'
+      );
+    });
+
+  if (roundedSignatureDeclarations.length !== 1) {
+    throw new Error(
+      `.rounded-signature in ${roundedSignatureRules[0].path} must contain exactly one border-radius declaration; found ${roundedSignatureDeclarations.length}.`,
+    );
+  }
+
+  const radiusValue = roundedSignatureDeclarations[0].slice(
+    roundedSignatureDeclarations[0].indexOf(':') + 1,
+  );
+  const radiusParts = radiusValue.trim().split(/\s+/).filter(Boolean);
+
+  if (radiusParts.length !== 4) {
+    throw new Error(
+      `.rounded-signature in ${roundedSignatureRules[0].path} must have exactly four border-radius values; found ${radiusParts.length}.`,
+    );
+  }
+
   const javascriptAssets = files.filter(
     (file) => file.normalizedPath.startsWith('assets/') && file.normalizedPath.endsWith('.js'),
   );
@@ -135,6 +199,70 @@ try {
 
   if (missingCanonicalAssets.length > 0) {
     throw new Error(`Missing canonical assets: ${missingCanonicalAssets.join(', ')}`);
+  }
+
+  const missingPublicFiles = requiredPublicFiles.filter(
+    (publicFile) => !files.some((file) => file.normalizedPath === publicFile),
+  );
+
+  if (missingPublicFiles.length > 0) {
+    throw new Error(`Missing public files: ${missingPublicFiles.join(', ')}`);
+  }
+
+  const manifestPath = path.join(distDirectory, 'site.webmanifest');
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+  if (!manifest || !Array.isArray(manifest.icons) || manifest.icons.length === 0) {
+    throw new Error('site.webmanifest must contain at least one icon.');
+  }
+
+  const filePaths = new Set(files.map((file) => file.normalizedPath));
+  const missingManifestIcons = manifest.icons.flatMap((icon) => {
+    if (!icon || typeof icon !== 'object') {
+      return ['(missing src)'];
+    }
+
+    const iconSource = icon.src;
+    if (typeof iconSource !== 'string' || iconSource.trim() === '') {
+      return [String(iconSource ?? '(missing src)')];
+    }
+
+    try {
+      const baseUrl = new URL('https://parkcore.invalid/');
+      const iconUrl = new URL(iconSource, baseUrl);
+      if (iconUrl.origin !== baseUrl.origin) {
+        return [iconSource];
+      }
+
+      const decodedPath = decodeURIComponent(iconUrl.pathname).replace(/^\/+/, '');
+      const absolutePath = path.resolve(distDirectory, decodedPath);
+      const relativePath = normalizePath(path.relative(distDirectory, absolutePath));
+      if (relativePath.startsWith('../') || path.isAbsolute(relativePath)) {
+        return [iconSource];
+      }
+
+      return filePaths.has(relativePath) ? [] : [iconSource];
+    } catch {
+      return [iconSource];
+    }
+  });
+
+  if (missingManifestIcons.length > 0) {
+    throw new Error(
+      `Manifest icon sources do not resolve to public files: ${missingManifestIcons.join(', ')}`,
+    );
+  }
+
+  const indexHtml = await readFile(path.join(distDirectory, 'index.html'), 'utf8');
+  const linkedAssets = [...indexHtml.matchAll(/<link\b[^>]*>/gi)].flatMap(([tag]) => {
+    const href = tag.match(/\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+    return href ? [href[1] ?? href[2] ?? href[3]] : [];
+  });
+  const missingIndexIconLinks = requiredIndexIconLinks.filter(
+    (requiredLink) => !linkedAssets.includes(requiredLink),
+  );
+
+  if (missingIndexIconLinks.length > 0) {
+    throw new Error(`Missing icon links in index.html: ${missingIndexIconLinks.join(', ')}`);
   }
 
   const violations = [];

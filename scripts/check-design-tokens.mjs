@@ -110,6 +110,8 @@ export const COLOR_TOKENS = [
   'sidebar-ring',
 ];
 
+const UTILITY_ONLY_TOKENS = new Set(['radius-signature']);
+
 const REQUIRED_SHARED_TOKENS = [
   'font-sans',
   'font-display',
@@ -656,10 +658,24 @@ export function validateDesignTokens({ stylesheet, themeColorSource, themeInitSo
 
   for (const token of REQUIRED_SHARED_TOKENS) {
     assert(sharedTokens[token], `Missing shared token: ${token}`);
+    if (UTILITY_ONLY_TOKENS.has(token)) {
+      assert.equal(
+        themeTokens[token],
+        undefined,
+        `${token} must stay out of @theme inline so Tailwind does not generate a competing utility`,
+      );
+      continue;
+    }
     if (!token.startsWith('motion-')) {
       assert.equal(themeTokens[token], `var(--${token})`, `theme alias ${token}`);
     }
   }
+
+  assert.match(
+    stylesheet,
+    /@utility rounded-signature\s*\{\s*border-radius:\s*var\(--radius-3xl\)\s+var\(--radius-3xl\)\s+var\(--radius-signature\)\s+var\(--radius-3xl\);\s*\}/,
+    'rounded-signature must keep three 3xl corners and a signature bottom-right corner',
+  );
 
   assert.equal(themeTokens['breakpoint-wide'], '75rem', 'wide breakpoint');
 

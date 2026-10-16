@@ -15,6 +15,12 @@ import { AppSheet } from '../../components/domain/app-dialog.js';
 import { EmptyState, ErrorState } from '../../components/domain/feedback.js';
 import { Skeleton } from '../../components/ui/skeleton.js';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../../components/ui/tooltip.js';
+import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
@@ -155,19 +161,11 @@ export function OwnerParkingOverviewRoute() {
               state={parking.availabilityState}
               timezone={parking.timezone}
             />
-            <Button
-              aria-label={t('parkingOperation.refreshFacility')}
-              disabled={parkingsQuery.isFetching}
-              onClick={() => void parkingsQuery.refetch()}
-              size="sm"
-              variant="outline"
-            >
-              <RefreshCw
-                aria-hidden="true"
-                className={cn('size-3.5', parkingsQuery.isFetching && 'animate-spin')}
-              />
-              {t('parkingOperation.refreshFacility')}
-            </Button>
+            <RefreshIconButton
+              isFetching={parkingsQuery.isFetching}
+              label={t('parkingOperation.refreshFacility')}
+              onRefresh={() => void parkingsQuery.refetch()}
+            />
             <Button asChild size="sm" variant="outline">
               <Link
                 aria-label={t('parkingOperation.editAria', { title: parking.title })}
@@ -298,17 +296,11 @@ export function OwnerParkingOverviewRoute() {
             </h2>
           </div>
           <div className="flex flex-wrap gap-2 self-start sm:self-auto">
-            <Button
-              disabled={activeSessionsQuery.isFetching}
-              onClick={() => {
-                void activeSessionsQuery.refetch();
-              }}
-              size="sm"
-              variant="outline"
-            >
-              <RefreshCw aria-hidden="true" className="size-3.5" />
-              {t('parkingOperation.refreshActiveSessions')}
-            </Button>
+            <RefreshIconButton
+              isFetching={activeSessionsQuery.isFetching}
+              label={t('parkingOperation.refreshActiveSessions')}
+              onRefresh={() => void activeSessionsQuery.refetch()}
+            />
             <Button asChild size="sm" variant="outline">
               <Link to={`/app/parkings/${parking.id}/sessions`}>
                 <History aria-hidden="true" className="size-3.5" /> {t('parkingOperation.history')}
@@ -461,6 +453,34 @@ export function OwnerParkingOverviewRoute() {
         />
       </AppSheet>
     </section>
+  );
+}
+
+interface RefreshIconButtonProps {
+  isFetching: boolean;
+  label: string;
+  onRefresh: () => void;
+}
+
+function RefreshIconButton({ isFetching, label, onRefresh }: RefreshIconButtonProps) {
+  return (
+    <TooltipProvider delayDuration={300}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            aria-label={label}
+            disabled={isFetching}
+            onClick={onRefresh}
+            size="icon"
+            type="button"
+            variant="ghost"
+          >
+            <RefreshCw aria-hidden="true" className={cn('size-4', isFetching && 'animate-spin')} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{label}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 

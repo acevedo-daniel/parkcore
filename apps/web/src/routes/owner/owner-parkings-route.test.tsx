@@ -43,6 +43,27 @@ afterEach(() => {
 });
 
 describe('owner parking list', () => {
+  it.each([
+    {
+      expectedRate: /US\$\s*15,50\s*\/\s*h/,
+      label: 'Tarifa',
+      locale: 'es-AR' as const,
+    },
+    {
+      expectedRate: /\$15\.50\s*\/\s*hr/,
+      label: 'Rate',
+      locale: 'en-US' as const,
+    },
+  ])('shows the short hourly rate suffix in $locale', async ({ expectedRate, label, locale }) => {
+    api.getOwnedParkings.mockResolvedValue([parkingFixture()]);
+    renderParkings(locale);
+
+    const rateLabel = await screen.findByText(label, { exact: true });
+    const rateLine = rateLabel.parentElement?.textContent ?? '';
+    expect(rateLine).toMatch(expectedRate);
+    expect(rateLine).not.toMatch(/\b(?:Por hora|Per hour)\b/i);
+  });
+
   it('renders the server snapshot with separate keyboard-reachable actions', async () => {
     const user = userEvent.setup();
     api.getOwnedParkings.mockResolvedValue([

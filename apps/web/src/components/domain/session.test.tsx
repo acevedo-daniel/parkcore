@@ -2,6 +2,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { AppearanceProvider } from '../../app/appearance-provider.js';
 import { CheckoutSummary, SessionRow } from './session.js';
 
 const activeSession = {
@@ -30,6 +31,7 @@ const activeSession = {
 
 afterEach(() => {
   cleanup();
+  window.localStorage.removeItem('parkcore-lang');
   vi.useRealTimers();
 });
 
@@ -58,5 +60,21 @@ describe('operational session components', () => {
     expect(
       screen.getByRole('link', { name: 'Open session for AB123CD' }).getAttribute('href'),
     ).toBe('/app/sessions/session-1');
+  });
+
+  it.each([
+    ['es-AR', 'Tarifa', '15,50 / h'],
+    ['en-US', 'Rate', '15.50 / hr'],
+  ] as const)('uses the short hourly unit for %s', (locale, rateLabel, expectedRate) => {
+    window.localStorage.setItem('parkcore-lang', locale);
+    render(
+      <AppearanceProvider>
+        <CheckoutSummary session={activeSession} />
+      </AppearanceProvider>,
+    );
+
+    const rateElement = screen.getByText(rateLabel).nextElementSibling;
+    if (!rateElement) throw new Error('Rate value should follow the rate label.');
+    expect(rateElement.textContent).toContain(expectedRate);
   });
 });

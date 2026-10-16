@@ -180,6 +180,67 @@ describe('parking operations', () => {
     expect(screen.getByRole('link', { name: 'Open session for AB123CD' })).toBeTruthy();
   });
 
+  it('keeps refresh actions icon-only, labeled, and disabled while refreshing', async () => {
+    const user = userEvent.setup();
+    let resolveFacilityRefresh!: (parkings: ReturnType<typeof parkingFixture>[]) => void;
+    let resolveSessionsRefresh!: (sessions: ReturnType<typeof parkingSessionFixture>[]) => void;
+    api.getOwnedParkings.mockResolvedValueOnce([parkingFixture()]).mockImplementationOnce(
+      () =>
+        new Promise<ReturnType<typeof parkingFixture>[]>((resolve) => {
+          resolveFacilityRefresh = resolve;
+        }),
+    );
+    api.getActiveSessions.mockResolvedValueOnce([]).mockImplementationOnce(
+      () =>
+        new Promise<ReturnType<typeof parkingSessionFixture>[]>((resolve) => {
+          resolveSessionsRefresh = resolve;
+        }),
+    );
+    renderOverview();
+
+    const facilityRefresh = await screen.findByRole('button', { name: 'Refresh facility details' });
+    const sessionsRefresh = screen.getByRole('button', { name: 'Refresh active stays' });
+    for (const button of [facilityRefresh, sessionsRefresh]) {
+      expect(button.getAttribute('data-size')).toBe('icon');
+      expect(button.getAttribute('data-variant')).toBe('ghost');
+      expect(button.classList.contains('size-11')).toBe(true);
+    }
+
+    await user.hover(facilityRefresh);
+    expect((await screen.findByRole('tooltip')).textContent).toBe('Refresh facility details');
+    await user.unhover(facilityRefresh);
+
+    await user.click(facilityRefresh);
+    await waitFor(() => {
+      expect(api.getOwnedParkings).toHaveBeenCalledTimes(2);
+    });
+    await waitFor(() => {
+      expect(facilityRefresh).toHaveProperty('disabled', true);
+    });
+    expect(facilityRefresh.querySelector('svg')?.classList.contains('animate-spin')).toBe(true);
+    resolveFacilityRefresh([parkingFixture()]);
+    await waitFor(() => {
+      expect(facilityRefresh).toHaveProperty('disabled', false);
+    });
+
+    await user.hover(sessionsRefresh);
+    expect((await screen.findByRole('tooltip')).textContent).toBe('Refresh active stays');
+    await user.unhover(sessionsRefresh);
+
+    await user.click(sessionsRefresh);
+    await waitFor(() => {
+      expect(api.getActiveSessions).toHaveBeenCalledTimes(2);
+    });
+    await waitFor(() => {
+      expect(sessionsRefresh).toHaveProperty('disabled', true);
+    });
+    expect(sessionsRefresh.querySelector('svg')?.classList.contains('animate-spin')).toBe(true);
+    resolveSessionsRefresh([]);
+    await waitFor(() => {
+      expect(sessionsRefresh).toHaveProperty('disabled', false);
+    });
+  });
+
   it.each([
     [
       'VEHICLE_ALREADY_ACTIVE',

@@ -157,7 +157,7 @@ export function DesignPreviewRoute() {
           }
           className="border-inverse-foreground/20"
           description={
-            <span className="text-inverse-foreground">{t('parking.fallbackMessage')}</span>
+            <span className="text-inverse-foreground">{t('public.detail.imageUnavailable')}</span>
           }
           eyebrow={
             <span className="text-inverse-foreground">{t('public.landing.heroEyebrow')}</span>
@@ -324,7 +324,7 @@ export function DesignPreviewRoute() {
           <CardHeader>
             <div className="space-y-2">
               <CardTitle className="type-heading">{t('parkingOperation.eyebrow')}</CardTitle>
-              <CardDescription>{t('parking.fallbackMessage')}</CardDescription>
+              <CardDescription>{t('public.detail.imageUnavailable')}</CardDescription>
             </div>
             <ParkingStatus isActive />
           </CardHeader>

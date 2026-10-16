@@ -102,6 +102,16 @@ describe('public parking catalog', () => {
     });
   });
 
+  it('keeps the rate group accessible with a visually hidden legend', async () => {
+    api.getPublicParkings.mockResolvedValue(listFixture([]));
+    renderCatalog();
+
+    await screen.findByText('No active parkings');
+    const rateGroup = screen.getByRole('group', { name: 'Hourly rate' });
+
+    expect(within(rateGroup).getByText('Hourly rate').className).toContain('sr-only');
+  });
+
   it('shows deliberate empty and error outcomes for API responses', async () => {
     api.getPublicParkings.mockResolvedValueOnce(listFixture([]));
     const { unmount } = renderCatalog();
@@ -250,6 +260,21 @@ describe('public parking catalog', () => {
       });
     });
     expect(screen.getByTestId('location-search').textContent).toBe('?search=central');
+  });
+
+  it('clears unsubmitted rate values and currency selection', async () => {
+    const user = userEvent.setup();
+    api.getPublicParkings.mockResolvedValue(listFixture([publicParkingFixture()]));
+    renderCatalog();
+    await screen.findByRole('link', { name: 'Open Central Parking' });
+
+    await user.click(screen.getByRole('combobox', { name: 'Currency' }));
+    await user.click(await screen.findByRole('option', { name: 'ARS' }));
+    await user.type(screen.getByLabelText('Min. rate (ARS)'), '10');
+    await user.click(screen.getByRole('button', { name: 'Clear rate' }));
+
+    expect(screen.getByLabelText<HTMLInputElement>('Min. rate (USD)').value).toBe('');
+    expect(screen.getByRole('combobox', { name: 'Currency' }).textContent).toBe('All');
   });
 
   it('preserves valid query state through pagination and browser history', async () => {
