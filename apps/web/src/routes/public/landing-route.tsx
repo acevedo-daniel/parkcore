@@ -211,6 +211,7 @@ export function LandingRoute() {
               {t('public.landing.operatorDescription')}
             </p>
             <DemoLoginButton
+              wrapperClassName="mt-9 items-start"
               onSuccess={() => {
                 void navigate('/app', { replace: true });
               }}

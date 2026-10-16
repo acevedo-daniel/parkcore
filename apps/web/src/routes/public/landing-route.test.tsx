@@ -102,6 +102,17 @@ describe('public landing route', () => {
     expect(api.getPublicParkings).toHaveBeenCalledWith({ limit: 6 });
   });
 
+  it('spaces the operator demo action below its description', async () => {
+    api.getPublicParkings.mockResolvedValue(listFixture([]));
+    renderLanding();
+
+    const operatorAction = await screen.findByRole('button', {
+      name: 'Ver una jornada de ejemplo',
+    });
+    expect(operatorAction.parentElement?.classList.contains('mt-9')).toBe(true);
+    expect(operatorAction.parentElement?.classList.contains('items-start')).toBe(true);
+  });
+
   it('keeps the estimator controls localized in English', async () => {
     window.localStorage.setItem('parkcore-lang', 'en-US');
     api.getPublicParkings.mockResolvedValue(
