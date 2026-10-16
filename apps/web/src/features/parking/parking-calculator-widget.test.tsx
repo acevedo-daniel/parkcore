@@ -103,7 +103,7 @@ describe('ParkingCalculatorWidget', () => {
     expect(screen.getByText('2 horas facturadas')).toBeTruthy();
     expect(
       screen.getByText(
-        'Cálculo según la tarifa actual. El importe final depende de la duración real de la estadía.',
+        'Se cobra por hora iniciada. El total final depende de cuánto dure la estadía.',
       ),
     ).toBeTruthy();
 

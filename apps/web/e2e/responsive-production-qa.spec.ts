@@ -225,7 +225,7 @@ test('keeps the deployed public and owner surfaces usable at production viewport
           theme,
           '/',
           page.getByRole('heading', {
-            name: /Parking with clear information|Estacionar con información clara/i,
+            name: /Know what you will pay before you arrive|Antes de llegar, ya sabes cuánto vas a pagar/i,
           }),
           `${prefix} ${theme} landing`,
         );

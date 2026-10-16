@@ -187,65 +187,65 @@
     "estimatePending": "Elige una duración",
     "estimateUnavailable": "Completa la duración para calcular el costo",
     "viewFacility": "Ver la cochera",
-    "estimateNote": "Cálculo según la tarifa actual. El importe final depende de la duración real de la estadía."
+    "estimateNote": "Se cobra por hora iniciada. El total final depende de cuánto dure la estadía."
   },
   "public": {
     "landing": {
-      "metaDescription": "Una forma más clara de encontrar, usar y operar una cochera.",
-      "metaTitle": "ParkCore | Una cochera clara",
-      "heroEyebrow": "Para quienes se mueven todos los días",
-      "heroTitle": "Estacionar con información clara.",
-      "heroDescription": "ParkCore ordena la entrada, el cobro y el historial de una cochera. Así, llegar, estacionar y salir resulta más simple.",
+      "metaDescription": "Compara cocheras por zona y tarifa, calcula tu estadía antes de llegar y lleva la operación de tu cochera con ingresos por patente.",
+      "metaTitle": "ParkCore | Cocheras con tarifa a la vista",
+      "heroEyebrow": "Cocheras con tarifa a la vista",
+      "heroTitle": "Antes de llegar, ya sabes cuánto vas a pagar.",
+      "heroDescription": "Busca por zona, compara tarifas por hora y mira cuántos lugares quedan libres. Elige cuánto te vas a quedar y ParkCore te muestra el costo.",
       "browseAction": "Ver cocheras",
-      "demoAction": "Recorrer la demo",
-      "heroNote": "Sin tickets de papel. Sin pasos innecesarios para una tarea cotidiana.",
-      "howEyebrow": "Una experiencia cotidiana",
-      "howTitle": "No hace falta cambiarlo todo para estacionar mejor.",
-      "howDescription": "La tecnología debe quitar pasos innecesarios: mostrar la tarifa, registrar la entrada y evitar que alguien busque un papel al salir.",
+      "demoAction": "Ver la demo de operador",
+      "heroNote": "Se cobra por hora iniciada, con la tarifa vigente al momento de entrar.",
+      "howEyebrow": "Cómo funciona",
+      "howTitle": "De la búsqueda al cobro, sin papeles en el medio.",
+      "howDescription": "La cochera registra tu patente al entrar y ParkCore lleva la cuenta del tiempo. Al salir, el cobro se calcula con la tarifa que ya conocías.",
       "howItems": {
-        "contextTitle": "Llegar con la información necesaria",
-        "contextDescription": "Ubicación, tarifa y costo estimado de la estadía antes de llegar.",
-        "paperTitle": "Entrar sin papel",
-        "paperDescription": "La patente o el código QR vinculan la llegada con la operación.",
-        "receiptTitle": "Salir con un comprobante",
-        "receiptDescription": "Un cierre claro, sin pasos innecesarios ni información escondida."
+        "contextTitle": "Compara antes de salir",
+        "contextDescription": "Tarifa por hora, horario, lugares libres y cómo llegar, en la ficha de cada cochera.",
+        "paperTitle": "Entra con tu patente",
+        "paperDescription": "La cochera registra la patente al ingreso. No necesitas guardar un ticket.",
+        "receiptTitle": "Paga lo que corresponde",
+        "receiptDescription": "El resumen muestra la hora de ingreso, el tiempo transcurrido, las horas cobradas y el total."
       },
       "driverEyebrow": "Para quien conduce",
-      "driverTitle": "Llega sabiendo dónde estacionar y cuánto pagar.",
-      "driverDescription": "Consulta las cocheras, entiende la tarifa y conserva el comprobante de tu estadía en un mismo lugar.",
+      "driverTitle": "Encuentra lugar sin dar vueltas a la manzana.",
+      "driverDescription": "Filtra por moneda y rango de tarifa, mira qué cocheras están abiertas ahora y abre el camino en el mapa desde la ficha.",
       "driverAction": "Buscar una cochera",
       "operatorEyebrow": "Para quien opera una cochera",
-      "operatorTitle": "La operación diaria no debería depender de la memoria.",
-      "operatorDescription": "Cada ingreso, cobro y salida queda registrado. La operación sigue el ritmo de la cochera, no el de una planilla.",
+      "operatorTitle": "Tu cochera, sin cuaderno ni planilla.",
+      "operatorDescription": "Registra cada ingreso por patente, controla la ocupación frente a la capacidad y cobra cada salida con la tarifa del ingreso. El historial queda listo para revisar.",
       "operatorAction": "Ver una jornada de ejemplo",
-      "featuredEyebrow": "Cerca de donde vas",
-      "featuredTitle": "Elige una cochera con la información necesaria.",
+      "featuredEyebrow": "Cocheras publicadas",
+      "featuredTitle": "Tarifa y lugares libres, a primera vista.",
       "featuredAction": "Ver todas las cocheras",
-      "faqEyebrow": "Preguntas frecuentes al estacionar",
-      "faqTitle": "Respuestas claras antes de empezar.",
+      "faqEyebrow": "Antes de estacionar",
+      "faqTitle": "Lo que suelen preguntar.",
       "faq": {
         "app": {
-          "question": "¿Necesito descargar una aplicación para estacionar?",
-          "answer": "No. ParkCore funciona desde el navegador y en el acceso de la cochera. Puedes identificar tu estadía con la patente o un código QR."
+          "question": "¿Necesito descargar una aplicación?",
+          "answer": "No. Puedes buscar cocheras y calcular el costo de tu estadía desde el navegador del celular o de la computadora."
         },
         "price": {
           "question": "¿Cómo sé cuánto voy a pagar?",
-          "answer": "Cada cochera publica su tarifa. Antes de llegar puedes estimar la estadía y, al salir, el comprobante deja claro qué se cobró."
+          "answer": "Cada cochera publica su tarifa por hora. Se cobra por hora iniciada, con un mínimo de una hora, y la tarifa queda fijada al momento del ingreso."
         },
         "ticket": {
           "question": "¿Qué pasa si no tengo ticket?",
-          "answer": "La estadía queda asociada a la patente o al acceso que elegiste. No dependes de un papel para completar la salida."
+          "answer": "La cochera registra tu estadía con la patente del vehículo, así que no necesitas un papel para salir."
         },
         "operator": {
-          "question": "Tengo una cochera. ¿Cómo puedo probarla?",
-          "answer": "Puedes entrar a la demo de operador con un clic y recorrer una operación completa con datos de ejemplo, sin configurar nada."
+          "question": "Tengo una cochera. ¿Cómo pruebo ParkCore?",
+          "answer": "Entra a la demo de operador con un clic. Tendrás una cochera con estadías de ejemplo para registrar ingresos, cobrar salidas y revisar el historial, sin crear una cuenta."
         }
       },
-      "finalTitle": "Estacionar y operar puede ser más simple.",
-      "finalDescription": "Entra a la demo de operador o encuentra una cochera cerca. Puedes empezar por cualquiera de las dos opciones.",
+      "finalTitle": "Busca una cochera o prueba la operación por dentro.",
+      "finalDescription": "La demo de operador abre con datos de ejemplo y no necesita registro.",
       "finalDemoAction": "Probar como operador",
       "finalBrowseAction": "Buscar cocheras",
-      "footerDescription": "Para estacionar, cobrar y operar una cochera con claridad.",
+      "footerDescription": "Cocheras con tarifa publicada y una operación ordenada.",
       "footerFacilities": "Cocheras",
       "footerSignIn": "Ingresar",
       "copyright": "© {{year}} ParkCore",
