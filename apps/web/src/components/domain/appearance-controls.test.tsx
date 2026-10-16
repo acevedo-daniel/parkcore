@@ -60,6 +60,7 @@ describe('AppearanceControls', () => {
     const dark = within(theme).getByRole('radio', { name: 'Oscuro' });
 
     expect(system.getAttribute('aria-checked')).toBe('true');
+    expect(system.className).toContain('aria-checked:bg-brand-soft');
     expect(light.getAttribute('aria-checked')).toBe('false');
     expect(dark.getAttribute('aria-checked')).toBe('false');
     expect(within(theme).getAllByRole('radio')).toHaveLength(3);

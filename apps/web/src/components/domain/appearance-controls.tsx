@@ -7,7 +7,7 @@ import { cn } from '../../lib/cn.js';
 const segmentClassName =
   'shrink-0 gap-0.5 rounded-xl border border-border-subtle bg-transparent p-0.5';
 const segmentItemClassName =
-  'min-h-11 min-w-11 rounded-lg border border-transparent px-2.5 text-xs font-bold text-foreground-secondary data-[state=on]:bg-brand-soft data-[state=on]:text-foreground';
+  'min-h-11 min-w-11 rounded-lg border border-transparent px-2.5 text-xs font-bold text-foreground-secondary data-[state=on]:bg-brand-soft data-[state=on]:text-foreground aria-checked:bg-brand-soft aria-checked:text-foreground';
 
 export function AppearanceControls({
   className,

@@ -895,6 +895,36 @@ async function expectPreferenceSegmentsUntruncated(page: Page, label: string) {
   expect(issues, `${label} has truncated or undersized preference segments.`).toEqual([]);
 }
 
+async function expectActiveThemeSegmentHighlighted(page: Page, locale: Locale, label: string) {
+  const groups = page.getByRole('radiogroup', {
+    name: locale === 'es-AR' ? 'Apariencia' : 'Theme',
+  });
+
+  for (let index = 0; index < (await groups.count()); index += 1) {
+    const group = groups.nth(index);
+    if (!(await group.isVisible())) continue;
+
+    const checked = group.locator('[aria-checked="true"]');
+    const unchecked = group.locator('[aria-checked="false"]').first();
+    await expect(checked).toHaveCount(1);
+    await expect(unchecked).toHaveCount(1);
+
+    const [checkedBackground, uncheckedBackground] = await Promise.all([
+      checked.evaluate((element) => getComputedStyle(element).backgroundColor),
+      unchecked.evaluate((element) => getComputedStyle(element).backgroundColor),
+    ]);
+
+    expect(
+      checkedBackground,
+      `${label} theme group ${String(index + 1)} should fill its active segment.`,
+    ).not.toBe('rgba(0, 0, 0, 0)');
+    expect(
+      checkedBackground,
+      `${label} theme group ${String(index + 1)} should distinguish the active segment.`,
+    ).not.toBe(uncheckedBackground);
+  }
+}
+
 async function expectPublicHeaderActionsAligned(page: Page, label: string) {
   const appearanceSegments = page.locator(
     '.public-header-tools [data-slot="appearance-controls"] [role="radio"]:visible',
@@ -988,6 +1018,11 @@ async function visitFixture(
   await expect(page.locator('html')).toHaveAttribute('lang', locale);
   await expectPreferenceSegmentsUntruncated(
     page,
+    `${viewport.name} ${locale} ${theme} ${route.name}`,
+  );
+  await expectActiveThemeSegmentHighlighted(
+    page,
+    locale,
     `${viewport.name} ${locale} ${theme} ${route.name}`,
   );
   await expectNoHorizontalOverflow(page, `${viewport.name} ${locale} ${theme} ${route.name}`);
