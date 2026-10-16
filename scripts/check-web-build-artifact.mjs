@@ -125,6 +125,55 @@ try {
   }
 
   const files = await collectFiles(distDirectory);
+  const cssAssets = files.filter(
+    (file) => file.normalizedPath.startsWith('assets/') && file.normalizedPath.endsWith('.css'),
+  );
+  const roundedSignatureRules = [];
+
+  for (const file of cssAssets) {
+    const stylesheet = await readFile(file.absolutePath, 'utf8');
+    for (const match of stylesheet.matchAll(/\.rounded-signature\s*\{([^}]*)\}/g)) {
+      roundedSignatureRules.push({
+        body: match[1],
+        path: file.normalizedPath,
+      });
+    }
+  }
+
+  if (roundedSignatureRules.length !== 1) {
+    throw new Error(
+      `Expected exactly one .rounded-signature rule in built CSS assets, found ${roundedSignatureRules.length}.`,
+    );
+  }
+
+  const roundedSignatureBody = roundedSignatureRules[0].body;
+  const roundedSignatureDeclarations = roundedSignatureBody
+    .split(';')
+    .map((declaration) => declaration.trim())
+    .filter((declaration) => {
+      const separator = declaration.indexOf(':');
+      return (
+        separator !== -1 && declaration.slice(0, separator).trim().toLowerCase() === 'border-radius'
+      );
+    });
+
+  if (roundedSignatureDeclarations.length !== 1) {
+    throw new Error(
+      `.rounded-signature in ${roundedSignatureRules[0].path} must contain exactly one border-radius declaration; found ${roundedSignatureDeclarations.length}.`,
+    );
+  }
+
+  const radiusValue = roundedSignatureDeclarations[0].slice(
+    roundedSignatureDeclarations[0].indexOf(':') + 1,
+  );
+  const radiusParts = radiusValue.trim().split(/\s+/).filter(Boolean);
+
+  if (radiusParts.length !== 4) {
+    throw new Error(
+      `.rounded-signature in ${roundedSignatureRules[0].path} must have exactly four border-radius values; found ${radiusParts.length}.`,
+    );
+  }
+
   const javascriptAssets = files.filter(
     (file) => file.normalizedPath.startsWith('assets/') && file.normalizedPath.endsWith('.js'),
   );
