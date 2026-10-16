@@ -62,7 +62,7 @@ test('serves public and protected journeys through the configured API origin', a
   await page.goto('/');
   await expect(
     page.getByRole('heading', {
-      name: /Parking with clear information|Estacionar con información clara/i,
+      name: /Know what you will pay before you arrive|Antes de llegar, ya sabes cuánto vas a pagar/i,
     }),
   ).toBeVisible();
   await expect.poll(() => apiRequests.get('/parkings') ?? 0).toBeGreaterThan(0);

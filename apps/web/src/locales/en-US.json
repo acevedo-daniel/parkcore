@@ -187,65 +187,65 @@
     "estimatePending": "Choose a duration",
     "estimateUnavailable": "Complete the duration to calculate the cost",
     "viewFacility": "View this facility",
-    "estimateNote": "Calculation based on the current rate. The final amount depends on the actual stay."
+    "estimateNote": "Stays are charged per started hour. The final total depends on how long you stay."
   },
   "public": {
     "landing": {
-      "metaDescription": "A clearer way to find, use, and run a parking facility.",
-      "metaTitle": "ParkCore | Parking, made clear",
-      "heroEyebrow": "For everyday movement",
-      "heroTitle": "Parking with clear information.",
-      "heroDescription": "ParkCore brings order to a facility’s entry, payment, and history, so arriving, parking, and leaving can feel simple again.",
+      "metaDescription": "Compare facilities by area and rate, estimate your stay before you arrive, and run your facility with plate-based check-ins.",
+      "metaTitle": "ParkCore | Parking with the rate up front",
+      "heroEyebrow": "Parking with the rate up front",
+      "heroTitle": "Know what you will pay before you arrive.",
+      "heroDescription": "Search by area, compare hourly rates, and see how many spaces are free. Pick how long you will stay and ParkCore shows you the cost.",
       "browseAction": "Browse facilities",
-      "demoAction": "Explore the demo",
-      "heroNote": "No paper tickets. No unnecessary steps for an everyday task.",
-      "howEyebrow": "An everyday experience",
-      "howTitle": "You do not need to change everything to park better.",
-      "howDescription": "Technology should remove unnecessary steps: show the rate, record each arrival, and keep people from searching for paper at the exit.",
+      "demoAction": "See the operator demo",
+      "heroNote": "Your rate is locked in when you enter, even if the facility changes it later.",
+      "howEyebrow": "How it works",
+      "howTitle": "From search to checkout, with no paper in between.",
+      "howDescription": "The facility records your plate when you enter and ParkCore keeps track of the time. When you leave, the charge uses the rate you already knew.",
       "howItems": {
-        "contextTitle": "Arrive with the information you need",
-        "contextDescription": "Location, rate, and an estimated stay cost before you arrive.",
-        "paperTitle": "Enter without paper",
-        "paperDescription": "Your plate or QR code connects the arrival to the operation.",
-        "receiptTitle": "Leave with a receipt",
-        "receiptDescription": "A clear close, with no unnecessary steps or hidden information."
+        "contextTitle": "Compare before you leave",
+        "contextDescription": "Hourly rate, opening hours, free spaces, and directions on each facility page.",
+        "paperTitle": "Enter with your plate",
+        "paperDescription": "The facility records your plate at entry. There is no ticket to keep.",
+        "receiptTitle": "Pay what the stay costs",
+        "receiptDescription": "The summary shows the entry time, the elapsed time, the hours charged, and the total."
       },
       "driverEyebrow": "For drivers",
-      "driverTitle": "Arrive knowing where to park and what you will pay.",
-      "driverDescription": "Browse facilities, understand the rate, and keep your stay receipt in one place.",
+      "driverTitle": "Find a space without circling the block.",
+      "driverDescription": "Filter by currency and rate range, see which facilities are open now, and open directions on the map from the facility page.",
       "driverAction": "Find a facility",
       "operatorEyebrow": "For facility operators",
-      "operatorTitle": "Everyday operations should not depend on memory.",
-      "operatorDescription": "Every entry, payment, and exit is recorded. The operation follows the rhythm of the facility, not a spreadsheet.",
+      "operatorTitle": "Your facility, without a notebook or spreadsheet.",
+      "operatorDescription": "Record each arrival by plate, track occupancy against capacity, and charge each exit at the entry rate. The history is ready to review.",
       "operatorAction": "See an example day",
-      "featuredEyebrow": "Near where you are going",
-      "featuredTitle": "Choose a facility with the information you need.",
+      "featuredEyebrow": "Published facilities",
+      "featuredTitle": "Rate and free spaces at a glance.",
       "featuredAction": "See all facilities",
-      "faqEyebrow": "Common questions about parking",
-      "faqTitle": "Clear answers before you start.",
+      "faqEyebrow": "Before you park",
+      "faqTitle": "What people usually ask.",
       "faq": {
         "app": {
-          "question": "Do I need to download an app to park?",
-          "answer": "No. ParkCore works in your browser and at the facility entrance. You can identify your stay with your plate or a QR code."
+          "question": "Do I need to download an app?",
+          "answer": "No. You can find facilities and estimate the cost of your stay from the browser on your phone or computer."
         },
         "price": {
           "question": "How do I know how much I will pay?",
-          "answer": "Each facility publishes its rate. You can estimate your stay before arriving, and the receipt makes the final charge clear when you leave."
+          "answer": "Each facility publishes its hourly rate. Stays are charged per started hour, with a one-hour minimum, and the rate is locked in when you enter."
         },
         "ticket": {
           "question": "What if I do not have a ticket?",
-          "answer": "Your stay is associated with your plate or chosen access method. You do not need a piece of paper to complete checkout."
+          "answer": "The facility records your stay with your vehicle plate, so you do not need a piece of paper to leave."
         },
         "operator": {
-          "question": "I run a facility. How can I try it?",
-          "answer": "You can enter the operator demo in one click and walk through a complete operation with example data, with no setup required."
+          "question": "I run a facility. How do I try ParkCore?",
+          "answer": "Open the operator demo in one click. You get a facility with example stays to record arrivals, charge exits, and review the history, with no account needed."
         }
       },
-      "finalTitle": "Parking and operations can be simpler.",
-      "finalDescription": "Enter the operator demo or find a nearby facility. You can start with either option.",
+      "finalTitle": "Find a space or try the operation from the inside.",
+      "finalDescription": "The operator demo opens with example data and needs no sign-up.",
       "finalDemoAction": "Try as an operator",
       "finalBrowseAction": "Browse facilities",
-      "footerDescription": "For parking, billing, and running a facility with clarity.",
+      "footerDescription": "Facilities with published rates and orderly operations.",
       "footerFacilities": "Facilities",
       "footerSignIn": "Sign in",
       "copyright": "© {{year}} ParkCore",

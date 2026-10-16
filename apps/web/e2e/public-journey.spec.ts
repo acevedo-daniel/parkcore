@@ -243,7 +243,7 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
       await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
       await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
       await expect(
-        page.getByRole('heading', { name: 'Parking with clear information.' }),
+        page.getByRole('heading', { name: 'Know what you will pay before you arrive.' }),
       ).toBeVisible();
       await expect(
         page.getByRole('heading', { name: 'Estimate the cost of a stay' }),
@@ -479,7 +479,9 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
   await expectNoHorizontalOverflow(page, '200 percent zoom equivalent login viewport');
 
   await page.goto('/');
-  const demoButton = page.getByRole('button', { name: 'Explore the demo', exact: true }).first();
+  const demoButton = page
+    .getByRole('button', { name: 'See the operator demo', exact: true })
+    .first();
   await demoButton.click();
   await expect(page).toHaveURL(/\/app$/);
   await expect
