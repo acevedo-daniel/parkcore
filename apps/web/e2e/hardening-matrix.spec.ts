@@ -62,7 +62,11 @@ async function captureReview(page: Page, relativePath: string, fullPage = true) 
   });
   const screenshotPath = path.resolve(REVIEW_DIR, relativePath);
   await mkdir(path.dirname(screenshotPath), { recursive: true });
-  await page.screenshot({ fullPage, path: screenshotPath });
+  await page.screenshot({
+    fullPage,
+    path: screenshotPath,
+    style: fullPage ? '.owner-mobile-nav { position: static !important; }' : undefined,
+  });
 }
 
 interface RouteFixture {
