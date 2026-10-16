@@ -198,7 +198,7 @@
       "heroDescription": "Busca por zona, compara tarifas por hora y mira cuántos lugares quedan libres. Elige cuánto te vas a quedar y ParkCore te muestra el costo.",
       "browseAction": "Ver cocheras",
       "demoAction": "Ver la demo de operador",
-      "heroNote": "Se cobra por hora iniciada, con la tarifa vigente al momento de entrar.",
+      "heroNote": "La tarifa queda fijada cuando entras, aunque la cochera la cambie después.",
       "howEyebrow": "Cómo funciona",
       "howTitle": "De la búsqueda al cobro, sin papeles en el medio.",
       "howDescription": "La cochera registra tu patente al entrar y ParkCore lleva la cuenta del tiempo. Al salir, el cobro se calcula con la tarifa que ya conocías.",
@@ -241,7 +241,7 @@
           "answer": "Entra a la demo de operador con un clic. Tendrás una cochera con estadías de ejemplo para registrar ingresos, cobrar salidas y revisar el historial, sin crear una cuenta."
         }
       },
-      "finalTitle": "Busca una cochera o prueba la operación por dentro.",
+      "finalTitle": "Busca lugar o prueba la operación por dentro.",
       "finalDescription": "La demo de operador abre con datos de ejemplo y no necesita registro.",
       "finalDemoAction": "Probar como operador",
       "finalBrowseAction": "Buscar cocheras",

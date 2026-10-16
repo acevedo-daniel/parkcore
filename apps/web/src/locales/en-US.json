@@ -198,7 +198,7 @@
       "heroDescription": "Search by area, compare hourly rates, and see how many spaces are free. Pick how long you will stay and ParkCore shows you the cost.",
       "browseAction": "Browse facilities",
       "demoAction": "See the operator demo",
-      "heroNote": "Stays are charged per started hour, at the rate in effect when you enter.",
+      "heroNote": "Your rate is locked in when you enter, even if the facility changes it later.",
       "howEyebrow": "How it works",
       "howTitle": "From search to checkout, with no paper in between.",
       "howDescription": "The facility records your plate when you enter and ParkCore keeps track of the time. When you leave, the charge uses the rate you already knew.",
@@ -241,7 +241,7 @@
           "answer": "Open the operator demo in one click. You get a facility with example stays to record arrivals, charge exits, and review the history, with no account needed."
         }
       },
-      "finalTitle": "Find a facility or try running one.",
+      "finalTitle": "Find a space or try the operation from the inside.",
       "finalDescription": "The operator demo opens with example data and needs no sign-up.",
       "finalDemoAction": "Try as an operator",
       "finalBrowseAction": "Browse facilities",
