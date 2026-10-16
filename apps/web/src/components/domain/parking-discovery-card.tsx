@@ -4,6 +4,7 @@ import { Link } from 'react-router';
 import { useAppearance } from '../../app/appearance-provider.js';
 import type { PublicParking } from '../../lib/api/public-api.js';
 import { formatMoney, formatNumber } from '../../lib/format.js';
+import { Badge } from '../ui/badge.js';
 import { AvailabilityIndicator } from './availability-indicator.js';
 import { PublicParkingImage } from './public-parking-image.js';
 
@@ -23,19 +24,29 @@ export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps)
       className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card text-foreground shadow-xs transition-lift duration-200 hover:-translate-y-1 hover:border-border-strong hover:shadow-md"
       to={to}
     >
-      <div className="relative aspect-4/3 overflow-hidden bg-accent">
+      <div
+        className="relative aspect-4/3 overflow-hidden bg-accent"
+        data-slot="discovery-card-media"
+      >
         <PublicParkingImage
           alt={t('parking.discoveryImageAlt', { title: parking.title })}
           image={parking.image}
           imageClassName="h-full w-full object-cover transition-transform duration-500 group-hover:scale-102"
         />
-        <AvailabilityIndicator
-          className="absolute left-4 top-4 bg-card/95 backdrop-blur-sm"
-          id={availabilityId}
-          state={parking.availabilityState}
-          timezone={parking.timezone}
-          nextOpeningAt={parking.nextOpeningAt}
-        />
+        <div className="absolute inset-x-4 top-4 flex flex-wrap items-start justify-between gap-2">
+          <AvailabilityIndicator
+            className="bg-card/95 backdrop-blur-sm"
+            id={availabilityId}
+            state={parking.availabilityState}
+            timezone={parking.timezone}
+            nextOpeningAt={parking.nextOpeningAt}
+          />
+          {parking.isShowcase ? (
+            <Badge size="sm" variant="brand">
+              {t('parking.demo')}
+            </Badge>
+          ) : null}
+        </div>
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col p-5 sm:p-6">
@@ -43,11 +54,6 @@ export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps)
           <h2 className="max-w-full break-words font-display text-2xl font-bold leading-tight tracking-title">
             {parking.title}
           </h2>
-          {parking.isShowcase ? (
-            <span className="mt-2 inline-flex rounded-full border border-brand-strong bg-brand-soft px-2.5 py-1 text-2xs font-bold text-foreground">
-              {t('parking.demo')}
-            </span>
-          ) : null}
           <p className="max-w-full break-words text-sm font-semibold text-foreground-secondary">
             {parking.neighborhood}
           </p>

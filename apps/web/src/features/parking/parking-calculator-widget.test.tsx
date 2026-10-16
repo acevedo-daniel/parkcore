@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import type { components } from '@parkcore/api-client';
@@ -29,7 +29,8 @@ function listFixture(data: ParkingList['data']): ParkingList {
   };
 }
 
-function renderCalculator() {
+function renderCalculator(locale: 'en-US' | 'es-AR' = 'es-AR') {
+  window.localStorage.setItem('parkcore-lang', locale);
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -59,14 +60,36 @@ describe('ParkingCalculatorWidget', () => {
 
     await screen.findByRole('combobox', { name: '¿Dónde vas a estacionar?' });
     expect(screen.getByText(/31,00/)).toBeTruthy();
-    expect(screen.getByRole('radio', { name: '1 hora' })).toBeTruthy();
-    expect(screen.getByRole('radio', { name: '2 horas' })).toBeTruthy();
-    expect(screen.getByRole('radio', { name: '4 horas' })).toBeTruthy();
-    expect(screen.getByRole('radio', { name: '8 horas' })).toBeTruthy();
-    expect(screen.getByRole('radio', { name: 'Personalizado' })).toBeTruthy();
+    const durationGroup = screen.getByRole('radiogroup', { name: 'Estadía estimada' });
+    const durationOptions = within(durationGroup).getAllByRole('radio');
+    expect(durationOptions.map((option) => option.textContent)).toEqual([
+      '1 hora',
+      '2 horas',
+      '4 horas',
+      '8 horas',
+      'Personalizado',
+    ]);
     expect(screen.getByRole('radio', { name: '2 horas' }).getAttribute('aria-checked')).toBe(
       'true',
     );
+
+    screen.getByRole('radio', { name: '2 horas' }).focus();
+    await user.keyboard('{ArrowRight}');
+    expect(screen.getByRole('radio', { name: '4 horas' }).getAttribute('aria-checked')).toBe(
+      'true',
+    );
+    await user.keyboard('{ArrowRight}{ArrowRight}');
+    expect(screen.getByRole('radio', { name: 'Personalizado' }).getAttribute('aria-checked')).toBe(
+      'true',
+    );
+    expect(screen.getByLabelText('Duración en minutos')).toBeTruthy();
+    expect(screen.getByText('Elige una duración', { selector: 'legend span' })).toBeTruthy();
+    await user.keyboard('{ArrowLeft}{ArrowLeft}');
+    expect(screen.getByRole('radio', { name: '4 horas' }).getAttribute('aria-checked')).toBe(
+      'true',
+    );
+    expect(screen.queryByLabelText('Duración en minutos')).toBeNull();
+    expect(screen.getByText('4 horas', { selector: 'legend span' })).toBeTruthy();
 
     await user.click(screen.getByRole('radio', { name: 'Personalizado' }));
     expect(screen.getByRole('radio', { name: 'Personalizado' }).getAttribute('aria-checked')).toBe(
@@ -88,6 +111,27 @@ describe('ParkingCalculatorWidget', () => {
     await user.type(durationInput, '0');
     expect(screen.getByText('Usa un número entero de minutos mayor que 0.')).toBeTruthy();
     expect(screen.getByText('Completa la duración para calcular el costo')).toBeTruthy();
+  });
+
+  it('shows the English estimated stay options in order', async () => {
+    api.getPublicParkings.mockResolvedValue(
+      listFixture([publicParkingFixture({ hourlyRateCents: 1550 })]),
+    );
+    renderCalculator('en-US');
+
+    await screen.findByRole('combobox', { name: 'Where are you parking?' });
+    const durationGroup = screen.getByRole('radiogroup', { name: 'Estimated stay' });
+    const durationOptions = within(durationGroup).getAllByRole('radio');
+    expect(durationOptions.map((option) => option.textContent)).toEqual([
+      '1 hour',
+      '2 hours',
+      '4 hours',
+      '8 hours',
+      'Custom',
+    ]);
+    expect(screen.getByRole('radio', { name: '2 hours' }).getAttribute('aria-checked')).toBe(
+      'true',
+    );
   });
 
   it('updates the rate and estimate when the selected facility changes', async () => {

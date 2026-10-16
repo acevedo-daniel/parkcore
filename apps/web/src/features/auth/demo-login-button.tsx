@@ -2,18 +2,23 @@ import { useState } from 'react';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../../components/ui/button.js';
+import { cn } from '../../lib/cn.js';
 import { localizeApiError } from '../../lib/api/api-error.js';
 import { useAuth } from './use-auth.js';
 
 export function DemoLoginButton({
   onSuccess,
   variant = 'secondary',
+  shape = 'default',
   className,
+  wrapperClassName,
   children,
 }: {
   onSuccess: () => void;
   variant?: 'default' | 'secondary';
+  shape?: 'default' | 'pill';
   className?: string;
+  wrapperClassName?: string;
   children?: React.ReactNode;
 }) {
   const { t } = useAppearance();
@@ -35,12 +40,13 @@ export function DemoLoginButton({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={cn('flex flex-col gap-2', wrapperClassName)}>
       <Button
         aria-busy={isSubmitting}
         className={className}
         disabled={isSubmitting}
         onClick={() => void startDemo()}
+        shape={shape}
         type="button"
         variant={variant}
       >

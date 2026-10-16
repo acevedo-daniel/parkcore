@@ -37,7 +37,7 @@ function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
           key={link.to}
           className={({ isActive }: NavLinkRenderProps) =>
             cn(
-              'public-nav-link flex min-h-11 items-center rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px',
+              'public-nav-link flex min-h-11 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors',
               isActive
                 ? 'is-active bg-muted text-foreground'
                 : 'text-foreground-secondary hover:bg-muted hover:text-foreground',
@@ -178,25 +178,29 @@ export function PublicLayout() {
               <AppearanceControls />
             </div>
 
-            <NavLink
-              className={({ isActive }: NavLinkRenderProps) =>
-                cn(
-                  'public-nav-link hidden min-h-11 rounded-full px-4 py-2 text-sm font-semibold transition-all hover:-translate-y-px wide:inline-flex',
-                  isActive
-                    ? 'is-active bg-muted text-foreground'
-                    : 'text-foreground-secondary hover:bg-muted hover:text-foreground',
-                )
-              }
-              to="/login"
-            >
-              {t('nav.signIn')}
-            </NavLink>
+            <Button asChild shape="pill" variant="ghost">
+              <NavLink
+                className={({ isActive }: NavLinkRenderProps) =>
+                  cn(
+                    'public-nav-link hidden min-h-11 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors wide:inline-flex',
+                    isActive
+                      ? 'is-active bg-muted text-foreground'
+                      : 'text-foreground-secondary hover:bg-muted hover:text-foreground',
+                  )
+                }
+                to="/login"
+              >
+                {t('nav.signIn')}
+              </NavLink>
+            </Button>
 
             <DemoLoginButton
               onSuccess={() => {
                 void navigate('/app', { replace: true });
               }}
-              className="hidden rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-xs transition-colors hover:bg-brand hover:text-brand-foreground wide:inline-flex"
+              shape="pill"
+              wrapperClassName="hidden wide:flex"
+              className="bg-primary px-5 py-2 text-xs font-bold text-primary-foreground shadow-xs transition-colors hover:bg-brand hover:text-brand-foreground"
             />
 
             <div className="public-mobile-nav wide:hidden">

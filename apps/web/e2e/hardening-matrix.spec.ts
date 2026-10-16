@@ -1,4 +1,5 @@
 import { AxeBuilder } from '@axe-core/playwright';
+import path from 'node:path';
 import type { Locator, Page, Route } from '@playwright/test';
 
 import { chooseSelectOption, expect, test } from './fixtures';
@@ -44,7 +45,21 @@ const VIEWPORTS = [
   { height: 960, name: '1440px', width: 1440 },
 ] as const;
 
+const REVIEW_DIR = process.env.PARKCORE_REVIEW_DIR;
+const REVIEW_VIEWPORTS = VIEWPORTS.filter((viewport) => viewport.width !== 1024);
 const A11Y_VIEWPORTS = [VIEWPORTS[1], VIEWPORTS[5]] as const;
+
+async function captureReview(page: Page, relativePath: string) {
+  if (!REVIEW_DIR) {
+    throw new Error('PARKCORE_REVIEW_DIR must be set before capturing review screenshots.');
+  }
+
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, 0);
+  });
+  await page.screenshot({ fullPage: true, path: path.resolve(REVIEW_DIR, relativePath) });
+}
 
 interface RouteFixture {
   name: string;
@@ -704,6 +719,37 @@ async function expectOwnerOverviewPanelsWithinViewport(page: Page, label: string
   });
 }
 
+async function expectOverviewMetricsAligned(page: Page, label: string) {
+  const metricsLocator = page.locator('section[aria-labelledby="network-now-title"] dl > div');
+  await expect(metricsLocator).toHaveCount(4);
+  const metrics = await metricsLocator.evaluateAll((elements) =>
+    elements.map((element) => {
+      const metric = element as HTMLElement;
+      const value = metric.querySelector('dd');
+
+      return {
+        bottom: value?.getBoundingClientRect().bottom ?? Number.NaN,
+        top: Math.round(metric.getBoundingClientRect().top),
+      };
+    }),
+  );
+  const rows = new Map<number, number[]>();
+
+  for (const { bottom, top } of metrics) {
+    const values = rows.get(top) ?? [];
+    values.push(bottom);
+    rows.set(top, values);
+  }
+
+  for (const [top, bottoms] of rows) {
+    const difference = Math.max(...bottoms) - Math.min(...bottoms);
+    expect(
+      difference,
+      `${label} KPI row at ${String(top)}px should align metric value bottoms.`,
+    ).toBeLessThanOrEqual(1);
+  }
+}
+
 async function expectMobileNavigationDoesNotCoverContent(page: Page, label: string) {
   const navigation = page.locator('.owner-mobile-nav');
   if ((await navigation.count()) === 0 || !(await navigation.isVisible())) return;
@@ -778,6 +824,99 @@ async function expectVisibleFocus(locator: Locator, label: string) {
   expect(hasVisibleFocus, `${label} should have a visible focus indicator.`).toBe(true);
 }
 
+async function expectPreferenceSegmentsUntruncated(page: Page, label: string) {
+  const issues = await page
+    .locator('[data-slot="appearance-controls"] [role="radio"]:visible')
+    .evaluateAll((segments) =>
+      segments
+        .map((segment) => {
+          const element = segment as HTMLElement;
+          return {
+            clientWidth: element.clientWidth,
+            scrollWidth: element.scrollWidth,
+            width: element.getBoundingClientRect().width,
+          };
+        })
+        .filter(({ clientWidth, scrollWidth, width }) => scrollWidth > clientWidth || width < 44),
+    );
+
+  expect(issues, `${label} has truncated or undersized preference segments.`).toEqual([]);
+}
+
+async function expectPublicHeaderActionsAligned(page: Page, label: string) {
+  const appearanceSegments = page.locator(
+    '.public-header-tools [data-slot="appearance-controls"] [role="radio"]:visible',
+  );
+  const signIn = page.locator('.public-header').getByRole('link', { name: /sign in|ingresar/i });
+  const demo = page
+    .locator('.public-header')
+    .getByRole('button', { name: /try the demo|probar demo/i });
+  const appearanceBoxes = await appearanceSegments.evaluateAll((segments) =>
+    segments.map((segment, index) => {
+      const { height, y } = segment.getBoundingClientRect();
+      return { center: y + height / 2, height, label: `appearance segment ${String(index + 1)}` };
+    }),
+  );
+  const [signInBox, demoBox] = await Promise.all([
+    signIn.evaluate((element) => {
+      const { height, y } = element.getBoundingClientRect();
+      return { center: y + height / 2, height, label: 'sign-in link' };
+    }),
+    demo.evaluate((element) => {
+      const { height, y } = element.getBoundingClientRect();
+      return { center: y + height / 2, height, label: 'demo button' };
+    }),
+  ]);
+  const controls = [...appearanceBoxes, signInBox, demoBox];
+  const center = controls[0]?.center ?? 0;
+
+  expect(appearanceBoxes, `${label} should show the desktop appearance controls.`).toHaveLength(5);
+  for (const control of controls) {
+    expect(
+      Math.abs(control.height - 44),
+      `${label} ${control.label} should be 44px tall.`,
+    ).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs(control.center - center),
+      `${label} ${control.label} should share one vertical center.`,
+    ).toBeLessThanOrEqual(1);
+  }
+}
+
+async function expectCalculatorOptionsUnbroken(page: Page, label: string) {
+  const durationGroup = page.getByRole('radiogroup', {
+    name: /estimated stay|estadía estimada/i,
+  });
+  await expect(durationGroup).toBeVisible();
+  const options = durationGroup.getByRole('radio');
+  const measurements = await options.evaluateAll((elements) =>
+    elements.map((element) => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      return {
+        label: element.textContent.trim(),
+        clientWidth: element.clientWidth,
+        scrollWidth: element.scrollWidth,
+        textLines: range.getClientRects().length,
+      };
+    }),
+  );
+
+  expect(measurements, `${label} should expose all five duration options.`).toHaveLength(5);
+  for (const option of measurements) {
+    expect(
+      option.scrollWidth,
+      `${label} ${option.label} should not overflow its calculator option.`,
+    ).toBeLessThanOrEqual(option.clientWidth);
+    if (option.label === 'Custom' || option.label === 'Personalizado') {
+      expect(
+        option.textLines,
+        `${label} ${option.label} should fit on one line.`,
+      ).toBeLessThanOrEqual(1);
+    }
+  }
+}
+
 async function visitFixture(
   page: Page,
   route: RouteFixture,
@@ -795,8 +934,27 @@ async function visitFixture(
   await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
   await expect(page.locator('html')).toHaveAttribute('lang', locale);
+  await expectPreferenceSegmentsUntruncated(
+    page,
+    `${viewport.name} ${locale} ${theme} ${route.name}`,
+  );
   await expectNoHorizontalOverflow(page, `${viewport.name} ${locale} ${theme} ${route.name}`);
+  if (route.name === 'landing') {
+    await expectCalculatorOptionsUnbroken(
+      page,
+      `${viewport.name} ${locale} ${theme} ${route.name}`,
+    );
+  }
+  if (route.name === 'overview') {
+    await expectOverviewMetricsAligned(page, `${viewport.name} ${locale} ${theme} ${route.name}`);
+  }
   await expectMobileNavigationDoesNotCoverContent(page, `${viewport.name} ${route.name}`);
+  if (route.shell === 'public' && viewport.width >= 1280) {
+    await expectPublicHeaderActionsAligned(
+      page,
+      `${viewport.name} ${locale} ${theme} ${route.name}`,
+    );
+  }
 }
 
 async function expectOverlayWithinViewport(locator: Locator, label: string) {
@@ -944,6 +1102,10 @@ test('keeps multiple owner overview summaries inside their grid', async ({ page 
       for (const viewport of [VIEWPORTS[3], VIEWPORTS[4]] as const) {
         await test.step(`${locale} ${theme} ${viewport.name}`, async () => {
           await visitFixture(page, overviewRoute, viewport, locale, theme);
+          await expectOverviewMetricsAligned(
+            page,
+            `${viewport.name} ${locale} ${theme} owner overview with multiple facilities`,
+          );
           await expectOwnerOverviewPanelsWithinViewport(
             page,
             `${viewport.name} ${locale} ${theme} owner overview`,
@@ -1062,7 +1224,16 @@ test('keeps profile preferences labeled and accessible at narrow widths', async 
             `${viewport.name} ${locale} ${theme} profile language focus`,
           );
           await expectVisibleFocus(
-            controls.getByRole('combobox', { name: appearanceLabel }),
+            controls.getByRole('radiogroup', { name: appearanceLabel }).getByRole('radio', {
+              name:
+                locale === 'en-US'
+                  ? theme === 'dark'
+                    ? 'Dark'
+                    : 'Light'
+                  : theme === 'dark'
+                    ? 'Oscuro'
+                    : 'Claro',
+            }),
             `${viewport.name} ${locale} ${theme} profile appearance focus`,
           );
         });
@@ -1270,22 +1441,22 @@ test('covers owner management, history, profile, and recovery interactions', asy
       const name = profileMain.locator('#profile-name');
       await name.fill('Updated owner');
 
-      const profileTheme = profileMain.getByRole('combobox', {
-        name: /theme|appearance|apariencia/i,
+      const profileTheme = profileMain.getByRole('radiogroup', {
+        name: state.locale === 'en-US' ? 'Appearance' : 'Apariencia',
       });
       const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
-      await chooseSelectOption(
-        page,
-        profileTheme,
+      const nextThemeLabel =
         state.locale === 'en-US'
           ? nextTheme === 'dark'
             ? 'Dark'
             : 'Light'
           : nextTheme === 'dark'
             ? 'Oscuro'
-            : 'Claro',
-      );
+            : 'Claro';
+      const nextThemeRadio = profileTheme.getByRole('radio', { name: nextThemeLabel });
+      await nextThemeRadio.click();
       await expect(page.locator('html')).toHaveAttribute('data-theme', nextTheme);
+      await expect(nextThemeRadio).toHaveAttribute('aria-checked', 'true');
 
       await profileMain
         .getByRole('radio', { name: state.locale === 'en-US' ? 'Spanish' : 'Inglés' })
@@ -1506,6 +1677,108 @@ test('recovers identity, rate-limit, analytics, and demo lifecycle failures', as
         await expect(analyticsAlert).toBeVisible();
         await expect(analyticsAlert).not.toContainText(/simulated .* failure/i);
       });
+    }
+  }
+
+  expect(api.unexpectedRequests).toEqual([]);
+});
+
+test('captures visual review screenshots', async ({ page }) => {
+  test.skip(!REVIEW_DIR, 'Set PARKCORE_REVIEW_DIR to capture visual review screenshots.');
+
+  const api = await installHardeningApiMock(page);
+
+  for (const locale of ['es-AR', 'en-US'] as const) {
+    for (const theme of ['light', 'dark'] as const) {
+      for (const route of ROUTES) {
+        for (const viewport of REVIEW_VIEWPORTS) {
+          await test.step(`${route.name} ${viewport.name} ${locale} ${theme}`, async () => {
+            api.setProfileKind('OWNER');
+            api.setScenario('success');
+            await visitFixture(page, route, viewport, locale, theme);
+            await captureReview(
+              page,
+              `routes/${route.name}/${String(viewport.width)}-${locale}-${theme}.png`,
+            );
+          });
+        }
+      }
+    }
+  }
+
+  const stateFixtures = [
+    {
+      name: 'loading',
+      route: { ...catalogRoute, path: '/parkings?search=pending' },
+      scenario: 'loading',
+    },
+    {
+      name: 'empty',
+      route: { ...catalogRoute, path: '/parkings?search=empty' },
+      scenario: 'empty',
+    },
+    {
+      name: 'error',
+      route: { ...catalogRoute, path: '/parkings?search=offline' },
+      scenario: 'error',
+    },
+    { name: 'degraded', route: overviewRoute, scenario: 'degraded' },
+    { name: 'owner-empty', route: ownerParkingsRoute, scenario: 'owner-empty' },
+    { name: 'owner-error', route: ownerParkingsRoute, scenario: 'owner-error' },
+    { name: 'blocked', route: ownerParkingRoute, scenario: 'blocked' },
+    { name: 'closed', route: ownerParkingRoute, scenario: 'closed' },
+    { name: 'paused', route: ownerParkingRoute, scenario: 'paused' },
+    { name: 'success', route: overviewRoute, scenario: 'success' },
+    { name: 'success', route: ownerParkingRoute, scenario: 'success' },
+  ] as const;
+
+  for (const locale of ['es-AR', 'en-US'] as const) {
+    for (const theme of ['light', 'dark'] as const) {
+      for (const viewport of [VIEWPORTS[1], VIEWPORTS[5]] as const) {
+        for (const state of stateFixtures) {
+          await test.step(`${state.name} ${state.route.name} ${viewport.name} ${locale} ${theme}`, async () => {
+            api.setProfileKind('OWNER');
+            api.setScenario(state.scenario);
+            await visitFixture(page, state.route, viewport, locale, theme);
+
+            if (state.scenario === 'loading') {
+              await expect(
+                page.locator('[aria-label*="loading" i], [aria-label*="cargand" i]').first(),
+              ).toBeVisible();
+            } else if (state.scenario === 'empty' || state.scenario === 'owner-empty') {
+              await expect(page.locator('[data-slot="empty-state"]')).toBeVisible();
+            } else if (state.scenario === 'error' || state.scenario === 'owner-error') {
+              await expect(page.locator('[data-slot="error-state"]')).toBeVisible();
+            } else if (state.scenario === 'degraded') {
+              await expect(page.getByRole('alert').first()).toBeVisible();
+            } else if (
+              state.scenario === 'blocked' ||
+              state.scenario === 'closed' ||
+              state.scenario === 'paused'
+            ) {
+              await expect(
+                page.getByRole('button', { name: /check in|ingresar/i }).first(),
+              ).toBeDisabled();
+            } else if (state.route.name === 'overview') {
+              await expect(page.locator('a[href="/app/parkings/parking-1"]').first()).toBeVisible();
+            } else {
+              await expect(
+                page.getByRole('button', { name: /check in|ingresar/i }).first(),
+              ).toBeEnabled();
+            }
+
+            await captureReview(
+              page,
+              `states/${state.name}-${state.route.name}/${String(viewport.width)}-${locale}-${theme}.png`,
+            );
+
+            if (state.scenario === 'loading') {
+              api.releasePending();
+              await expect(page.locator('a[href="/parkings/parking-1"]').first()).toBeVisible();
+            }
+          });
+        }
+      }
     }
   }
 

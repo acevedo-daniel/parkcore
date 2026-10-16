@@ -464,7 +464,11 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
 
   await page.goto('/login?returnTo=%2Fapp');
   await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
-  await chooseSelectOption(page, page.getByRole('combobox', { name: 'Theme' }), 'System');
+  const system = page
+    .getByRole('radiogroup', { name: 'Theme' })
+    .getByRole('radio', { name: 'System' });
+  await system.click();
+  await expect(system).toHaveAttribute('aria-checked', 'true');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(page.locator('html')).toHaveCSS('scroll-behavior', 'auto');
   await expectNoHorizontalOverflow(page, 'reduced-motion login');

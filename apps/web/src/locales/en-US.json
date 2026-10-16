@@ -348,7 +348,7 @@
     "attentionEyebrow": "Needs attention",
     "attentionFull": "There are no spaces available for new arrivals.",
     "attentionLimited": "Only a few spaces remain. Review the operation before the next arrivals.",
-    "attentionLongRunning": "This stay has been active for {{hours}} hours or more. Review its details.",
+    "attentionLongRunning": "Active for {{duration}}. Review the stay details.",
     "attentionNeedsReview": "Some states need review.",
     "attentionDataError": "We could not review active stays for every facility.",
     "attentionPaused": "Review the paused facility before accepting new arrivals.",

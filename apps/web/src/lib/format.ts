@@ -1,5 +1,7 @@
 import { DEFAULT_LOCALE, type Locale } from './localization.js';
 
+export const LONG_STAY_DISPLAY_HOURS = 48;
+
 export function formatNumber(
   value: number,
   locale: Locale = DEFAULT_LOCALE,
@@ -33,10 +35,27 @@ export function formatDuration(
 ) {
   const milliseconds = Math.max(0, new Date(endTime).getTime() - new Date(startTime).getTime());
   const hours = Math.floor(milliseconds / 3_600_000);
+  if (hours >= LONG_STAY_DISPLAY_HOURS) return formatElapsedHours(hours, locale);
+
   const minutes = Math.floor((milliseconds % 3_600_000) / 60_000);
   const formatPart = (value: number) =>
     formatNumber(value, locale, { minimumIntegerDigits: 2, useGrouping: false });
   return `${formatPart(hours)}:${formatPart(minutes)}`;
+}
+
+export function formatElapsedHours(hours: number, locale: Locale) {
+  const elapsedHours = Math.floor(hours);
+  const formatUnit = (value: number, unit: 'day' | 'hour') =>
+    new Intl.NumberFormat(locale, { style: 'unit', unit, unitDisplay: 'long' }).format(value);
+
+  if (elapsedHours < LONG_STAY_DISPLAY_HOURS) return formatUnit(elapsedHours, 'hour');
+
+  const days = Math.floor(elapsedHours / 24);
+  const remainingHours = elapsedHours % 24;
+  const parts = [formatUnit(days, 'day')];
+  if (remainingHours > 0) parts.push(formatUnit(remainingHours, 'hour'));
+
+  return new Intl.ListFormat(locale, { type: 'unit', style: 'long' }).format(parts);
 }
 
 export function checkoutPreview(startTime: string, hourlyRateCents: number) {

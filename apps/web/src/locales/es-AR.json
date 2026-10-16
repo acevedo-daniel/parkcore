@@ -348,7 +348,7 @@
     "attentionEyebrow": "Requiere atención",
     "attentionFull": "No quedan lugares disponibles para nuevos ingresos.",
     "attentionLimited": "Quedan pocos lugares. Revisa la operación antes de los próximos ingresos.",
-    "attentionLongRunning": "Lleva {{hours}} horas o más activa. Revisa el detalle de la estadía.",
+    "attentionLongRunning": "Activa desde hace {{duration}}. Revisa el detalle de la estadía.",
     "attentionNeedsReview": "Hay estados para revisar.",
     "attentionDataError": "No pudimos revisar las estadías activas de todas las cocheras.",
     "attentionPaused": "Revisa la cochera pausada antes de aceptar nuevos ingresos.",

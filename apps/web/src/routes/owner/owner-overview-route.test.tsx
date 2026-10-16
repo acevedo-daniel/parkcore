@@ -156,7 +156,7 @@ describe('owner overview briefing', () => {
       {
         id: 'long-session',
         parkingId: longRunningParking.id,
-        startTime: '2026-09-11T00:00:00.000Z',
+        startTime: new Date(Date.now() - 49.5 * 60 * 60 * 1000).toISOString(),
         vehicle: { plate: 'AB123CD' },
       },
     ]);
@@ -194,6 +194,7 @@ describe('owner overview briefing', () => {
       expect(screen.getByText('Long-running stay')).toBeTruthy();
       expect(screen.getByText('Paused')).toBeTruthy();
     });
+    expect(screen.getByText('Active for 2 days, 1 hour. Review the stay details.')).toBeTruthy();
     const attentionLinks = screen.getAllByRole('link', { name: 'Open context' });
     expect(attentionLinks.map((link) => link.getAttribute('href'))).toEqual([
       '/app/parkings/full',
@@ -208,6 +209,27 @@ describe('owner overview briefing', () => {
       screen.getByRole('heading', {
         name: 'Long-running Parking with a name that wraps across the card',
       }),
+    ).toBeTruthy();
+  });
+
+  it('localizes long-running stay durations in Spanish', async () => {
+    const parking = parkingFixture({ activeSessionCount: 1, id: 'long-running' });
+    api.getOwnedParkings.mockResolvedValue([parking]);
+    api.getActiveSessionsForOwner.mockResolvedValue([
+      {
+        id: 'long-session',
+        parkingId: parking.id,
+        startTime: new Date(Date.now() - 49.5 * 60 * 60 * 1000).toISOString(),
+        vehicle: { plate: 'AB123CD' },
+      },
+    ]);
+    configureAnalytics();
+    renderOverview('es-AR');
+
+    expect(
+      await screen.findByText(
+        'Activa desde hace 2 días y 1 hora. Revisa el detalle de la estadía.',
+      ),
     ).toBeTruthy();
   });
 

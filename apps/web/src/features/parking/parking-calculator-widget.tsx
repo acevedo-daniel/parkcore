@@ -237,7 +237,7 @@ function CalculatorForm({
         </legend>
         <ToggleGroup
           aria-label={t('calculator.estimatedStay')}
-          className="grid w-full grid-cols-2 gap-1.5 @sm:grid-cols-5"
+          className="grid w-full grid-cols-2 gap-1.5 @sm:grid-cols-4"
           onValueChange={(value) => {
             if (value) onDurationChange(value as (typeof DURATION_OPTIONS)[number]['id']);
           }}
@@ -247,8 +247,14 @@ function CalculatorForm({
         >
           {DURATION_OPTIONS.map((option) => (
             <ToggleGroupItem
-              className="min-w-0 whitespace-normal rounded-sm border border-border bg-card px-1 py-2 text-center text-xs font-bold leading-tight text-foreground data-[state=on]:border-brand data-[state=on]:text-brand-foreground"
+              className={cn(
+                'min-w-0 rounded-sm border border-border bg-card px-2 py-2 text-center text-xs font-bold leading-tight text-foreground data-[state=on]:border-brand data-[state=on]:text-brand-foreground',
+                option.id === 'custom' && 'col-span-2 @sm:col-span-4',
+              )}
               key={option.id}
+              onFocus={() => {
+                onDurationChange(option.id);
+              }}
               value={option.id}
             >
               {t(option.label)}

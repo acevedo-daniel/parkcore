@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 
-import { chooseSelectOption, expect, test } from './fixtures';
+import { expect, test } from './fixtures';
 
 interface ParkingSnapshot {
   id: string;
@@ -167,7 +167,10 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
   ).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  await chooseSelectOption(page, publicAppearance.getByRole('combobox', { name: 'Theme' }), 'Dark');
+  const publicTheme = publicAppearance.getByRole('radiogroup', { name: 'Theme' });
+  const darkTheme = publicTheme.getByRole('radio', { name: 'Dark' });
+  await darkTheme.click();
+  await expect(darkTheme).toHaveAttribute('aria-checked', 'true');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await publicAppearance.getByRole('radio', { exact: true, name: 'Spanish' }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-AR');
@@ -177,11 +180,9 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
   );
   await publicAppearance.getByRole('radio', { exact: true, name: /Ingl/ }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
-  await chooseSelectOption(
-    page,
-    publicAppearance.getByRole('combobox', { name: 'Theme' }),
-    'Light',
-  );
+  const lightTheme = publicTheme.getByRole('radio', { name: 'Light' });
+  await lightTheme.click();
+  await expect(lightTheme).toHaveAttribute('aria-checked', 'true');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
   await page.goto('/parkings');
@@ -476,11 +477,10 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
     path: testInfo.outputPath('canonical-receipt-compact-light.png'),
   });
 
-  await chooseSelectOption(
-    page,
-    page.locator('.owner-mobile-header').getByRole('combobox', { name: 'Theme' }),
-    'Dark',
-  );
+  const ownerMobileTheme = page
+    .locator('.owner-mobile-header')
+    .getByRole('radiogroup', { name: 'Theme' });
+  await ownerMobileTheme.getByRole('radio', { name: 'Dark' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expectNoHorizontalOverflow(page, 'compact dark receipt');
   await page.screenshot({
@@ -489,9 +489,11 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
   });
 
   await page.setViewportSize({ height: 960, width: 1440 });
-  await expect(page.locator('.owner-sidebar').getByRole('combobox', { name: 'Theme' })).toHaveText(
-    'Dark',
-  );
+  await expect(
+    page.locator('.owner-sidebar').getByRole('radiogroup', { name: 'Theme' }).getByRole('radio', {
+      name: 'Dark',
+    }),
+  ).toHaveAttribute('aria-checked', 'true');
   await expectNoHorizontalOverflow(page, 'wide dark session detail');
   await page.screenshot({
     fullPage: true,

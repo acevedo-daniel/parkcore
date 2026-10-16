@@ -30,13 +30,22 @@ function renderRoute(element: ReactNode, path: string) {
 describe('application shells', () => {
   it('renders restrained public navigation in a semantic header', () => {
     renderRoute(<PublicLayout />, '/');
-    expect(screen.getByRole('banner')).toBeTruthy();
+    const header = screen.getByRole('banner');
     expect(screen.getByRole('navigation', { name: 'Navegación pública' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Cómo funciona' }).getAttribute('href')).toBe(
       '/#como-funciona',
     );
-    expect(screen.getByRole('link', { name: 'Ingresar' }).getAttribute('href')).toBe('/login');
-    expect(screen.getByRole('button', { name: 'Probar demo' })).toBeTruthy();
+    const signIn = within(header).getByRole('link', { name: 'Ingresar' });
+    expect(signIn.getAttribute('href')).toBe('/login');
+    expect(signIn.className).toContain('min-h-11');
+    expect(signIn.className).not.toContain('hover:-translate-y-px');
+    for (const link of within(header).getAllByRole('link')) {
+      expect(link.className).not.toContain('hover:-translate-y-px');
+    }
+    const demo = within(header).getByRole('button', { name: 'Probar demo' });
+    expect(demo.className).toContain('min-h-11');
+    expect(demo.className).toContain('rounded-full');
+    expect(demo.parentElement?.className).toContain('hidden wide:flex');
     expect(screen.queryByRole('link', { name: 'Get started' })).toBeNull();
   });
 
@@ -54,7 +63,7 @@ describe('application shells', () => {
     ).toEqual(['Cocheras', 'Cómo funciona', 'Ingresar']);
     expect(within(dialog).getByRole('button', { name: 'Probar demo' })).toBeTruthy();
     expect(within(dialog).getByRole('radio', { name: 'Español' })).toBeTruthy();
-    expect(within(dialog).getByRole('combobox', { name: 'Apariencia' })).toBeTruthy();
+    expect(within(dialog).getByRole('radiogroup', { name: 'Apariencia' })).toBeTruthy();
     expect(
       dialog
         .querySelector<HTMLElement>('[data-slot="appearance-controls"]')
@@ -98,12 +107,17 @@ describe('application shells', () => {
     expect(mobileNavigation.className).toContain('wide:hidden');
     expect(mobileNavigation.className).toContain('owner-mobile-nav');
     expect(screen.getByRole('main').className).toContain('pb-safe-owner-content');
-    expect(screen.getAllByRole('combobox', { name: 'Apariencia' })).toHaveLength(2);
+    expect(screen.getAllByRole('radiogroup', { name: 'Apariencia' })).toHaveLength(2);
     expect(
       Array.from(document.querySelectorAll<HTMLElement>('[data-slot="appearance-controls"]')).map(
         (control) => control.getAttribute('data-presentation'),
       ),
     ).toEqual(['compact', 'compact']);
+    expect(
+      Array.from(document.querySelectorAll<HTMLElement>('[data-slot="appearance-controls"]')).map(
+        (control) => control.getAttribute('data-layout'),
+      ),
+    ).toEqual(['stacked', 'inline']);
     expect(document.title).toBe('ParkCore | Operaciones');
   });
 });

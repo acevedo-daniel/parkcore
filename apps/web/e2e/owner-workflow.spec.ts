@@ -95,7 +95,7 @@ test('preserves an unsaved form while language and appearance change', async ({ 
 
   const email = page.getByLabel('Correo electrónico');
   await email.fill('owner@parkcore.test');
-  await chooseSelectOption(page, page.getByRole('combobox', { name: 'Apariencia' }), 'Oscuro');
+  await page.getByRole('radio', { name: 'Oscuro' }).click();
 
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#111310');
@@ -105,7 +105,10 @@ test('preserves an unsaved form while language and appearance change', async ({ 
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(page.getByLabel('Email')).toHaveValue('owner@parkcore.test');
-  await expect(page.getByRole('combobox', { name: 'Theme' })).toHaveText('Dark');
+  const dark = page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio', {
+    name: 'Dark',
+  });
+  await expect(dark).toHaveAttribute('aria-checked', 'true');
   await expect(page).toHaveURL(/\/login$/);
   expect(await page.evaluate(() => localStorage.getItem('parkcore-lang'))).toBe('en-US');
 });
@@ -118,8 +121,9 @@ test('follows system appearance only while the system preference is selected', a
   await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
   await page.goto('/login');
 
-  const theme = page.getByRole('combobox', { name: 'Theme' });
-  await expect(theme).toHaveText('System');
+  const theme = page.getByRole('radiogroup', { name: 'Theme' });
+  const system = theme.getByRole('radio', { name: 'System' });
+  await expect(system).toHaveAttribute('aria-checked', 'true');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#111310');
   await expect(page.locator('html')).toHaveCSS('scroll-behavior', 'auto');
@@ -128,12 +132,15 @@ test('follows system appearance only while the system preference is selected', a
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#f7f7f4');
 
-  await chooseSelectOption(page, theme, 'Dark');
+  const dark = theme.getByRole('radio', { name: 'Dark' });
+  await dark.click();
+  await expect(dark).toHaveAttribute('aria-checked', 'true');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
-  await chooseSelectOption(page, theme, 'System');
+  await system.click();
+  await expect(system).toHaveAttribute('aria-checked', 'true');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 });
 
