@@ -97,8 +97,8 @@ function FacilityIdentity({ identifier, parking }: { identifier: number; parking
         <span className="type-label mr-2 text-muted-foreground">{t('ownerParkings.rate')}</span>
         <span className="type-operational font-semibold">
           {formatMoney(parking.hourlyRateCents, parking.currency, locale)}
-        </span>{' '}
-        <span>{t('parking.perHour')}</span>
+        </span>
+        <span> / {t('session.perHourShort')}</span>
       </p>
     </div>
   );
