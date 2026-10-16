@@ -335,10 +335,10 @@ function CatalogFilters({
       noValidate
       onSubmit={onSubmit}
     >
-      <div className="grid gap-4 lg:grid-cols-12 lg:items-end">
-        <div className="lg:col-span-5 lg:-translate-y-1">
+      <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
+        <div className="lg:col-span-5">
           <FormField htmlFor={`${idPrefix}-search`} label={t('public.catalog.searchLabel')}>
-            <InputGroup className="border-border-subtle bg-transparent dark:bg-transparent">
+            <InputGroup className="h-11 border-border-subtle bg-transparent dark:bg-transparent">
               <InputGroupAddon>
                 <InputGroupText>
                   <Search aria-hidden="true" />
@@ -349,7 +349,7 @@ function CatalogFilters({
                 aria-label={t('public.catalog.searchLabel')}
                 id={`${idPrefix}-search`}
                 name="search"
-                className="h-12 border-0 bg-transparent px-0 focus:bg-transparent"
+                className="h-full min-h-0 border-0 bg-transparent px-0 focus:bg-transparent"
                 placeholder={t('public.catalog.searchPlaceholder')}
               />
             </InputGroup>

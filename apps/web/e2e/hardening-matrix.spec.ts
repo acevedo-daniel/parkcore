@@ -707,7 +707,12 @@ async function expectLandingHeroFillsFirstScreen(page: Page, label: string) {
 
 async function expectCatalogFilterRowAligned(page: Page, label: string) {
   const controls = [
-    { name: 'search', locator: page.locator('#catalog-desktop-search') },
+    {
+      name: 'search',
+      locator: page
+        .locator('[data-slot="input-group"]')
+        .filter({ has: page.locator('#catalog-desktop-search') }),
+    },
     { name: 'currency', locator: page.locator('#catalog-desktop-currency-filter') },
     { name: 'minimum rate', locator: page.locator('#catalog-desktop-minRate-filter') },
     { name: 'maximum rate', locator: page.locator('#catalog-desktop-maxRate-filter') },
@@ -729,6 +734,21 @@ async function expectCatalogFilterRowAligned(page: Page, label: string) {
       Math.abs(box.y - reference.y),
       `${label} ${controls[index + 1]?.name} should share the search control's top edge. ` +
         `Search: ${JSON.stringify(reference)}. Control: ${JSON.stringify(box)}.`,
+    ).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs(box.y + box.height - (reference.y + reference.height)),
+      `${label} ${controls[index + 1]?.name} should share the search control's bottom edge. ` +
+        `Search: ${JSON.stringify(reference)}. Control: ${JSON.stringify(box)}.`,
+    ).toBeLessThanOrEqual(1);
+  });
+
+  boxes.forEach((box, index) => {
+    expect(box, `${label} ${controls[index]?.name} should have a bounding box.`).not.toBeNull();
+    if (!box) return;
+    expect(
+      Math.abs(box.height - 44),
+      `${label} ${controls[index]?.name} should be 44px tall. ` +
+        `Control: ${JSON.stringify(box)}.`,
     ).toBeLessThanOrEqual(1);
   });
 }

@@ -77,7 +77,6 @@ export function MonetaryFilterGroup({
             <SelectTrigger
               aria-required={hasRate || undefined}
               id={`${idPrefix}-${currencyName}-filter`}
-              className="min-h-12"
             >
               <SelectValue />
             </SelectTrigger>
