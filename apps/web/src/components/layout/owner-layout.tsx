@@ -14,6 +14,7 @@ import { useAuth } from '../../features/auth/use-auth.js';
 import { cn } from '../../lib/cn.js';
 import { useDocumentMeta } from '../../lib/document-meta.js';
 import { AppearanceControls } from '../domain/appearance-controls.js';
+import { BrandMark } from '../domain/brand-mark.js';
 import { Button } from '../ui/button.js';
 
 function OwnerLink({
@@ -86,9 +87,10 @@ export function OwnerLayout() {
           <div className="owner-brand-block border-b border-border-strong pb-5">
             <Link
               aria-label={t('shell.ownerHome')}
-              className="brand-mark inline-flex min-h-11 items-center font-display text-lg font-bold tracking-title text-foreground transition-colors hover:text-foreground-secondary"
+              className="brand-mark inline-flex min-h-11 items-center gap-2.5 font-display text-lg font-bold tracking-title text-foreground transition-colors hover:text-foreground-secondary"
               to="/app"
             >
+              <BrandMark />
               PARKCORE
             </Link>
           </div>
@@ -149,9 +151,10 @@ export function OwnerLayout() {
       </aside>
       <header className="owner-mobile-header sticky top-0 z-30 flex min-h-14 flex-wrap items-center justify-between gap-1 border-b border-border-strong bg-card px-3 pb-2 pt-safe-header wide:hidden">
         <Link
-          className="brand-mark flex min-h-11 items-center font-display text-base font-bold tracking-title text-foreground"
+          className="brand-mark flex min-h-11 items-center gap-2 font-display text-base font-bold tracking-title text-foreground"
           to="/app"
         >
+          <BrandMark className="size-7" />
           PARKCORE
         </Link>
         <div className="ml-auto flex items-center gap-1">

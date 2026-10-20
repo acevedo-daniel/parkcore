@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { BrandMark } from '../../components/domain/brand-mark.js';
 import { ParkingDiscoveryCard } from '../../components/domain/parking-discovery-card.js';
 import { EmptyState, ErrorState } from '../../components/domain/feedback.js';
 import { Skeleton } from '../../components/ui/skeleton.js';
@@ -312,9 +313,10 @@ export function LandingRoute() {
         <div className="mx-auto flex max-w-7xl flex-col gap-8 border-t border-border-subtle pt-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Link
-              className="inline-flex font-display text-xl font-bold tracking-tight hover:underline"
+              className="inline-flex items-center gap-2.5 font-display text-xl font-bold tracking-tight hover:underline"
               to="/"
             >
+              <BrandMark />
               PARKCORE
             </Link>
             <p className="mt-3 max-w-sm text-sm leading-relaxed text-foreground-secondary">

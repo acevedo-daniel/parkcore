@@ -12,6 +12,7 @@ import { useAppearance } from '../../app/appearance-provider.js';
 import { DemoLoginButton } from '../../features/auth/demo-login-button.js';
 import { cn } from '../../lib/cn.js';
 import { AppearanceControls } from '../domain/appearance-controls.js';
+import { BrandMark } from '../domain/brand-mark.js';
 import { Button } from '../ui/button.js';
 import {
   Dialog,
@@ -75,7 +76,8 @@ function PublicMobileMenu() {
         <DialogContent className="public-menu-content fixed inset-y-0 left-auto right-0 top-0 z-50 mx-0 flex h-dvh w-full max-w-xs translate-y-0 flex-col justify-between overflow-x-hidden overflow-y-auto rounded-l-xl border-l border-border bg-card p-6 pb-safe-overlay pt-safe-overlay shadow-xl animate-in fade-in">
           <div>
             <header className="public-menu-header mb-6 flex items-center justify-between border-b border-border-subtle pb-4">
-              <DialogTitle className="brand-mark font-display text-lg font-extrabold tracking-tight text-foreground">
+              <DialogTitle className="brand-mark flex items-center gap-2 font-display text-lg font-extrabold tracking-tight text-foreground">
+                <BrandMark className="size-7" />
                 PARKCORE
               </DialogTitle>
               <DialogDescription className="sr-only">{t('nav.public')}</DialogDescription>
@@ -157,9 +159,10 @@ export function PublicLayout() {
           <div className="flex items-center gap-10">
             <Link
               aria-label={t('shell.publicHome')}
-              className="brand-mark group flex min-h-11 items-center gap-2 font-display text-xl font-black tracking-tight text-foreground sm:text-2xl"
+              className="brand-mark group flex min-h-11 items-center gap-2.5 font-display text-xl font-black tracking-tight text-foreground sm:text-2xl"
               to="/"
             >
+              <BrandMark className="size-8 transition-control motion-safe:group-hover:-rotate-6 sm:size-9" />
               <span>PARKCORE</span>
             </Link>
 
