@@ -51,7 +51,9 @@ export function LoginRoute() {
             onSuccess={() => {
               void navigate('/app', { replace: true });
             }}
-            className="mt-5 w-full rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+            className="mt-5 w-full"
+            shape="pill"
+            variant="on-brand"
           >
             {t('auth.login.demoAction')}
             <ArrowRight aria-hidden="true" className="ml-2 inline size-4" />

@@ -16,6 +16,10 @@ const buttonVariants = cva(
         secondary: 'border-2 border-foreground bg-card text-foreground shadow-xs hover:bg-accent',
         outline:
           'border-2 border-border-strong bg-card text-foreground shadow-xs hover:border-foreground hover:bg-accent',
+        'on-brand':
+          'border-2 border-brand-foreground bg-brand-foreground text-brand shadow-xs hover:bg-brand-foreground/85',
+        'on-brand-outline':
+          'border-2 border-brand-foreground bg-transparent text-brand-foreground hover:bg-brand-strong',
         ghost: 'text-foreground hover:bg-accent',
         destructive:
           'border-2 border-destructive bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90',
