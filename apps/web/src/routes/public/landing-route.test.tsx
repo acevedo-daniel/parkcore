@@ -137,7 +137,7 @@ describe('public landing route', () => {
     renderLanding();
 
     const question = await screen.findByRole('button', {
-      name: '¿Necesito descargar una aplicación para estacionar?',
+      name: '¿Necesito descargar una aplicación?',
     });
     const answerId = question.getAttribute('aria-controls');
     expect(answerId).toBeTruthy();

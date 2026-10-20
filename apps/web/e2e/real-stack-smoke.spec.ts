@@ -163,7 +163,7 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
   await page.goto('/');
   const publicAppearance = page.locator('.public-header-tools [data-slot="appearance-controls"]');
   await expect(
-    page.getByRole('heading', { exact: true, name: 'Parking with clear information.' }),
+    page.getByRole('heading', { exact: true, name: 'Know what you will pay before you arrive.' }),
   ).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');

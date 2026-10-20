@@ -58,7 +58,7 @@ test('keeps public mobile navigation and main content usable with a keyboard', a
   await page.goto('/');
 
   await expect(
-    page.getByRole('heading', { name: 'Parking with clear information.' }),
+    page.getByRole('heading', { name: 'Know what you will pay before you arrive.' }),
   ).toBeVisible();
   const skipLink = page.getByRole('link', { name: 'Skip to main content' });
   await expect(skipLink).toBeVisible();
