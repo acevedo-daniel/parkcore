@@ -255,7 +255,8 @@ try {
   const indexHtml = await readFile(path.join(distDirectory, 'index.html'), 'utf8');
   const linkedAssets = [...indexHtml.matchAll(/<link\b[^>]*>/gi)].flatMap(([tag]) => {
     const href = tag.match(/\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
-    return href ? [href[1] ?? href[2] ?? href[3]] : [];
+    // Icon links may carry a cache-busting query; the linked file is the path before it.
+    return href ? [(href[1] ?? href[2] ?? href[3]).split(/[?#]/)[0]] : [];
   });
   const missingIndexIconLinks = requiredIndexIconLinks.filter(
     (requiredLink) => !linkedAssets.includes(requiredLink),
