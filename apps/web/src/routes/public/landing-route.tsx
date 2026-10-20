@@ -117,7 +117,7 @@ export function LandingRoute() {
               {t('public.landing.heroDescription')}
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Button asChild shape="pill" size="lg">
+              <Button asChild shape="pill" size="lg" variant="on-brand">
                 <Link className="group" to="/parkings">
                   {t('public.landing.browseAction')}
                   <ArrowRight
@@ -132,7 +132,7 @@ export function LandingRoute() {
                   void navigate('/app', { replace: true });
                 }}
                 shape="pill"
-                variant="secondary"
+                variant="on-brand-outline"
               >
                 {t('public.landing.demoAction')}
               </DemoLoginButton>

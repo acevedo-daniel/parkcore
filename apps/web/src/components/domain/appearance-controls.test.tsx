@@ -59,22 +59,22 @@ describe('AppearanceControls', () => {
     const light = within(theme).getByRole('radio', { name: 'Claro' });
     const dark = within(theme).getByRole('radio', { name: 'Oscuro' });
 
-    expect(system.getAttribute('aria-checked')).toBe('true');
-    expect(system.className).toContain('aria-checked:bg-primary');
-    expect(system.className).not.toContain('brand-soft');
+    expect(dark.getAttribute('aria-checked')).toBe('true');
+    expect(dark.className).toContain('aria-checked:bg-primary');
+    expect(dark.className).not.toContain('brand-soft');
+    expect(system.getAttribute('aria-checked')).toBe('false');
     expect(light.getAttribute('aria-checked')).toBe('false');
-    expect(dark.getAttribute('aria-checked')).toBe('false');
     expect(within(theme).getAllByRole('radio')).toHaveLength(3);
 
     await user.click(system);
     await user.keyboard('{ArrowRight}');
     expect(document.activeElement).toBe(light);
 
-    await user.click(dark);
+    await user.click(light);
 
-    expect(document.documentElement.dataset.theme).toBe('dark');
-    expect(window.localStorage.getItem('parkcore-theme')).toBe('dark');
-    expect(dark.getAttribute('aria-checked')).toBe('true');
+    expect(document.documentElement.dataset.theme).toBe('light');
+    expect(window.localStorage.getItem('parkcore-theme')).toBe('light');
+    expect(light.getAttribute('aria-checked')).toBe('true');
   });
 
   it('exposes the stacked layout for the owner sidebar', () => {

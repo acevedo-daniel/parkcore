@@ -15,7 +15,7 @@ export function DemoLoginButton({
   children,
 }: {
   onSuccess: () => void;
-  variant?: 'default' | 'secondary';
+  variant?: 'default' | 'secondary' | 'on-brand' | 'on-brand-outline';
   shape?: 'default' | 'pill';
   className?: string;
   wrapperClassName?: string;
