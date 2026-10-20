@@ -7,6 +7,7 @@ import { z } from 'zod';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { Button } from '../../components/ui/button.js';
+import { BrandMark } from '../../components/domain/brand-mark.js';
 import { FormField } from '../../components/domain/form-field.js';
 import { Input } from '../../components/ui/input.js';
 import { Toggle } from '../../components/ui/toggle.js';
@@ -63,9 +64,10 @@ export function AuthFormFrame({
         <div className="hidden min-w-0 rounded-signature bg-inverse p-10 text-inverse-foreground shadow-md wide:flex wide:flex-col wide:justify-between">
           <div>
             <Link
-              className="inline-flex min-h-11 items-center gap-2 rounded-sm font-display text-xl font-black tracking-tight text-inverse-foreground"
+              className="inline-flex min-h-11 items-center gap-2.5 rounded-sm font-display text-xl font-black tracking-tight text-inverse-foreground"
               to="/"
             >
+              <BrandMark className="size-9" />
               PARKCORE
             </Link>
             <p className="mt-16 text-xs font-bold tracking-eyebrow text-inverse-foreground uppercase">
@@ -91,6 +93,7 @@ export function AuthFormFrame({
               className="inline-flex min-h-11 items-center gap-2 rounded-sm font-display text-lg font-black tracking-tight text-foreground wide:hidden"
               to="/"
             >
+              <BrandMark className="size-7" />
               PARKCORE
             </Link>
             <p className="mt-10 text-xs font-bold tracking-eyebrow text-muted-foreground uppercase wide:mt-0">

@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { SquareParking } from 'lucide-react';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { BrandMark } from './brand-mark.js';
+
+const BAY_LINES = [0, 1, 2, 3, 4, 5];
 
 interface PublicParkingImageProps {
   alt: string;
@@ -41,12 +43,20 @@ export function PublicParkingImage({
   return (
     <div
       aria-label={t('public.detail.imageUnavailable')}
-      className="flex h-full w-full items-center justify-center bg-muted"
+      className="relative flex h-full w-full items-center justify-center overflow-hidden bg-muted"
       role="img"
     >
-      <div className="flex size-12 items-center justify-center rounded-full border border-border-subtle bg-card">
-        <SquareParking aria-hidden="true" className="size-5 text-muted-foreground" />
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 flex h-1/3 justify-around">
+        {BAY_LINES.map((line) => (
+          <span className="w-1 rounded-b-full bg-border-subtle" key={line} />
+        ))}
       </div>
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 flex h-1/3 justify-around">
+        {BAY_LINES.map((line) => (
+          <span className="w-1 rounded-t-full bg-border-subtle" key={line} />
+        ))}
+      </div>
+      <BrandMark className="relative size-14" />
     </div>
   );
 }
