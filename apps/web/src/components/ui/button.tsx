@@ -5,20 +5,20 @@ import { Slot } from 'radix-ui';
 import { cn } from '@/lib/cn';
 
 const buttonVariants = cva(
-  'inline-flex max-w-full cursor-pointer select-none items-center justify-center gap-2 break-words text-center text-sm font-semibold outline-none transition-control disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 active:scale-98 [&_svg]:pointer-events-none [&_svg:not([class*="size-"])]:size-4 [&_svg]:shrink-0',
+  'inline-flex max-w-full cursor-pointer select-none items-center justify-center gap-2 break-words text-center text-sm font-bold tracking-label outline-none transition-control disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 active:scale-98 [&_svg]:pointer-events-none [&_svg:not([class*="size-"])]:size-4 [&_svg]:shrink-0 [&_svg:last-child:not(:first-child)]:transition-control motion-safe:hover:[&_svg:last-child:not(:first-child)]:translate-x-0.5',
   {
     variants: {
       variant: {
         default:
-          'border-2 border-border-strong bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+          'border-2 border-primary bg-primary text-primary-foreground shadow-xs hover:border-foreground-secondary hover:bg-foreground-secondary',
         brand:
-          'border-2 border-brand-strong bg-brand text-brand-foreground shadow-xs hover:bg-brand/90',
-        secondary:
-          'border-2 border-border-strong bg-card text-foreground shadow-xs hover:bg-accent',
-        outline: 'border-2 border-border-strong bg-card text-foreground shadow-xs hover:bg-accent',
+          'border-2 border-brand-foreground bg-brand text-brand-foreground shadow-xs hover:bg-brand-strong',
+        secondary: 'border-2 border-foreground bg-card text-foreground shadow-xs hover:bg-accent',
+        outline:
+          'border-2 border-border-strong bg-card text-foreground shadow-xs hover:border-foreground hover:bg-accent',
         ghost: 'text-foreground hover:bg-accent',
         destructive:
-          'border-2 border-destructive-soft-foreground bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90',
+          'border-2 border-destructive bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90',
         link: 'text-foreground underline-offset-4 hover:underline',
       },
       size: {
