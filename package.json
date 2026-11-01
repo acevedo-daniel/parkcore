@@ -67,6 +67,6 @@
     "test:scripts": "node --test scripts/check-authored-text.test.mjs scripts/check-design-tokens.test.mjs scripts/preflight.test.mjs scripts/raw-interactive-elements-rule.test.mjs"
   },
   "devDependencies": {
-    "prettier": "3.9.9"
+    "prettier": "3.9.10"
   }
 }
