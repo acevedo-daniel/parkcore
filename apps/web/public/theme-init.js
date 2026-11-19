@@ -13,7 +13,7 @@
     const storedTheme = readStoredValue(themeStorageKey);
     const preference = ['system', 'light', 'dark'].includes(storedTheme ?? '')
       ? storedTheme
-      : 'system';
+      : 'dark';
     const storedLocale = readStoredValue(localeStorageKey);
     const locale = storedLocale === 'en' || storedLocale === 'en-US' ? 'en-US' : 'es-AR';
     const systemIsDark =
@@ -28,9 +28,9 @@
       .querySelector('meta[name="theme-color"]')
       ?.setAttribute('content', theme === 'dark' ? '#111310' : '#f7f7f4');
   } catch {
-    document.documentElement.dataset.theme = 'light';
-    document.documentElement.style.colorScheme = 'light';
+    document.documentElement.dataset.theme = 'dark';
+    document.documentElement.style.colorScheme = 'dark';
     document.documentElement.lang = 'es-AR';
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#f7f7f4');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#111310');
   }
 })();

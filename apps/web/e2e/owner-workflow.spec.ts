@@ -95,20 +95,21 @@ test('preserves an unsaved form while language and appearance change', async ({ 
 
   const email = page.getByLabel('Correo electrónico');
   await email.fill('owner@parkcore.test');
-  await page.getByRole('radio', { name: 'Oscuro' }).click();
-
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#111310');
+  await page.getByRole('radio', { name: 'Claro' }).click();
+
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#f7f7f4');
   await expect(email).toHaveValue('owner@parkcore.test');
   await page.getByRole('radio', { name: 'Inglés' }).click();
 
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await expect(page.getByLabel('Email')).toHaveValue('owner@parkcore.test');
-  const dark = page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio', {
-    name: 'Dark',
+  const light = page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio', {
+    name: 'Light',
   });
-  await expect(dark).toHaveAttribute('aria-checked', 'true');
+  await expect(light).toHaveAttribute('aria-checked', 'true');
   await expect(page).toHaveURL(/\/login$/);
   expect(await page.evaluate(() => localStorage.getItem('parkcore-lang'))).toBe('en-US');
 });
@@ -116,7 +117,7 @@ test('preserves an unsaved form while language and appearance change', async ({ 
 test('follows system appearance only while the system preference is selected', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('parkcore-lang', 'en-US');
-    localStorage.removeItem('parkcore-theme');
+    localStorage.setItem('parkcore-theme', 'system');
   });
   await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
   await page.goto('/login');

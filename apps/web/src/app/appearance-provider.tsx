@@ -69,7 +69,7 @@ function writeStoredValue(key: string, value: string) {
 }
 
 function parseThemePreference(value: string | null | undefined): ThemePreference {
-  return value === 'light' || value === 'dark' || value === 'system' ? value : 'system';
+  return value === 'light' || value === 'dark' || value === 'system' ? value : 'dark';
 }
 
 function languageForLocale(locale: Locale): Language {

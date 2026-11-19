@@ -156,6 +156,7 @@ test('applies stored and system themes before the app mounts', async ({ page }) 
   });
 
   const cases = [
+    { preference: null, systemDark: false, theme: 'dark' },
     { preference: 'light', systemDark: true, theme: 'light' },
     { preference: 'dark', systemDark: false, theme: 'dark' },
     { preference: 'system', systemDark: false, theme: 'light' },
@@ -166,7 +167,8 @@ test('applies stored and system themes before the app mounts', async ({ page }) 
     await page.emulateMedia({ colorScheme: appearance.systemDark ? 'dark' : 'light' });
     await page.goto('/');
     await page.evaluate((preference) => {
-      localStorage.setItem('parkcore-theme', preference);
+      if (preference) localStorage.setItem('parkcore-theme', preference);
+      else localStorage.removeItem('parkcore-theme');
       localStorage.setItem('parkcore-lang', 'en-US');
     }, appearance.preference);
     await page.reload();
@@ -200,9 +202,9 @@ test('applies stored and system themes before the app mounts', async ({ page }) 
     const themeLabel =
       appearance.preference === 'system'
         ? 'System'
-        : appearance.preference === 'dark'
-          ? 'Dark'
-          : 'Light';
+        : appearance.preference === 'light'
+          ? 'Light'
+          : 'Dark';
     await expect(
       page.getByRole('radiogroup', { name: 'Theme' }).getByRole('radio', { name: themeLabel }),
     ).toHaveAttribute('aria-checked', 'true');

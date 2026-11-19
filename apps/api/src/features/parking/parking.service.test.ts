@@ -305,6 +305,9 @@ describe('parking.service', () => {
     });
 
     it('filters and orders by derived availability before pagination', async () => {
+      // Noon in Buenos Aires keeps the 08:00-09:00 fixture closed whenever the suite runs.
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date('2026-10-20T15:00:00Z'));
       const data = [
         publicParking({ id: 'closed', title: 'Closed' }),
         publicParking({ id: 'full', title: 'Full', capacity: 1 }),
@@ -323,9 +326,13 @@ describe('parking.service', () => {
       ];
       vi.mocked(parkingRepository.findPublicCandidates).mockResolvedValue(data);
 
-      const result = await findAll({ page: 1, limit: 10, availableNow: true });
+      try {
+        const result = await findAll({ page: 1, limit: 10, availableNow: true });
 
-      expect(result.data.map(({ id }) => id)).toEqual(['available', 'limited']);
+        expect(result.data.map(({ id }) => id)).toEqual(['available', 'limited']);
+      } finally {
+        vi.useRealTimers();
+      }
     });
   });
 });

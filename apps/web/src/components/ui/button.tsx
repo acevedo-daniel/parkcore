@@ -13,9 +13,14 @@ const buttonVariants = cva(
           'border-2 border-primary bg-primary text-primary-foreground shadow-xs hover:border-foreground-secondary hover:bg-foreground-secondary',
         brand:
           'border-2 border-brand-foreground bg-brand text-brand-foreground shadow-xs hover:bg-brand-strong',
-        secondary: 'border-2 border-foreground bg-card text-foreground shadow-xs hover:bg-accent',
+        secondary:
+          'border-2 border-foreground bg-card text-foreground shadow-xs hover:bg-accent disabled:border-border-subtle disabled:text-muted-foreground disabled:opacity-100 disabled:shadow-none aria-disabled:border-border-subtle aria-disabled:text-muted-foreground aria-disabled:opacity-100 aria-disabled:shadow-none',
         outline:
-          'border-2 border-border-strong bg-card text-foreground shadow-xs hover:border-foreground hover:bg-accent',
+          'border-2 border-border-strong bg-card text-foreground shadow-xs hover:border-foreground hover:bg-accent disabled:border-border-subtle disabled:text-muted-foreground disabled:opacity-100 disabled:shadow-none aria-disabled:border-border-subtle aria-disabled:text-muted-foreground aria-disabled:opacity-100 aria-disabled:shadow-none',
+        'on-brand':
+          'border-2 border-brand-foreground bg-brand-foreground text-brand shadow-xs hover:bg-brand-foreground/85',
+        'on-brand-outline':
+          'border-2 border-brand-foreground bg-transparent text-brand-foreground hover:bg-brand-strong',
         ghost: 'text-foreground hover:bg-accent',
         destructive:
           'border-2 border-destructive bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90',

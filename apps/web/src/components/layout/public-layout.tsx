@@ -129,7 +129,7 @@ function PublicMobileMenu() {
               }}
               className="block w-full rounded-full bg-primary py-3 text-center text-xs font-bold text-primary-foreground"
             />
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2">
               <span className="text-xs font-medium text-foreground-secondary">
                 {t('appearance.languageTheme')}
               </span>

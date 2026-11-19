@@ -78,14 +78,26 @@ describe('AppearanceProvider', () => {
     });
   });
 
+  it('starts in the dark theme without a stored preference, even on a light system', () => {
+    setSystemTheme(false);
+    renderAppearance();
+
+    expect(screen.getByTestId('appearance').textContent).toBe('dark:dark:es-AR');
+    expect(document.documentElement.dataset.theme).toBe('dark');
+    expect(document.documentElement.style.colorScheme).toBe('dark');
+    expect(window.localStorage.getItem('parkcore-theme')).toBeNull();
+    expect(screen.getByRole('radio', { name: 'Oscuro' }).getAttribute('aria-checked')).toBe('true');
+    expect(getListenerCount()).toBe(0);
+  });
+
   it('resolves system preference from the operating system and follows changes', async () => {
+    window.localStorage.setItem('parkcore-theme', 'system');
     setSystemTheme(true);
     renderAppearance();
 
     expect(screen.getByTestId('appearance').textContent).toBe('system:dark:es-AR');
     expect(document.documentElement.dataset.theme).toBe('dark');
     expect(document.documentElement.style.colorScheme).toBe('dark');
-    expect(window.localStorage.getItem('parkcore-theme')).toBeNull();
 
     setSystemTheme(false);
 
@@ -98,18 +110,18 @@ describe('AppearanceProvider', () => {
   it('persists an explicit choice and ignores later system changes', async () => {
     const user = userEvent.setup();
     renderAppearance();
-    const dark = screen.getByRole('radio', { name: 'Oscuro' });
+    const light = screen.getByRole('radio', { name: 'Claro' });
 
-    await user.click(dark);
+    await user.click(light);
 
-    expect(screen.getByTestId('appearance').textContent).toBe('dark:dark:es-AR');
-    expect(window.localStorage.getItem('parkcore-theme')).toBe('dark');
-    expect(dark.getAttribute('aria-checked')).toBe('true');
+    expect(screen.getByTestId('appearance').textContent).toBe('light:light:es-AR');
+    expect(window.localStorage.getItem('parkcore-theme')).toBe('light');
+    expect(light.getAttribute('aria-checked')).toBe('true');
     expect(getListenerCount()).toBe(0);
 
-    setSystemTheme(false);
+    setSystemTheme(true);
 
-    expect(screen.getByTestId('appearance').textContent).toBe('dark:dark:es-AR');
+    expect(screen.getByTestId('appearance').textContent).toBe('light:light:es-AR');
   });
 
   it('restores an explicit choice and returns to system mode without persisting its result', async () => {
@@ -127,12 +139,12 @@ describe('AppearanceProvider', () => {
     );
   });
 
-  it('normalizes legacy locale values and exposes accessible language state', async () => {
+  it('falls back to dark for unknown themes, normalizes legacy locales, and exposes language state', async () => {
     window.localStorage.setItem('parkcore-theme', 'unexpected');
     window.localStorage.setItem('parkcore-lang', 'en');
     renderAppearance();
 
-    expect(screen.getByTestId('appearance').textContent).toBe('system:light:en-US');
+    expect(screen.getByTestId('appearance').textContent).toBe('dark:dark:en-US');
     expect(screen.getByRole('radio', { name: 'English' }).getAttribute('aria-checked')).toBe(
       'true',
     );
@@ -180,6 +192,7 @@ describe('AppearanceProvider', () => {
   });
 
   it('removes the system listener when the provider unmounts', () => {
+    window.localStorage.setItem('parkcore-theme', 'system');
     const { unmount } = renderAppearance();
 
     expect(getListenerCount()).toBe(1);
