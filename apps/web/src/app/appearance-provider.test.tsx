@@ -41,9 +41,6 @@ describe('AppearanceProvider', () => {
         addEventListener: (_event: string, listener: (event: MediaQueryListEvent) => void) => {
           listeners.add(listener);
         },
-        addListener: (listener: (event: MediaQueryListEvent) => void) => {
-          listeners.add(listener);
-        },
         dispatchEvent: () => true,
         matches,
         media: query,
@@ -51,10 +48,7 @@ describe('AppearanceProvider', () => {
         removeEventListener: (_event: string, listener: (event: MediaQueryListEvent) => void) => {
           listeners.delete(listener);
         },
-        removeListener: (listener: (event: MediaQueryListEvent) => void) => {
-          listeners.delete(listener);
-        },
-      }) as MediaQueryList;
+      }) as unknown as MediaQueryList;
 
     setSystemTheme = (nextMatches: boolean) => {
       matches = nextMatches;

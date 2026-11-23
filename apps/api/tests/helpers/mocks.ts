@@ -1,3 +1,5 @@
+import { IncomingMessage } from 'node:http';
+import { Socket } from 'node:net';
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 import { vi } from 'vitest';
@@ -9,14 +11,9 @@ export type MockResponse = Omit<Response, 'status' | 'json' | 'send'> & {
 };
 
 export const createMockRequest = (overrides?: Partial<Request>): Request => {
-  const base: Partial<Request> = {
-    headers: {},
-  };
-
-  return {
-    ...base,
-    ...(overrides ?? {}),
-  } as Request;
+  const req = new IncomingMessage(new Socket()) as Request;
+  if (overrides) Object.assign(req, overrides);
+  return req;
 };
 
 export const createMockResponse = (): MockResponse => {
