@@ -221,7 +221,7 @@ export function ActivitySection({
                       >
                         <span
                           className={cn(
-                            'mx-auto w-full max-w-12 rounded-t-sm transition-all duration-200',
+                            'mx-auto w-full max-w-12 rounded-t-sm transition-colors duration-(--motion-standard)',
                             isActive ? 'bg-chart-1' : 'bg-chart-3 group-hover:bg-chart-1',
                           )}
                           style={{ height: `${String(height)}%` }}
@@ -234,7 +234,7 @@ export function ActivitySection({
               <div className="mt-2 flex gap-1.5 sm:gap-3">
                 {chartPoints.map((point, index) => (
                   <span
-                    className="min-w-0 flex-1 truncate text-center font-sans text-2xs tabular-nums text-muted-foreground"
+                    className="min-w-0 flex-1 truncate text-center font-sans text-xs tabular-nums text-muted-foreground"
                     key={point.date}
                   >
                     {days === 30 && index % 4 !== 0 && index !== chartPoints.length - 1

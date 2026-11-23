@@ -75,6 +75,7 @@ describe('parking session history pagination', () => {
     renderHistory('/app/parkings/parking-1/sessions?plate=%20ab-123%20cd%20');
 
     await screen.findByRole('link', { name: 'Open session for AB123CD' });
+    expect(screen.queryByRole('navigation', { name: 'Session history pagination' })).toBeNull();
     expect(api.getParkingSessions).toHaveBeenLastCalledWith('parking-1', {
       page: 1,
       plate: 'AB123CD',
@@ -107,6 +108,7 @@ describe('parking session history pagination', () => {
     renderHistory('/app/parkings/parking-1/sessions?plate=ab-123&period=7d&status=COMPLETED');
 
     await screen.findByRole('link', { name: 'Open session for AB123CD' });
+    expect(screen.getByRole('navigation', { name: 'Session history pagination' })).toBeTruthy();
     await user.click(screen.getByRole('button', { name: 'Next' }));
 
     expect(await screen.findByText('$31.00')).toBeTruthy();

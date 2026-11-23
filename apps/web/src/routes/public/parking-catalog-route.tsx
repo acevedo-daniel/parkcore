@@ -160,7 +160,7 @@ export function ParkingCatalogRoute() {
           <Button
             aria-expanded={mobileFiltersOpen}
             aria-haspopup="dialog"
-            className="w-full rounded-full"
+            className="w-full"
             onClick={() => {
               setMobileFiltersOpen(true);
             }}

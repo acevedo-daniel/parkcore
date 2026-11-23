@@ -16,8 +16,7 @@ export function FacilityOverviewSection({ parkings }: FacilityOverviewSectionPro
     <section aria-labelledby="facilities-title">
       <div className="mb-5 flex items-end justify-between gap-4 border-b border-border-strong pb-4">
         <div>
-          <p className="type-label text-muted-foreground">{t('overview.networkNow')}</p>
-          <h2 className="type-heading mt-2" id="facilities-title">
+          <h2 className="type-heading" id="facilities-title">
             {t('overview.facilityOverview')}
           </h2>
         </div>

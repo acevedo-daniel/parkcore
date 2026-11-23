@@ -21,7 +21,7 @@ export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps)
     <Link
       aria-label={`${t('parking.open')} ${parking.title}`}
       aria-describedby={availabilityId}
-      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card text-foreground shadow-xs transition-lift duration-200 hover:-translate-y-1 hover:border-border-strong hover:shadow-md"
+      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card text-foreground shadow-xs transition-lift hover:-translate-y-1 hover:border-border-strong hover:shadow-md"
       to={to}
     >
       <div
@@ -31,7 +31,7 @@ export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps)
         <PublicParkingImage
           alt={t('parking.discoveryImageAlt', { title: parking.title })}
           image={parking.image}
-          imageClassName="h-full w-full object-cover transition-transform duration-500 group-hover:scale-102"
+          imageClassName="h-full w-full object-cover transition-transform duration-(--motion-overlay) group-hover:scale-102"
         />
         <div className="absolute inset-x-4 top-4 flex flex-wrap items-start justify-between gap-2">
           <AvailabilityIndicator

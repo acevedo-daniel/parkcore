@@ -487,7 +487,7 @@
     "editAria": "Editar {{title}}",
     "operating": "En operación",
     "paused": "Pausada",
-    "arrivals": "Ingresos",
+    "arrivals": "Entrada de vehículos",
     "ready": "Listo para el próximo vehículo.",
     "readyDescription": "Registra primero la patente. Los datos del vehículo y del visitante son opcionales y puedes agregarlos en el mismo paso.",
     "limitedTitle": "Quedan pocos lugares",

@@ -193,13 +193,15 @@ export function OwnerSessionDetailRoute() {
             <p className="type-label text-muted-foreground">
               {getSessionStateTitle(session.status, t)}
             </p>
-            <div className="mt-4 flex flex-wrap items-center gap-4">
-              <Plate plate={session.vehicle.plate} />
-              <SessionStatus status={session.status} />
-            </div>
-            <h1 className="type-page-title mt-5 break-words" id="session-detail-title">
-              {getVehicleTypeLabel(session.vehicle.type, t)}
+            <h1 className="type-page-title type-code mt-3 break-words" id="session-detail-title">
+              {session.vehicle.plate}
             </h1>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <SessionStatus status={session.status} />
+              <span className="text-sm text-foreground-secondary">
+                {getVehicleTypeLabel(session.vehicle.type, t)}
+              </span>
+            </div>
           </div>
           {canOperate ? (
             <div className="flex min-w-0 flex-wrap gap-2">
@@ -217,7 +219,7 @@ export function OwnerSessionDetailRoute() {
                   setActionError(undefined);
                   setCancelOpen(true);
                 }}
-                variant="destructive"
+                variant="destructive-outline"
               >
                 <Ban aria-hidden="true" className="size-4" /> {t('session.cancel')}
               </Button>
@@ -369,6 +371,7 @@ export function OwnerSessionDetailRoute() {
             className="w-full"
             disabled={cancelMutation.isPending}
             onClick={() => void cancelSession()}
+            variant="destructive"
           >
             {cancelMutation.isPending ? t('session.cancelling') : t('session.cancel')}
           </Button>

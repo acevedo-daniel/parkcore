@@ -64,7 +64,7 @@ export function SessionRow({
   return (
     <Link
       aria-label={t('session.openFor', { plate: session.vehicle.plate })}
-      className="group grid min-w-0 gap-4 border-b border-border-subtle bg-card py-5 text-foreground transition-colors duration-200 hover:bg-accent lg:grid-cols-session-row lg:items-center"
+      className="group grid min-w-0 gap-4 border-b border-border-subtle bg-card py-5 text-foreground transition-colors duration-(--motion-standard) hover:bg-accent lg:grid-cols-session-row lg:items-center"
       to={to}
     >
       <div className="flex min-w-0 items-center gap-3">
@@ -122,7 +122,7 @@ export function SessionHistoryRow({
   return (
     <Link
       aria-label={t('session.openFor', { plate: session.vehicle.plate })}
-      className="session-history-row group grid min-w-0 gap-x-4 gap-y-4 border-b border-border-subtle py-5 text-foreground transition-colors duration-200 hover:bg-muted focus-visible:bg-muted md:grid-cols-session-history-row md:items-center"
+      className="session-history-row group grid min-w-0 gap-x-4 gap-y-4 border-b border-border-subtle py-5 text-foreground transition-colors duration-(--motion-standard) hover:bg-muted focus-visible:bg-muted md:grid-cols-session-history-row md:items-center"
       to={to}
     >
       <div className="min-w-0">

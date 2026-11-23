@@ -177,7 +177,7 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           {form.formState.errors.root.message}
         </p>
       ) : null}
-      <Button className="w-full rounded-full" disabled={form.formState.isSubmitting} type="submit">
+      <Button className="w-full" disabled={form.formState.isSubmitting} type="submit">
         {form.formState.isSubmitting ? t('auth.actions.signingIn') : t('auth.actions.signIn')}
       </Button>
     </form>
@@ -267,7 +267,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
           {form.formState.errors.root.message}
         </p>
       ) : null}
-      <Button className="w-full rounded-full" disabled={form.formState.isSubmitting} type="submit">
+      <Button className="w-full" disabled={form.formState.isSubmitting} type="submit">
         {form.formState.isSubmitting
           ? t('auth.actions.creatingAccount')
           : t('auth.actions.createAccount')}

@@ -349,7 +349,7 @@ export function OwnerParkingHistoryRoute() {
         )}
       </section>
 
-      {pagination ? (
+      {pagination && pagination.totalPages > 1 ? (
         <nav
           aria-label={t('parkingHistory.pagination')}
           className="flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle pt-5"
@@ -470,7 +470,7 @@ function HistoryFilters({
         </FormField>
         <Button
           aria-busy={isFetching}
-          className="self-end rounded-full"
+          className="self-end"
           disabled={isFetching}
           onClick={onRefresh}
           type="button"
