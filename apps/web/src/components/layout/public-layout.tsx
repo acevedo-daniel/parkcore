@@ -25,31 +25,38 @@ import {
   DialogTrigger,
 } from '../ui/dialog.js';
 
+const publicNavLinkBase =
+  'public-nav-link min-h-11 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors';
+const publicNavLinkActive = 'is-active bg-muted text-foreground';
+const publicNavLinkIdle = 'text-foreground-secondary hover:bg-muted hover:text-foreground';
+const publicMobileLinkBase =
+  'flex min-h-11 items-center rounded-lg px-4 py-3 text-base font-bold transition-colors';
+const publicMobileNavLinkClass = cn(
+  publicMobileLinkBase,
+  publicNavLinkIdle,
+  'aria-[current=page]:bg-muted aria-[current=page]:text-foreground',
+);
+
 function PublicLinks({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useAppearance();
-  const publicLinks = [
-    { label: t('nav.parkings'), to: '/parkings' },
-    { label: t('nav.howItWorks'), to: '/#como-funciona' },
-  ];
   return (
     <div className="flex items-center gap-1.5">
-      {publicLinks.map((link) => (
-        <NavLink
-          key={link.to}
-          className={({ isActive }: NavLinkRenderProps) =>
-            cn(
-              'public-nav-link flex min-h-11 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors',
-              isActive
-                ? 'is-active bg-muted text-foreground'
-                : 'text-foreground-secondary hover:bg-muted hover:text-foreground',
-            )
-          }
-          to={link.to}
-          onClick={onNavigate}
-        >
-          {link.label}
-        </NavLink>
-      ))}
+      <NavLink
+        className={({ isActive }: NavLinkRenderProps) =>
+          cn(publicNavLinkBase, 'flex', isActive ? publicNavLinkActive : publicNavLinkIdle)
+        }
+        to="/parkings"
+        onClick={onNavigate}
+      >
+        {t('nav.parkings')}
+      </NavLink>
+      <Link
+        className={cn(publicNavLinkBase, 'flex', publicNavLinkIdle)}
+        to="/#como-funciona"
+        onClick={onNavigate}
+      >
+        {t('nav.howItWorks')}
+      </Link>
     </div>
   );
 }
@@ -96,28 +103,19 @@ function PublicMobileMenu() {
 
             <nav aria-label={t('nav.public')} className="public-mobile-links flex flex-col gap-2">
               <DialogClose asChild>
-                <Link
-                  className="flex min-h-11 items-center rounded-lg px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-muted"
-                  to="/parkings"
-                >
+                <NavLink className={publicMobileNavLinkClass} to="/parkings">
                   {t('nav.parkings')}
-                </Link>
+                </NavLink>
               </DialogClose>
               <DialogClose asChild>
-                <Link
-                  className="flex min-h-11 items-center rounded-lg px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-muted"
-                  to="/#como-funciona"
-                >
+                <Link className={cn(publicMobileLinkBase, publicNavLinkIdle)} to="/#como-funciona">
                   {t('nav.howItWorks')}
                 </Link>
               </DialogClose>
               <DialogClose asChild>
-                <Link
-                  className="flex min-h-11 items-center rounded-lg px-4 py-3 text-base font-bold text-foreground transition-colors hover:bg-muted"
-                  to="/login"
-                >
+                <NavLink className={publicMobileNavLinkClass} to="/login">
                   {t('nav.signIn')}
-                </Link>
+                </NavLink>
               </DialogClose>
             </nav>
           </div>
@@ -127,7 +125,9 @@ function PublicMobileMenu() {
               onSuccess={() => {
                 void navigate('/app', { replace: true });
               }}
-              className="block w-full rounded-full bg-primary py-3 text-center text-xs font-bold text-primary-foreground"
+              className="w-full"
+              shape="pill"
+              variant="default"
             />
             <div className="flex flex-col gap-2">
               <span className="text-xs font-medium text-foreground-secondary">
@@ -152,8 +152,7 @@ export function PublicLayout() {
         {t('nav.skipMain')}
       </a>
 
-      {/* Unified, sleek, Wise-standard navbar */}
-      <header className="public-header sticky top-0 z-40 w-full border-b border-border-subtle bg-card/90 backdrop-blur-md transition-all">
+      <header className="public-header sticky top-0 z-40 w-full border-b border-border-subtle bg-card/90 backdrop-blur-md transition-colors">
         <div className="public-header-inner mx-auto flex h-18 max-w-7xl items-center justify-between px-4 sm:h-20 sm:px-6 lg:px-8">
           {/* Brand mark */}
           <div className="flex items-center gap-10">
@@ -181,29 +180,26 @@ export function PublicLayout() {
               <AppearanceControls />
             </div>
 
-            <Button asChild shape="pill" variant="ghost">
-              <NavLink
-                className={({ isActive }: NavLinkRenderProps) =>
-                  cn(
-                    'public-nav-link hidden min-h-11 items-center rounded-full px-4 py-2 text-sm font-semibold transition-colors wide:inline-flex',
-                    isActive
-                      ? 'is-active bg-muted text-foreground'
-                      : 'text-foreground-secondary hover:bg-muted hover:text-foreground',
-                  )
-                }
-                to="/login"
-              >
-                {t('nav.signIn')}
-              </NavLink>
-            </Button>
+            <NavLink
+              className={({ isActive }: NavLinkRenderProps) =>
+                cn(
+                  publicNavLinkBase,
+                  'hidden wide:inline-flex',
+                  isActive ? publicNavLinkActive : publicNavLinkIdle,
+                )
+              }
+              to="/login"
+            >
+              {t('nav.signIn')}
+            </NavLink>
 
             <DemoLoginButton
               onSuccess={() => {
                 void navigate('/app', { replace: true });
               }}
               shape="pill"
+              variant="default"
               wrapperClassName="hidden wide:flex"
-              className="bg-primary px-5 py-2 text-xs font-bold text-primary-foreground shadow-xs transition-colors hover:bg-brand hover:text-brand-foreground"
             />
 
             <div className="public-mobile-nav wide:hidden">

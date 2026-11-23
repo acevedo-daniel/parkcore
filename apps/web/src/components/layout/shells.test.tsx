@@ -32,21 +32,52 @@ describe('application shells', () => {
     renderRoute(<PublicLayout />, '/');
     const header = screen.getByRole('banner');
     expect(screen.getByRole('navigation', { name: 'Navegación pública' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Cómo funciona' }).getAttribute('href')).toBe(
-      '/#como-funciona',
-    );
+    const howItWorks = screen.getByRole('link', { name: 'Cómo funciona' });
+    expect(howItWorks.getAttribute('href')).toBe('/#como-funciona');
+    expect(howItWorks.getAttribute('aria-current')).toBeNull();
     const signIn = within(header).getByRole('link', { name: 'Ingresar' });
     expect(signIn.getAttribute('href')).toBe('/login');
+    expect(signIn.getAttribute('aria-current')).toBeNull();
+    expect(signIn.className).toContain('hidden');
+    expect(signIn.className).toContain('wide:inline-flex');
+    expect(signIn.className).not.toContain('function');
+    expect(signIn.className.split(/\s+/)).not.toContain('bg-muted');
+    expect(signIn.className.split(/\s+/)).not.toContain('is-active');
     expect(signIn.className).toContain('min-h-11');
     expect(signIn.className).not.toContain('hover:-translate-y-px');
     for (const link of within(header).getAllByRole('link')) {
       expect(link.className).not.toContain('hover:-translate-y-px');
     }
     const demo = within(header).getByRole('button', { name: 'Probar demo' });
+    expect(demo.getAttribute('data-variant')).toBe('default');
     expect(demo.className).toContain('min-h-11');
     expect(demo.className).toContain('rounded-full');
     expect(demo.parentElement?.className).toContain('hidden wide:flex');
     expect(screen.queryByRole('link', { name: 'Get started' })).toBeNull();
+  });
+
+  it('marks the active public route in both header and compact menu without marking hash links', async () => {
+    const user = userEvent.setup();
+    renderRoute(<PublicLayout />, '/login');
+    const header = screen.getByRole('banner');
+    const signIn = within(header).getByRole('link', { name: 'Ingresar' });
+    expect(signIn.getAttribute('aria-current')).toBe('page');
+    expect(signIn.className).toContain('bg-muted');
+    expect(
+      within(header).getByRole('link', { name: 'Cómo funciona' }).getAttribute('aria-current'),
+    ).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'Abrir navegación' }));
+    const dialog = await screen.findByRole('dialog');
+    const mobileSignIn = within(dialog).getByRole('link', { name: 'Ingresar' });
+    expect(mobileSignIn.getAttribute('aria-current')).toBe('page');
+    expect(mobileSignIn.className).toContain('aria-[current=page]:bg-muted');
+    expect(
+      within(dialog).getByRole('link', { name: 'Cómo funciona' }).getAttribute('aria-current'),
+    ).toBeNull();
+    expect(
+      within(dialog).getByRole('button', { name: 'Probar demo' }).getAttribute('data-variant'),
+    ).toBe('default');
   });
 
   it('opens an accessible compact public navigation when requested', async () => {
