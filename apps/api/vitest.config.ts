@@ -33,10 +33,10 @@ export default defineConfig({
       reportsDirectory: 'coverage',
       reporter: ['text', 'html', 'lcov'],
       thresholds: {
-        lines: 70,
-        functions: 70,
-        branches: 60,
-        statements: 70,
+        lines: 92,
+        functions: 91,
+        branches: 80,
+        statements: 90,
       },
       exclude: [
         '**/node_modules/**',

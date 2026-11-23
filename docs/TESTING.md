@@ -124,8 +124,8 @@ Vitest enforces these minimum thresholds:
 
 | Workspace  | Lines | Functions | Statements | Branches |
 | ---------- | ----: | --------: | ---------: | -------: |
-| `apps/api` |   70% |       70% |        70% |      60% |
-| `apps/web` |   65% |       65% |        65% |      55% |
+| `apps/api` |   92% |       91% |        90% |      80% |
+| `apps/web` |   85% |       81% |        83% |      77% |
 
 CI enforces these thresholds, and the critical behaviors above still need direct coverage.
 
