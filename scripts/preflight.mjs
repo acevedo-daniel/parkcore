@@ -291,6 +291,7 @@ async function runPreflight() {
 
         await stage('Quality', async () => {
           await run(process.execPath, ['scripts/check-ci-placeholders.mjs']);
+          await runPnpm(['dedupe', '--check']);
           await runPnpm(['test:scripts']);
           await runPnpm(['text:check']);
           await runPnpm(['locales:check']);
@@ -313,6 +314,7 @@ async function runPreflight() {
 
         await stage('Contract', async () => {
           await runPnpm(['contract:check'], apiEnv);
+          await runPnpm(['openapi:check'], apiEnv);
         });
 
         await stage('E2E / Web prerequisites', async () => {

@@ -38,6 +38,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify lockfile has no duplicates
+        run: pnpm dedupe --check
+
       - name: Check CI template placeholders
         run: node scripts/check-ci-placeholders.mjs
 
@@ -167,6 +170,9 @@ jobs:
 
       - name: Verify generated API contract
         run: pnpm contract:check
+
+      - name: Verify OpenAPI document
+        run: pnpm openapi:check
 
   real_stack_e2e:
     name: E2E
