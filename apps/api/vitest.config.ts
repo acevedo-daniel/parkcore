@@ -9,7 +9,25 @@ export default defineConfig({
     clearMocks: true,
     restoreMocks: true,
     setupFiles: ['./vitest.setup.ts'],
-    include: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'unit',
+          include: ['src/**/*.test.ts'],
+        },
+      },
+      {
+        // Integration files share one PostgreSQL database and the canonical
+        // showcase, so they run one file at a time.
+        extends: true,
+        test: {
+          name: 'integration',
+          include: ['tests/**/*.test.ts'],
+          fileParallelism: false,
+        },
+      },
+    ],
     coverage: {
       provider: 'v8',
       reportsDirectory: 'coverage',

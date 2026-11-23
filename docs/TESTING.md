@@ -39,7 +39,7 @@ The production audit must report no known vulnerabilities before the workspace c
 
 ### API
 
-API tests use PostgreSQL rather than an in-memory substitute for persistence-sensitive behavior.
+API tests use PostgreSQL rather than an in-memory substitute for persistence-sensitive behavior. Database integration files under `apps/api/tests/` run serially in their own Vitest project because they share one database and the canonical showcase; unit tests under `apps/api/src/` mock Prisma and run in parallel.
 
 CI provisions a PostgreSQL service, then runs:
 
