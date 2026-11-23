@@ -136,7 +136,7 @@ function OwnerProfileContent({ user }: { user: User }) {
 
       <form
         aria-busy={mutation.isPending}
-        className="space-y-8"
+        className="max-w-3xl space-y-8"
         noValidate
         onSubmit={(event) => {
           void submit(event);
@@ -180,20 +180,22 @@ function OwnerProfileContent({ user }: { user: User }) {
                     {...form.register('lastName', { onChange: clearSaveFeedback })}
                   />
                 </FormField>
-                <FormField
-                  help={t('profile.emailReadOnly')}
-                  htmlFor="profile-email"
-                  label={t('profile.email')}
-                >
-                  <Input
-                    autoComplete="email"
-                    aria-readonly="true"
-                    id="profile-email"
-                    readOnly
-                    type="email"
-                    value={user.email ?? ''}
-                  />
-                </FormField>
+                <div className="sm:col-span-2">
+                  <FormField
+                    help={t('profile.emailReadOnly')}
+                    htmlFor="profile-email"
+                    label={t('profile.email')}
+                  >
+                    <Input
+                      autoComplete="email"
+                      aria-readonly="true"
+                      id="profile-email"
+                      readOnly
+                      type="email"
+                      value={user.email ?? ''}
+                    />
+                  </FormField>
+                </div>
               </div>
             </>
           ) : (
@@ -215,7 +217,7 @@ function OwnerProfileContent({ user }: { user: User }) {
           <div className="mt-5 max-w-xl">
             <AppearanceControls presentation="profile" />
           </div>
-          <div className="mt-7 max-w-xl">
+          <div className="mt-7">
             <Controller
               control={form.control}
               name="timezone"

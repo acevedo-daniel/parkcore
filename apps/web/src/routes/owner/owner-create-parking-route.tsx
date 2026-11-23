@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
+import { PageHeader } from '../../components/domain/page-header.js';
 import { Button } from '../../components/ui/button.js';
 import { UnsavedChangesPrompt } from '../../components/domain/unsaved-changes-prompt.js';
 import { toast } from 'sonner';
@@ -23,26 +24,24 @@ export function OwnerCreateParkingRoute() {
 
   return (
     <section className="owner-page space-y-8" aria-labelledby="create-parking-title">
-      <header className="flex flex-col justify-between gap-5 border-b border-border-strong pb-7 sm:flex-row sm:items-end">
-        <div className="min-w-0">
-          <p className="type-label">{t('parkingRoute.management')}</p>
-          <h1 className="break-words type-page-title" id="create-parking-title">
-            {t('parkingRoute.createTitle')}
-          </h1>
-        </div>
-        <Button
-          className="shrink-0 self-start"
-          variant="secondary"
-          type="button"
-          onClick={() => {
-            allowNavigationRef.current = true;
-            setIsDirty(false);
-            void navigate('/app/parkings');
-          }}
-        >
-          {t('parkingRoute.cancel')}
-        </Button>
-      </header>
+      <PageHeader
+        actions={
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={() => {
+              allowNavigationRef.current = true;
+              setIsDirty(false);
+              void navigate('/app/parkings');
+            }}
+          >
+            {t('parkingRoute.cancel')}
+          </Button>
+        }
+        eyebrow={t('parkingRoute.management')}
+        id="create-parking-title"
+        title={t('parkingRoute.createTitle')}
+      />
       <ParkingForm
         defaultTimezone={user?.timezone}
         error={error}

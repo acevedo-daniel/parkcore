@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { ParkingForm } from '../../features/parking/parking-form.js';
+import { PageHeader } from '../../components/domain/page-header.js';
 import { Button } from '../../components/ui/button.js';
 import { ErrorState } from '../../components/domain/feedback.js';
 import { Skeleton } from '../../components/ui/skeleton.js';
@@ -72,26 +73,24 @@ export function OwnerEditParkingRoute() {
 
   return (
     <section className="owner-page space-y-8" aria-labelledby="edit-parking-title">
-      <header className="flex flex-col justify-between gap-5 border-b border-border-strong pb-7 sm:flex-row sm:items-end">
-        <div className="min-w-0">
-          <p className="type-label">{t('parkingRoute.management')}</p>
-          <h1 className="break-words type-page-title" id="edit-parking-title">
-            {t('parkingRoute.editTitle')}
-          </h1>
-        </div>
-        <Button
-          className="shrink-0 self-start"
-          variant="secondary"
-          type="button"
-          onClick={() => {
-            allowNavigationRef.current = true;
-            setIsDirty(false);
-            void navigate(`/app/parkings/${parking.id}`);
-          }}
-        >
-          {t('parkingRoute.cancel')}
-        </Button>
-      </header>
+      <PageHeader
+        actions={
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={() => {
+              allowNavigationRef.current = true;
+              setIsDirty(false);
+              void navigate(`/app/parkings/${parking.id}`);
+            }}
+          >
+            {t('parkingRoute.cancel')}
+          </Button>
+        }
+        eyebrow={t('parkingRoute.management')}
+        id="edit-parking-title"
+        title={t('parkingRoute.editTitle')}
+      />
       <ParkingForm
         error={error}
         isSubmitting={mutation.isPending}
