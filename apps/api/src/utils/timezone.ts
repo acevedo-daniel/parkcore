@@ -227,6 +227,3 @@ export const getScheduleState = (schedule: DailySchedule, now = new Date()): Sch
     ),
   };
 };
-
-export const isParkingOpen = (schedule: DailySchedule, now = new Date()): boolean =>
-  getScheduleState(schedule, now).isOpen;
