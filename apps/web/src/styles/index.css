@@ -442,7 +442,7 @@
 
   [data-slot='combobox'] [role='combobox']:focus-visible {
     outline: none !important;
-    border-color: var(--border-strong) !important;
+    border-color: var(--primary) !important;
   }
 
   [data-slot='command-input']:focus-visible {

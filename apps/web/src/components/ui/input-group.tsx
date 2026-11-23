@@ -12,7 +12,7 @@ function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
       data-slot="input-group"
       role="group"
       className={cn(
-        'group/input-group relative flex w-full items-center rounded-md border border-input shadow-xs transition-control outline-none dark:bg-input/30',
+        'group/input-group relative flex w-full items-center rounded-md border border-border-strong bg-background shadow-xs transition-control outline-none',
         'min-h-11 min-w-0 has-[>textarea]:h-auto',
 
         // Variants based on alignment.
@@ -22,7 +22,10 @@ function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
         'has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-end]]:[&>input]:pt-3',
 
         // Focus state.
-        'has-[[data-slot=input-group-control]:focus-visible]:border-border-strong',
+        'has-[[data-slot=input-group-control]:focus-visible]:border-primary',
+
+        // Disabled state.
+        'has-[[data-slot=input-group-control]:disabled]:border-border-subtle has-[[data-slot=input-group-control]:disabled]:bg-muted',
 
         // Error state.
         'has-[[data-slot][aria-invalid=true]]:border-destructive',
@@ -125,7 +128,7 @@ function InputGroupInput({ className, ...props }: React.ComponentProps<'input'>)
     <Input
       data-slot="input-group-control"
       className={cn(
-        'flex-1 rounded-none border-0 bg-transparent shadow-none dark:bg-transparent',
+        'min-h-0 flex-1 self-stretch rounded-none border-0 bg-transparent shadow-none',
         className,
       )}
       {...props}
@@ -138,7 +141,7 @@ function InputGroupTextarea({ className, ...props }: React.ComponentProps<'texta
     <Textarea
       data-slot="input-group-control"
       className={cn(
-        'flex-1 resize-none rounded-none border-0 bg-transparent py-3 shadow-none dark:bg-transparent',
+        'flex-1 resize-none rounded-none border-0 bg-transparent py-3 shadow-none',
         className,
       )}
       {...props}

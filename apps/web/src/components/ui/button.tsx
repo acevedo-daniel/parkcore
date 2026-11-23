@@ -25,6 +25,8 @@ const buttonVariants = cva(
         destructive:
           'border-2 border-destructive bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90',
         link: 'text-foreground underline-offset-4 hover:underline',
+        field:
+          'w-full justify-between border border-border-strong bg-background text-left font-medium tracking-body text-foreground shadow-xs hover:border-foreground active:scale-100 disabled:border-border-subtle disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100',
       },
       size: {
         default: 'min-h-11 rounded-lg px-4 py-2',
@@ -38,6 +40,12 @@ const buttonVariants = cva(
         pill: 'rounded-full',
       },
     },
+    compoundVariants: [
+      {
+        variant: 'field',
+        className: 'rounded-md px-3.5',
+      },
+    ],
     defaultVariants: {
       variant: 'default',
       size: 'default',

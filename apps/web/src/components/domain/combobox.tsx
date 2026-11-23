@@ -102,16 +102,13 @@ export const Combobox = forwardRef<HTMLButtonElement, ComboboxProps>(function Co
             aria-invalid={fieldProps['aria-invalid']}
             aria-label={label}
             aria-required={ariaRequired === true || ariaRequired === 'true' || undefined}
-            className={cn(
-              'justify-between border-input bg-card text-left font-medium hover:border-border-strong hover:bg-card',
-              !selectedOption && 'text-muted-foreground',
-            )}
+            className={cn(!selectedOption && 'text-muted-foreground')}
             disabled={disabled}
             id={fieldProps.id}
             onBlur={onBlur}
             ref={forwardedRef}
             role="combobox"
-            variant="outline"
+            variant="field"
           >
             <span className="truncate">{selectedOption?.label ?? placeholder ?? label}</span>
             <ChevronsUpDown aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />

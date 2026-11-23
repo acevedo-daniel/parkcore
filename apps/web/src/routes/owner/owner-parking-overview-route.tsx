@@ -310,7 +310,7 @@ export function OwnerParkingOverviewRoute() {
         </div>
 
         <div className="mt-6 max-w-md">
-          <InputGroup className="rounded-full bg-muted">
+          <InputGroup>
             <InputGroupAddon>
               <InputGroupText>
                 <Search aria-hidden="true" />
@@ -318,7 +318,7 @@ export function OwnerParkingOverviewRoute() {
             </InputGroupAddon>
             <InputGroupInput
               aria-label={t('parkingOperation.searchPlate')}
-              className="h-12 rounded-full border-0 bg-transparent type-code font-semibold"
+              className="type-code font-semibold placeholder:font-sans placeholder:tracking-normal"
               id="active-session-plate"
               onChange={(event) => {
                 setPlateSearch(event.target.value);
