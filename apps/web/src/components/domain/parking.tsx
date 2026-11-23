@@ -1,11 +1,8 @@
 import type { components } from '@parkcore/api-client';
-import { ArrowUpRight } from 'lucide-react';
-import { Link } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { cn } from '../../lib/cn.js';
 import { formatMoney, formatNumber } from '../../lib/format.js';
-import { ParkingStatus } from './status.js';
 import { Progress, type ProgressTone } from '../ui/progress.js';
 
 type Parking = components['schemas']['ParkingResponse'];
@@ -161,52 +158,5 @@ export function OccupancyMeter({
         </span>
       </p>
     </div>
-  );
-}
-
-interface ParkingListItemProps {
-  activeSessions?: number;
-  identifier?: number;
-  occupancyUnavailable?: boolean;
-  parking: Parking;
-  to: string;
-}
-
-export function ParkingListItem({
-  activeSessions,
-  identifier,
-  occupancyUnavailable = false,
-  parking,
-  to,
-}: ParkingListItemProps) {
-  const { t } = useAppearance();
-  const available =
-    activeSessions === undefined ? undefined : Math.max(0, parking.capacity - activeSessions);
-  return (
-    <Link
-      aria-label={`${t('parking.open')} ${parking.title}`}
-      className="parking-list-item"
-      to={to}
-    >
-      <div>
-        <ParkingIdentity identifier={identifier} parking={parking} />
-      </div>
-      <div className="parking-list-metrics">
-        <ParkingStatus isActive={parking.isActive} />
-        <RateDisplay currency={parking.currency} hourlyRateCents={parking.hourlyRateCents} />
-        {occupancyUnavailable ? (
-          <span className="type-small">{t('parkingOperation.occupancyUnavailable')}</span>
-        ) : available === undefined ? (
-          <span className="type-small">
-            {t('parkingOperation.capacity')} {parking.capacity}
-          </span>
-        ) : (
-          <span className="type-operational">
-            {activeSessions} / {parking.capacity} {t('parking.occupied')}
-          </span>
-        )}
-        <ArrowUpRight aria-hidden="true" size={18} />
-      </div>
-    </Link>
   );
 }

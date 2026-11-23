@@ -90,18 +90,9 @@ function getSystemTheme(): Theme {
 function subscribeToSystemTheme(onChange: () => void) {
   try {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    if (typeof mediaQuery.addEventListener === 'function') {
-      mediaQuery.addEventListener('change', onChange);
-      return () => {
-        mediaQuery.removeEventListener('change', onChange);
-      };
-    }
-    // Support Safari 13 and other browsers without MediaQueryListEventTarget.
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    mediaQuery.addListener(onChange);
+    mediaQuery.addEventListener('change', onChange);
     return () => {
-      // eslint-disable-next-line @typescript-eslint/no-deprecated
-      mediaQuery.removeListener(onChange);
+      mediaQuery.removeEventListener('change', onChange);
     };
   } catch {
     return noop;
