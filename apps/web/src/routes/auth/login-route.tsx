@@ -8,6 +8,7 @@ import { useAuth } from '../../features/auth/use-auth.js';
 import { useDocumentMeta } from '../../lib/document-meta.js';
 import { getAuthPath, getReturnTo } from './auth-redirect.js';
 import { RedirectAuthenticated } from './auth-guard.js';
+import { Notice } from '../../components/domain/notice.js';
 
 export function LoginRoute() {
   const { t } = useAppearance();
@@ -29,12 +30,9 @@ export function LoginRoute() {
         title={t('auth.login.title')}
       >
         {sessionErrorKey ? (
-          <p
-            className="mb-6 rounded-2xl border border-warning-soft-foreground bg-warning-soft p-4 text-sm font-semibold text-warning-soft-foreground"
-            role="alert"
-          >
+          <Notice className="mb-6" role="alert">
             {t(sessionErrorKey)}
-          </p>
+          </Notice>
         ) : null}
         <div className="rounded-3xl bg-brand p-5 text-brand-foreground shadow-md">
           <div className="flex items-center gap-2 text-xs font-bold tracking-label uppercase">

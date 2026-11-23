@@ -14,6 +14,7 @@ import { Button } from '../ui/button.js';
 import { Input } from '../ui/input.js';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select.js';
 import { Textarea } from '../ui/textarea.js';
+import { Notice } from './notice.js';
 
 function createCheckInFormSchema(t: Translator) {
   return z.object({
@@ -254,14 +255,7 @@ export function CheckInPanel({
         <Textarea id="check-in-notes" {...register('notes')} />
       </FormField>
 
-      {error ? (
-        <p
-          className="break-words rounded-lg border border-warning-soft-foreground bg-warning-soft p-3 text-sm font-semibold text-warning-soft-foreground"
-          role="alert"
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <Notice role="alert">{error}</Notice> : null}
       <Button className="w-full" disabled={isSubmitting} type="submit">
         {isSubmitting ? t('checkIn.starting') : t('checkIn.start')}
       </Button>

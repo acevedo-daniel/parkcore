@@ -10,6 +10,7 @@ import { OwnerParkingPanel } from '../../features/parking/owner-parking-panel.js
 import { useOwnedParkingOperations } from '../../features/parking/use-owned-parking-operations.js';
 import { cn } from '../../lib/cn.js';
 import { formatNumber } from '../../lib/format.js';
+import { Notice } from '../../components/domain/notice.js';
 
 export function OwnerParkingsRoute() {
   const { locale, t } = useAppearance();
@@ -71,25 +72,25 @@ export function OwnerParkingsRoute() {
       />
 
       {facilitiesSnapshotIsStale ? (
-        <div
-          className="flex flex-col gap-3 rounded-lg border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+        <Notice
+          action={
+            <Button
+              disabled={parkingsQuery.isFetching}
+              onClick={() => void parkingsQuery.refetch()}
+              size="sm"
+              variant="secondary"
+            >
+              <RefreshCw
+                aria-hidden="true"
+                className={cn('size-3.5', parkingsQuery.isFetching && 'animate-spin')}
+              />
+              {t('ownerParkings.refresh')}
+            </Button>
+          }
           role="alert"
         >
-          <p className="break-words text-sm font-semibold">{t('ownerParkings.stale')}</p>
-          <Button
-            className="self-start sm:self-auto"
-            disabled={parkingsQuery.isFetching}
-            onClick={() => void parkingsQuery.refetch()}
-            size="sm"
-            variant="secondary"
-          >
-            <RefreshCw
-              aria-hidden="true"
-              className={cn('size-3.5', parkingsQuery.isFetching && 'animate-spin')}
-            />
-            {t('ownerParkings.refresh')}
-          </Button>
-        </div>
+          {t('ownerParkings.stale')}
+        </Notice>
       ) : null}
 
       {parkings.length === 0 ? (
@@ -110,7 +111,7 @@ export function OwnerParkingsRoute() {
         <>
           <div
             aria-label={t('ownerParkings.networkSummary')}
-            className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3"
+            className="grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3"
             role="group"
           >
             <NetworkMetric
@@ -137,7 +138,7 @@ export function OwnerParkingsRoute() {
             <h2 className="sr-only" id="owner-facility-list-title">
               {t('ownerParkings.facilityList')}
             </h2>
-            <div className="overflow-hidden rounded-xl border border-border bg-card">
+            <div className="overflow-hidden rounded-lg border border-border bg-card">
               {parkings.map(({ parking }, index) => (
                 <div className="border-b border-border-subtle last:border-b-0" key={parking.id}>
                   <OwnerParkingPanel identifier={index + 1} parking={parking} presentation="list" />
@@ -175,12 +176,12 @@ function OwnerParkingsSkeleton() {
         <Skeleton className="h-12 w-3/4 rounded-lg" />
         <Skeleton className="h-5 w-full max-w-xl rounded-full" />
       </div>
-      <div className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
+      <div className="grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3">
         {Array.from({ length: 3 }).map((_, index) => (
           <Skeleton className="h-24 rounded-none border-0" key={index} />
         ))}
       </div>
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
         {Array.from({ length: 3 }).map((_, index) => (
           <div
             className="grid min-w-0 gap-6 border-b border-border-subtle p-5 last:border-b-0 sm:p-6 md:grid-cols-owner-parking-card md:items-center md:gap-8 lg:grid-cols-owner-parking-fields"

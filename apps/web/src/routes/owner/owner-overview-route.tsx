@@ -21,6 +21,7 @@ import { OwnerOverviewSkeleton } from '../../features/owner-overview/owner-overv
 import { useOwnedParkingOperations } from '../../features/parking/use-owned-parking-operations.js';
 import { getActiveSessionsForOwner } from '../../lib/api/owner-api.js';
 import { cn } from '../../lib/cn.js';
+import { Notice } from '../../components/domain/notice.js';
 
 export function OwnerOverviewRoute() {
   const { t } = useAppearance();
@@ -123,25 +124,25 @@ export function OwnerOverviewRoute() {
       />
 
       {facilitiesSnapshotIsStale ? (
-        <div
-          className="flex flex-col gap-3 rounded-lg border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+        <Notice
+          action={
+            <Button
+              disabled={parkingsQuery.isFetching}
+              onClick={() => void parkingsQuery.refetch()}
+              size="sm"
+              variant="secondary"
+            >
+              <RefreshCw
+                aria-hidden="true"
+                className={cn('size-3.5', parkingsQuery.isFetching && 'animate-spin')}
+              />
+              {t('overview.retryFacilities')}
+            </Button>
+          }
           role="alert"
         >
-          <p className="break-words text-sm font-semibold">{t('overview.facilitiesStale')}</p>
-          <Button
-            className="self-start sm:self-auto"
-            disabled={parkingsQuery.isFetching}
-            onClick={() => void parkingsQuery.refetch()}
-            size="sm"
-            variant="secondary"
-          >
-            <RefreshCw
-              aria-hidden="true"
-              className={cn('size-3.5', parkingsQuery.isFetching && 'animate-spin')}
-            />
-            {t('overview.retryFacilities')}
-          </Button>
-        </div>
+          {t('overview.facilitiesStale')}
+        </Notice>
       ) : null}
 
       <div className="grid gap-5 wide:grid-cols-owner-overview">

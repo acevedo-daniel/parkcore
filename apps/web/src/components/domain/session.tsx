@@ -8,6 +8,7 @@ import { Button } from '../ui/button.js';
 import { formatDuration, formatMoney, formatTimestamp } from '../../lib/format.js';
 import { Plate } from './plate.js';
 import { SessionStatus } from './status.js';
+import { Card } from '../ui/card.js';
 
 type Session = components['schemas']['ParkingSessionResponse'];
 
@@ -187,50 +188,50 @@ export function CheckoutSummary({ session, timezone }: { session: Session; timez
   const total = session.totalAmountCents ?? preview?.totalAmountCents;
   const chargedHours = preview?.chargedHours;
   return (
-    <section
-      aria-label={t('session.checkoutSummary')}
-      className="rounded-xl border border-border bg-accent p-5 text-foreground"
-    >
-      <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
-        <span className="type-label text-muted-foreground">{t('session.started')}</span>
-        <OperationalTimestamp value={session.startTime} timezone={timezone} />
-      </div>
-      {!session.endTime ? (
-        <div className="flex items-center justify-between gap-4 border-b border-border py-3">
-          <span className="type-label text-muted-foreground">
-            {t('session.currentCalculation')}
-          </span>
-          <time className="type-operational" dateTime={now.toISOString()}>
-            {formatTimestamp(now.toISOString(), timezone, locale)}
-          </time>
+    <Card asChild>
+      <section aria-label={t('session.checkoutSummary')} className="p-5 text-foreground">
+        <div className="flex items-center justify-between gap-4 border-b border-border pb-3">
+          <span className="type-label text-muted-foreground">{t('session.started')}</span>
+          <OperationalTimestamp value={session.startTime} timezone={timezone} />
         </div>
-      ) : null}
-      <div className="flex items-center justify-between gap-4 border-b border-border py-3">
-        <span className="type-label text-muted-foreground">{t('session.rate')}</span>
-        <span className="type-operational">
-          {formatMoney(session.hourlyRateCents, session.currency, locale)} /{' '}
-          {t('session.perHourShort')}
-        </span>
-      </div>
-      {chargedHours ? (
+        {!session.endTime ? (
+          <div className="flex items-center justify-between gap-4 border-b border-border py-3">
+            <span className="type-label text-muted-foreground">
+              {t('session.currentCalculation')}
+            </span>
+            <time className="type-operational" dateTime={now.toISOString()}>
+              {formatTimestamp(now.toISOString(), timezone, locale)}
+            </time>
+          </div>
+        ) : null}
         <div className="flex items-center justify-between gap-4 border-b border-border py-3">
-          <span className="type-label text-muted-foreground">{t('session.charged')}</span>
+          <span className="type-label text-muted-foreground">{t('session.rate')}</span>
           <span className="type-operational">
-            {chargedHours} {tPlural(chargedHours, { one: 'session.hour', other: 'session.hours' })}
+            {formatMoney(session.hourlyRateCents, session.currency, locale)} /{' '}
+            {t('session.perHourShort')}
           </span>
         </div>
-      ) : null}
-      <div className="flex items-end justify-between gap-4 pt-5">
-        <span className="type-label text-muted-foreground">
-          {session.endTime ? t('session.confirmedTotal') : t('session.estimate')}
-        </span>
-        <strong className="font-display text-3xl font-bold leading-none tracking-display tabular-nums">
-          {total === undefined
-            ? t('common.notAvailable')
-            : formatMoney(total, session.currency, locale)}
-        </strong>
-      </div>
-    </section>
+        {chargedHours ? (
+          <div className="flex items-center justify-between gap-4 border-b border-border py-3">
+            <span className="type-label text-muted-foreground">{t('session.charged')}</span>
+            <span className="type-operational">
+              {chargedHours}{' '}
+              {tPlural(chargedHours, { one: 'session.hour', other: 'session.hours' })}
+            </span>
+          </div>
+        ) : null}
+        <div className="flex items-end justify-between gap-4 pt-5">
+          <span className="type-label text-muted-foreground">
+            {session.endTime ? t('session.confirmedTotal') : t('session.estimate')}
+          </span>
+          <strong className="font-display text-3xl font-bold leading-none tracking-display tabular-nums">
+            {total === undefined
+              ? t('common.notAvailable')
+              : formatMoney(total, session.currency, locale)}
+          </strong>
+        </div>
+      </section>
+    </Card>
   );
 }
 
@@ -258,94 +259,99 @@ export function OperationalReceipt({
       )
     : undefined;
   return (
-    <section
-      aria-label={t('session.operationalReceipt')}
-      className="min-w-0 rounded-2xl border border-success-soft-foreground bg-success-soft p-6 text-foreground sm:p-8"
-    >
-      <div className="flex flex-col justify-between gap-5 border-b border-success-soft-foreground/30 pb-5 sm:flex-row sm:items-start">
-        <div>
-          <p className="type-label text-success-soft-foreground">
-            {t('session.serverConfirmedCheckout')}
-          </p>
-          <h2 className="mt-3 font-display text-3xl font-bold tracking-heading">
-            {t('session.operationalReceipt')}
-          </h2>
+    <Card asChild tone="success">
+      <section aria-label={t('session.operationalReceipt')} className="p-5 text-foreground sm:p-6">
+        <div className="flex flex-col justify-between gap-5 border-b border-success-soft-foreground/30 pb-5 sm:flex-row sm:items-start">
+          <div>
+            <p className="type-label text-success-soft-foreground">
+              {t('session.serverConfirmedCheckout')}
+            </p>
+            <h2 className="mt-3 font-display text-3xl font-bold tracking-heading">
+              {t('session.operationalReceipt')}
+            </h2>
+          </div>
+          <span className="rounded-full border border-success-soft-foreground px-3 py-1.5 text-xs font-bold text-success-soft-foreground">
+            {t('session.completedLabel')}
+          </span>
         </div>
-        <span className="rounded-full border border-success-soft-foreground px-3 py-1.5 text-xs font-bold text-success-soft-foreground">
-          {t('session.completedLabel')}
-        </span>
-      </div>
 
-      <dl className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
-        <ReceiptItem label={t('session.plate')} value={session.vehicle.plate} />
-        <ReceiptItem
-          label={t('session.parking')}
-          value={parkingTitle ?? t('common.notAvailable')}
-        />
-        <ReceiptItem
-          label={t('session.started')}
-          value={formatTimestamp(session.startTime, timezone, locale)}
-        />
-        <ReceiptItem
-          label={t('session.completedAt')}
-          value={
-            session.endTime
-              ? formatTimestamp(session.endTime, timezone, locale)
-              : t('common.notAvailable')
-          }
-        />
-        <ReceiptItem
-          label={t('session.duration')}
-          value={
-            session.endTime
-              ? formatDuration(session.startTime, session.endTime, locale)
-              : t('common.notAvailable')
-          }
-        />
-        <ReceiptItem
-          label={t('session.rateSnapshot')}
-          value={`${formatMoney(session.hourlyRateCents, session.currency, locale)} / ${t('session.perHour')}`}
-        />
-        <ReceiptItem
-          label={t('session.charged')}
-          value={
-            chargedHours === undefined
+        <dl className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+          <ReceiptItem label={t('session.plate')} value={session.vehicle.plate} />
+          <ReceiptItem
+            label={t('session.parking')}
+            value={parkingTitle ?? t('common.notAvailable')}
+          />
+          <ReceiptItem
+            label={t('session.started')}
+            value={formatTimestamp(session.startTime, timezone, locale)}
+          />
+          <ReceiptItem
+            label={t('session.completedAt')}
+            value={
+              session.endTime
+                ? formatTimestamp(session.endTime, timezone, locale)
+                : t('common.notAvailable')
+            }
+          />
+          <ReceiptItem
+            label={t('session.duration')}
+            value={
+              session.endTime
+                ? formatDuration(session.startTime, session.endTime, locale)
+                : t('common.notAvailable')
+            }
+          />
+          <ReceiptItem
+            label={t('session.rateSnapshot')}
+            value={`${formatMoney(session.hourlyRateCents, session.currency, locale)} / ${t('session.perHour')}`}
+          />
+          <ReceiptItem
+            label={t('session.charged')}
+            value={
+              chargedHours === undefined
+                ? t('common.notAvailable')
+                : `${String(chargedHours)} ${tPlural(chargedHours, {
+                    one: 'session.hour',
+                    other: 'session.hours',
+                  })}`
+            }
+          />
+          <ReceiptItem
+            label={t('session.chargedTotal')}
+            value={
+              total === null
+                ? t('common.notAvailable')
+                : formatMoney(total, session.currency, locale)
+            }
+          />
+        </dl>
+
+        <div className="mt-7 flex items-end justify-between gap-4 border-t border-success-soft-foreground/30 pt-5">
+          <span className="type-label text-success-soft-foreground">
+            {t('session.finalAmount')}
+          </span>
+          <strong className="font-display text-4xl font-bold leading-none tracking-display tabular-nums">
+            {total === null
               ? t('common.notAvailable')
-              : `${String(chargedHours)} ${tPlural(chargedHours, {
-                  one: 'session.hour',
-                  other: 'session.hours',
-                })}`
-          }
-        />
-        <ReceiptItem
-          label={t('session.chargedTotal')}
-          value={
-            total === null ? t('common.notAvailable') : formatMoney(total, session.currency, locale)
-          }
-        />
-      </dl>
-
-      <div className="mt-7 flex items-end justify-between gap-4 border-t border-success-soft-foreground/30 pt-5">
-        <span className="type-label text-success-soft-foreground">{t('session.finalAmount')}</span>
-        <strong className="font-display text-4xl font-bold leading-none tracking-display tabular-nums">
-          {total === null ? t('common.notAvailable') : formatMoney(total, session.currency, locale)}
-        </strong>
-      </div>
-      {parkingHref || historyHref ? (
-        <div className="mt-6 flex flex-wrap gap-2">
-          {parkingHref ? (
-            <Button asChild size="sm" variant="secondary">
-              <Link to={parkingHref}>{t('session.returnToParking')}</Link>
-            </Button>
-          ) : null}
-          {historyHref ? (
-            <Button asChild size="sm" variant="ghost">
-              <Link to={historyHref}>{t('session.viewHistory')}</Link>
-            </Button>
-          ) : null}
+              : formatMoney(total, session.currency, locale)}
+          </strong>
         </div>
-      ) : null}
-    </section>
+        {parkingHref || historyHref ? (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {parkingHref ? (
+              <Button asChild size="sm" variant="secondary">
+                <Link to={parkingHref}>{t('session.returnToParking')}</Link>
+              </Button>
+            ) : null}
+            {historyHref ? (
+              <Button asChild size="sm" variant="ghost">
+                <Link to={historyHref}>{t('session.viewHistory')}</Link>
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
+      </section>
+    </Card>
   );
 }
 
@@ -364,57 +370,59 @@ export function OperationalCancellation({
 }) {
   const { locale, t } = useAppearance();
   return (
-    <section
-      aria-label={t('session.cancelledRegion')}
-      className="min-w-0 rounded-2xl border border-warning-soft-foreground bg-warning-soft p-6 text-warning-soft-foreground sm:p-8"
-      role="region"
-    >
-      <div className="border-b border-warning-soft-foreground/30 pb-5">
-        <p className="type-label">{t('session.terminalState')}</p>
-        <h2 className="mt-3 font-display text-3xl font-bold tracking-heading">
-          {t('session.cancelledHeading')}
-        </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed">
-          {t('session.cancelledDescription')}
-        </p>
-      </div>
-
-      <dl className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
-        <ReceiptItem label={t('session.plate')} value={session.vehicle.plate} />
-        <ReceiptItem
-          label={t('session.parking')}
-          value={parkingTitle ?? t('common.notAvailable')}
-        />
-        <ReceiptItem
-          label={t('session.started')}
-          value={formatTimestamp(session.startTime, timezone, locale)}
-        />
-        <ReceiptItem
-          label={t('session.cancelledAt')}
-          value={
-            session.endTime
-              ? formatTimestamp(session.endTime, timezone, locale)
-              : t('common.notAvailable')
-          }
-        />
-        <ReceiptItem label={t('session.total')} value={t('session.notCharged')} />
-      </dl>
-
-      {parkingHref || historyHref ? (
-        <div className="mt-7 flex flex-wrap gap-2 border-t border-warning-soft-foreground/30 pt-5">
-          {parkingHref ? (
-            <Button asChild size="sm" variant="secondary">
-              <Link to={parkingHref}>{t('session.returnToParking')}</Link>
-            </Button>
-          ) : null}
-          {historyHref ? (
-            <Button asChild size="sm" variant="ghost">
-              <Link to={historyHref}>{t('session.viewHistory')}</Link>
-            </Button>
-          ) : null}
+    <Card asChild tone="warning">
+      <section
+        aria-label={t('session.cancelledRegion')}
+        className="p-5 text-warning-soft-foreground sm:p-6"
+        role="region"
+      >
+        <div className="border-b border-warning-soft-foreground/30 pb-5">
+          <p className="type-label">{t('session.terminalState')}</p>
+          <h2 className="mt-3 font-display text-3xl font-bold tracking-heading">
+            {t('session.cancelledHeading')}
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed">
+            {t('session.cancelledDescription')}
+          </p>
         </div>
-      ) : null}
-    </section>
+
+        <dl className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+          <ReceiptItem label={t('session.plate')} value={session.vehicle.plate} />
+          <ReceiptItem
+            label={t('session.parking')}
+            value={parkingTitle ?? t('common.notAvailable')}
+          />
+          <ReceiptItem
+            label={t('session.started')}
+            value={formatTimestamp(session.startTime, timezone, locale)}
+          />
+          <ReceiptItem
+            label={t('session.cancelledAt')}
+            value={
+              session.endTime
+                ? formatTimestamp(session.endTime, timezone, locale)
+                : t('common.notAvailable')
+            }
+          />
+          <ReceiptItem label={t('session.total')} value={t('session.notCharged')} />
+        </dl>
+
+        {parkingHref || historyHref ? (
+          <div className="mt-7 flex flex-wrap gap-2 border-t border-warning-soft-foreground/30 pt-5">
+            {parkingHref ? (
+              <Button asChild size="sm" variant="secondary">
+                <Link to={parkingHref}>{t('session.returnToParking')}</Link>
+              </Button>
+            ) : null}
+            {historyHref ? (
+              <Button asChild size="sm" variant="ghost">
+                <Link to={historyHref}>{t('session.viewHistory')}</Link>
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
+      </section>
+    </Card>
   );
 }
 

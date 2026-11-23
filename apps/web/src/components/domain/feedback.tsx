@@ -50,7 +50,7 @@ export function EmptyState({
       ) : (
         <EmptyHeader className="max-w-none items-start gap-0 text-left">
           <EmptyMedia
-            className="mb-0 size-11 rounded-xl border border-border-subtle bg-brand-soft text-foreground shadow-xs"
+            className="mb-0 size-11 rounded-md border border-border-subtle bg-brand-soft text-foreground"
             variant="icon"
           >
             <FolderOpen aria-hidden="true" className="size-5" />
@@ -96,13 +96,13 @@ export function ErrorState({
     <Empty
       aria-atomic="true"
       aria-labelledby={titleId}
-      className="min-h-56 flex-none items-start gap-0 rounded-2xl border border-border-subtle border-solid bg-card p-6 text-left text-foreground shadow-xs sm:p-8"
+      className="min-h-56 flex-none items-start gap-0 rounded-lg border border-border-subtle border-solid bg-card p-6 text-left text-foreground sm:p-8"
       data-slot="error-state"
       role="alert"
     >
       <EmptyHeader className="max-w-none items-start gap-0 text-left">
         <EmptyMedia
-          className="mb-0 size-11 rounded-xl border border-destructive-soft-foreground/20 bg-destructive-soft text-destructive-soft-foreground"
+          className="mb-0 size-11 rounded-md border border-destructive-soft-foreground/20 bg-destructive-soft text-destructive-soft-foreground"
           variant="icon"
         >
           <CloudAlert aria-hidden="true" className="size-5" />
@@ -130,7 +130,7 @@ export function ErrorState({
 function cnEmptyState(isCompact: boolean, isSplitCompact: boolean, className?: string) {
   const base = isCompact
     ? 'flex-none min-w-0 flex-col items-start justify-center gap-0 rounded-none border-0 bg-transparent p-0 text-left text-foreground'
-    : 'min-h-56 flex-none flex-col items-start justify-center gap-0 rounded-2xl border border-border-subtle border-solid bg-card p-6 text-left text-foreground shadow-xs sm:p-8';
+    : 'min-h-56 flex-none flex-col items-start justify-center gap-0 rounded-lg border border-border-subtle border-solid bg-card p-6 text-left text-foreground sm:p-8';
   return [
     base,
     isSplitCompact && 'sm:flex-row sm:items-center sm:justify-between sm:gap-8',

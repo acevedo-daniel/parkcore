@@ -653,10 +653,6 @@
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, auto);
 }
 
-@utility grid-cols-owner-parking-metrics {
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-}
-
 @utility grid-cols-calculator-facility {
   grid-template-columns: auto minmax(0, 1fr);
 }

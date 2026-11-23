@@ -33,6 +33,8 @@ import {
 import { formatMoney } from '../../lib/format.js';
 import type { Locale, Translator } from '../../lib/localization.js';
 import { invalidateOwnerMutationQueries } from '../../lib/query-invalidation.js';
+import { Notice } from '../../components/domain/notice.js';
+import { Card } from '../../components/ui/card.js';
 
 const sessionErrorMessages: ApiErrorCodeMessages = {
   SESSION_NOT_ACTIVE: 'session.stateChanged',
@@ -228,32 +230,32 @@ export function OwnerSessionDetailRoute() {
       </header>
 
       {hasStaleSessionData || hasStaleParkingData ? (
-        <div
-          className="flex flex-col gap-3 rounded-lg border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+        <Notice
+          action={
+            <Button
+              disabled={sessionQuery.isFetching || parkingsQuery.isFetching}
+              onClick={() => {
+                void sessionQuery.refetch();
+                void parkingsQuery.refetch();
+              }}
+              size="sm"
+              variant="secondary"
+            >
+              <RefreshCw
+                aria-hidden="true"
+                className={
+                  sessionQuery.isFetching || parkingsQuery.isFetching
+                    ? 'size-3.5 animate-spin'
+                    : 'size-3.5'
+                }
+              />
+              {t('session.retryData')}
+            </Button>
+          }
           role="alert"
         >
-          <p className="break-words text-sm font-semibold">{t('session.staleData')}</p>
-          <Button
-            className="self-start sm:self-auto"
-            disabled={sessionQuery.isFetching || parkingsQuery.isFetching}
-            onClick={() => {
-              void sessionQuery.refetch();
-              void parkingsQuery.refetch();
-            }}
-            size="sm"
-            variant="secondary"
-          >
-            <RefreshCw
-              aria-hidden="true"
-              className={
-                sessionQuery.isFetching || parkingsQuery.isFetching
-                  ? 'size-3.5 animate-spin'
-                  : 'size-3.5'
-              }
-            />
-            {t('session.retryData')}
-          </Button>
-        </div>
+          {t('session.staleData')}
+        </Notice>
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -273,35 +275,37 @@ export function OwnerSessionDetailRoute() {
           ]}
           title={t('session.visit')}
         />
-        <section className="min-w-0 rounded-xl border border-border bg-card p-5">
-          <p className="type-label text-muted-foreground">{t('session.parking')}</p>
-          <dl className="mt-5 space-y-4">
-            <DetailItem label={t('session.facility')}>
-              <Link
-                className="font-bold underline decoration-brand decoration-4 underline-offset-4"
-                to={`/app/parkings/${parking.id}`}
-              >
-                {parking.title}
-              </Link>
-            </DetailItem>
-            <DetailItem label={t('session.address')}>
-              <span className="flex items-start gap-1.5">
-                <MapPin aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
-                {parking.address}
-              </span>
-            </DetailItem>
-            <DetailItem label={t('session.started')}>
-              <OperationalTimestamp value={session.startTime} timezone={parking.timezone} />
-            </DetailItem>
-            <DetailItem label={t('session.rateSnapshot')}>
-              {formatMoney(session.hourlyRateCents, session.currency, locale)} /{' '}
-              {t('session.perHourShort')}
-            </DetailItem>
-            <DetailItem label={t('session.total')}>
-              {formatSessionTotal(session, t, locale)}
-            </DetailItem>
-          </dl>
-        </section>
+        <Card asChild>
+          <section className="p-5">
+            <p className="type-label text-muted-foreground">{t('session.parking')}</p>
+            <dl className="mt-5 space-y-4">
+              <DetailItem label={t('session.facility')}>
+                <Link
+                  className="font-bold underline decoration-brand decoration-4 underline-offset-4"
+                  to={`/app/parkings/${parking.id}`}
+                >
+                  {parking.title}
+                </Link>
+              </DetailItem>
+              <DetailItem label={t('session.address')}>
+                <span className="flex items-start gap-1.5">
+                  <MapPin aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
+                  {parking.address}
+                </span>
+              </DetailItem>
+              <DetailItem label={t('session.started')}>
+                <OperationalTimestamp value={session.startTime} timezone={parking.timezone} />
+              </DetailItem>
+              <DetailItem label={t('session.rateSnapshot')}>
+                {formatMoney(session.hourlyRateCents, session.currency, locale)} /{' '}
+                {t('session.perHourShort')}
+              </DetailItem>
+              <DetailItem label={t('session.total')}>
+                {formatSessionTotal(session, t, locale)}
+              </DetailItem>
+            </dl>
+          </section>
+        </Card>
       </div>
 
       {session.status === 'COMPLETED' ? (
@@ -403,27 +407,26 @@ function formatSessionTotal(session: ParkingSession, translate: Translator, loca
 
 function ActionError({ message }: { message: string }) {
   return (
-    <p
-      className="break-words rounded-lg border border-destructive-soft-foreground bg-destructive-soft p-3 text-sm font-semibold text-destructive-soft-foreground"
-      role="alert"
-    >
+    <Notice role="alert" tone="destructive">
       {message}
-    </p>
+    </Notice>
   );
 }
 
 function DetailCard({ entries, title }: { entries: [string, string][]; title: string }) {
   return (
-    <section className="min-w-0 rounded-xl border border-border bg-card p-5">
-      <p className="type-label text-muted-foreground">{title}</p>
-      <dl className="mt-5 space-y-4">
-        {entries.map(([label, value]) => (
-          <DetailItem key={label} label={label}>
-            {value}
-          </DetailItem>
-        ))}
-      </dl>
-    </section>
+    <Card asChild>
+      <section className="p-5">
+        <p className="type-label text-muted-foreground">{title}</p>
+        <dl className="mt-5 space-y-4">
+          {entries.map(([label, value]) => (
+            <DetailItem key={label} label={label}>
+              {value}
+            </DetailItem>
+          ))}
+        </dl>
+      </section>
+    </Card>
   );
 }
 
@@ -441,11 +444,11 @@ function SessionDetailSkeleton() {
   return (
     <div aria-busy="true" aria-label={t('api.loadSession')} className="space-y-8" role="status">
       <h1 className="sr-only">{t('session.operation')}</h1>
-      <Skeleton className="h-56 rounded-2xl" />
+      <Skeleton className="h-56 rounded-lg" />
       <div className="grid gap-4 lg:grid-cols-3">
-        <Skeleton className="h-64 rounded-xl" />
-        <Skeleton className="h-64 rounded-xl" />
-        <Skeleton className="h-64 rounded-xl" />
+        <Skeleton className="h-64 rounded-lg" />
+        <Skeleton className="h-64 rounded-lg" />
+        <Skeleton className="h-64 rounded-lg" />
       </div>
     </div>
   );

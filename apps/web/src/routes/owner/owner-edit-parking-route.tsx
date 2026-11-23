@@ -11,6 +11,7 @@ import { getOwnedParkings, updateParking } from '../../lib/api/owner-api.js';
 import { UnsavedChangesPrompt } from '../../components/domain/unsaved-changes-prompt.js';
 import { toast } from 'sonner';
 import { localizeParkingMutationError } from './parking-route-errors.js';
+import { Notice } from '../../components/domain/notice.js';
 
 export function OwnerEditParkingRoute() {
   const { t } = useAppearance();
@@ -111,22 +112,22 @@ export function OwnerEditParkingRoute() {
         }}
       />
       {hasStaleData ? (
-        <div
-          className="flex flex-col gap-4 rounded-xl border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+        <Notice
+          action={
+            <Button
+              onClick={() => {
+                void parkingsQuery.refetch();
+              }}
+              type="button"
+              variant="secondary"
+            >
+              {t('parkingRoute.retryStale')}
+            </Button>
+          }
           role="alert"
         >
-          <p className="break-words text-sm font-semibold">{t('parkingRoute.stale')}</p>
-          <Button
-            className="shrink-0 self-start sm:self-auto"
-            onClick={() => {
-              void parkingsQuery.refetch();
-            }}
-            type="button"
-            variant="secondary"
-          >
-            {t('parkingRoute.retryStale')}
-          </Button>
-        </div>
+          {t('parkingRoute.stale')}
+        </Notice>
       ) : null}
       <UnsavedChangesPrompt
         allowNavigationRef={allowNavigationRef}
