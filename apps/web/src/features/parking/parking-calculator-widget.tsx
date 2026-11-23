@@ -111,6 +111,7 @@ export function ParkingCalculatorWidget({ className, parking }: ParkingCalculato
       ) : (
         <CalculatorForm
           facilities={availableFacilities}
+          fixedFacility={Boolean(parking)}
           locale={locale}
           onFacilityChange={setSelectedId}
           onDurationChange={setSelectedDuration}
@@ -144,6 +145,7 @@ function CalculatorLoading() {
 }
 
 interface CalculatorFormProps {
+  fixedFacility: boolean;
   locale: Locale;
   facilities: {
     id: string;
@@ -165,6 +167,7 @@ interface CalculatorFormProps {
 
 function CalculatorForm({
   facilities,
+  fixedFacility,
   locale,
   onFacilityChange,
   onDurationChange,
@@ -205,17 +208,31 @@ function CalculatorForm({
           <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-brand-soft text-foreground">
             <MapPin aria-hidden="true" className="size-4" />
           </span>
-          <Combobox
-            className="public-discovery-combobox min-w-0 @sm:flex-1"
-            id="estimate-facility"
-            key={facilities.map((facility) => facility.id).join('|')}
-            label={t('calculator.facility')}
-            onValueChange={(id) => {
-              onFacilityChange(id);
-            }}
-            options={facilities.map((facility) => ({ label: facility.title, value: facility.id }))}
-            value={selectedId}
-          />
+          {fixedFacility ? (
+            <div className="min-w-0 space-y-1 @sm:flex-1">
+              <p className="field-label block text-xs font-bold text-foreground">
+                {t('calculator.facility')}
+              </p>
+              <p className="truncate text-sm font-semibold text-foreground">
+                {selectedFacility.title}
+              </p>
+            </div>
+          ) : (
+            <Combobox
+              className="public-discovery-combobox min-w-0 @sm:flex-1"
+              id="estimate-facility"
+              key={facilities.map((facility) => facility.id).join('|')}
+              label={t('calculator.facility')}
+              onValueChange={(id) => {
+                onFacilityChange(id);
+              }}
+              options={facilities.map((facility) => ({
+                label: facility.title,
+                value: facility.id,
+              }))}
+              value={selectedId}
+            />
+          )}
           <span className="col-start-2 flex items-baseline justify-end gap-1 text-right @sm:block @sm:shrink-0">
             <span className="type-operational text-xs font-bold text-foreground">
               {formatMoney(selectedFacility.hourlyRateCents, selectedFacility.currency, locale)}
@@ -318,17 +335,19 @@ function CalculatorForm({
         </div>
       </div>
 
-      <Button asChild className="h-12 w-full rounded-full" size="lg">
-        <Link className="group" to={`/parkings/${selectedFacility.id}`}>
-          <span>{t('calculator.viewFacility')}</span>
-          <ArrowRight
-            aria-hidden="true"
-            className="size-4 transition-transform group-hover:translate-x-1"
-          />
-        </Link>
-      </Button>
+      {!fixedFacility ? (
+        <Button asChild className="h-12 w-full" shape="pill" size="lg">
+          <Link className="group" to={`/parkings/${selectedFacility.id}`}>
+            <span>{t('calculator.viewFacility')}</span>
+            <ArrowRight
+              aria-hidden="true"
+              className="size-4 transition-transform group-hover:translate-x-1"
+            />
+          </Link>
+        </Button>
+      ) : null}
 
-      <p className="mt-4 text-center text-2xs leading-relaxed text-muted-foreground">
+      <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
         {t('calculator.estimateNote')}
       </p>
     </>

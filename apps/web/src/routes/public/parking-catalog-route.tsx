@@ -220,10 +220,22 @@ export function ParkingCatalogRoute() {
             </ErrorState>
           </div>
         ) : null}
+        {parkingQuery.data && !parkingQuery.isError ? (
+          <p className="mt-8 text-sm font-semibold text-foreground-secondary" role="status">
+            {tPlural(
+              parkingQuery.data.meta.total,
+              {
+                one: 'public.catalog.resultCountOne',
+                other: 'public.catalog.resultCountOther',
+              },
+              { count: formatNumber(parkingQuery.data.meta.total, locale) },
+            )}
+          </p>
+        ) : null}
         {!parkingQuery.isLoading &&
         !parkingQuery.isError &&
         parkingQuery.data?.data.length === 0 ? (
-          <div className="mt-10">
+          <div className="mt-6">
             <EmptyState
               action={
                 hasFilters ? (
@@ -238,28 +250,17 @@ export function ParkingCatalogRoute() {
                   </Button>
                 ) : undefined
               }
+              eyebrow={hasFilters ? t('public.catalog.emptyEyebrow') : undefined}
               title={t('public.catalog.emptyTitle')}
             >
               {t('public.catalog.emptyDescription')}
             </EmptyState>
           </div>
         ) : null}
-        {parkingQuery.data && !parkingQuery.isError ? (
-          <p className="mt-8 text-sm font-semibold text-foreground-secondary" role="status">
-            {tPlural(
-              parkingQuery.data.meta.total,
-              {
-                one: 'public.catalog.resultCountOne',
-                other: 'public.catalog.resultCountOther',
-              },
-              { count: formatNumber(parkingQuery.data.meta.total, locale) },
-            )}
-          </p>
-        ) : null}
         {!parkingQuery.isLoading && !parkingQuery.isError && parkingQuery.data?.data.length ? (
           <div
             aria-label={t('public.catalog.results')}
-            className="mt-10 grid gap-5 md:grid-cols-2 wide:grid-cols-3"
+            className="mt-6 grid gap-5 md:grid-cols-2 wide:grid-cols-3"
             role="region"
           >
             {parkingQuery.data.data.map((parking) => (
@@ -271,7 +272,7 @@ export function ParkingCatalogRoute() {
             ))}
           </div>
         ) : null}
-        {parkingQuery.data && !parkingQuery.isError ? (
+        {parkingQuery.data && !parkingQuery.isError && parkingQuery.data.meta.totalPages > 1 ? (
           <nav
             aria-label={t('public.catalog.pagination')}
             className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-border-subtle pt-7"

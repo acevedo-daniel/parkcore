@@ -10,6 +10,7 @@ interface EmptyStateProps {
   children: ReactNode;
   className?: string;
   compactLayout?: 'split' | 'stacked';
+  eyebrow?: string;
   title: string;
   variant?: 'compact' | 'default';
 }
@@ -19,6 +20,7 @@ export function EmptyState({
   children,
   className,
   compactLayout = 'stacked',
+  eyebrow,
   title,
   variant = 'default',
 }: EmptyStateProps) {
@@ -55,7 +57,9 @@ export function EmptyState({
           >
             <FolderOpen aria-hidden="true" className="size-5" />
           </EmptyMedia>
-          <p className="mt-5 type-eyebrow text-muted-foreground">{t('feedback.emptyEyebrow')}</p>
+          <p className="mt-5 type-eyebrow text-muted-foreground">
+            {eyebrow ?? t('feedback.emptyEyebrow')}
+          </p>
           <h2 className="mt-2 type-heading" id={titleId}>
             {title}
           </h2>

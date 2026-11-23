@@ -367,7 +367,7 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
           path: '/not-a-public-route',
           ready: async () => {
             await expect(
-              page.getByRole('heading', { name: 'We could not find this facility.' }),
+              page.getByRole('heading', { name: 'We could not find this page.' }),
             ).toBeVisible();
             await expect(page.getByRole('link', { name: 'Explore facilities' })).toHaveAttribute(
               'href',

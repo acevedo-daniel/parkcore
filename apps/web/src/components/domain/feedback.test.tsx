@@ -17,6 +17,7 @@ describe('shared feedback states', () => {
     );
 
     expect(screen.getByText('No active sessions')).toBeTruthy();
+    expect(screen.getByText('Nothing here yet')).toBeTruthy();
     expect(screen.getByRole('status').getAttribute('aria-live')).toBe('polite');
     expect(screen.getByRole('alert').textContent).toContain('The operation could not be loaded.');
     expect(screen.getByRole('alert').getAttribute('aria-atomic')).toBe('true');
@@ -50,5 +51,16 @@ describe('shared feedback states', () => {
     expect(screen.getByRole('button', { name: 'Reintentar' })).toBeTruthy();
     expect(screen.getByText('Necesita atención')).toBeTruthy();
     window.localStorage.removeItem('parkcore-lang');
+  });
+
+  it('allows overriding the default empty eyebrow', () => {
+    render(
+      <EmptyState eyebrow="No results" title="No active parkings">
+        Try a different filter.
+      </EmptyState>,
+    );
+
+    expect(screen.getByText('No results')).toBeTruthy();
+    expect(screen.queryByText('Nothing here yet')).toBeNull();
   });
 });

@@ -89,6 +89,7 @@ describe('public parking catalog', () => {
     expect(await screen.findByRole('link', { name: 'Open Central Parking' })).toBeTruthy();
     expect(screen.getByText('Demo', { exact: true })).toBeTruthy();
     expect(screen.getByText('1 parking found', { exact: true })).toBeTruthy();
+    expect(screen.queryByRole('navigation', { name: 'Parking catalog pagination' })).toBeNull();
     expect(document.title).toBe('Parkings | ParkCore');
     expect(document.head.querySelector('meta[name="description"]')?.getAttribute('content')).toBe(
       'Browse active ParkCore parking facilities by address and hourly rate.',
@@ -116,6 +117,8 @@ describe('public parking catalog', () => {
     api.getPublicParkings.mockResolvedValueOnce(listFixture([]));
     const { unmount } = renderCatalog();
     expect(await screen.findByText('No active parkings')).toBeTruthy();
+    expect(screen.getByText('Nothing here yet')).toBeTruthy();
+    expect(screen.queryByRole('navigation', { name: 'Parking catalog pagination' })).toBeNull();
     unmount();
 
     api.getPublicParkings.mockRejectedValueOnce(new Error('Offline'));
@@ -123,6 +126,22 @@ describe('public parking catalog', () => {
     await waitFor(() => {
       expect(screen.getByRole('alert').textContent).toContain('We could not load the directory.');
     });
+  });
+
+  it('shows the filtered empty eyebrow and renders the result count before the empty state', async () => {
+    api.getPublicParkings.mockResolvedValueOnce(listFixture([]));
+    renderCatalog('/parkings?search=missing');
+
+    expect(await screen.findByText('No active parkings')).toBeTruthy();
+    expect(screen.getByText('No results')).toBeTruthy();
+    expect(screen.queryByText('Nothing here yet')).toBeNull();
+    expect(screen.queryByRole('navigation', { name: 'Parking catalog pagination' })).toBeNull();
+
+    const resultCount = screen.getByText('0 parkings found');
+    const emptyState = screen.getByRole('heading', { name: 'No active parkings' });
+    expect(
+      Boolean(resultCount.compareDocumentPosition(emptyState) & Node.DOCUMENT_POSITION_FOLLOWING),
+    ).toBe(true);
   });
 
   it('keeps filters in the URL while moving through public parking pages', async () => {

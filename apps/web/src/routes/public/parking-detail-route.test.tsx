@@ -144,7 +144,9 @@ describe('public parking detail', () => {
     );
     renderParkingDetail();
 
-    expect(await screen.findByRole('combobox', { name: 'Where are you parking?' })).toBeTruthy();
+    expect(await screen.findByText('Where are you parking?')).toBeTruthy();
+    expect(screen.queryByRole('combobox')).toBeNull();
+    expect(screen.queryByRole('link', { name: 'View this facility' })).toBeNull();
     expect(screen.getByText(/31\.00/)).toBeTruthy();
     expect(api.getPublicParkings).not.toHaveBeenCalled();
   });
