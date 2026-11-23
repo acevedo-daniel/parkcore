@@ -57,9 +57,3 @@ export function formatElapsedHours(hours: number, locale: Locale) {
 
   return new Intl.ListFormat(locale, { type: 'unit', style: 'long' }).format(parts);
 }
-
-export function checkoutPreview(startTime: string, hourlyRateCents: number) {
-  const elapsedHours = (Date.now() - new Date(startTime).getTime()) / 3_600_000;
-  const chargedHours = Math.max(1, Math.ceil(elapsedHours));
-  return { chargedHours, totalAmountCents: chargedHours * hourlyRateCents };
-}

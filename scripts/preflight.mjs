@@ -2,26 +2,17 @@
 
 import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { existsSync } from 'node:fs';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { resolvePackageManager } from './package-manager.mjs';
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const composeFile = path.join(repositoryRoot, 'docker-compose.preflight.yml');
 const packageManager = resolvePackageManager();
 let isolatedEnvironmentPath;
-
-function resolvePackageManager() {
-  if (process.platform !== 'win32') return 'pnpm';
-  for (const directory of (process.env.PATH ?? '').split(path.delimiter)) {
-    const executable = path.join(directory, 'node_modules', 'pnpm', 'pnpm.exe');
-    if (existsSync(executable)) return executable;
-  }
-  return 'pnpm.cmd';
-}
 const retainedEnvironmentKeys = new Set([
   'APPDATA',
   'COMSPEC',
@@ -300,6 +291,7 @@ async function runPreflight() {
 
         await stage('Quality', async () => {
           await run(process.execPath, ['scripts/check-ci-placeholders.mjs']);
+          await runPnpm(['dedupe', '--check']);
           await runPnpm(['test:scripts']);
           await runPnpm(['text:check']);
           await runPnpm(['locales:check']);
@@ -322,6 +314,7 @@ async function runPreflight() {
 
         await stage('Contract', async () => {
           await runPnpm(['contract:check'], apiEnv);
+          await runPnpm(['openapi:check'], apiEnv);
         });
 
         await stage('E2E / Web prerequisites', async () => {
@@ -332,10 +325,15 @@ async function runPreflight() {
           const env = e2eEnvironment(databases.e2e);
           await runPnpm(['--filter', '@parkcore/api', 'db:setup'], env);
           await runPnpm(['--filter', '@parkcore/web', 'test:e2e:local'], env);
+          await runPnpm(['--filter', '@parkcore/web', 'test:e2e:production-preview'], env);
         });
 
         await stage('E2E / Web', async () => {
           await runPnpm(['--filter', '@parkcore/web', 'test:e2e:hardening'], {
+            ...apiEnv,
+            VITE_API_URL: 'http://127.0.0.1:3000',
+          });
+          await runPnpm(['--filter', '@parkcore/web', 'test:e2e'], {
             ...apiEnv,
             VITE_API_URL: 'http://127.0.0.1:3000',
           });

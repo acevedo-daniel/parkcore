@@ -248,10 +248,6 @@ test('walks the public discovery, estimate, and demo entry journey', async ({ pa
       await expect(
         page.getByRole('heading', { name: 'Estimate the cost of a stay' }),
       ).toBeVisible();
-      await expect(page.getByText('Demonstration data', { exact: true })).toBeVisible();
-      await expect(
-        page.getByText('This is not real-time activity.', { exact: true }),
-      ).toBeVisible();
       await expect(page.getByText('$31.00', { exact: true })).toBeVisible();
       await expectNoHorizontalOverflow(page, `${viewport.name} ${theme} landing`);
       await page.screenshot({

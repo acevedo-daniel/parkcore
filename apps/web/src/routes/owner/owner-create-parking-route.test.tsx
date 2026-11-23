@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../lib/api/api-error.js';
 import { parkingFixture } from '../../test/fixtures.js';
 import { OwnerCreateParkingRoute } from './owner-create-parking-route.js';
+import { fillField } from '../../test/fill-field.js';
 
 const api = vi.hoisted(() => ({ createParking: vi.fn() }));
 
@@ -42,17 +43,17 @@ describe('create parking workflow', () => {
     api.createParking.mockResolvedValue(parkingFixture({ id: 'parking-2', title: 'North Garage' }));
     renderCreateParking();
 
-    await user.type(screen.getByLabelText('Name'), 'North Garage');
-    await user.type(screen.getByLabelText('Neighborhood'), 'Downtown');
-    await user.type(screen.getByLabelText('Address'), '202 North Street');
+    await fillField(user, screen.getByLabelText('Name'), 'North Garage');
+    await fillField(user, screen.getByLabelText('Neighborhood'), 'Downtown');
+    await fillField(user, screen.getByLabelText('Address'), '202 North Street');
     await user.clear(screen.getByLabelText('Latitude'));
-    await user.type(screen.getByLabelText('Latitude'), '-34.61');
+    await fillField(user, screen.getByLabelText('Latitude'), '-34.61');
     await user.clear(screen.getByLabelText('Longitude'));
-    await user.type(screen.getByLabelText('Longitude'), '-58.38');
+    await fillField(user, screen.getByLabelText('Longitude'), '-58.38');
     await user.clear(screen.getByLabelText('Capacity'));
-    await user.type(screen.getByLabelText('Capacity'), '20');
+    await fillField(user, screen.getByLabelText('Capacity'), '20');
     await user.clear(screen.getByLabelText('Hourly rate (ARS)'));
-    await user.type(screen.getByLabelText('Hourly rate (ARS)'), '18.5');
+    await fillField(user, screen.getByLabelText('Hourly rate (ARS)'), '18.5');
     await user.click(screen.getByRole('button', { name: 'Create parking' }));
 
     await waitFor(() => {
@@ -84,11 +85,11 @@ describe('create parking workflow', () => {
     );
     renderCreateParking();
 
-    await user.type(screen.getByLabelText('Name'), 'North Garage');
-    await user.type(screen.getByLabelText('Neighborhood'), 'Downtown');
-    await user.type(screen.getByLabelText('Address'), '202 North Street');
-    await user.type(screen.getByLabelText('Latitude'), '-34.61');
-    await user.type(screen.getByLabelText('Longitude'), '-58.38');
+    await fillField(user, screen.getByLabelText('Name'), 'North Garage');
+    await fillField(user, screen.getByLabelText('Neighborhood'), 'Downtown');
+    await fillField(user, screen.getByLabelText('Address'), '202 North Street');
+    await fillField(user, screen.getByLabelText('Latitude'), '-34.61');
+    await fillField(user, screen.getByLabelText('Longitude'), '-58.38');
     await user.click(screen.getByRole('button', { name: 'Create parking' }));
 
     expect((await screen.findByRole('alert')).textContent).toContain(
@@ -100,7 +101,7 @@ describe('create parking workflow', () => {
     const user = userEvent.setup();
     renderCreateParking();
 
-    await user.type(screen.getByLabelText('Name'), 'North Garage');
+    await fillField(user, screen.getByLabelText('Name'), 'North Garage');
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
 
     expect(await screen.findByText('Parking list')).toBeTruthy();
@@ -111,7 +112,7 @@ describe('create parking workflow', () => {
     const user = userEvent.setup();
     renderCreateParking();
 
-    await user.type(screen.getByLabelText('Name'), 'North Garage');
+    await fillField(user, screen.getByLabelText('Name'), 'North Garage');
     const event = new Event('beforeunload', { cancelable: true });
     window.dispatchEvent(event);
 

@@ -39,7 +39,7 @@ The production audit must report no known vulnerabilities before the workspace c
 
 ### API
 
-API tests use PostgreSQL rather than an in-memory substitute for persistence-sensitive behavior.
+API tests use PostgreSQL rather than an in-memory substitute for persistence-sensitive behavior. Database integration files under `apps/api/tests/` run serially in their own Vitest project because they share one database and the canonical showcase; unit tests under `apps/api/src/` mock Prisma and run in parallel.
 
 CI provisions a PostgreSQL service, then runs:
 
@@ -124,8 +124,8 @@ Vitest enforces these minimum thresholds:
 
 | Workspace  | Lines | Functions | Statements | Branches |
 | ---------- | ----: | --------: | ---------: | -------: |
-| `apps/api` |   70% |       70% |        70% |      60% |
-| `apps/web` |   65% |       65% |        65% |      55% |
+| `apps/api` |   92% |       91% |        90% |      80% |
+| `apps/web` |   85% |       81% |        83% |      77% |
 
 CI enforces these thresholds, and the critical behaviors above still need direct coverage.
 
@@ -256,12 +256,12 @@ The hardening matrix checks failure recovery across representative compact and w
 
 `.github/workflows/ci.yml` separates verification into seven conceptual jobs and one final gate:
 
-1. **Quality**: tracked template-placeholder guard, script regression tests, authored text, localization parity, design tokens, formatting, Prisma/API-client preparation, lint, and typecheck;
+1. **Quality**: tracked template-placeholder guard, lockfile deduplication, script regression tests, authored text, localization parity, design tokens, formatting, Prisma/API-client preparation, lint, and typecheck;
 2. **Tests / API**: PostgreSQL bootstrap and API coverage tests;
 3. **Tests / Web**: browser-facing unit and component tests with the existing coverage thresholds;
-4. **Contract**: generated API/client drift detection;
-5. **E2E**: local real-stack Playwright browser workflow with PostgreSQL and failure diagnostics;
-6. **E2E / Web**: credential-free deterministic browser hardening matrix with responsive, accessibility, theme, and localization checks;
+4. **Contract**: generated API/client drift detection and OpenAPI document validation;
+5. **E2E**: local real-stack Playwright browser workflow with PostgreSQL, the production-preview smoke, and failure diagnostics;
+6. **E2E / Web**: credential-free deterministic browser hardening matrix with responsive, accessibility, theme, and localization checks, plus the mocked public and owner journeys;
 7. **Production**: production and full-graph dependency audits, fresh-database migrations, deployable API/client/web builds, compiled startup, cleanup, and browser secret-boundary checks;
 8. **CI Gate**: the final aggregate check that fails when any verification job fails, is cancelled, or is skipped.
 
@@ -296,7 +296,7 @@ from `.ci/production/`.
 
 ### Local preflight
 
-It requires Node.js 24, the exact pnpm version in the root manifest, Docker Compose, and free application ports `3000` and `4173`. It installs from the frozen lockfile, assigns a unique Compose project and dynamic loopback PostgreSQL port, and creates distinct API-test, browser-E2E, and production databases. It runs the placeholder and script checks, authored-text and localization checks, token and format checks, lint and types, API and web coverage, contract generation, both browser suites, both audits, fresh migrations, production builds, artifact checks, compiled startup smoke, and bounded cleanup. It does not load personal `.env` values or target the development or hosted database. The disposable project and temporary environment file are cleaned up after success or failure.
+It requires Node.js 24, the exact pnpm version in the root manifest, Docker Compose, and free application ports `3000` and `4173`. It installs from the frozen lockfile, assigns a unique Compose project and dynamic loopback PostgreSQL port, and creates distinct API-test, browser-E2E, and production databases. It runs the placeholder, lockfile deduplication, and script checks, authored-text and localization checks, token and format checks, lint and types, API and web coverage, contract generation and OpenAPI document validation, the local real-stack workflow, the production-preview smoke, the browser hardening matrix, the mocked public and owner journeys, both audits, fresh migrations, production builds, artifact checks, compiled startup smoke, and bounded cleanup. It does not load personal `.env` values or target the development or hosted database. The disposable project and temporary environment file are cleaned up after success or failure.
 
 Playwright installs Chromium if it is missing. A standalone production-style local build still needs a valid `VITE_API_URL`; preflight supplies explicit synthetic values for its production checks.
 

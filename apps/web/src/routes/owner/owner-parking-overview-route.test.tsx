@@ -8,6 +8,7 @@ import { Toaster } from '../../components/ui/sonner.js';
 import { ApiError } from '../../lib/api/api-error.js';
 import { parkingFixture, parkingSessionFixture } from '../../test/fixtures.js';
 import { OwnerParkingOverviewRoute } from './owner-parking-overview-route.js';
+import { fillField } from '../../test/fill-field.js';
 
 const api = vi.hoisted(() => ({
   checkIn: vi.fn(),
@@ -261,7 +262,7 @@ describe('parking operations', () => {
     await user.click(screen.getByRole('button', { name: 'Check in' }));
     await screen.findByRole('dialog', { name: 'Check in vehicle' });
     await user.type(screen.getByLabelText('Plate'), 'ab-123 cd');
-    await user.type(screen.getByLabelText('Brand'), 'Toyota');
+    await fillField(user, screen.getByLabelText('Brand'), 'Toyota');
     await user.click(screen.getByRole('button', { name: 'Start session' }));
 
     expect(await screen.findByText(message)).toBeTruthy();

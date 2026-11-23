@@ -1,17 +1,17 @@
 import rateLimit from 'express-rate-limit';
 import { env } from './env.js';
 
-function buildAuthRateLimitMessage() {
+function buildRateLimitMessage() {
   return { error: true, message: 'Too many requests, try again later' };
 }
 
-export function createAuthRateLimiter(_scope: 'register' | 'login') {
+export function createAuthRateLimiter() {
   return rateLimit({
     windowMs: env.AUTH_RATE_LIMIT_WINDOW_MS,
     limit: env.AUTH_RATE_LIMIT_MAX,
     standardHeaders: 'draft-8',
     legacyHeaders: false,
-    message: buildAuthRateLimitMessage(),
+    message: buildRateLimitMessage(),
   });
 }
 
@@ -21,7 +21,7 @@ export function createDemoResetRateLimiter() {
     limit: env.DEMO_RESET_RATE_LIMIT_MAX,
     standardHeaders: 'draft-8',
     legacyHeaders: false,
-    message: buildAuthRateLimitMessage(),
+    message: buildRateLimitMessage(),
   });
 }
 
@@ -31,6 +31,6 @@ export function createDemoCreationRateLimiter() {
     limit: env.DEMO_CREATION_RATE_LIMIT_MAX,
     standardHeaders: 'draft-8',
     legacyHeaders: false,
-    message: buildAuthRateLimitMessage(),
+    message: buildRateLimitMessage(),
   });
 }

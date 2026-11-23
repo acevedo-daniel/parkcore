@@ -4,10 +4,11 @@ import { createWriteStream, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { resolvePackageManager } from './package-manager.mjs';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, '..');
-const pnpmCommand = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
+const pnpmCommand = resolvePackageManager();
 const configuredLogDirectory = process.env.PARKCORE_E2E_LOG_DIRECTORY?.trim();
 const logDirectory = configuredLogDirectory
   ? path.resolve(repositoryRoot, configuredLogDirectory)
@@ -31,7 +32,7 @@ function runCommand(args) {
     const child = spawn(pnpmCommand, args, {
       cwd: repositoryRoot,
       env: process.env,
-      shell: process.platform === 'win32',
+      shell: process.platform === 'win32' && pnpmCommand.toLowerCase().endsWith('.cmd'),
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 

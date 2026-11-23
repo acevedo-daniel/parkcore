@@ -123,14 +123,20 @@ describe('demo lifecycle integration', () => {
       },
     });
 
-    await expect(cleanupExpiredDemoOwners(prisma, new Date())).resolves.toBeGreaterThanOrEqual(1);
-    await expect(prisma.user.findUnique({ where: { id: expiredId } })).resolves.toBeNull();
-    await expect(prisma.parking.findUnique({ where: { id: parking.id } })).resolves.toBeNull();
-    await expect(prisma.vehicle.findUnique({ where: { id: vehicle.id } })).resolves.toBeNull();
-    await expect(
-      prisma.parkingSession.findFirst({ where: { parkingId: parking.id } }),
-    ).resolves.toBeNull();
-    await expect(cleanupExpiredDemoOwners(prisma, new Date())).resolves.toBe(0);
+    // Assert only this test's records: other files may create or clean expired DEMO owners.
+    const expectExpiredRecordsRemoved = async () => {
+      await expect(prisma.user.findUnique({ where: { id: expiredId } })).resolves.toBeNull();
+      await expect(prisma.parking.findUnique({ where: { id: parking.id } })).resolves.toBeNull();
+      await expect(prisma.vehicle.findUnique({ where: { id: vehicle.id } })).resolves.toBeNull();
+      await expect(
+        prisma.parkingSession.findFirst({ where: { parkingId: parking.id } }),
+      ).resolves.toBeNull();
+    };
+
+    await cleanupExpiredDemoOwners(prisma, new Date());
+    await expectExpiredRecordsRemoved();
+    await cleanupExpiredDemoOwners(prisma, new Date());
+    await expectExpiredRecordsRemoved();
     await expect(prisma.parking.count({ where: { ownerId: seededOwner.id } })).resolves.toBe(
       ownerBefore,
     );
