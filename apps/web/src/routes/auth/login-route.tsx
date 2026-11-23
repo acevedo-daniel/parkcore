@@ -34,7 +34,7 @@ export function LoginRoute() {
             {t(sessionErrorKey)}
           </Notice>
         ) : null}
-        <div className="rounded-3xl bg-brand p-5 text-brand-foreground shadow-md">
+        <div className="rounded-3xl bg-brand p-5 text-brand-foreground">
           <div className="flex items-center gap-2 text-xs font-bold tracking-label uppercase">
             <Sparkles aria-hidden="true" className="size-4" />
             {t('auth.login.demoEyebrow')}

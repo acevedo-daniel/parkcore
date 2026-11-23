@@ -27,6 +27,7 @@ import {
   parseParkingCatalogUrlState,
   parkingCatalogSearchParamsFromState,
 } from './parking-catalog-query.js';
+import { Card } from '../../components/ui/card.js';
 
 function getFormText(formData: FormData, name: string) {
   const value = formData.get(name);
@@ -328,73 +329,75 @@ function CatalogFilters({
 }) {
   const { t } = useAppearance();
   return (
-    <form
-      aria-describedby={filterError ? `${idPrefix}-filter-error` : undefined}
-      aria-label={t('public.catalog.filterAction')}
-      className="grid gap-5 rounded-2xl border border-border bg-card p-5 shadow-xs lg:p-6"
-      noValidate
-      onSubmit={onSubmit}
-    >
-      <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
-        <div className="lg:col-span-5">
-          <FormField htmlFor={`${idPrefix}-search`} label={t('public.catalog.searchLabel')}>
-            <InputGroup>
-              <InputGroupAddon>
-                <InputGroupText>
-                  <Search aria-hidden="true" />
-                </InputGroupText>
-              </InputGroupAddon>
-              <InputGroupInput
-                defaultValue={searchParams.get('search') ?? ''}
-                aria-label={t('public.catalog.searchLabel')}
-                id={`${idPrefix}-search`}
-                name="search"
-                className="px-0"
-                placeholder={t('public.catalog.searchPlaceholder')}
-              />
-            </InputGroup>
-          </FormField>
-        </div>
-        <MonetaryFilterGroup
-          className="lg:col-span-7 lg:[&>div]:mt-0"
-          currency={currency}
-          defaultMax={searchParams.get('maxRate') ?? ''}
-          defaultMin={searchParams.get('minRate') ?? ''}
-          hideClear
-          idPrefix={idPrefix}
-          legendClassName="sr-only"
-          onClear={onClear}
-        />
-      </div>
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <label className="flex cursor-pointer items-center gap-3 text-sm font-semibold text-foreground">
-          <Checkbox
-            defaultChecked={searchParams.get('availableNow') === 'true'}
-            id={`${idPrefix}-available-now`}
-            name="availableNow"
+    <Card asChild>
+      <form
+        aria-describedby={filterError ? `${idPrefix}-filter-error` : undefined}
+        aria-label={t('public.catalog.filterAction')}
+        className="grid gap-5 p-5 lg:p-6"
+        noValidate
+        onSubmit={onSubmit}
+      >
+        <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
+          <div className="lg:col-span-5">
+            <FormField htmlFor={`${idPrefix}-search`} label={t('public.catalog.searchLabel')}>
+              <InputGroup>
+                <InputGroupAddon>
+                  <InputGroupText>
+                    <Search aria-hidden="true" />
+                  </InputGroupText>
+                </InputGroupAddon>
+                <InputGroupInput
+                  defaultValue={searchParams.get('search') ?? ''}
+                  aria-label={t('public.catalog.searchLabel')}
+                  id={`${idPrefix}-search`}
+                  name="search"
+                  className="px-0"
+                  placeholder={t('public.catalog.searchPlaceholder')}
+                />
+              </InputGroup>
+            </FormField>
+          </div>
+          <MonetaryFilterGroup
+            className="lg:col-span-7 lg:[&>div]:mt-0"
+            currency={currency}
+            defaultMax={searchParams.get('maxRate') ?? ''}
+            defaultMin={searchParams.get('minRate') ?? ''}
+            hideClear
+            idPrefix={idPrefix}
+            legendClassName="sr-only"
+            onClear={onClear}
           />
-          <span>{t('public.catalog.availableNow')}</span>
-        </label>
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <Button onClick={onClear} size="sm" type="button" variant="ghost">
-            {t('filters.clearRate')}
-          </Button>
-          <Button shape="pill" type="submit">
-            <SlidersHorizontal aria-hidden="true" className="size-4" />
-            {t('public.catalog.applyFilters')}
-          </Button>
         </div>
-      </div>
-      {filterError ? (
-        <p
-          className="text-sm font-medium text-destructive-soft-foreground lg:col-span-full"
-          id={`${idPrefix}-filter-error`}
-          role="alert"
-        >
-          {filterError}
-        </p>
-      ) : null}
-    </form>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <label className="flex cursor-pointer items-center gap-3 text-sm font-semibold text-foreground">
+            <Checkbox
+              defaultChecked={searchParams.get('availableNow') === 'true'}
+              id={`${idPrefix}-available-now`}
+              name="availableNow"
+            />
+            <span>{t('public.catalog.availableNow')}</span>
+          </label>
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <Button onClick={onClear} size="sm" type="button" variant="ghost">
+              {t('filters.clearRate')}
+            </Button>
+            <Button shape="pill" type="submit">
+              <SlidersHorizontal aria-hidden="true" className="size-4" />
+              {t('public.catalog.applyFilters')}
+            </Button>
+          </div>
+        </div>
+        {filterError ? (
+          <p
+            className="text-sm font-medium text-destructive-soft-foreground lg:col-span-full"
+            id={`${idPrefix}-filter-error`}
+            role="alert"
+          >
+            {filterError}
+          </p>
+        ) : null}
+      </form>
+    </Card>
   );
 }
 
@@ -409,7 +412,7 @@ function CatalogSkeleton() {
       role="status"
     >
       {Array.from({ length: 6 }, (_, index) => (
-        <div className="overflow-hidden rounded-2xl border border-border bg-card" key={index}>
+        <div className="overflow-hidden rounded-lg border border-border bg-card" key={index}>
           <Skeleton className="aspect-4/3 rounded-none" />
           <div className="space-y-4 p-6">
             <Skeleton className="h-7 w-3/4" />

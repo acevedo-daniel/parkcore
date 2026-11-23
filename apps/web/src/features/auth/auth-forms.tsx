@@ -61,7 +61,7 @@ export function AuthFormFrame({
   return (
     <section aria-labelledby="auth-title" className="min-h-full bg-background py-12 sm:py-20">
       <div className="mx-auto grid max-w-5xl gap-8 px-4 sm:px-6 wide:grid-cols-2 wide:items-stretch wide:px-8">
-        <div className="hidden min-w-0 rounded-signature bg-inverse p-10 text-inverse-foreground shadow-md wide:flex wide:flex-col wide:justify-between">
+        <div className="hidden min-w-0 rounded-signature bg-inverse p-10 text-inverse-foreground wide:flex wide:flex-col wide:justify-between">
           <div>
             <Link
               className="inline-flex min-h-11 items-center gap-2.5 rounded-sm font-display text-xl font-black tracking-tight text-inverse-foreground"
@@ -87,7 +87,7 @@ export function AuthFormFrame({
             {t('auth.frame.footer')}
           </p>
         </div>
-        <div className="min-w-0 rounded-signature border border-border bg-card p-6 shadow-md sm:p-8 wide:p-10">
+        <div className="min-w-0 rounded-signature border border-border bg-card p-6 sm:p-8 wide:p-10">
           <div>
             <Link
               className="inline-flex min-h-11 items-center gap-2 rounded-sm font-display text-lg font-black tracking-tight text-foreground wide:hidden"

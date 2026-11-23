@@ -62,7 +62,7 @@ export function ParkingCalculatorWidget({ className, parking }: ParkingCalculato
     <section
       aria-labelledby={titleId}
       className={cn(
-        'relative w-full max-w-md @container rounded-2xl border border-border bg-popover p-6 text-foreground shadow-md sm:p-8',
+        'relative w-full max-w-md @container rounded-lg border border-border bg-popover p-6 text-foreground sm:p-8',
         className,
       )}
     >
@@ -136,8 +136,8 @@ function CalculatorLoading() {
       <p className="mb-3 text-sm font-medium text-foreground-secondary">
         {t('calculator.loadingMessage')}
       </p>
-      <Skeleton className="h-24 rounded-xl" />
-      <Skeleton className="mt-3 h-28 rounded-xl" />
+      <Skeleton className="h-24 rounded-md" />
+      <Skeleton className="mt-3 h-28 rounded-md" />
       <Skeleton className="mt-6 h-12 rounded-full" />
     </div>
   );
@@ -200,9 +200,9 @@ function CalculatorForm({
 
   return (
     <>
-      <div className="rounded-xl border border-border-subtle bg-transparent p-4">
+      <div className="rounded-md border border-border-subtle bg-transparent p-4">
         <div className="grid min-w-0 grid-cols-calculator-facility gap-x-3 gap-y-2 @sm:flex @sm:items-center @sm:gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-foreground">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-brand-soft text-foreground">
             <MapPin aria-hidden="true" className="size-4" />
           </span>
           <Combobox
@@ -225,7 +225,7 @@ function CalculatorForm({
         </div>
       </div>
 
-      <fieldset className="mt-3 rounded-xl border border-border-subtle bg-transparent p-4">
+      <fieldset className="mt-3 rounded-md border border-border-subtle bg-transparent p-4">
         <legend className="mb-3 flex w-full items-center justify-between gap-3">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
             <Clock aria-hidden="true" className="size-3.5" />

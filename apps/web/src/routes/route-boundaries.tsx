@@ -43,8 +43,8 @@ function RouteRecovery({ notFound, owner }: { notFound: boolean; owner: boolean 
       <div
         className={
           owner
-            ? 'w-full min-w-0 max-w-xl rounded-2xl border border-brand-foreground/30 bg-brand-soft p-7 shadow-md sm:p-10'
-            : 'mx-auto w-full max-w-3xl rounded-2xl border border-border-strong bg-card p-8 shadow-md sm:p-10'
+            ? 'w-full min-w-0 max-w-xl rounded-lg border border-brand-foreground/30 bg-brand-soft p-6 sm:p-8'
+            : 'mx-auto w-full max-w-3xl rounded-lg border border-border bg-card p-6 sm:p-8'
         }
       >
         <p className="type-eyebrow text-muted-foreground">

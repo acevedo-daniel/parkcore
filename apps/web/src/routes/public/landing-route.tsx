@@ -162,7 +162,7 @@ export function LandingRoute() {
             </p>
           </div>
 
-          <div className="mt-16 grid gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-3">
+          <div className="mt-16 grid gap-px overflow-hidden rounded-3xl border border-border bg-border md:grid-cols-3">
             {HOW_IT_WORKS_ITEMS.map((item) => (
               <article className="min-h-64 bg-card p-7 sm:p-8" key={item.number}>
                 <span className="font-display text-xs font-bold tabular-nums text-muted-foreground">
@@ -182,10 +182,10 @@ export function LandingRoute() {
 
       <section className="py-16 sm:py-24">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-          <article className="rounded-2xl bg-card p-8 shadow-md sm:p-10">
-            <span className="inline-flex rounded-full bg-brand px-3 py-1.5 text-xs font-bold text-brand-foreground">
+          <article className="rounded-3xl border border-border bg-card p-8 sm:p-10">
+            <p className="type-eyebrow text-muted-foreground">
               {t('public.landing.driverEyebrow')}
-            </span>
+            </p>
             <h2 className="mt-7 max-w-md font-display text-3xl font-bold leading-tight tracking-heading sm:text-4xl">
               {t('public.landing.driverTitle')}
             </h2>
@@ -201,10 +201,10 @@ export function LandingRoute() {
             </Link>
           </article>
 
-          <article className="rounded-2xl bg-inverse p-8 text-inverse-foreground shadow-md sm:p-10">
-            <span className="inline-flex rounded-full bg-brand px-3 py-1.5 text-xs font-bold text-brand-foreground">
+          <article className="rounded-3xl bg-inverse p-8 text-inverse-foreground sm:p-10">
+            <p className="type-eyebrow text-inverse-foreground/75">
               {t('public.landing.operatorEyebrow')}
-            </span>
+            </p>
             <h2 className="mt-7 max-w-md font-display text-3xl font-bold leading-tight tracking-heading sm:text-4xl">
               {t('public.landing.operatorTitle')}
             </h2>
@@ -265,7 +265,7 @@ export function LandingRoute() {
           >
             {FAQS.map((faq) => (
               <AccordionItem
-                className="overflow-hidden rounded-xl border border-border bg-card"
+                className="overflow-hidden rounded-lg border border-border bg-card"
                 key={faq.id}
                 value={faq.id}
               >
@@ -356,7 +356,7 @@ function FeaturedFacilities({
         role="status"
       >
         {Array.from({ length: 3 }, (_, index) => (
-          <div className="overflow-hidden rounded-2xl border border-border bg-card" key={index}>
+          <div className="overflow-hidden rounded-lg border border-border bg-card" key={index}>
             <Skeleton className="aspect-4/3 rounded-none" />
             <div className="space-y-4 p-6">
               <Skeleton className="h-7 w-3/4" />
@@ -396,7 +396,7 @@ function FeaturedFacilities({
             {t('public.landing.emptyAction')}
           </Link>
         }
-        className="mt-10 rounded-xl border border-dashed border-border-strong bg-muted px-5 py-5 sm:px-6 sm:py-6"
+        className="mt-10 rounded-lg border border-dashed border-border-strong bg-muted px-5 py-5 sm:px-6 sm:py-6"
         compactLayout="split"
         title={t('public.landing.emptyEyebrow')}
         variant="compact"
