@@ -221,7 +221,7 @@ export function ActivitySection({
                       >
                         <span
                           className={cn(
-                            'mx-auto w-full max-w-12 rounded-t-sm transition-colors duration-(--motion-standard)',
+                            'mx-auto w-full max-w-12 rounded-t-sm transition-colors duration-standard',
                             isActive ? 'bg-chart-1' : 'bg-chart-3 group-hover:bg-chart-1',
                           )}
                           style={{ height: `${String(height)}%` }}
