@@ -410,7 +410,8 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
 
   await activeSessionLink.click();
   await expect(page).toHaveURL(new RegExp(`/app/sessions/${sessionId}$`));
-  await expect(page.getByRole('heading', { name: 'Car', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'CC004', exact: true })).toBeVisible();
+  await expect(page.getByText('Car', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('Central Corrientes', { exact: true })).toBeVisible();
   const checkoutTrigger = page.getByRole('button', { name: 'Check out', exact: true });
   await checkoutTrigger.focus();
