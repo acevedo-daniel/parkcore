@@ -323,10 +323,15 @@ async function runPreflight() {
           const env = e2eEnvironment(databases.e2e);
           await runPnpm(['--filter', '@parkcore/api', 'db:setup'], env);
           await runPnpm(['--filter', '@parkcore/web', 'test:e2e:local'], env);
+          await runPnpm(['--filter', '@parkcore/web', 'test:e2e:production-preview'], env);
         });
 
         await stage('E2E / Web', async () => {
           await runPnpm(['--filter', '@parkcore/web', 'test:e2e:hardening'], {
+            ...apiEnv,
+            VITE_API_URL: 'http://127.0.0.1:3000',
+          });
+          await runPnpm(['--filter', '@parkcore/web', 'test:e2e'], {
             ...apiEnv,
             VITE_API_URL: 'http://127.0.0.1:3000',
           });

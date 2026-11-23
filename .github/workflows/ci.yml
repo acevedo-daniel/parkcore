@@ -217,6 +217,9 @@ jobs:
       - name: Run local real-stack browser workflow
         run: pnpm --filter @parkcore/web test:e2e:local
 
+      - name: Run production preview smoke
+        run: pnpm --filter @parkcore/web test:e2e:production-preview
+
       - name: Report flaky browser tests
         if: ${{ !cancelled() }}
         run: |
@@ -237,6 +240,8 @@ jobs:
             apps/web/test-results/local-real-stack/
             apps/web/playwright-report/local-real-stack/
             apps/web/playwright-report/local-real-stack-results.json
+            apps/web/test-results/production-preview/
+            apps/web/playwright-report/production-preview/
           retention-days: 7
           if-no-files-found: ignore
 
@@ -272,6 +277,9 @@ jobs:
       - name: Run browser hardening matrix
         run: pnpm --filter @parkcore/web test:e2e:hardening
 
+      - name: Run mocked browser journeys
+        run: pnpm --filter @parkcore/web test:e2e
+
       - name: Report flaky browser tests
         if: ${{ !cancelled() }}
         run: |
@@ -289,6 +297,8 @@ jobs:
         with:
           name: web-e2e-hardening-diagnostics
           path: |
+            apps/web/test-results/
+            apps/web/playwright-report/
             apps/web/test-results/hardening/
             apps/web/playwright-report/hardening/
             apps/web/playwright-report/hardening-results.json
