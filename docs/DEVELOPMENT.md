@@ -190,9 +190,7 @@ An optional `SEED_REFERENCE_TIME` can be used when reproducible session timestam
 
 ## Dependency note
 
-The root `pnpm.overrides` in `package.json` pins audited transitive dependency versions.
-
-Treat these overrides as compatibility and security measures: verify `pnpm audit --prod` and the Prisma generate/build flow before changing or removing them.
+The root `pnpm.overrides` in `package.json` only lifts transitive dependencies whose parent pins a vulnerable exact version. Each entry targets the vulnerable range (for example `effect@<3.22.1`), so patched releases resolve normally and Dependabot can still update them. Remove an entry once its parent requires a patched version, and verify `pnpm audit`, `pnpm dedupe --check`, and the Prisma generate/build flow after any change.
 
 ## Related documentation
 
