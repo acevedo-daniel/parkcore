@@ -8,6 +8,7 @@ import type { AuthContextValue } from './auth-context.js';
 import { AuthContext } from './auth-context.js';
 import { LoginForm, RegisterForm } from './auth-forms.js';
 import { ApiError } from '../../lib/api/api-error.js';
+import { fillField } from '../../test/fill-field.js';
 
 afterEach(cleanup);
 
@@ -88,8 +89,8 @@ describe('authentication forms', () => {
     const login = vi.fn().mockResolvedValue(undefined);
     renderWithAuth(<LoginForm onSuccess={onSuccess} />, { login });
 
-    await user.type(screen.getByLabelText('Email'), ' owner@example.com ');
-    await user.type(screen.getByLabelText('Password'), 'password123');
+    await fillField(user, screen.getByLabelText('Email'), ' owner@example.com ');
+    await fillField(user, screen.getByLabelText('Password'), 'password123');
     await user.click(screen.getByRole('button', { name: 'Sign in' }));
 
     await waitFor(() => {
@@ -103,10 +104,10 @@ describe('authentication forms', () => {
     const register = vi.fn().mockRejectedValue(new ApiError('Email taken', 409));
     renderWithAuth(<RegisterForm onSuccess={vi.fn()} />, { register });
 
-    await user.type(screen.getByLabelText('First name'), 'Park');
-    await user.type(screen.getByLabelText('Last name'), 'Core');
-    await user.type(screen.getByLabelText('Email'), 'owner@example.com');
-    await user.type(screen.getByLabelText('Password'), 'password123');
+    await fillField(user, screen.getByLabelText('First name'), 'Park');
+    await fillField(user, screen.getByLabelText('Last name'), 'Core');
+    await fillField(user, screen.getByLabelText('Email'), 'owner@example.com');
+    await fillField(user, screen.getByLabelText('Password'), 'password123');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
 
     expect(
@@ -122,7 +123,7 @@ describe('authentication forms', () => {
     renderWithAuth(<LoginForm onSuccess={vi.fn()} />);
 
     const password = screen.getByLabelText('Password');
-    await user.type(password, 'password123');
+    await fillField(user, password, 'password123');
     await user.click(screen.getByRole('button', { name: 'Show password' }));
 
     expect(password).toHaveProperty('type', 'text');
@@ -151,10 +152,10 @@ describe('authentication forms', () => {
 
     try {
       const { value } = renderWithAuth(<RegisterForm onSuccess={vi.fn()} />, { register });
-      await user.type(screen.getByLabelText('First name'), 'Park');
-      await user.type(screen.getByLabelText('Last name'), 'Core');
-      await user.type(screen.getByLabelText('Email'), 'owner@example.com');
-      await user.type(screen.getByLabelText('Password'), 'password123');
+      await fillField(user, screen.getByLabelText('First name'), 'Park');
+      await fillField(user, screen.getByLabelText('Last name'), 'Core');
+      await fillField(user, screen.getByLabelText('Email'), 'owner@example.com');
+      await fillField(user, screen.getByLabelText('Password'), 'password123');
       await user.click(screen.getByRole('button', { name: 'Create account' }));
 
       expect(await screen.findByText(/too many attempts/i)).toBeTruthy();
@@ -183,10 +184,10 @@ describe('authentication forms', () => {
     const onSuccess = vi.fn();
     renderWithAuth(<RegisterForm onSuccess={onSuccess} />, { register });
 
-    await user.type(screen.getByLabelText('First name'), 'Park');
-    await user.type(screen.getByLabelText('Last name'), 'Core');
-    await user.type(screen.getByLabelText('Email'), 'owner@example.com');
-    await user.type(screen.getByLabelText('Password'), 'password123');
+    await fillField(user, screen.getByLabelText('First name'), 'Park');
+    await fillField(user, screen.getByLabelText('Last name'), 'Core');
+    await fillField(user, screen.getByLabelText('Email'), 'owner@example.com');
+    await fillField(user, screen.getByLabelText('Password'), 'password123');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
 
     const submit = screen.getByRole('button', { name: /Creating account/ });
@@ -204,8 +205,8 @@ describe('authentication forms', () => {
     const login = vi.fn().mockRejectedValue(new ApiError('Invalid credentials', 401));
     renderWithAuth(<LoginForm onSuccess={vi.fn()} />, { login });
 
-    await user.type(screen.getByLabelText('Email'), 'owner@example.com');
-    await user.type(screen.getByLabelText('Password'), 'wrong-password');
+    await fillField(user, screen.getByLabelText('Email'), 'owner@example.com');
+    await fillField(user, screen.getByLabelText('Password'), 'wrong-password');
     await user.click(screen.getByRole('button', { name: 'Sign in' }));
 
     expect((await screen.findByText('The email or password is incorrect.')).textContent).toContain(
@@ -222,8 +223,8 @@ describe('authentication forms', () => {
     await user.click(screen.getByRole('button', { name: 'Ingresar' }));
     expect(await screen.findByText('Ingresa un correo electrónico válido.')).toBeTruthy();
 
-    await user.type(screen.getByLabelText('Correo electrónico'), 'owner@example.com');
-    await user.type(screen.getByLabelText('Contraseña'), 'wrong-password');
+    await fillField(user, screen.getByLabelText('Correo electrónico'), 'owner@example.com');
+    await fillField(user, screen.getByLabelText('Contraseña'), 'wrong-password');
     await user.click(screen.getByRole('button', { name: 'Ingresar' }));
 
     expect(
@@ -240,7 +241,7 @@ describe('authentication forms', () => {
       </>,
     );
 
-    await user.type(screen.getByLabelText('Email'), 'owner@example.com');
+    await fillField(user, screen.getByLabelText('Email'), 'owner@example.com');
     await user.click(screen.getByRole('button', { name: 'Español' }));
 
     expect(screen.getByLabelText('Correo electrónico')).toHaveProperty(

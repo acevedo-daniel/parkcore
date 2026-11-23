@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AppearanceProvider } from '../../app/appearance-provider.js';
 import { CheckInPanel } from './check-in-panel.js';
 import { OccupancyMeter } from './parking.js';
+import { fillField } from '../../test/fill-field.js';
 
 const api = vi.hoisted(() => ({ lookupVehicle: vi.fn() }));
 
@@ -80,10 +81,10 @@ describe('CheckInPanel', () => {
     expect(fieldValue('Notes')).toBe('');
 
     await user.clear(screen.getByLabelText('Brand'));
-    await user.type(screen.getByLabelText('Brand'), 'Toyota');
-    await user.type(screen.getByLabelText('Name'), 'Jane Doe');
-    await user.type(screen.getByLabelText('Phone'), '+1234567890');
-    await user.type(screen.getByLabelText('Notes'), 'New stay');
+    await fillField(user, screen.getByLabelText('Brand'), 'Toyota');
+    await fillField(user, screen.getByLabelText('Name'), 'Jane Doe');
+    await fillField(user, screen.getByLabelText('Phone'), '+1234567890');
+    await fillField(user, screen.getByLabelText('Notes'), 'New stay');
     await user.click(screen.getByRole('button', { name: 'Start session' }));
 
     await waitFor(() => {

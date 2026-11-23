@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AppearanceProvider } from '../../app/appearance-provider.js';
 import { parkingFixture } from '../../test/fixtures.js';
 import { ParkingForm } from './parking-form.js';
+import { fillField } from '../../test/fill-field.js';
 
 function renderForm(
   locale: 'en-US' | 'es-AR',
@@ -20,11 +21,11 @@ function renderForm(
 }
 
 async function fillRequiredFields(user: ReturnType<typeof userEvent.setup>) {
-  await user.type(screen.getByLabelText(/Name|Nombre/), 'Central Parking');
-  await user.type(screen.getByLabelText(/Neighborhood|Barrio/), 'Centro');
-  await user.type(screen.getByLabelText(/Address|Dirección/), 'Av. Corrientes 1234');
-  await user.type(screen.getByLabelText(/Latitude|Latitud/), '-34.6037');
-  await user.type(screen.getByLabelText(/Longitude|Longitud/), '-58.3816');
+  await fillField(user, screen.getByLabelText(/Name|Nombre/), 'Central Parking');
+  await fillField(user, screen.getByLabelText(/Neighborhood|Barrio/), 'Centro');
+  await fillField(user, screen.getByLabelText(/Address|Dirección/), 'Av. Corrientes 1234');
+  await fillField(user, screen.getByLabelText(/Latitude|Latitud/), '-34.6037');
+  await fillField(user, screen.getByLabelText(/Longitude|Longitud/), '-58.3816');
 }
 
 describe('ParkingForm', () => {
@@ -92,7 +93,7 @@ describe('ParkingForm', () => {
     await user.keyboard('{ArrowDown}{Enter}');
 
     const imageInput = screen.getByLabelText('Facility image URL');
-    await user.type(imageInput, 'https://example.com/parking.jpg');
+    await fillField(user, imageInput, 'https://example.com/parking.jpg');
     const image = await screen.findByRole('img', { name: 'Facility image preview' });
     expect(image.getAttribute('src')).toBe('https://example.com/parking.jpg');
 

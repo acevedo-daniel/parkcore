@@ -7,6 +7,7 @@ import { AppearanceProvider } from '../../app/appearance-provider.js';
 import type { AuthContextValue } from '../../features/auth/auth-context.js';
 import { AuthContext } from '../../features/auth/auth-context.js';
 import { RegisterRoute } from './register-route.js';
+import { fillField } from '../../test/fill-field.js';
 
 function renderRegister(initialEntry: string, overrides: Partial<AuthContextValue> = {}) {
   window.localStorage.setItem('parkcore-lang', 'en-US');
@@ -43,10 +44,10 @@ function renderRegister(initialEntry: string, overrides: Partial<AuthContextValu
 
 async function completeRegistration() {
   const user = userEvent.setup();
-  await user.type(screen.getByLabelText('First name'), 'Park');
-  await user.type(screen.getByLabelText('Last name'), 'Core');
-  await user.type(screen.getByLabelText('Email'), 'owner@example.com');
-  await user.type(screen.getByLabelText('Password'), 'password123');
+  await fillField(user, screen.getByLabelText('First name'), 'Park');
+  await fillField(user, screen.getByLabelText('Last name'), 'Core');
+  await fillField(user, screen.getByLabelText('Email'), 'owner@example.com');
+  await fillField(user, screen.getByLabelText('Password'), 'password123');
   await user.click(screen.getByRole('button', { name: 'Create account' }));
 }
 
