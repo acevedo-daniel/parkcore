@@ -237,7 +237,7 @@ function CalculatorForm({
             <span className="type-operational text-xs font-bold text-foreground">
               {formatMoney(selectedFacility.hourlyRateCents, selectedFacility.currency, locale)}
             </span>
-            <span className="block text-2xs text-muted-foreground">{t('calculator.perHour')}</span>
+            <span className="block text-xs text-muted-foreground">{t('calculator.perHour')}</span>
           </span>
         </div>
       </div>
@@ -309,7 +309,7 @@ function CalculatorForm({
             <span className="block text-xs font-semibold text-foreground">
               {t('calculator.estimateLabel')}
             </span>
-            <span className="text-2xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground">
               {estimate
                 ? tPlural(estimate.chargedHours, {
                     one: 'calculator.chargedHour',

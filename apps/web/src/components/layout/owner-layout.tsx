@@ -121,13 +121,13 @@ export function OwnerLayout() {
             </time>
           </div>
           <section>
-            <p className="mb-2 text-2xs font-bold uppercase tracking-eyebrow text-muted-foreground">
+            <p className="mb-2 text-xs font-bold uppercase tracking-eyebrow text-muted-foreground">
               {t('nav.preferences')}
             </p>
             <AppearanceControls compact layout="stacked" />
           </section>
           <section className="border-t border-border-subtle pt-3">
-            <p className="mb-1 px-1 text-2xs font-bold uppercase tracking-eyebrow text-muted-foreground">
+            <p className="mb-1 px-1 text-xs font-bold uppercase tracking-eyebrow text-muted-foreground">
               {t('nav.account')}
             </p>
             <NavLink
