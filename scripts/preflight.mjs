@@ -2,26 +2,17 @@
 
 import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { existsSync } from 'node:fs';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import net from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { resolvePackageManager } from './package-manager.mjs';
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const composeFile = path.join(repositoryRoot, 'docker-compose.preflight.yml');
 const packageManager = resolvePackageManager();
 let isolatedEnvironmentPath;
-
-function resolvePackageManager() {
-  if (process.platform !== 'win32') return 'pnpm';
-  for (const directory of (process.env.PATH ?? '').split(path.delimiter)) {
-    const executable = path.join(directory, 'node_modules', 'pnpm', 'pnpm.exe');
-    if (existsSync(executable)) return executable;
-  }
-  return 'pnpm.cmd';
-}
 const retainedEnvironmentKeys = new Set([
   'APPDATA',
   'COMSPEC',
