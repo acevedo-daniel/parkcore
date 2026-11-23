@@ -40,6 +40,8 @@ import { normalizePlate } from '../../lib/plate.js';
 import { invalidateOwnerMutationQueries } from '../../lib/query-invalidation.js';
 import { useDebouncedValue } from '../../lib/use-debounced-value.js';
 import type { Translator } from '../../lib/localization.js';
+import { Notice } from '../../components/domain/notice.js';
+import { Card } from '../../components/ui/card.js';
 
 const checkInErrorMessages: ApiErrorCodeMessages = {
   CHECK_IN_RACE: 'parkingOperation.checkInRace',
@@ -197,77 +199,72 @@ export function OwnerParkingOverviewRoute() {
       />
 
       {facilitySnapshotIsStale ? (
-        <div
-          className="flex flex-col gap-3 rounded-lg border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+        <Notice
+          action={
+            <Button
+              disabled={parkingsQuery.isFetching}
+              onClick={() => void parkingsQuery.refetch()}
+              size="sm"
+              variant="secondary"
+            >
+              <RefreshCw
+                aria-hidden="true"
+                className={cn('size-3.5', parkingsQuery.isFetching && 'animate-spin')}
+              />
+              {t('parkingOperation.refreshFacility')}
+            </Button>
+          }
           role="alert"
         >
-          <p className="break-words text-sm font-semibold">{t('parkingOperation.staleFacility')}</p>
-          <Button
-            className="self-start sm:self-auto"
-            disabled={parkingsQuery.isFetching}
-            onClick={() => void parkingsQuery.refetch()}
-            size="sm"
-            variant="secondary"
-          >
-            <RefreshCw
-              aria-hidden="true"
-              className={cn('size-3.5', parkingsQuery.isFetching && 'animate-spin')}
-            />
-            {t('parkingOperation.refreshFacility')}
-          </Button>
-        </div>
+          {t('parkingOperation.staleFacility')}
+        </Notice>
       ) : null}
 
       <div className="grid gap-4 wide:grid-cols-parking-overview">
-        <section
-          className="rounded-2xl border border-border bg-accent p-6 text-foreground sm:p-8"
-          aria-labelledby="check-in-title"
-        >
-          <p className="type-label text-muted-foreground">{t('parkingOperation.arrivals')}</p>
-          <div className="mt-6 flex min-w-0 flex-col justify-between gap-6 sm:flex-row sm:items-end">
-            <div>
-              <h2
-                className="font-display text-3xl font-bold leading-none tracking-display"
-                id="check-in-title"
-              >
-                {stateTitle}
-              </h2>
-              <p
-                className="mt-3 max-w-md break-words text-sm leading-relaxed text-foreground-secondary"
-                role="status"
-              >
-                {stateDescription}
-              </p>
+        <Card asChild>
+          <section className="p-5 text-foreground sm:p-6" aria-labelledby="check-in-title">
+            <p className="type-label text-muted-foreground">{t('parkingOperation.arrivals')}</p>
+            <div className="mt-6 flex min-w-0 flex-col justify-between gap-6 sm:flex-row sm:items-end">
+              <div>
+                <h2 className="type-heading" id="check-in-title">
+                  {stateTitle}
+                </h2>
+                <p
+                  className="mt-3 max-w-md break-words text-sm leading-relaxed text-foreground-secondary"
+                  role="status"
+                >
+                  {stateDescription}
+                </p>
+              </div>
+              <Button disabled={!checkInAllowed} onClick={openCheckIn}>
+                <Plus aria-hidden="true" className="size-4" /> {t('parkingOperation.checkIn')}{' '}
+                <kbd
+                  aria-hidden="true"
+                  className="ml-1 type-code rounded border border-border-strong px-1.5 py-0.5 text-2xs"
+                >
+                  N
+                </kbd>
+              </Button>
             </div>
-            <Button disabled={!checkInAllowed} onClick={openCheckIn}>
-              <Plus aria-hidden="true" className="size-4" /> {t('parkingOperation.checkIn')}{' '}
-              <kbd
-                aria-hidden="true"
-                className="ml-1 type-code rounded border border-border-strong px-1.5 py-0.5 text-2xs"
-              >
-                N
-              </kbd>
-            </Button>
-          </div>
-        </section>
+          </section>
+        </Card>
 
-        <section
-          className="rounded-2xl border border-border bg-card p-6 sm:p-8"
-          aria-labelledby="capacity-title"
-        >
-          <p className="type-label text-muted-foreground" id="capacity-title">
-            {t('parkingOperation.capacity')}
-          </p>
-          <div className="mt-5">
-            <OccupancyMeter
-              active={parking.activeSessionCount}
-              availableSpaces={parking.availableSpaces}
-              capacity={parking.capacity}
-              compact
-              occupancyPercent={parking.occupancyPercent}
-            />
-          </div>
-        </section>
+        <Card asChild>
+          <section className="p-5 sm:p-6" aria-labelledby="capacity-title">
+            <p className="type-label text-muted-foreground" id="capacity-title">
+              {t('parkingOperation.capacity')}
+            </p>
+            <div className="mt-5">
+              <OccupancyMeter
+                active={parking.activeSessionCount}
+                availableSpaces={parking.availableSpaces}
+                capacity={parking.capacity}
+                compact
+                occupancyPercent={parking.occupancyPercent}
+              />
+            </div>
+          </section>
+        </Card>
       </div>
 
       {checkInSuccess ? (
@@ -288,10 +285,7 @@ export function OwnerParkingOverviewRoute() {
         <div className="flex flex-col justify-between gap-5 border-b border-border-strong pb-5 sm:flex-row sm:items-end">
           <div>
             <p className="type-label text-muted-foreground">{t('parkingOperation.onSite')}</p>
-            <h2
-              className="mt-2 font-display text-3xl font-bold leading-none tracking-display"
-              id="active-sessions-title"
-            >
+            <h2 className="type-heading mt-2" id="active-sessions-title">
               {t('parkingOperation.activeSessions')}
             </h2>
           </div>
@@ -310,7 +304,7 @@ export function OwnerParkingOverviewRoute() {
         </div>
 
         <div className="mt-6 max-w-md">
-          <InputGroup className="rounded-full bg-muted">
+          <InputGroup>
             <InputGroupAddon>
               <InputGroupText>
                 <Search aria-hidden="true" />
@@ -318,7 +312,7 @@ export function OwnerParkingOverviewRoute() {
             </InputGroupAddon>
             <InputGroupInput
               aria-label={t('parkingOperation.searchPlate')}
-              className="h-12 rounded-full border-0 bg-transparent type-code font-semibold"
+              className="type-code font-semibold placeholder:font-sans placeholder:tracking-normal"
               id="active-session-plate"
               onChange={(event) => {
                 setPlateSearch(event.target.value);
@@ -336,29 +330,30 @@ export function OwnerParkingOverviewRoute() {
         ) : null}
 
         {activeSessionsQuery.isError && hasActiveSessionData ? (
-          <div
-            className="mt-4 flex flex-col gap-3 rounded-lg border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+          <Notice
+            action={
+              <Button
+                onClick={() => {
+                  void activeSessionsQuery.refetch();
+                }}
+                size="sm"
+                variant="secondary"
+              >
+                {t('parkingOperation.retryActiveSessions')}
+              </Button>
+            }
+            className="mt-4"
             role="alert"
           >
-            <p className="text-sm font-semibold">{t('parkingOperation.staleActiveSessions')}</p>
-            <Button
-              className="self-start sm:self-auto"
-              onClick={() => {
-                void activeSessionsQuery.refetch();
-              }}
-              size="sm"
-              variant="secondary"
-            >
-              {t('parkingOperation.retryActiveSessions')}
-            </Button>
-          </div>
+            {t('parkingOperation.staleActiveSessions')}
+          </Notice>
         ) : null}
 
         <div className="mt-5">
           {activeSessionsLoading ? (
             <div className="grid gap-3">
-              <Skeleton className="h-28 rounded-xl" />
-              <Skeleton className="h-28 rounded-xl" />
+              <Skeleton className="h-28 rounded-lg" />
+              <Skeleton className="h-28 rounded-lg" />
             </div>
           ) : activeSessionsQuery.isError && !hasActiveSessionData ? (
             <ErrorState
@@ -538,12 +533,12 @@ function OwnerParkingOperationSkeleton() {
       role="status"
     >
       <h1 className="sr-only">{t('parkingOperation.eyebrow')}</h1>
-      <Skeleton className="h-48 rounded-2xl" />
+      <Skeleton className="h-48 rounded-lg" />
       <div className="grid gap-4 wide:grid-cols-parking-overview">
-        <Skeleton className="h-64 rounded-2xl" />
-        <Skeleton className="h-64 rounded-2xl" />
+        <Skeleton className="h-64 rounded-lg" />
+        <Skeleton className="h-64 rounded-lg" />
       </div>
-      <Skeleton className="h-72 rounded-2xl" />
+      <Skeleton className="h-72 rounded-lg" />
     </div>
   );
 }

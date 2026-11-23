@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router';
 
 import { useAppearance } from '../../app/appearance-provider.js';
 import { ParkingForm } from '../../features/parking/parking-form.js';
+import { PageHeader } from '../../components/domain/page-header.js';
 import { Button } from '../../components/ui/button.js';
 import { ErrorState } from '../../components/domain/feedback.js';
 import { Skeleton } from '../../components/ui/skeleton.js';
@@ -11,6 +12,7 @@ import { getOwnedParkings, updateParking } from '../../lib/api/owner-api.js';
 import { UnsavedChangesPrompt } from '../../components/domain/unsaved-changes-prompt.js';
 import { toast } from 'sonner';
 import { localizeParkingMutationError } from './parking-route-errors.js';
+import { Notice } from '../../components/domain/notice.js';
 
 export function OwnerEditParkingRoute() {
   const { t } = useAppearance();
@@ -71,26 +73,24 @@ export function OwnerEditParkingRoute() {
 
   return (
     <section className="owner-page space-y-8" aria-labelledby="edit-parking-title">
-      <header className="flex flex-col justify-between gap-5 border-b border-border-strong pb-7 sm:flex-row sm:items-end">
-        <div className="min-w-0">
-          <p className="type-label">{t('parkingRoute.management')}</p>
-          <h1 className="break-words type-page-title" id="edit-parking-title">
-            {t('parkingRoute.editTitle')}
-          </h1>
-        </div>
-        <Button
-          className="shrink-0 self-start"
-          variant="secondary"
-          type="button"
-          onClick={() => {
-            allowNavigationRef.current = true;
-            setIsDirty(false);
-            void navigate(`/app/parkings/${parking.id}`);
-          }}
-        >
-          {t('parkingRoute.cancel')}
-        </Button>
-      </header>
+      <PageHeader
+        actions={
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={() => {
+              allowNavigationRef.current = true;
+              setIsDirty(false);
+              void navigate(`/app/parkings/${parking.id}`);
+            }}
+          >
+            {t('parkingRoute.cancel')}
+          </Button>
+        }
+        eyebrow={t('parkingRoute.management')}
+        id="edit-parking-title"
+        title={t('parkingRoute.editTitle')}
+      />
       <ParkingForm
         error={error}
         isSubmitting={mutation.isPending}
@@ -111,22 +111,22 @@ export function OwnerEditParkingRoute() {
         }}
       />
       {hasStaleData ? (
-        <div
-          className="flex flex-col gap-4 rounded-xl border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+        <Notice
+          action={
+            <Button
+              onClick={() => {
+                void parkingsQuery.refetch();
+              }}
+              type="button"
+              variant="secondary"
+            >
+              {t('parkingRoute.retryStale')}
+            </Button>
+          }
           role="alert"
         >
-          <p className="break-words text-sm font-semibold">{t('parkingRoute.stale')}</p>
-          <Button
-            className="shrink-0 self-start sm:self-auto"
-            onClick={() => {
-              void parkingsQuery.refetch();
-            }}
-            type="button"
-            variant="secondary"
-          >
-            {t('parkingRoute.retryStale')}
-          </Button>
-        </div>
+          {t('parkingRoute.stale')}
+        </Notice>
       ) : null}
       <UnsavedChangesPrompt
         allowNavigationRef={allowNavigationRef}

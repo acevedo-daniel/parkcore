@@ -265,7 +265,7 @@ test('keeps the deployed public and owner surfaces usable at production viewport
         page,
         '/not-a-route',
         page.getByRole('heading', {
-          name: /We could not find this facility|No encontramos esta cochera/i,
+          name: /We could not find this page|No encontramos esta página/i,
         }),
         `${prefix} public 404`,
       );

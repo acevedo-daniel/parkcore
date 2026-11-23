@@ -136,7 +136,7 @@ function OwnerProfileContent({ user }: { user: User }) {
 
       <form
         aria-busy={mutation.isPending}
-        className="space-y-8"
+        className="max-w-3xl space-y-8"
         noValidate
         onSubmit={(event) => {
           void submit(event);
@@ -180,20 +180,22 @@ function OwnerProfileContent({ user }: { user: User }) {
                     {...form.register('lastName', { onChange: clearSaveFeedback })}
                   />
                 </FormField>
-                <FormField
-                  help={t('profile.emailReadOnly')}
-                  htmlFor="profile-email"
-                  label={t('profile.email')}
-                >
-                  <Input
-                    autoComplete="email"
-                    aria-readonly="true"
-                    id="profile-email"
-                    readOnly
-                    type="email"
-                    value={user.email ?? ''}
-                  />
-                </FormField>
+                <div className="sm:col-span-2">
+                  <FormField
+                    help={t('profile.emailReadOnly')}
+                    htmlFor="profile-email"
+                    label={t('profile.email')}
+                  >
+                    <Input
+                      autoComplete="email"
+                      aria-readonly="true"
+                      id="profile-email"
+                      readOnly
+                      type="email"
+                      value={user.email ?? ''}
+                    />
+                  </FormField>
+                </div>
               </div>
             </>
           ) : (
@@ -215,7 +217,7 @@ function OwnerProfileContent({ user }: { user: User }) {
           <div className="mt-5 max-w-xl">
             <AppearanceControls presentation="profile" />
           </div>
-          <div className="mt-7 max-w-xl">
+          <div className="mt-7">
             <Controller
               control={form.control}
               name="timezone"
@@ -316,9 +318,9 @@ function OwnerProfileContent({ user }: { user: User }) {
 
 function DemoSessionDisclosure({ locale, t, user }: { locale: Locale; t: Translator; user: User }) {
   return (
-    <div className="mt-4 flex min-w-0 flex-col gap-5 rounded-xl border border-brand-foreground/30 bg-brand-soft p-5 text-foreground sm:flex-row sm:items-start sm:justify-between sm:p-6">
+    <div className="mt-4 flex min-w-0 flex-col gap-5 rounded-lg border border-brand-foreground/30 bg-brand-soft p-5 text-foreground sm:flex-row sm:items-start sm:justify-between sm:p-6">
       <div className="flex min-w-0 items-start gap-3">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-foreground">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-brand-soft text-foreground">
           <UserRound aria-hidden="true" className="size-5" />
         </span>
         <div className="min-w-0">

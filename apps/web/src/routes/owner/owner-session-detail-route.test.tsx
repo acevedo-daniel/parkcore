@@ -67,6 +67,13 @@ describe('parking session completion', () => {
     renderSessionDetail();
 
     expect(await screen.findByRole('button', { name: 'Check out' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('AB123CD');
+    expect(screen.getByRole('button', { name: 'Check out' }).getAttribute('data-variant')).toBe(
+      'default',
+    );
+    expect(
+      screen.getByRole('button', { name: 'Cancel session' }).getAttribute('data-variant'),
+    ).toBe('destructive-outline');
     await user.click(screen.getByRole('button', { name: 'Check out' }));
     const dialog = await screen.findByRole('dialog', { name: 'Complete checkout' });
     expect(dialog).toBeTruthy();
@@ -92,7 +99,9 @@ describe('parking session completion', () => {
     expect(
       screen.getByText('The parking will be available for a new check-in after cancellation.'),
     ).toBeTruthy();
-    await user.click(within(dialog).getByRole('button', { name: 'Cancel session' }));
+    const confirmCancel = within(dialog).getByRole('button', { name: 'Cancel session' });
+    expect(confirmCancel.getAttribute('data-variant')).toBe('destructive');
+    await user.click(confirmCancel);
 
     await waitFor(() => {
       expect(api.cancelParkingSession.mock.calls[0]?.[0]).toBe('session-1');

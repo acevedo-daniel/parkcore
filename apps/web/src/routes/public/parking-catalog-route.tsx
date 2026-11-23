@@ -27,6 +27,7 @@ import {
   parseParkingCatalogUrlState,
   parkingCatalogSearchParamsFromState,
 } from './parking-catalog-query.js';
+import { Card } from '../../components/ui/card.js';
 
 function getFormText(formData: FormData, name: string) {
   const value = formData.get(name);
@@ -146,10 +147,7 @@ export function ParkingCatalogRoute() {
         <header className="grid gap-8 border-b border-border-subtle pb-10 lg:grid-cols-12 lg:items-end">
           <div className="min-w-0 lg:col-span-7">
             <p className="type-label text-muted-foreground">{t('public.catalog.eyebrow')}</p>
-            <h1
-              className="mt-4 max-w-full break-words font-display text-4xl font-bold leading-tight tracking-display sm:text-5xl lg:text-6xl"
-              id="public-catalog-title"
-            >
+            <h1 className="type-page-title mt-4 max-w-full break-words" id="public-catalog-title">
               {t('public.catalog.title')}
             </h1>
           </div>
@@ -162,7 +160,7 @@ export function ParkingCatalogRoute() {
           <Button
             aria-expanded={mobileFiltersOpen}
             aria-haspopup="dialog"
-            className="w-full rounded-full"
+            className="w-full"
             onClick={() => {
               setMobileFiltersOpen(true);
             }}
@@ -222,10 +220,22 @@ export function ParkingCatalogRoute() {
             </ErrorState>
           </div>
         ) : null}
+        {parkingQuery.data && !parkingQuery.isError ? (
+          <p className="mt-8 text-sm font-semibold text-foreground-secondary" role="status">
+            {tPlural(
+              parkingQuery.data.meta.total,
+              {
+                one: 'public.catalog.resultCountOne',
+                other: 'public.catalog.resultCountOther',
+              },
+              { count: formatNumber(parkingQuery.data.meta.total, locale) },
+            )}
+          </p>
+        ) : null}
         {!parkingQuery.isLoading &&
         !parkingQuery.isError &&
         parkingQuery.data?.data.length === 0 ? (
-          <div className="mt-10">
+          <div className="mt-6">
             <EmptyState
               action={
                 hasFilters ? (
@@ -240,28 +250,17 @@ export function ParkingCatalogRoute() {
                   </Button>
                 ) : undefined
               }
+              eyebrow={hasFilters ? t('public.catalog.emptyEyebrow') : undefined}
               title={t('public.catalog.emptyTitle')}
             >
               {t('public.catalog.emptyDescription')}
             </EmptyState>
           </div>
         ) : null}
-        {parkingQuery.data && !parkingQuery.isError ? (
-          <p className="mt-8 text-sm font-semibold text-foreground-secondary" role="status">
-            {tPlural(
-              parkingQuery.data.meta.total,
-              {
-                one: 'public.catalog.resultCountOne',
-                other: 'public.catalog.resultCountOther',
-              },
-              { count: formatNumber(parkingQuery.data.meta.total, locale) },
-            )}
-          </p>
-        ) : null}
         {!parkingQuery.isLoading && !parkingQuery.isError && parkingQuery.data?.data.length ? (
           <div
             aria-label={t('public.catalog.results')}
-            className="mt-10 grid gap-5 md:grid-cols-2 wide:grid-cols-3"
+            className="mt-6 grid gap-5 md:grid-cols-2 wide:grid-cols-3"
             role="region"
           >
             {parkingQuery.data.data.map((parking) => (
@@ -273,7 +272,7 @@ export function ParkingCatalogRoute() {
             ))}
           </div>
         ) : null}
-        {parkingQuery.data && !parkingQuery.isError ? (
+        {parkingQuery.data && !parkingQuery.isError && parkingQuery.data.meta.totalPages > 1 ? (
           <nav
             aria-label={t('public.catalog.pagination')}
             className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-border-subtle pt-7"
@@ -328,73 +327,75 @@ function CatalogFilters({
 }) {
   const { t } = useAppearance();
   return (
-    <form
-      aria-describedby={filterError ? `${idPrefix}-filter-error` : undefined}
-      aria-label={t('public.catalog.filterAction')}
-      className="grid gap-5 rounded-2xl border border-border bg-card p-5 shadow-xs lg:p-6"
-      noValidate
-      onSubmit={onSubmit}
-    >
-      <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
-        <div className="lg:col-span-5">
-          <FormField htmlFor={`${idPrefix}-search`} label={t('public.catalog.searchLabel')}>
-            <InputGroup className="h-11 border-border-subtle bg-transparent dark:bg-transparent">
-              <InputGroupAddon>
-                <InputGroupText>
-                  <Search aria-hidden="true" />
-                </InputGroupText>
-              </InputGroupAddon>
-              <InputGroupInput
-                defaultValue={searchParams.get('search') ?? ''}
-                aria-label={t('public.catalog.searchLabel')}
-                id={`${idPrefix}-search`}
-                name="search"
-                className="h-full min-h-0 border-0 bg-transparent px-0 focus:bg-transparent"
-                placeholder={t('public.catalog.searchPlaceholder')}
-              />
-            </InputGroup>
-          </FormField>
-        </div>
-        <MonetaryFilterGroup
-          className="lg:col-span-7 lg:[&>div]:mt-0"
-          currency={currency}
-          defaultMax={searchParams.get('maxRate') ?? ''}
-          defaultMin={searchParams.get('minRate') ?? ''}
-          hideClear
-          idPrefix={idPrefix}
-          legendClassName="sr-only"
-          onClear={onClear}
-        />
-      </div>
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <label className="flex cursor-pointer items-center gap-3 text-sm font-semibold text-foreground">
-          <Checkbox
-            defaultChecked={searchParams.get('availableNow') === 'true'}
-            id={`${idPrefix}-available-now`}
-            name="availableNow"
+    <Card asChild>
+      <form
+        aria-describedby={filterError ? `${idPrefix}-filter-error` : undefined}
+        aria-label={t('public.catalog.filterAction')}
+        className="grid gap-5 p-5 lg:p-6"
+        noValidate
+        onSubmit={onSubmit}
+      >
+        <div className="grid gap-4 lg:grid-cols-12 lg:items-start">
+          <div className="lg:col-span-5">
+            <FormField htmlFor={`${idPrefix}-search`} label={t('public.catalog.searchLabel')}>
+              <InputGroup>
+                <InputGroupAddon>
+                  <InputGroupText>
+                    <Search aria-hidden="true" />
+                  </InputGroupText>
+                </InputGroupAddon>
+                <InputGroupInput
+                  defaultValue={searchParams.get('search') ?? ''}
+                  aria-label={t('public.catalog.searchLabel')}
+                  id={`${idPrefix}-search`}
+                  name="search"
+                  className="px-0"
+                  placeholder={t('public.catalog.searchPlaceholder')}
+                />
+              </InputGroup>
+            </FormField>
+          </div>
+          <MonetaryFilterGroup
+            className="lg:col-span-7 lg:[&>div]:mt-0"
+            currency={currency}
+            defaultMax={searchParams.get('maxRate') ?? ''}
+            defaultMin={searchParams.get('minRate') ?? ''}
+            hideClear
+            idPrefix={idPrefix}
+            legendClassName="sr-only"
+            onClear={onClear}
           />
-          <span>{t('public.catalog.availableNow')}</span>
-        </label>
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-          <Button onClick={onClear} size="sm" type="button" variant="ghost">
-            {t('filters.clearRate')}
-          </Button>
-          <Button shape="pill" type="submit">
-            <SlidersHorizontal aria-hidden="true" className="size-4" />
-            {t('public.catalog.applyFilters')}
-          </Button>
         </div>
-      </div>
-      {filterError ? (
-        <p
-          className="text-sm font-medium text-destructive-soft-foreground lg:col-span-full"
-          id={`${idPrefix}-filter-error`}
-          role="alert"
-        >
-          {filterError}
-        </p>
-      ) : null}
-    </form>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <label className="flex cursor-pointer items-center gap-3 text-sm font-semibold text-foreground">
+            <Checkbox
+              defaultChecked={searchParams.get('availableNow') === 'true'}
+              id={`${idPrefix}-available-now`}
+              name="availableNow"
+            />
+            <span>{t('public.catalog.availableNow')}</span>
+          </label>
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+            <Button onClick={onClear} size="sm" type="button" variant="ghost">
+              {t('filters.clearRate')}
+            </Button>
+            <Button shape="pill" type="submit">
+              <SlidersHorizontal aria-hidden="true" className="size-4" />
+              {t('public.catalog.applyFilters')}
+            </Button>
+          </div>
+        </div>
+        {filterError ? (
+          <p
+            className="text-sm font-medium text-destructive-soft-foreground lg:col-span-full"
+            id={`${idPrefix}-filter-error`}
+            role="alert"
+          >
+            {filterError}
+          </p>
+        ) : null}
+      </form>
+    </Card>
   );
 }
 
@@ -409,7 +410,7 @@ function CatalogSkeleton() {
       role="status"
     >
       {Array.from({ length: 6 }, (_, index) => (
-        <div className="overflow-hidden rounded-2xl border border-border bg-card" key={index}>
+        <div className="overflow-hidden rounded-lg border border-border bg-card" key={index}>
           <Skeleton className="aspect-4/3 rounded-none" />
           <div className="space-y-4 p-6">
             <Skeleton className="h-7 w-3/4" />

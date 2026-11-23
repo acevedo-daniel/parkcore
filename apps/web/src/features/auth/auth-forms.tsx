@@ -61,7 +61,7 @@ export function AuthFormFrame({
   return (
     <section aria-labelledby="auth-title" className="min-h-full bg-background py-12 sm:py-20">
       <div className="mx-auto grid max-w-5xl gap-8 px-4 sm:px-6 wide:grid-cols-2 wide:items-stretch wide:px-8">
-        <div className="hidden min-w-0 rounded-signature bg-inverse p-10 text-inverse-foreground shadow-md wide:flex wide:flex-col wide:justify-between">
+        <div className="hidden min-w-0 rounded-signature bg-inverse p-10 text-inverse-foreground wide:flex wide:flex-col wide:justify-between">
           <div>
             <Link
               className="inline-flex min-h-11 items-center gap-2.5 rounded-sm font-display text-xl font-black tracking-tight text-inverse-foreground"
@@ -73,10 +73,7 @@ export function AuthFormFrame({
             <p className="mt-16 text-xs font-bold tracking-eyebrow text-inverse-foreground uppercase">
               {eyebrow}
             </p>
-            <p
-              aria-hidden="true"
-              className="mt-5 font-display text-4xl font-black leading-tight tracking-display"
-            >
+            <p aria-hidden="true" className="type-heading mt-5">
               {t('auth.frame.headline')}
             </p>
             <p className="mt-6 max-w-sm text-base leading-relaxed text-inverse-foreground/80">
@@ -87,7 +84,7 @@ export function AuthFormFrame({
             {t('auth.frame.footer')}
           </p>
         </div>
-        <div className="min-w-0 rounded-signature border border-border bg-card p-6 shadow-md sm:p-8 wide:p-10">
+        <div className="min-w-0 rounded-signature border border-border bg-card p-6 sm:p-8 wide:p-10">
           <div>
             <Link
               className="inline-flex min-h-11 items-center gap-2 rounded-sm font-display text-lg font-black tracking-tight text-foreground wide:hidden"
@@ -100,13 +97,13 @@ export function AuthFormFrame({
               {eyebrow}
             </p>
             <h1
-              className="mt-3 max-w-full break-words font-display text-3xl font-black tracking-heading text-foreground wide:text-4xl"
+              className="type-page-title mt-3 max-w-full break-words text-foreground"
               id="auth-title"
             >
               {title}
             </h1>
           </div>
-          <div className="mt-8 [&_.auth-form]:mt-6 [&_.auth-form]:flex [&_.auth-form]:flex-col [&_.auth-form]:gap-4 [&_.field]:space-y-1.5 [&_.field-label]:block [&_.field-label]:text-xs [&_.field-label]:font-bold [&_.field-label]:text-foreground [&_.control]:h-12 [&_.control]:w-full [&_.control]:rounded-2xl [&_.control]:border [&_.control]:border-border [&_.control]:bg-muted [&_.control]:px-4 [&_.control]:text-sm [&_.control]:font-medium [&_.control]:text-foreground [&_.control]:outline-none [&_.control]:transition-colors [&_.control]:focus:border-primary [&_.control]:focus:bg-card [&_.form-error]:text-sm [&_.form-error]:font-medium [&_.form-error]:text-destructive-soft-foreground">
+          <div className="mt-8 [&_.auth-form]:mt-6 [&_.auth-form]:flex [&_.auth-form]:flex-col [&_.auth-form]:gap-4 [&_.field]:space-y-1.5 [&_.field-label]:block [&_.field-label]:text-xs [&_.field-label]:font-bold [&_.field-label]:text-foreground [&_.form-error]:text-sm [&_.form-error]:font-medium [&_.form-error]:text-destructive-soft-foreground">
             {children}
           </div>
           <p className="mt-6 border-t border-border-subtle pt-5 text-sm leading-relaxed text-foreground-secondary">
@@ -180,7 +177,7 @@ export function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           {form.formState.errors.root.message}
         </p>
       ) : null}
-      <Button className="w-full rounded-full" disabled={form.formState.isSubmitting} type="submit">
+      <Button className="w-full" disabled={form.formState.isSubmitting} type="submit">
         {form.formState.isSubmitting ? t('auth.actions.signingIn') : t('auth.actions.signIn')}
       </Button>
     </form>
@@ -270,7 +267,7 @@ export function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
           {form.formState.errors.root.message}
         </p>
       ) : null}
-      <Button className="w-full rounded-full" disabled={form.formState.isSubmitting} type="submit">
+      <Button className="w-full" disabled={form.formState.isSubmitting} type="submit">
         {form.formState.isSubmitting
           ? t('auth.actions.creatingAccount')
           : t('auth.actions.createAccount')}

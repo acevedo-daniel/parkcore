@@ -5,6 +5,7 @@ import {
   NavLink,
   Outlet,
   type NavLinkRenderProps,
+  useLocation,
   useNavigate,
   useNavigation,
 } from 'react-router';
@@ -17,6 +18,10 @@ import { AppearanceControls } from '../domain/appearance-controls.js';
 import { BrandMark } from '../domain/brand-mark.js';
 import { Button } from '../ui/button.js';
 
+function isFacilityPath(pathname: string) {
+  return pathname.startsWith('/app/parkings') || pathname.startsWith('/app/sessions');
+}
+
 function OwnerLink({
   compact = false,
   Icon,
@@ -28,24 +33,26 @@ function OwnerLink({
   label: string;
   to: string;
 }) {
+  const { pathname } = useLocation();
+  const isActive =
+    to === '/app' ? pathname === '/app' || pathname === '/app/' : isFacilityPath(pathname);
+
   return (
-    <NavLink
-      end={to === '/app'}
-      className={({ isActive }: NavLinkRenderProps) =>
-        cn(
-          compact
-            ? 'owner-nav-link flex min-h-11 min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-2xs font-medium transition-colors'
-            : 'owner-nav-link flex min-h-11 items-center gap-3 rounded-md px-3.5 py-2.5 text-sm font-medium transition-colors',
-          isActive
-            ? 'is-active bg-primary text-primary-foreground font-semibold'
-            : 'text-foreground-secondary hover:bg-muted hover:text-foreground',
-        )
-      }
+    <Link
+      aria-current={isActive ? 'page' : undefined}
+      className={cn(
+        compact
+          ? 'owner-nav-link flex min-h-11 min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors'
+          : 'owner-nav-link flex min-h-11 items-center gap-3 rounded-md px-3.5 py-2.5 text-sm font-medium transition-colors',
+        isActive
+          ? 'is-active bg-primary text-primary-foreground font-semibold'
+          : 'text-foreground-secondary hover:bg-muted hover:text-foreground',
+      )}
       to={to}
     >
       <Icon aria-hidden="true" size={17} className="shrink-0" />
       <span>{label}</span>
-    </NavLink>
+    </Link>
   );
 }
 
@@ -114,13 +121,13 @@ export function OwnerLayout() {
             </time>
           </div>
           <section>
-            <p className="mb-2 text-2xs font-bold uppercase tracking-eyebrow text-muted-foreground">
+            <p className="mb-2 text-xs font-bold uppercase tracking-eyebrow text-muted-foreground">
               {t('nav.preferences')}
             </p>
             <AppearanceControls compact layout="stacked" />
           </section>
           <section className="border-t border-border-subtle pt-3">
-            <p className="mb-1 px-1 text-2xs font-bold uppercase tracking-eyebrow text-muted-foreground">
+            <p className="mb-1 px-1 text-xs font-bold uppercase tracking-eyebrow text-muted-foreground">
               {t('nav.account')}
             </p>
             <NavLink
@@ -149,7 +156,7 @@ export function OwnerLayout() {
           </section>
         </div>
       </aside>
-      <header className="owner-mobile-header sticky top-0 z-30 flex min-h-14 flex-wrap items-center justify-between gap-1 border-b border-border-strong bg-card px-3 pb-2 pt-safe-header wide:hidden">
+      <header className="owner-mobile-header sticky top-0 z-30 flex min-h-14 items-center justify-between gap-2 border-b border-border-strong bg-card px-3 pb-2 pt-safe-header wide:hidden">
         <Link
           className="brand-mark flex min-h-11 items-center gap-2 font-display text-base font-bold tracking-title text-foreground"
           to="/app"
@@ -157,8 +164,7 @@ export function OwnerLayout() {
           <BrandMark className="size-7" />
           PARKCORE
         </Link>
-        <div className="ml-auto flex items-center gap-1">
-          <AppearanceControls className="gap-1" />
+        <div className="ml-auto flex items-center gap-2">
           <span className="type-label hidden sm:inline">{t('nav.operations')}</span>
           <Button
             aria-label={t('nav.signOut')}
@@ -197,7 +203,7 @@ export function OwnerLayout() {
         <NavLink
           className={({ isActive }: NavLinkRenderProps) =>
             cn(
-              'owner-nav-link flex min-h-11 min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-2xs font-medium transition-colors',
+              'owner-nav-link flex min-h-11 min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors',
               isActive
                 ? 'is-active text-foreground font-semibold'
                 : 'text-foreground-secondary hover:text-foreground',

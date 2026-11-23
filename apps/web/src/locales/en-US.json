@@ -267,6 +267,7 @@
       "refreshing": "Refreshing parkings…",
       "errorTitle": "We could not load the directory",
       "errorDescription": "We could not load the directory. Try again in a moment.",
+      "emptyEyebrow": "No results",
       "emptyTitle": "No active parkings",
       "emptyDescription": "Try a different address or rate range.",
       "clearFilters": "Clear filters",
@@ -319,10 +320,10 @@
       "loading": "Loading parking"
     },
     "notFound": {
-      "metaDescription": "The public facility you are looking for is unavailable.",
-      "metaTitle": "Facility not found | ParkCore",
-      "title": "We could not find this facility.",
-      "description": "Return to the directory to find a nearby facility.",
+      "metaDescription": "The page you are looking for does not exist on ParkCore.",
+      "metaTitle": "Page not found | ParkCore",
+      "title": "We could not find this page.",
+      "description": "This address does not exist or has changed. Browse the listed facilities to continue.",
       "action": "Explore facilities"
     }
   },

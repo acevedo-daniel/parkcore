@@ -267,6 +267,7 @@
       "refreshing": "Actualizando cocheras…",
       "errorTitle": "No pudimos cargar el directorio",
       "errorDescription": "No pudimos cargar el directorio. Prueba de nuevo en unos instantes.",
+      "emptyEyebrow": "Sin resultados",
       "emptyTitle": "No encontramos cocheras con esos filtros.",
       "emptyDescription": "Prueba con otra zona o amplía el rango de tarifas.",
       "clearFilters": "Limpiar filtros",
@@ -319,10 +320,10 @@
       "loading": "Cargando cochera"
     },
     "notFound": {
-      "metaDescription": "La cochera pública que buscas no está disponible.",
-      "metaTitle": "Cochera no encontrada | ParkCore",
-      "title": "No encontramos esta cochera.",
-      "description": "Vuelve al directorio para encontrar una cochera cercana.",
+      "metaDescription": "La página que buscas no existe en ParkCore.",
+      "metaTitle": "Página no encontrada | ParkCore",
+      "title": "No encontramos esta página.",
+      "description": "La dirección no existe o cambió. Explora las cocheras publicadas para seguir.",
       "action": "Ver cocheras"
     }
   },
@@ -486,7 +487,7 @@
     "editAria": "Editar {{title}}",
     "operating": "En operación",
     "paused": "Pausada",
-    "arrivals": "Ingresos",
+    "arrivals": "Entrada de vehículos",
     "ready": "Listo para el próximo vehículo.",
     "readyDescription": "Registra primero la patente. Los datos del vehículo y del visitante son opcionales y puedes agregarlos en el mismo paso.",
     "limitedTitle": "Quedan pocos lugares",

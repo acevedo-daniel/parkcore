@@ -11,6 +11,7 @@ import { ParkingCalculatorWidget } from '../../features/parking/parking-calculat
 import { getPublicParking, PublicApiError } from '../../lib/api/public-api.js';
 import { publicUrl, useDocumentMeta } from '../../lib/document-meta.js';
 import { formatMoney, formatNumber } from '../../lib/format.js';
+import { Card } from '../../components/ui/card.js';
 
 export function ParkingDetailRoute() {
   const { locale, t } = useAppearance();
@@ -42,36 +43,37 @@ export function ParkingDetailRoute() {
         aria-labelledby="public-detail-error-title"
         className="min-h-full bg-background px-4 py-16 sm:px-6 lg:px-8"
       >
-        <div
-          className="mx-auto max-w-3xl rounded-3xl border border-border-strong bg-accent p-8 sm:p-10"
-          role="alert"
-        >
-          <p className="type-label text-muted-foreground">{t('public.detail.directoryEyebrow')}</p>
-          <h1
-            className="mt-4 max-w-full break-words font-display text-3xl font-black tracking-heading text-foreground"
-            id="public-detail-error-title"
-          >
-            {t(notFound ? 'public.detail.notFoundTitle' : 'public.detail.errorTitle')}
-          </h1>
-          <p className="mt-4 text-base leading-relaxed text-foreground-secondary">
-            {t(notFound ? 'public.detail.notFoundDescription' : 'public.detail.errorDescription')}
-          </p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            {!notFound ? (
-              <Button
-                onClick={() => {
-                  void parkingQuery.refetch();
-                }}
-                variant="default"
-              >
-                {t('public.detail.retry')}
+        <Card asChild>
+          <div className="mx-auto max-w-3xl p-6 sm:p-8" role="alert">
+            <p className="type-label text-muted-foreground">
+              {t('public.detail.directoryEyebrow')}
+            </p>
+            <h1
+              className="type-page-title mt-4 max-w-full break-words text-foreground"
+              id="public-detail-error-title"
+            >
+              {t(notFound ? 'public.detail.notFoundTitle' : 'public.detail.errorTitle')}
+            </h1>
+            <p className="mt-4 text-base leading-relaxed text-foreground-secondary">
+              {t(notFound ? 'public.detail.notFoundDescription' : 'public.detail.errorDescription')}
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              {!notFound ? (
+                <Button
+                  onClick={() => {
+                    void parkingQuery.refetch();
+                  }}
+                  variant="default"
+                >
+                  {t('public.detail.retry')}
+                </Button>
+              ) : null}
+              <Button asChild variant="secondary">
+                <Link to="/parkings">{t('public.detail.back')}</Link>
               </Button>
-            ) : null}
-            <Button asChild variant="secondary">
-              <Link to="/parkings">{t('public.detail.back')}</Link>
-            </Button>
+            </div>
           </div>
-        </div>
+        </Card>
       </section>
     );
   }
@@ -107,7 +109,7 @@ export function ParkingDetailRoute() {
         >
           <header className="min-w-0 lg:col-span-7">
             <h1
-              className="mt-2 max-w-full break-words font-display text-5xl font-black leading-display tracking-display text-foreground sm:text-6xl"
+              className="type-page-title mt-2 max-w-full break-words text-foreground"
               id="public-detail-title"
             >
               {parking.title}
@@ -133,7 +135,7 @@ export function ParkingDetailRoute() {
           </header>
 
           <aside
-            className="min-w-0 rounded-signature border border-border bg-card p-6 shadow-md lg:col-span-4 lg:col-start-9 lg:row-span-2"
+            className="min-w-0 rounded-signature border border-border bg-card p-6 lg:col-span-4 lg:col-start-9 lg:row-span-2"
             data-slot="parking-detail-summary"
           >
             <p className="type-label text-muted-foreground">{t('public.detail.essentials')}</p>
@@ -142,7 +144,7 @@ export function ParkingDetailRoute() {
                 <p className="text-xs font-medium text-foreground-secondary">
                   {t('public.detail.hourlyRate')}
                 </p>
-                <p className="mt-1 font-display text-2xl font-bold tabular-nums text-foreground">
+                <p className="type-metric mt-1 text-foreground">
                   {formatMoney(parking.hourlyRateCents, parking.currency, locale)}{' '}
                   <span className="text-sm">{t('public.detail.perHour')}</span>
                 </p>
@@ -151,7 +153,7 @@ export function ParkingDetailRoute() {
                 <p className="text-xs font-medium text-foreground-secondary">
                   {t('public.detail.availableSpaces')}
                 </p>
-                <p className="mt-1 font-display text-2xl font-extrabold text-foreground">
+                <p className="type-metric mt-1 text-foreground">
                   {formatNumber(parking.availableSpaces, locale)}{' '}
                   <span className="text-sm font-medium">{t('public.detail.spacesUnit')}</span>
                 </p>
@@ -194,13 +196,13 @@ export function ParkingDetailRoute() {
               </Button>
             </div>
             {parking.isShowcase ? (
-              <p className="mt-5 rounded-2xl bg-brand-soft p-4 text-sm font-medium leading-relaxed text-foreground">
+              <p className="mt-5 rounded-md bg-brand-soft p-4 text-sm font-medium leading-relaxed text-foreground">
                 {t('public.detail.showcaseDisclosure')}
               </p>
             ) : null}
           </aside>
           <div
-            className="min-w-0 aspect-16/10 overflow-hidden rounded-signature border border-border bg-accent lg:col-span-7 lg:row-start-2"
+            className="min-w-0 aspect-16/10 overflow-hidden rounded-lg border border-border bg-accent lg:col-span-7 lg:row-start-2"
             data-slot="parking-detail-hero-image"
           >
             <PublicParkingImage
@@ -214,12 +216,14 @@ export function ParkingDetailRoute() {
         </div>
 
         <div className="mt-8 grid gap-8 md:grid-cols-12 md:items-start">
-          <section className="min-w-0 rounded-3xl border border-border bg-card p-6 sm:p-7 md:col-span-7 md:self-start">
-            <p className="type-label text-muted-foreground">{t('public.detail.about')}</p>
-            <p className="mt-4 text-base leading-relaxed text-foreground-secondary">
-              {parking.description ?? t('public.detail.missingDescription')}
-            </p>
-          </section>
+          <Card asChild>
+            <section className="p-6 sm:p-8 md:col-span-7 md:self-start">
+              <p className="type-label text-muted-foreground">{t('public.detail.about')}</p>
+              <p className="mt-4 text-base leading-relaxed text-foreground-secondary">
+                {parking.description ?? t('public.detail.missingDescription')}
+              </p>
+            </section>
+          </Card>
           <div className="min-w-0 md:col-span-5 md:col-start-8 wide:col-span-4 wide:col-start-9">
             <ParkingCalculatorWidget className="min-w-0 max-w-none" parking={parking} />
           </div>
@@ -244,8 +248,8 @@ function ParkingDetailSkeleton() {
         <div className="mt-10 h-16 max-w-2xl rounded bg-accent" />
         <div className="mt-5 h-6 max-w-lg rounded bg-accent" />
         <div className="mt-12 grid gap-8 md:grid-cols-12">
-          <div className="aspect-16/10 rounded-3xl bg-accent md:col-span-7" />
-          <div className="min-h-64 rounded-3xl bg-accent md:col-span-5 md:col-start-8 wide:col-span-4 wide:col-start-9" />
+          <div className="aspect-16/10 rounded-lg bg-accent md:col-span-7" />
+          <div className="min-h-64 rounded-lg bg-accent md:col-span-5 md:col-start-8 wide:col-span-4 wide:col-start-9" />
         </div>
       </div>
     </div>

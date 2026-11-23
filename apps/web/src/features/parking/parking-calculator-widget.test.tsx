@@ -59,6 +59,9 @@ describe('ParkingCalculatorWidget', () => {
     renderCalculator();
 
     await screen.findByRole('combobox', { name: '¿Dónde vas a estacionar?' });
+    expect(screen.getByRole('link', { name: 'Ver la cochera' }).getAttribute('href')).toBe(
+      '/parkings/parking-1',
+    );
     expect(screen.getByText(/31,00/)).toBeTruthy();
     const durationGroup = screen.getByRole('radiogroup', { name: 'Estadía estimada' });
     const durationOptions = within(durationGroup).getAllByRole('radio');
@@ -176,6 +179,9 @@ describe('ParkingCalculatorWidget', () => {
         }).textContent,
       ).toContain('Central Parking');
     });
+    expect(screen.getByRole('link', { name: 'Ver la cochera' }).getAttribute('href')).toBe(
+      '/parkings/parking-1',
+    );
     expect(screen.getByText(/31,00/)).toBeTruthy();
   });
 
@@ -197,5 +203,34 @@ describe('ParkingCalculatorWidget', () => {
     renderCalculator();
 
     expect(screen.getByRole('status', { name: 'Cargando cocheras' })).toBeTruthy();
+  });
+
+  it('shows static facility text without a combobox or self-link when parking is passed', () => {
+    window.localStorage.setItem('parkcore-lang', 'es-AR');
+    render(
+      <AppearanceProvider>
+        <QueryClientProvider
+          client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+        >
+          <MemoryRouter>
+            <ParkingCalculatorWidget
+              parking={publicParkingFixture({
+                hourlyRateCents: 1550,
+                id: 'parking-1',
+                title: 'Central Parking',
+              })}
+            />
+          </MemoryRouter>
+        </QueryClientProvider>
+      </AppearanceProvider>,
+    );
+
+    expect(screen.queryByRole('combobox')).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Ver la cochera' })).toBeNull();
+    expect(screen.queryByRole('link')).toBeNull();
+    expect(screen.getByText('¿Dónde vas a estacionar?')).toBeTruthy();
+    expect(screen.getByText('Central Parking')).toBeTruthy();
+    expect(screen.getByText(/31,00/)).toBeTruthy();
+    expect(api.getPublicParkings).not.toHaveBeenCalled();
   });
 });

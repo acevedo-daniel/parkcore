@@ -442,7 +442,7 @@
 
   [data-slot='combobox'] [role='combobox']:focus-visible {
     outline: none !important;
-    border-color: var(--border-strong) !important;
+    border-color: var(--primary) !important;
   }
 
   [data-slot='command-input']:focus-visible {
@@ -579,6 +579,21 @@
   min-height: 55vh;
 }
 
+@utility duration-micro {
+  --tw-duration: var(--motion-micro);
+  transition-duration: var(--motion-micro);
+}
+
+@utility duration-standard {
+  --tw-duration: var(--motion-standard);
+  transition-duration: var(--motion-standard);
+}
+
+@utility duration-overlay {
+  --tw-duration: var(--motion-overlay);
+  transition-duration: var(--motion-overlay);
+}
+
 @utility transition-lift {
   transition-property: transform, box-shadow, border-color;
   transition-duration: var(--motion-standard);
@@ -651,10 +666,6 @@
 
 @utility grid-cols-owner-parking-fields {
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, auto);
-}
-
-@utility grid-cols-owner-parking-metrics {
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
 }
 
 @utility grid-cols-calculator-facility {

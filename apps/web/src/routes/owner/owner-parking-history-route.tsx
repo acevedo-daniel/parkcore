@@ -32,6 +32,7 @@ import {
   parseParkingHistoryUrlState,
   type ParkingHistoryUrlState,
 } from './parking-history-query.js';
+import { Notice } from '../../components/domain/notice.js';
 
 type SessionFilter = 'ALL' | ParkingSession['status'];
 type ExportStatus = 'idle' | 'pending' | 'success' | 'error';
@@ -213,23 +214,23 @@ export function OwnerParkingHistoryRoute() {
       />
 
       {hasStaleData ? (
-        <div
-          className="flex flex-col gap-4 rounded-xl border border-warning-soft-foreground bg-warning-soft p-4 text-warning-soft-foreground sm:flex-row sm:items-center sm:justify-between"
+        <Notice
+          action={
+            <Button
+              onClick={() => {
+                void parkingsQuery.refetch();
+                void sessionsQuery.refetch();
+              }}
+              type="button"
+              variant="secondary"
+            >
+              {t('parkingHistory.retryStale')}
+            </Button>
+          }
           role="alert"
         >
-          <p className="break-words text-sm font-semibold">{t('parkingHistory.stale')}</p>
-          <Button
-            className="shrink-0 self-start sm:self-auto"
-            onClick={() => {
-              void parkingsQuery.refetch();
-              void sessionsQuery.refetch();
-            }}
-            type="button"
-            variant="secondary"
-          >
-            {t('parkingHistory.retryStale')}
-          </Button>
-        </div>
+          {t('parkingHistory.stale')}
+        </Notice>
       ) : null}
 
       {exportStatus === 'pending' || exportStatus === 'success' ? (
@@ -245,16 +246,18 @@ export function OwnerParkingHistoryRoute() {
         </p>
       ) : null}
       {exportStatus === 'error' ? (
-        <div
+        <Notice
+          action={
+            <Button onClick={() => void exportHistory()} type="button" variant="secondary">
+              {t('parkingHistory.retryExport')}
+            </Button>
+          }
           aria-live="assertive"
-          className="flex flex-col gap-4 rounded-xl border border-destructive-soft-foreground bg-destructive-soft p-4 text-destructive-soft-foreground sm:flex-row sm:items-center sm:justify-between"
           role="alert"
+          tone="destructive"
         >
-          <p className="text-sm font-semibold">{t('parkingHistory.exportError')}</p>
-          <Button onClick={() => void exportHistory()} type="button" variant="secondary">
-            {t('parkingHistory.retryExport')}
-          </Button>
-        </div>
+          {t('parkingHistory.exportError')}
+        </Notice>
       ) : null}
 
       {aggregate ? (
@@ -346,7 +349,7 @@ export function OwnerParkingHistoryRoute() {
         )}
       </section>
 
-      {pagination ? (
+      {pagination && pagination.totalPages > 1 ? (
         <nav
           aria-label={t('parkingHistory.pagination')}
           className="flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle pt-5"
@@ -467,7 +470,7 @@ function HistoryFilters({
         </FormField>
         <Button
           aria-busy={isFetching}
-          className="self-end rounded-full"
+          className="self-end"
           disabled={isFetching}
           onClick={onRefresh}
           type="button"

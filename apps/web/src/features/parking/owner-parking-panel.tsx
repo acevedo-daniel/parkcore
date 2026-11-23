@@ -6,6 +6,8 @@ import {
   AvailabilityIndicator,
   type AvailabilityState,
 } from '../../components/domain/availability-indicator.js';
+import { Button } from '../../components/ui/button.js';
+import { Card } from '../../components/ui/card.js';
 import type { Parking } from '../../lib/api/owner-api.js';
 import { cn } from '../../lib/cn.js';
 import { formatMoney, formatNumber } from '../../lib/format.js';
@@ -43,7 +45,7 @@ export function OwnerParkingPanel({ identifier, parking, presentation }: OwnerPa
     parking,
   };
 
-  return (
+  const panel = (
     <article
       className={cn(
         'owner-parking-panel min-w-0 bg-card p-5 text-foreground sm:p-6',
@@ -57,7 +59,7 @@ export function OwnerParkingPanel({ identifier, parking, presentation }: OwnerPa
       <FacilityIdentity identifier={identifier} parking={parking} />
       {presentation === 'overview' ? (
         <>
-          <div className="grid min-w-0 gap-5 border-t border-border-subtle pt-5 wide:grid-cols-owner-parking-metrics">
+          <div className="grid min-w-0 gap-5 border-t border-border-subtle pt-5">
             <OccupancySummary {...occupancyProps} />
             <FacilityState parking={parking} presentation={presentation} />
           </div>
@@ -72,6 +74,8 @@ export function OwnerParkingPanel({ identifier, parking, presentation }: OwnerPa
       )}
     </article>
   );
+
+  return presentation === 'overview' ? <Card asChild>{panel}</Card> : panel;
 }
 
 function FacilityIdentity({ identifier, parking }: { identifier: number; parking: Parking }) {
@@ -82,9 +86,7 @@ function FacilityIdentity({ identifier, parking }: { identifier: number; parking
       <p className="type-label text-muted-foreground">
         {t('ownerParkings.facilityNumber', { number: String(identifier).padStart(2, '0') })}
       </p>
-      <h3 className="mt-2 break-words font-display text-2xl font-bold leading-tight tracking-heading">
-        {parking.title}
-      </h3>
+      <h3 className="type-section-title mt-2 break-words">{parking.title}</h3>
       <p className="mt-3 flex min-w-0 items-start gap-2 text-sm leading-relaxed text-foreground-secondary">
         <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
         <span className="min-w-0 break-words">
@@ -181,7 +183,7 @@ function FacilityState({
       className={cn(
         'min-w-0',
         isOverview
-          ? 'flex flex-wrap items-start gap-x-5 gap-y-3 wide:flex-col wide:gap-4'
+          ? 'flex flex-wrap items-start gap-x-5 gap-y-3'
           : 'flex items-start justify-between gap-4 md:flex-col md:justify-center',
       )}
     >
@@ -223,14 +225,15 @@ function FacilityActions({
           : 'justify-between border-t border-border-subtle pt-5 md:flex-col md:items-stretch md:border-t-0 md:pt-0',
       )}
     >
-      <Link
-        aria-label={t('ownerParkings.openAria', { title: parking.title })}
-        className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-md bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-primary/90"
-        to={`/app/parkings/${parking.id}`}
-      >
-        {t('ownerParkings.open')}
-        <ArrowUpRight aria-hidden="true" className="size-4" />
-      </Link>
+      <Button asChild className="shrink-0">
+        <Link
+          aria-label={t('ownerParkings.openAria', { title: parking.title })}
+          to={`/app/parkings/${parking.id}`}
+        >
+          {t('ownerParkings.open')}
+          <ArrowUpRight aria-hidden="true" className="size-4" />
+        </Link>
+      </Button>
       <div
         className={cn(
           'flex min-w-0 flex-wrap items-center gap-1',

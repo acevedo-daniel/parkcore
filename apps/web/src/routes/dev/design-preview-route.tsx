@@ -320,7 +320,7 @@ export function DesignPreviewRoute() {
       </PreviewSection>
 
       <PreviewSection title="Card">
-        <Card>
+        <Card className="flex flex-col gap-6 py-6">
           <CardHeader>
             <div className="space-y-2">
               <CardTitle className="type-heading">{t('parkingOperation.eyebrow')}</CardTitle>

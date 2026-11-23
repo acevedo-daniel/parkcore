@@ -34,6 +34,11 @@ describe('ParkingForm', () => {
     renderForm('es-AR');
 
     expect(screen.getByRole('button', { name: 'Crear cochera' })).toBeTruthy();
+    const form = screen.getByRole('button', { name: 'Crear cochera' }).closest('form');
+    expect(form?.className).toContain('max-w-3xl');
+    expect(form?.className).not.toContain('lg:grid-cols-2');
+    expect(screen.getByText('Información general').className).toContain('type-section-title');
+    expect(screen.getByText('Información general').className).toContain('text-foreground');
     await user.click(screen.getByRole('button', { name: 'Crear cochera' }));
     expect(await screen.findAllByText('Usa al menos 5 caracteres.')).not.toHaveLength(0);
 

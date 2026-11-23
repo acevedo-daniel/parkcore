@@ -16,13 +16,41 @@ describe('PublicNotFoundRoute', () => {
       </AppearanceProvider>,
     );
 
-    expect(screen.getByRole('heading', { name: 'We could not find this facility.' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'We could not find this page.' })).toBeTruthy();
+    expect(
+      screen.getByText(
+        'This address does not exist or has changed. Browse the listed facilities to continue.',
+      ),
+    ).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Explore facilities' }).getAttribute('href')).toBe(
       '/parkings',
     );
-    expect(document.title).toBe('Facility not found | ParkCore');
+    expect(document.title).toBe('Page not found | ParkCore');
     expect(document.head.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe(
       'noindex',
     );
+  });
+
+  it('renders the Spanish page-not-found copy', () => {
+    window.localStorage.setItem('parkcore-lang', 'es-AR');
+    render(
+      <AppearanceProvider>
+        <MemoryRouter>
+          <PublicNotFoundRoute />
+        </MemoryRouter>
+      </AppearanceProvider>,
+    );
+
+    expect(screen.getByRole('heading', { name: 'No encontramos esta página.' })).toBeTruthy();
+    expect(
+      screen.getByText(
+        'La dirección no existe o cambió. Explora las cocheras publicadas para seguir.',
+      ),
+    ).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Ver cocheras' }).getAttribute('href')).toBe(
+      '/parkings',
+    );
+    expect(document.title).toBe('Página no encontrada | ParkCore');
+    window.localStorage.removeItem('parkcore-lang');
   });
 });

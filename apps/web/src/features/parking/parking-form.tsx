@@ -179,7 +179,7 @@ export function ParkingForm({
   return (
     <form
       aria-busy={isSubmitting}
-      className="parking-form grid gap-8 lg:grid-cols-2"
+      className="parking-form grid max-w-3xl gap-8"
       noValidate
       onSubmit={(event) => {
         void submit(event);
@@ -188,7 +188,6 @@ export function ParkingForm({
       <FormSection
         description={t('parkingForm.generalDescription')}
         title={t('parkingForm.general')}
-        wide
       >
         <FormField
           error={errors.title?.message}
@@ -453,7 +452,6 @@ export function ParkingForm({
         <FormSection
           description={t('parkingForm.availabilityDescription')}
           title={t('parkingForm.availability')}
-          wide
         >
           <Controller
             control={form.control}
@@ -481,7 +479,6 @@ export function ParkingForm({
       <FormSection
         description={t('parkingForm.publicationDescription')}
         title={t('parkingForm.publication')}
-        wide
       >
         <Controller
           control={form.control}
@@ -506,15 +503,11 @@ export function ParkingForm({
       </FormSection>
 
       {error ? (
-        <p className="form-error lg:col-span-2" role="alert">
+        <p className="form-error" role="alert">
           {error}
         </p>
       ) : null}
-      <Button
-        className="justify-self-start rounded-full px-6"
-        disabled={isSubmitting}
-        type="submit"
-      >
+      <Button className="justify-self-start px-6" disabled={isSubmitting} type="submit">
         {isSubmitting
           ? t('parkingForm.saving')
           : parking
@@ -529,21 +522,19 @@ function FormSection({
   children,
   description,
   title,
-  wide = false,
 }: {
   children: ReactNode;
   description: string;
   title: string;
-  wide?: boolean;
 }) {
   const descriptionId = useId();
 
   return (
     <fieldset
       aria-describedby={descriptionId}
-      className={`space-y-5 border-b border-border-subtle pb-8 ${wide ? 'lg:col-span-2' : ''}`}
+      className="space-y-5 border-b border-border-subtle pb-8"
     >
-      <legend className="break-words px-0 type-label text-muted-foreground">{title}</legend>
+      <legend className="type-section-title break-words px-0 text-foreground">{title}</legend>
       <p
         className="max-w-2xl break-words text-sm leading-relaxed text-foreground-secondary"
         id={descriptionId}

@@ -43,30 +43,27 @@ function RouteRecovery({ notFound, owner }: { notFound: boolean; owner: boolean 
       <div
         className={
           owner
-            ? 'w-full min-w-0 max-w-xl rounded-2xl border border-brand-foreground/30 bg-brand-soft p-7 shadow-md sm:p-10'
-            : 'mx-auto w-full max-w-3xl rounded-2xl border border-border-strong bg-card p-8 shadow-md sm:p-10'
+            ? 'w-full min-w-0 max-w-xl rounded-lg border border-brand-foreground/30 bg-brand-soft p-6 sm:p-8'
+            : 'mx-auto w-full max-w-3xl rounded-lg border border-border bg-card p-6 sm:p-8'
         }
       >
         <p className="type-eyebrow text-muted-foreground">
           {notFound ? '404' : t('route.error.attention')}
         </p>
-        <h1
-          className="mt-5 max-w-3xl font-display text-4xl font-bold leading-display tracking-display text-foreground sm:text-6xl"
-          id="route-error-title"
-        >
+        <h1 className="type-page-title mt-5 max-w-3xl text-foreground" id="route-error-title">
           {t(notFound ? 'route.error.notFoundTitle' : 'route.error.title')}
         </h1>
         <p className="mt-5 max-w-xl text-base leading-relaxed text-foreground-secondary">
           {t(notFound ? 'route.error.notFoundDescription' : 'route.error.description')}
         </p>
         <div className="mt-7 flex flex-wrap gap-2">
-          <Button asChild className="rounded-full" variant="default">
+          <Button asChild shape="pill" variant="default">
             <Link to={owner ? '/app' : '/'}>
               {t(owner ? 'route.error.ownerAction' : 'route.error.publicAction')}
             </Link>
           </Button>
           {owner ? (
-            <Button asChild className="rounded-full" variant="secondary">
+            <Button asChild shape="pill" variant="secondary">
               <Link to="/app/parkings">{t('route.error.ownerParkingsAction')}</Link>
             </Button>
           ) : null}

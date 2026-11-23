@@ -62,14 +62,14 @@ export function ParkingCalculatorWidget({ className, parking }: ParkingCalculato
     <section
       aria-labelledby={titleId}
       className={cn(
-        'relative w-full max-w-md @container rounded-2xl border border-border bg-popover p-6 text-foreground shadow-md sm:p-8',
+        'relative w-full max-w-md @container rounded-lg border border-border bg-popover p-6 text-foreground sm:p-8',
         className,
       )}
     >
       <div className="mb-5 flex items-start justify-between gap-4 border-b border-border-subtle pb-5">
         <div>
           <p className="type-label text-muted-foreground">{t('calculator.eyebrow')}</p>
-          <h2 className="mt-2 font-display text-xl font-bold tracking-title" id={titleId}>
+          <h2 className="type-section-title mt-2" id={titleId}>
             {t('calculator.title')}
           </h2>
         </div>
@@ -111,6 +111,7 @@ export function ParkingCalculatorWidget({ className, parking }: ParkingCalculato
       ) : (
         <CalculatorForm
           facilities={availableFacilities}
+          fixedFacility={Boolean(parking)}
           locale={locale}
           onFacilityChange={setSelectedId}
           onDurationChange={setSelectedDuration}
@@ -136,14 +137,15 @@ function CalculatorLoading() {
       <p className="mb-3 text-sm font-medium text-foreground-secondary">
         {t('calculator.loadingMessage')}
       </p>
-      <Skeleton className="h-24 rounded-xl" />
-      <Skeleton className="mt-3 h-28 rounded-xl" />
+      <Skeleton className="h-24 rounded-md" />
+      <Skeleton className="mt-3 h-28 rounded-md" />
       <Skeleton className="mt-6 h-12 rounded-full" />
     </div>
   );
 }
 
 interface CalculatorFormProps {
+  fixedFacility: boolean;
   locale: Locale;
   facilities: {
     id: string;
@@ -165,6 +167,7 @@ interface CalculatorFormProps {
 
 function CalculatorForm({
   facilities,
+  fixedFacility,
   locale,
   onFacilityChange,
   onDurationChange,
@@ -200,32 +203,46 @@ function CalculatorForm({
 
   return (
     <>
-      <div className="rounded-xl border border-border-subtle bg-transparent p-4">
+      <div className="rounded-md border border-border-subtle bg-transparent p-4">
         <div className="grid min-w-0 grid-cols-calculator-facility gap-x-3 gap-y-2 @sm:flex @sm:items-center @sm:gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-foreground">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-brand-soft text-foreground">
             <MapPin aria-hidden="true" className="size-4" />
           </span>
-          <Combobox
-            className="public-discovery-combobox min-w-0 @sm:flex-1"
-            id="estimate-facility"
-            key={facilities.map((facility) => facility.id).join('|')}
-            label={t('calculator.facility')}
-            onValueChange={(id) => {
-              onFacilityChange(id);
-            }}
-            options={facilities.map((facility) => ({ label: facility.title, value: facility.id }))}
-            value={selectedId}
-          />
+          {fixedFacility ? (
+            <div className="min-w-0 space-y-1 @sm:flex-1">
+              <p className="field-label block text-xs font-bold text-foreground">
+                {t('calculator.facility')}
+              </p>
+              <p className="truncate text-sm font-semibold text-foreground">
+                {selectedFacility.title}
+              </p>
+            </div>
+          ) : (
+            <Combobox
+              className="public-discovery-combobox min-w-0 @sm:flex-1"
+              id="estimate-facility"
+              key={facilities.map((facility) => facility.id).join('|')}
+              label={t('calculator.facility')}
+              onValueChange={(id) => {
+                onFacilityChange(id);
+              }}
+              options={facilities.map((facility) => ({
+                label: facility.title,
+                value: facility.id,
+              }))}
+              value={selectedId}
+            />
+          )}
           <span className="col-start-2 flex items-baseline justify-end gap-1 text-right @sm:block @sm:shrink-0">
             <span className="type-operational text-xs font-bold text-foreground">
               {formatMoney(selectedFacility.hourlyRateCents, selectedFacility.currency, locale)}
             </span>
-            <span className="block text-2xs text-muted-foreground">{t('calculator.perHour')}</span>
+            <span className="block text-xs text-muted-foreground">{t('calculator.perHour')}</span>
           </span>
         </div>
       </div>
 
-      <fieldset className="mt-3 rounded-xl border border-border-subtle bg-transparent p-4">
+      <fieldset className="mt-3 rounded-md border border-border-subtle bg-transparent p-4">
         <legend className="mb-3 flex w-full items-center justify-between gap-3">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
             <Clock aria-hidden="true" className="size-3.5" />
@@ -292,7 +309,7 @@ function CalculatorForm({
             <span className="block text-xs font-semibold text-foreground">
               {t('calculator.estimateLabel')}
             </span>
-            <span className="text-2xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground">
               {estimate
                 ? tPlural(estimate.chargedHours, {
                     one: 'calculator.chargedHour',
@@ -305,8 +322,10 @@ function CalculatorForm({
             aria-atomic="true"
             aria-live="polite"
             className={cn(
-              'max-w-full font-display text-3xl font-bold tracking-tight tabular-nums text-foreground',
-              !estimate && 'max-w-40 text-right text-base leading-tight text-foreground-secondary',
+              'max-w-full text-foreground',
+              estimate
+                ? 'type-metric'
+                : 'max-w-40 text-right text-base leading-tight text-foreground-secondary',
             )}
           >
             {estimate
@@ -316,17 +335,19 @@ function CalculatorForm({
         </div>
       </div>
 
-      <Button asChild className="h-12 w-full rounded-full" size="lg">
-        <Link className="group" to={`/parkings/${selectedFacility.id}`}>
-          <span>{t('calculator.viewFacility')}</span>
-          <ArrowRight
-            aria-hidden="true"
-            className="size-4 transition-transform group-hover:translate-x-1"
-          />
-        </Link>
-      </Button>
+      {!fixedFacility ? (
+        <Button asChild className="h-12 w-full" shape="pill" size="lg">
+          <Link className="group" to={`/parkings/${selectedFacility.id}`}>
+            <span>{t('calculator.viewFacility')}</span>
+            <ArrowRight
+              aria-hidden="true"
+              className="size-4 transition-transform group-hover:translate-x-1"
+            />
+          </Link>
+        </Button>
+      ) : null}
 
-      <p className="mt-4 text-center text-2xs leading-relaxed text-muted-foreground">
+      <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
         {t('calculator.estimateNote')}
       </p>
     </>

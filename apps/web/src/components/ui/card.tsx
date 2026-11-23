@@ -1,15 +1,35 @@
 import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { Slot } from 'radix-ui';
 
 import { cn } from '@/lib/cn';
 
-function Card({ className, ...props }: React.ComponentProps<'div'>) {
+const cardVariants = cva('min-w-0 rounded-lg border text-card-foreground', {
+  variants: {
+    tone: {
+      default: 'border-border bg-card',
+      success: 'border-success-soft-foreground bg-success-soft',
+      warning: 'border-warning-soft-foreground bg-warning-soft',
+    },
+  },
+  defaultVariants: {
+    tone: 'default',
+  },
+});
+
+function Card({
+  asChild = false,
+  className,
+  tone = 'default',
+  ...props
+}: React.ComponentProps<'div'> & VariantProps<typeof cardVariants> & { asChild?: boolean }) {
+  const Comp = asChild ? Slot.Root : 'div';
+
   return (
-    <div
+    <Comp
       data-slot="card"
-      className={cn(
-        'flex flex-col gap-6 rounded-lg border border-border bg-card py-6 text-card-foreground',
-        className,
-      )}
+      data-tone={tone}
+      className={cn(cardVariants({ tone }), className)}
       {...props}
     />
   );
