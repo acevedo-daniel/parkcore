@@ -131,24 +131,55 @@ describe('application shells', () => {
     expect(navigation.textContent).toContain('Cocheras');
     expect(navigation.textContent).not.toContain('Payments');
     expect(screen.getByRole('complementary').className).toContain('wide:flex');
-    expect(screen.getByRole('banner').className).toContain('wide:hidden');
+    const mobileHeader = screen.getByRole('banner');
+    expect(mobileHeader.className).toContain('wide:hidden');
+    expect(within(mobileHeader).queryByRole('radiogroup')).toBeNull();
+    expect(mobileHeader.querySelector('[data-slot="appearance-controls"]')).toBeNull();
+    expect(within(mobileHeader).getByRole('button', { name: 'Cerrar sesión' })).toBeTruthy();
     const mobileNavigation = screen.getByRole('navigation', {
       name: 'Navegación de operador, móvil',
     });
     expect(mobileNavigation.className).toContain('wide:hidden');
     expect(mobileNavigation.className).toContain('owner-mobile-nav');
+    for (const link of within(mobileNavigation).getAllByRole('link')) {
+      expect(link.className).toContain('text-xs');
+      expect(link.className).not.toContain('text-2xs');
+    }
     expect(screen.getByRole('main').className).toContain('pb-safe-owner-content');
-    expect(screen.getAllByRole('radiogroup', { name: 'Apariencia' })).toHaveLength(2);
+    expect(screen.getAllByRole('radiogroup', { name: 'Apariencia' })).toHaveLength(1);
     expect(
       Array.from(document.querySelectorAll<HTMLElement>('[data-slot="appearance-controls"]')).map(
         (control) => control.getAttribute('data-presentation'),
       ),
-    ).toEqual(['compact', 'compact']);
+    ).toEqual(['compact']);
     expect(
       Array.from(document.querySelectorAll<HTMLElement>('[data-slot="appearance-controls"]')).map(
         (control) => control.getAttribute('data-layout'),
       ),
-    ).toEqual(['stacked', 'inline']);
+    ).toEqual(['stacked']);
     expect(document.title).toBe('ParkCore | Operaciones');
+  });
+
+  it('marks facilities active in both owner navs on session detail routes', () => {
+    renderRoute(<OwnerLayout />, '/app/sessions/session-1');
+    const sidebarNavigation = screen.getByRole('navigation', { name: 'Navegación de operador' });
+    const mobileNavigation = screen.getByRole('navigation', {
+      name: 'Navegación de operador, móvil',
+    });
+
+    expect(
+      within(sidebarNavigation)
+        .getByRole('link', { name: 'Cocheras' })
+        .getAttribute('aria-current'),
+    ).toBe('page');
+    expect(
+      within(sidebarNavigation).getByRole('link', { name: 'Inicio' }).getAttribute('aria-current'),
+    ).toBeNull();
+    expect(
+      within(mobileNavigation).getByRole('link', { name: 'Cocheras' }).getAttribute('aria-current'),
+    ).toBe('page');
+    expect(
+      within(mobileNavigation).getByRole('link', { name: 'Inicio' }).getAttribute('aria-current'),
+    ).toBeNull();
   });
 });

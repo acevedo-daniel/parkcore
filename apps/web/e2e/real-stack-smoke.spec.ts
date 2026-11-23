@@ -222,13 +222,17 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
     page.getByRole('heading', { exact: true, name: 'Operations overview.' }),
   ).toBeVisible();
 
-  const ownerMobileAppearance = page.locator(
-    '.owner-mobile-header [data-slot="appearance-controls"]',
+  await page.locator('.owner-mobile-nav').getByRole('link', { name: 'Profile' }).click();
+  await expect(page).toHaveURL(/\/app\/profile$/);
+  const ownerProfileAppearance = page.locator(
+    '[data-slot="appearance-controls"][data-presentation="profile"]',
   );
-  await ownerMobileAppearance.getByRole('radio', { exact: true, name: 'Spanish' }).click();
+  await ownerProfileAppearance.getByRole('radio', { exact: true, name: 'Spanish' }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-AR');
-  await ownerMobileAppearance.getByRole('radio', { exact: true, name: /Ingl/ }).click();
+  await ownerProfileAppearance.getByRole('radio', { exact: true, name: /Ingl/ }).click();
   await expect(page.locator('html')).toHaveAttribute('lang', 'en-US');
+  await page.locator('.owner-mobile-nav').getByRole('link', { name: 'Home' }).click();
+  await expect(page).toHaveURL(/\/app$/);
 
   const publicListingBeforeOperations = await readPublicParkingList(page, apiBaseUrl, webOrigin);
   expect(publicListingBeforeOperations.meta.total).toBe(5);
@@ -477,11 +481,17 @@ test('proves the isolated canonical demo stay journey', async ({ page }, testInf
     path: testInfo.outputPath('canonical-receipt-compact-light.png'),
   });
 
-  const ownerMobileTheme = page
-    .locator('.owner-mobile-header')
-    .getByRole('radiogroup', { name: 'Theme' });
-  await ownerMobileTheme.getByRole('radio', { name: 'Dark' }).click();
+  const sessionUrl = page.url();
+  await page.locator('.owner-mobile-nav').getByRole('link', { name: 'Profile' }).click();
+  await expect(page).toHaveURL(/\/app\/profile$/);
+  const ownerProfileTheme = page
+    .locator('[data-slot="appearance-controls"][data-presentation="profile"]')
+    .getByRole('radiogroup', { name: 'Appearance' });
+  await ownerProfileTheme.getByRole('radio', { name: 'Dark' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.goBack();
+  await expect(page).toHaveURL(sessionUrl);
+  await expect(receipt).toBeVisible();
   await expectNoHorizontalOverflow(page, 'compact dark receipt');
   await page.screenshot({
     fullPage: true,
