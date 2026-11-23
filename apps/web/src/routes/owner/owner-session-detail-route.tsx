@@ -197,10 +197,7 @@ export function OwnerSessionDetailRoute() {
               <Plate plate={session.vehicle.plate} />
               <SessionStatus status={session.status} />
             </div>
-            <h1
-              className="mt-5 break-words font-display text-4xl font-bold leading-display tracking-display sm:text-5xl"
-              id="session-detail-title"
-            >
+            <h1 className="type-page-title mt-5 break-words" id="session-detail-title">
               {getVehicleTypeLabel(session.vehicle.type, t)}
             </h1>
           </div>

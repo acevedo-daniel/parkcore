@@ -73,10 +73,7 @@ export function AuthFormFrame({
             <p className="mt-16 text-xs font-bold tracking-eyebrow text-inverse-foreground uppercase">
               {eyebrow}
             </p>
-            <p
-              aria-hidden="true"
-              className="mt-5 font-display text-4xl font-black leading-tight tracking-display"
-            >
+            <p aria-hidden="true" className="type-heading mt-5">
               {t('auth.frame.headline')}
             </p>
             <p className="mt-6 max-w-sm text-base leading-relaxed text-inverse-foreground/80">
@@ -100,7 +97,7 @@ export function AuthFormFrame({
               {eyebrow}
             </p>
             <h1
-              className="mt-3 max-w-full break-words font-display text-3xl font-black tracking-heading text-foreground wide:text-4xl"
+              className="type-page-title mt-3 max-w-full break-words text-foreground"
               id="auth-title"
             >
               {title}

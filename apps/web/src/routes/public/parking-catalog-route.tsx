@@ -147,10 +147,7 @@ export function ParkingCatalogRoute() {
         <header className="grid gap-8 border-b border-border-subtle pb-10 lg:grid-cols-12 lg:items-end">
           <div className="min-w-0 lg:col-span-7">
             <p className="type-label text-muted-foreground">{t('public.catalog.eyebrow')}</p>
-            <h1
-              className="mt-4 max-w-full break-words font-display text-4xl font-bold leading-tight tracking-display sm:text-5xl lg:text-6xl"
-              id="public-catalog-title"
-            >
+            <h1 className="type-page-title mt-4 max-w-full break-words" id="public-catalog-title">
               {t('public.catalog.title')}
             </h1>
           </div>

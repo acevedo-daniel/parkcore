@@ -224,7 +224,7 @@ export function CheckoutSummary({ session, timezone }: { session: Session; timez
           <span className="type-label text-muted-foreground">
             {session.endTime ? t('session.confirmedTotal') : t('session.estimate')}
           </span>
-          <strong className="font-display text-3xl font-bold leading-none tracking-display tabular-nums">
+          <strong className="type-metric">
             {total === undefined
               ? t('common.notAvailable')
               : formatMoney(total, session.currency, locale)}
@@ -266,9 +266,7 @@ export function OperationalReceipt({
             <p className="type-label text-success-soft-foreground">
               {t('session.serverConfirmedCheckout')}
             </p>
-            <h2 className="mt-3 font-display text-3xl font-bold tracking-heading">
-              {t('session.operationalReceipt')}
-            </h2>
+            <h2 className="type-heading mt-3">{t('session.operationalReceipt')}</h2>
           </div>
           <span className="rounded-full border border-success-soft-foreground px-3 py-1.5 text-xs font-bold text-success-soft-foreground">
             {t('session.completedLabel')}
@@ -330,7 +328,7 @@ export function OperationalReceipt({
           <span className="type-label text-success-soft-foreground">
             {t('session.finalAmount')}
           </span>
-          <strong className="font-display text-4xl font-bold leading-none tracking-display tabular-nums">
+          <strong className="type-metric">
             {total === null
               ? t('common.notAvailable')
               : formatMoney(total, session.currency, locale)}
@@ -378,9 +376,7 @@ export function OperationalCancellation({
       >
         <div className="border-b border-warning-soft-foreground/30 pb-5">
           <p className="type-label">{t('session.terminalState')}</p>
-          <h2 className="mt-3 font-display text-3xl font-bold tracking-heading">
-            {t('session.cancelledHeading')}
-          </h2>
+          <h2 className="type-heading mt-3">{t('session.cancelledHeading')}</h2>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed">
             {t('session.cancelledDescription')}
           </p>

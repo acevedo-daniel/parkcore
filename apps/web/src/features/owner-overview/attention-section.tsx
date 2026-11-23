@@ -52,7 +52,7 @@ export function AttentionSection({ activeSessionsQuery, parkings }: AttentionSec
     <Card asChild>
       <section className="p-5 sm:p-6" aria-labelledby="attention-title">
         <p className="type-label text-muted-foreground">{t('overview.attentionEyebrow')}</p>
-        <h2 className="mt-4 font-display text-2xl font-bold tracking-heading" id="attention-title">
+        <h2 className="type-heading mt-4" id="attention-title">
           {attentionItems.length > 0
             ? t('overview.attentionNeedsReview')
             : t('overview.attentionNormal')}

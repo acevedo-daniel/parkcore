@@ -90,10 +90,7 @@ export function ActivitySection({
               </span>
               <p className="type-label text-muted-foreground">{t('overview.activityEyebrow')}</p>
             </div>
-            <h2
-              className="mt-4 font-display text-3xl font-bold leading-none tracking-display"
-              id="activity-title"
-            >
+            <h2 className="type-heading mt-4" id="activity-title">
               {t('overview.activityTitle')}
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-foreground-secondary">

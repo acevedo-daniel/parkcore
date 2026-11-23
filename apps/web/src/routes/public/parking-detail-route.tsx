@@ -49,7 +49,7 @@ export function ParkingDetailRoute() {
               {t('public.detail.directoryEyebrow')}
             </p>
             <h1
-              className="mt-4 max-w-full break-words font-display text-3xl font-black tracking-heading text-foreground"
+              className="type-page-title mt-4 max-w-full break-words text-foreground"
               id="public-detail-error-title"
             >
               {t(notFound ? 'public.detail.notFoundTitle' : 'public.detail.errorTitle')}
@@ -109,7 +109,7 @@ export function ParkingDetailRoute() {
         >
           <header className="min-w-0 lg:col-span-7">
             <h1
-              className="mt-2 max-w-full break-words font-display text-5xl font-black leading-display tracking-display text-foreground sm:text-6xl"
+              className="type-page-title mt-2 max-w-full break-words text-foreground"
               id="public-detail-title"
             >
               {parking.title}
@@ -144,7 +144,7 @@ export function ParkingDetailRoute() {
                 <p className="text-xs font-medium text-foreground-secondary">
                   {t('public.detail.hourlyRate')}
                 </p>
-                <p className="mt-1 font-display text-2xl font-bold tabular-nums text-foreground">
+                <p className="type-metric mt-1 text-foreground">
                   {formatMoney(parking.hourlyRateCents, parking.currency, locale)}{' '}
                   <span className="text-sm">{t('public.detail.perHour')}</span>
                 </p>
@@ -153,7 +153,7 @@ export function ParkingDetailRoute() {
                 <p className="text-xs font-medium text-foreground-secondary">
                   {t('public.detail.availableSpaces')}
                 </p>
-                <p className="mt-1 font-display text-2xl font-extrabold text-foreground">
+                <p className="type-metric mt-1 text-foreground">
                   {formatNumber(parking.availableSpaces, locale)}{' '}
                   <span className="text-sm font-medium">{t('public.detail.spacesUnit')}</span>
                 </p>

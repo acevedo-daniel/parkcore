@@ -39,9 +39,7 @@ export function CheckInSuccess({
           </span>
           <div className="min-w-0">
             <p className="type-label text-success-soft-foreground">{t('checkInSuccess.eyebrow')}</p>
-            <h2 className="mt-1 font-display text-2xl font-bold tracking-heading">
-              {t('checkInSuccess.title')}
-            </h2>
+            <h2 className="type-heading mt-1">{t('checkInSuccess.title')}</h2>
           </div>
         </div>
         <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-success-soft-foreground/30 pt-5">

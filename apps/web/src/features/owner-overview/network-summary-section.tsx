@@ -44,10 +44,7 @@ export function NetworkSummarySection({ parkings, summaryQuery }: NetworkSummary
     <Card asChild>
       <section className="p-5 sm:p-6" aria-labelledby="network-now-title">
         <p className="type-label text-muted-foreground">{t('overview.networkNow')}</p>
-        <h2
-          className="mt-4 max-w-2xl font-display text-3xl font-bold leading-tight tracking-heading sm:text-4xl"
-          id="network-now-title"
-        >
+        <h2 className="type-heading mt-4 max-w-2xl" id="network-now-title">
           {tPlural(
             activeVehicles,
             {

@@ -69,7 +69,7 @@ export function ParkingCalculatorWidget({ className, parking }: ParkingCalculato
       <div className="mb-5 flex items-start justify-between gap-4 border-b border-border-subtle pb-5">
         <div>
           <p className="type-label text-muted-foreground">{t('calculator.eyebrow')}</p>
-          <h2 className="mt-2 font-display text-xl font-bold tracking-title" id={titleId}>
+          <h2 className="type-section-title mt-2" id={titleId}>
             {t('calculator.title')}
           </h2>
         </div>
@@ -305,8 +305,10 @@ function CalculatorForm({
             aria-atomic="true"
             aria-live="polite"
             className={cn(
-              'max-w-full font-display text-3xl font-bold tracking-tight tabular-nums text-foreground',
-              !estimate && 'max-w-40 text-right text-base leading-tight text-foreground-secondary',
+              'max-w-full text-foreground',
+              estimate
+                ? 'type-metric'
+                : 'max-w-40 text-right text-base leading-tight text-foreground-secondary',
             )}
           >
             {estimate

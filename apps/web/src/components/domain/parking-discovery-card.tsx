@@ -51,9 +51,7 @@ export function ParkingDiscoveryCard({ parking, to }: ParkingDiscoveryCardProps)
 
       <div className="flex min-w-0 flex-1 flex-col p-5 sm:p-6">
         <div className="flex-1">
-          <h2 className="max-w-full break-words font-display text-2xl font-bold leading-tight tracking-title">
-            {parking.title}
-          </h2>
+          <h2 className="type-section-title max-w-full break-words">{parking.title}</h2>
           <p className="max-w-full break-words text-sm font-semibold text-foreground-secondary">
             {parking.neighborhood}
           </p>

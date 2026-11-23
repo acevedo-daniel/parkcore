@@ -110,7 +110,7 @@ export function LandingRoute() {
               <span aria-hidden="true" className="size-1.5 rounded-full bg-brand-foreground" />
               {t('public.landing.heroEyebrow')}
             </p>
-            <h1 className="mt-7 min-w-0 max-w-full break-words font-display text-5xl font-bold leading-display tracking-display sm:text-6xl lg:text-display">
+            <h1 className="type-display mt-7 min-w-0 max-w-full break-words">
               {t('public.landing.heroTitle')}
             </h1>
             <p className="mt-7 max-w-xl text-lg font-medium leading-relaxed text-brand-foreground/85 sm:text-xl">
@@ -153,9 +153,7 @@ export function LandingRoute() {
           <div className="grid gap-12 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-5">
               <p className="type-label text-muted-foreground">{t('public.landing.howEyebrow')}</p>
-              <h2 className="mt-4 font-display text-4xl font-bold leading-tight tracking-heading sm:text-5xl">
-                {t('public.landing.howTitle')}
-              </h2>
+              <h2 className="type-page-title mt-4">{t('public.landing.howTitle')}</h2>
             </div>
             <p className="max-w-xl text-base leading-relaxed text-foreground-secondary lg:col-span-5 lg:col-start-8 sm:text-lg">
               {t('public.landing.howDescription')}
@@ -165,12 +163,10 @@ export function LandingRoute() {
           <div className="mt-16 grid gap-px overflow-hidden rounded-3xl border border-border bg-border md:grid-cols-3">
             {HOW_IT_WORKS_ITEMS.map((item) => (
               <article className="min-h-64 bg-card p-7 sm:p-8" key={item.number}>
-                <span className="font-display text-xs font-bold tabular-nums text-muted-foreground">
+                <span className="type-eyebrow text-muted-foreground tabular-nums">
                   {item.number}
                 </span>
-                <h3 className="mt-12 max-w-48 font-display text-2xl font-bold leading-tight tracking-title">
-                  {t(item.title)}
-                </h3>
+                <h3 className="type-section-title mt-12 max-w-48">{t(item.title)}</h3>
                 <p className="mt-4 max-w-xs text-sm leading-relaxed text-foreground-secondary">
                   {t(item.body)}
                 </p>
@@ -186,9 +182,7 @@ export function LandingRoute() {
             <p className="type-eyebrow text-muted-foreground">
               {t('public.landing.driverEyebrow')}
             </p>
-            <h2 className="mt-7 max-w-md font-display text-3xl font-bold leading-tight tracking-heading sm:text-4xl">
-              {t('public.landing.driverTitle')}
-            </h2>
+            <h2 className="type-heading mt-7 max-w-md">{t('public.landing.driverTitle')}</h2>
             <p className="mt-5 max-w-md text-base leading-relaxed text-foreground-secondary">
               {t('public.landing.driverDescription')}
             </p>
@@ -205,9 +199,7 @@ export function LandingRoute() {
             <p className="type-eyebrow text-inverse-foreground/75">
               {t('public.landing.operatorEyebrow')}
             </p>
-            <h2 className="mt-7 max-w-md font-display text-3xl font-bold leading-tight tracking-heading sm:text-4xl">
-              {t('public.landing.operatorTitle')}
-            </h2>
+            <h2 className="type-heading mt-7 max-w-md">{t('public.landing.operatorTitle')}</h2>
             <p className="mt-5 max-w-md text-base leading-relaxed text-inverse-foreground/75">
               {t('public.landing.operatorDescription')}
             </p>
@@ -232,9 +224,7 @@ export function LandingRoute() {
               <p className="type-label text-muted-foreground">
                 {t('public.landing.featuredEyebrow')}
               </p>
-              <h2 className="mt-4 font-display text-4xl font-bold tracking-heading sm:text-5xl">
-                {t('public.landing.featuredTitle')}
-              </h2>
+              <h2 className="type-page-title mt-4">{t('public.landing.featuredTitle')}</h2>
             </div>
             <Link
               className="inline-flex items-center gap-2 text-sm font-bold underline decoration-brand decoration-2 underline-offset-4"
@@ -253,9 +243,7 @@ export function LandingRoute() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="type-label text-muted-foreground">{t('public.landing.faqEyebrow')}</p>
-            <h2 className="mt-4 font-display text-4xl font-bold tracking-heading sm:text-5xl">
-              {t('public.landing.faqTitle')}
-            </h2>
+            <h2 className="type-page-title mt-4">{t('public.landing.faqTitle')}</h2>
           </div>
           <Accordion
             className="mt-12 space-y-3"
@@ -269,7 +257,7 @@ export function LandingRoute() {
                 key={faq.id}
                 value={faq.id}
               >
-                <AccordionTrigger className="p-5 font-display text-base font-bold hover:bg-accent hover:no-underline sm:p-6">
+                <AccordionTrigger className="type-section-title p-5 hover:bg-accent hover:no-underline sm:p-6">
                   {t(faq.question)}
                 </AccordionTrigger>
                 <AccordionContent>
@@ -285,9 +273,7 @@ export function LandingRoute() {
 
       <section className="px-4 pb-16 sm:px-6 sm:pb-24 lg:px-8">
         <div className="mx-auto max-w-5xl rounded-signature bg-inverse px-6 py-14 text-center text-inverse-foreground sm:px-12 sm:py-20">
-          <h2 className="font-display text-4xl font-bold leading-tight tracking-heading sm:text-5xl">
-            {t('public.landing.finalTitle')}
-          </h2>
+          <h2 className="type-display">{t('public.landing.finalTitle')}</h2>
           <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-inverse-foreground/75 sm:text-lg">
             {t('public.landing.finalDescription')}
           </p>

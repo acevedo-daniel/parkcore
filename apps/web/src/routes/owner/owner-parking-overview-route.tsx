@@ -226,10 +226,7 @@ export function OwnerParkingOverviewRoute() {
             <p className="type-label text-muted-foreground">{t('parkingOperation.arrivals')}</p>
             <div className="mt-6 flex min-w-0 flex-col justify-between gap-6 sm:flex-row sm:items-end">
               <div>
-                <h2
-                  className="font-display text-3xl font-bold leading-none tracking-display"
-                  id="check-in-title"
-                >
+                <h2 className="type-heading" id="check-in-title">
                   {stateTitle}
                 </h2>
                 <p
@@ -288,10 +285,7 @@ export function OwnerParkingOverviewRoute() {
         <div className="flex flex-col justify-between gap-5 border-b border-border-strong pb-5 sm:flex-row sm:items-end">
           <div>
             <p className="type-label text-muted-foreground">{t('parkingOperation.onSite')}</p>
-            <h2
-              className="mt-2 font-display text-3xl font-bold leading-none tracking-display"
-              id="active-sessions-title"
-            >
+            <h2 className="type-heading mt-2" id="active-sessions-title">
               {t('parkingOperation.activeSessions')}
             </h2>
           </div>

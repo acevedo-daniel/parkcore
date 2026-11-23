@@ -86,9 +86,7 @@ function FacilityIdentity({ identifier, parking }: { identifier: number; parking
       <p className="type-label text-muted-foreground">
         {t('ownerParkings.facilityNumber', { number: String(identifier).padStart(2, '0') })}
       </p>
-      <h3 className="mt-2 break-words font-display text-2xl font-bold leading-tight tracking-heading">
-        {parking.title}
-      </h3>
+      <h3 className="type-section-title mt-2 break-words">{parking.title}</h3>
       <p className="mt-3 flex min-w-0 items-start gap-2 text-sm leading-relaxed text-foreground-secondary">
         <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
         <span className="min-w-0 break-words">

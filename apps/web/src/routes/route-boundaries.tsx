@@ -50,10 +50,7 @@ function RouteRecovery({ notFound, owner }: { notFound: boolean; owner: boolean 
         <p className="type-eyebrow text-muted-foreground">
           {notFound ? '404' : t('route.error.attention')}
         </p>
-        <h1
-          className="mt-5 max-w-3xl font-display text-4xl font-bold leading-display tracking-display text-foreground sm:text-6xl"
-          id="route-error-title"
-        >
+        <h1 className="type-page-title mt-5 max-w-3xl text-foreground" id="route-error-title">
           {t(notFound ? 'route.error.notFoundTitle' : 'route.error.title')}
         </h1>
         <p className="mt-5 max-w-xl text-base leading-relaxed text-foreground-secondary">

@@ -39,9 +39,7 @@ export function LoginRoute() {
             <Sparkles aria-hidden="true" className="size-4" />
             {t('auth.login.demoEyebrow')}
           </div>
-          <h2 className="mt-3 font-display text-xl font-extrabold tracking-title">
-            {t('auth.login.demoTitle')}
-          </h2>
+          <h2 className="type-section-title mt-3">{t('auth.login.demoTitle')}</h2>
           <p className="mt-2 text-sm leading-relaxed text-brand-foreground/80">
             {t('auth.login.demoDescription')}
           </p>
